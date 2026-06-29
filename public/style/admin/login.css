@@ -1,0 +1,81 @@
+/* ====== Default (أكبر من 1024px) ====== */
+body {
+    font-size: clamp(14px, 2vw, 16px);
+    background-color: #b5babe;
+}
+
+
+
+.login-card {
+    max-width: 500px;
+}
+
+h1 {
+    font-size: 2rem;
+}
+
+input.form-control {
+    font-size: 1rem;
+    padding: 0.75rem;
+}
+
+#login-btn {
+    font-size: 1rem;
+    padding: 0.6rem 1.5rem;
+    width: 160px;
+}
+
+
+input.form-control {
+    background-color: #e7e7e7;
+    border-radius: 8px;
+    color: black;
+    border: 1px solid #d0d7de;
+}
+
+input.form-control:focus {
+    background-color: #ffffff;
+}
+
+/* ====== من 768px إلى 1024px (Tablet) ====== */
+@media (max-width: 1024px) {
+    .login-card {
+        max-width: 420px;
+    }
+
+    h1 {
+        font-size: 1.7rem;
+    }
+
+    input.form-control {
+        font-size: 0.95rem;
+        padding: 0.65rem;
+    }
+
+    #login-btn {
+        font-size: 0.95rem;
+        width: 150px;
+    }
+}
+
+/* ====== أقل من 768px (Mobile) ====== */
+@media (max-width: 768px) {
+    .login-card {
+        max-width: 100%;
+        margin: 0 1rem;
+    }
+
+    h1 {
+        font-size: 1.4rem;
+    }
+
+    input.form-control {
+        font-size: 0.9rem;
+        padding: 0.6rem;
+    }
+
+    #login-btn {
+        font-size: 0.9rem;
+        width: 100%;
+    }
+}

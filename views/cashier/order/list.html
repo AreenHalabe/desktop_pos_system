@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Coffee Corner</title>
+    <!-- Bootstrap CSS -->
+    <link href="../../../wroot/assets/bootstrap/css/bootstrap.rtl.min.css" rel="stylesheet">
+    <link href="../../../wroot/assets/bootstrap/css/bootstrap-icons.css" rel="stylesheet">
+
+    <!-- FontAwesome -->
+    <link href="../../../wroot/assets/fontawesome/css/all.min.css" rel="stylesheet">
+
+    <link rel="stylesheet" href="../../../public/style/cashier/header.css" />
+    <link rel="stylesheet" href="../../../public/style/cashier/order/list.css" />
+
+
+</head>
+<body>
+    
+
+    
+
+    <div class="container-fluid">
+        <div class="mt-3">
+            <site-header></site-header>
+        </div>
+        
+        <!-- محتوى الصفحة -->
+        <div class="row mt-2">
+            <div class="col-12">
+                <div class="card border-0 table-card">
+                    <div class="card-body">
+                        <div class="table-container">
+                            <div class="d-flex justify-content-center">
+                                <h2>
+                                    <i class="fas fa-clipboard-list"></i> 
+                                   الطلبات
+                                </h2>
+                            </div>
+                            <!-- أزرار التحكم -->
+                            <div class="d-flex justify-content-between align-items-center mb-4 table-heder">
+                                <div>
+                                    <span class="badge bg-primary" id="total-orders">0 طلبات</span>
+                                    <span class="badge bg-danger ms-2 " id="deleted-orders">0 تم حذفهم</span>
+                                </div>
+                                <div>
+                                    <button class="btn btn-danger btn-show-deleted" id="toggle-deleted-btn">
+                                        <i class="fas fa-trash-alt"></i> عرض الطلبات المحذوفة
+                                    </button>
+                                    <button class="btn-show-completed hidden" id="toggle-complet-btn">
+                                        <i class="fas fa-check-circle"></i> عرض الطلبات المكتملة
+                                    </button>
+                                </div>
+                                
+                            </div>
+
+                            <div id="error-box" class="error-box fs-5 hidden"></div>
+
+                            <!-- جدول الطلبات -->
+                            <div class="table-responsive">
+                                <table class="orders-table">
+                                    <thead>
+                                        <tr>
+                                            <th>رقم الطلب</th>
+                                            <th>طريقة الدفع</th>
+                                            <th class="position-relative">
+                                                التاريخ
+                                                <div class="position-absolute bottom-0 text-muted opacity-75" style="font-size:12px;">
+                                                يوم - شهر - سنة
+                                                </div>
+                                            </th>
+                                            <th>الوقت</th>
+                                            <th>المبلغ</th>
+                                            <th>الحالة</th>
+                                            <th>الإجراءات</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="orders-table-body">
+                                        <tr id="loading-row">
+                                            <td colspan="100%" class="text-center py-5">
+                                                <div class="d-flex flex-column align-items-center gap-2">
+                                                    <div class="spinner-border text-primary" role="status"></div>
+                                                    <span class="text-muted">جاري تحميل الطلبات...</span>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            
+                            <div class="pagination-button mt-4 hidden" id="paginationBtn">
+                                <button class="btn btn-sm btn-outline-secondary prevBtn" id="prevBtn">
+                                    <i class="fas fa-chevron-right"></i>
+                                </button>
+                                <span class="mx-2" id="pageInfo">صفحة 1 من 6</span>
+                                <button class="btn btn-sm btn-outline-secondary nextBtn" id="nextBtn">
+                                    <i class="fas fa-chevron-left"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+         </div>
+    </div>
+
+
+
+    <div class="modal fade" id="orderDetailsModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        <i class="fas fa-receipt ms-2"></i>
+                        تفاصيل الطلب
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <!-- معلومات الطلب -->
+                    <div class="row mb-2">
+                        <div class="col-md-6">
+                            <p><strong>رقم الطلب : </strong> <span id="modalOrderId"></span></p>
+                            <p><strong>الوقت : </strong> <span id="modaltime" dir="ltr"></span></p>
+                            
+                        </div>
+                        <div class="col-md-6">
+                            <p><strong>الدفع : </strong> <span id="modalPayment"></span></p>
+                            <p><strong>التاريخ : </strong> <span id="modalDate"></span></p>
+                            <p class="d-none"><strong>نوع الطلب : </strong> <span id="modalOrderType"></span></p>
+                        </div>
+                    </div>
+                    
+                    <!-- أسباب الإلغاء -->
+                    <div class="alert alert-warning mb-4 hidden">
+                        <strong>سبب الإلغاء : </strong> <span id="modalCancelReason"></span>
+                    </div>
+                    
+                    <!-- جدول الأصناف -->
+                    <h6 class="mb-3">
+                        <i class="fas fa-list ms-2"></i>
+                        الأصناف المرتبطة
+                    </h6>
+                    <div class="table-responsive">
+                        <table class="table table-sm table-bordered">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>الإسم</th>
+                                    <th>الكمية</th>
+                                    <th>سعر الوحدة</th>
+                                    <th>المجموع</th>
+                                </tr>
+                            </thead>
+                            <tbody id="modalItemsTable">
+                                <!-- سيتم ملؤه بالجافاسكريبت -->
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <!-- آخر تحديث -->
+                    <p class="text-muted small mt-3 hidden">
+                        <i class="fas fa-clock ms-1"></i>
+                        آخر تحديث: <span id="modalUpdated"></span>
+                    </p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إغلاق</button>
+                    <button type="button" class="btn btn-primary printBtn">طباعة الفاتورة</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="../../../wroot/assets/bootstrap/js/bootstrap.bundle.min.js"></script>
+
+    <script src="../../../wroot/assets/jquery/jquery-3.7.1.min.js"></script>
+    <script src="../../../wroot/assets/bootbox/bootbox.min.js"></script>
+
+    <script type="module" src="../../../public/js/cashier/order/list.js"></script>
+</body>
+</html>

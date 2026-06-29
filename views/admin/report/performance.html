@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Coffee Corner</title>
+        
+
+        <link href="../../../wroot/assets/bootstrap/css/bootstrap.rtl.min.css" rel="stylesheet">
+        <link href="../../../wroot/assets/bootstrap/css/bootstrap-icons.css" rel="stylesheet">
+
+        <!-- FontAwesome -->
+        <link href="../../../wroot/assets/fontawesome/css/all.min.css" rel="stylesheet">
+
+        <link rel="stylesheet" href="../../../public/style/admin/header.css"/>
+        <link rel="stylesheet" href="../../../public/style/admin/reports/performance.css">
+
+    </head>
+    <body>
+
+        <site-header></site-header>
+
+        <!-- محتوى الصفحة -->
+        <div style="padding: 20px;">
+            <div class="container-fluid p-0">
+                
+                <!-- ترويسة الصفحة -->
+                <div class="page-header">
+                    <div class="row align-items-center">
+                        <div class="col-12">
+                            <h3 class="mb-2">
+                                <i class="fas fa-file-invoice text-primary ms-2"></i>
+                                 تقرير آداء المبيعات 
+                            </h3>
+                            <p class="text-muted mb-0">تحليل شامل للمبيعات وساعة الذروة في الفترة المحددة</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- تحديد الفترة الزمنية -->
+                <div class="filter-section d-none reveal" id="filterSection">
+                    <h6 class="mb-4">
+                        <i class="fas fa-calendar-alt text-primary ms-2"></i>
+                        تحديد الفترة الزمنية
+                    </h6>
+
+                    <div class="row g-3">
+
+
+                        <div class="col-md-3">
+                            <label class="form-label">من تاريخ و وقت</label>
+                            <input type="datetime-local" class="form-control date-picker" id="startDate">
+                        </div>
+
+
+                        <div class="col-md-3">
+                            <label class="form-label">إلى تاريخ و وقت</label>
+                            <input type="datetime-local" class="form-control date-picker" id="endDate">
+                        </div>
+
+
+                        <div class="col-md-3 ms-auto">
+                            <label class="form-label">&nbsp;</label>
+                            <button class="btn btn-primary w-100 search-btn" id="searchBtn" disabled>
+                                <i class="fas fa-search ms-1"></i>
+                                تحديث التقرير
+                            </button>
+                        </div>
+
+
+                        <div class="row mt-3 d-none" id="filterDateRange">
+                            <div class="col-12 d-flex justify-content-center">
+                                <div class="header-container text-center" style="width: 50%;">
+                                    <small class="text-muted d-block">
+                                        الفترة المدخلة حالياً لعرض البيانات.
+                                    </small>
+                                    <div class="date-range mt-1">
+                                       <span class="text-muted fw-bold">من</span>
+                                        <strong>
+                                            <span class="date nowrap-cell" id="filterDateStart" dir="ltr"></span>
+                                        </strong> 
+                                       <span class="text-muted fw-bold">إلى</span>
+                                        <strong>
+                                            <span class="date nowrap-cell" id="filterDateEnd" dir="ltr"></span>
+                                        </strong>
+                                    </div>
+                                    <small class="text-muted d-block">
+                                         قم بتعديلها لتحديث التقرير بناءً على فترة زمنية مختلفة.
+                                    </small>
+                                </div>
+                            </div>
+                        </div>
+                        
+                    </div>                   
+                </div>
+                
+
+                <div class="row d-none reveal mb-5" id="error-dev">
+                    <div class="col-12">
+                        <div class="card border-0 table-card p-3">
+                            <h6 class="text-danger">
+                                <i class="fas fa-exclamation-triangle text-danger ms-2"></i>
+                                حدث خطأ أثناء تحميل البيانات
+                            </h6>
+                            <div class="error col-12">
+                                <ul class="list-group" id="error-list">
+                
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="row mb-4 d-none reveal" id="headerDateRange">
+                    <div class="col-12 d-flex justify-content-center">
+                        <div class="header-container text-center" style="width: 50%;">
+                            <h3 class="mb-1">تحليل آداء المبيعات آخر أسبوع</h3>
+                            
+                            <small class="text-muted d-block mb-2">
+                                تعرض هذه البيانات آخر أسبوع من اليوم الحالي
+                            </small>
+
+                            <div class="date-range">
+                                <span class="text-muted fw-bold">من</span>
+                                <strong class="mx-1 nowrap-cell" id="HeaderStartDate" dir="ltr"></strong>
+                                
+                                <span class="text-muted mx-1 fw-bold">إلى</span>
+                                <strong class="nowrap-cell" id="HeaderEndDate" dir="ltr"></strong>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+
+                <div class="row g-4 mb-5 justify-content-center d-none reveal" id="headerSummeryCard">
+                    <!-- الطلبات -->
+                    <div class="col-md-6 col-lg-5 d-flex">
+                        <div class="stat-card card p-3 bg-white w-100">
+                            <div class="d-flex flex-column">
+                                <div>
+                                    <p class="text-muted mb-1">إجمالي الطلبات</p>
+                                </div>
+
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div class="h-100">
+                                        <h3 class="mb-0 mt-1" id="totalOrder">
+                                            <!-- 0 -->
+                                        </h3>
+                                        <small class="mt-1"><i id="orderChangeIcon"></i> <span id="orderChangeValue"></span></small>
+                                    </div>
+
+                                    <div class="stat-icon bg-primary bg-opacity-10 text-primary">
+                                        <i class="fas fa-shopping-bag"></i>
+                                    </div>
+                                </div>
+
+                                <div class="d-flex justify-content-around mt-2">
+                                    <div class="fw-semibold text-success" id="completedOrder">
+                                        
+                                    </div>
+
+                                    <div class="fw-semibold text-danger" id="deletedOrder">
+                                        
+                                    </div> 
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- الإيرادات -->
+                    <div class="col-md-6 col-lg-5 d-flex">
+                        <div class="stat-card card p-3 bg-white w-100">
+                            <div class="d-flex flex-column">
+                                <div>
+                                    <p class="text-muted mb-1">الايرادات</p>
+                                </div>
+
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div class="d-flex flex-column">
+                                        <h3 class="mb-0 mt-1" id="totalSales">
+                                           
+                                        </h3>
+                                       <small class="mt-1"><i id="revenueChangeIcon"></i> <span id="revenueChangeValue"></span></small>
+                                    </div>
+
+                                    <div class="stat-icon bg-success bg-opacity-10 text-success">
+                                        <i class="fas fa-shekel-sign"></i>
+                                    </div>
+                                </div>
+
+                                <div class="d-flex justify-content-around mt-2">
+                                    <div class="fw-semibold text-success" id="cashSales">
+                                      
+                                    </div>
+
+                                    <div class="fw-semibold text-info" id="cardSales">
+                                      
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+
+                <div class="row g-4 mb-4 d-none reveal" id="lineChartCard">
+                    <div class="col-12">
+                        <div class="card border-0 table-card">
+                            <div class="card-body">
+                                <h5 class="card-title text-primary mb-4"><i class="fa-solid fa-clock"></i> تحليل ساعة الذروة</h5> 
+                                <div class="d-flex justify-content-center gap-1" id="labelHeader">
+                                    <span style="font-weight: 500;">عدد الطلبات</span>
+                                    <div class="border-box" style="background-color: rgba(54,162,235,0.7);">
+                                    </div>
+                                </div>
+
+
+                                <div class="chart-scroll" id="barChartCanvas">
+                                    <div class="chart-inner">
+                                        <canvas id="lineChart"></canvas>
+                                    </div>
+                                </div>
+                                
+                                <div id="barChartMessage" class="text-center mt-5 d-none">
+                                <h5 class="text-muted">لا يوجد بيانات لتحليلها</h5>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+
+                <div class="row g-4 mb-4 d-none reveal" id="bestDayLineChartCard">
+                    <div class="col-12">
+                        <div class="card border-0 table-card">
+                            <div class="card-body">
+                                <h5 class="card-title text-success mb-4"><i class="fas fa-chart-line text-success ms-2"></i> موجز أفضل يوم مبيعات من أيام الأسبوع</h5> 
+                                
+                                <div class="d-flex justify-content-center gap-1" id="labelHeader">
+                                    <span style="font-weight: 500;">عدد الطلبات و المبيعات خلال أيام الأسبوع</span>
+                                    <div class="border-box" style="background-color: rgba(76,175,80,0.7);">
+                                    </div>
+                                </div>
+
+                                <div class="chart-scroll" id="barChartCanvas">
+                                    <div class="chart-inner">
+                                        <canvas id="bestDayBarChartContainer"></canvas>
+                                    </div>
+                                </div>
+                                
+                                <div id="barChartMessage" class="text-center mt-5 d-none">
+                                    <h5 class="text-muted">لا يوجد بيانات لتحليلها</h5>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+
+
+                <div class="row g-4 mb-4 d-none reveal" id="topLeastSellingItemsCard">
+
+                    <div class="col-12 col-md-6" id="topSellingCard">
+                        <div class="card border-0 table-card">
+                            <div class="card-body">
+                                <div class="mb-2">
+                                    <h5 class="card-title">
+                                        <i class="fas fa-box text-success ms-2"></i> أكثر المنتجات طلباً
+                                    </h5>
+                                    <small class="text-muted d-block">
+                                        النسبة تظهر نسبة طلب كل صنف من إجمالي الطلبات
+                                    </small>
+                                </div>
+                                
+
+                               <div class="chart-container d-none pieChartContainer">
+                                    <canvas class="pieChart"></canvas>
+                                </div>
+                                
+                                <div class="text-center mt-5 d-none messageContainer">
+                                    <h5 class="text-muted">لا يوجد بيانات لتحليلها</h5>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+
+
+
+                    <div class="col-12 col-md-6" id="leastSellingCard">
+                        <div class="card border-0 table-card">
+                            <div class="card-body">
+                                <div class="mb-2">
+                                    <h5 class="card-title text-danger">
+                                        <i class="fas fa-box ms-2"></i> أقل المنتجات طلباً
+                                    </h5>
+                                    <small class="text-muted d-block">
+                                        النسبة تظهر نسبة طلب كل صنف من إجمالي الطلبات
+                                    </small>
+                                </div>
+                                
+
+                               <div class="chart-container d-none pieChartContainer">
+                                    <canvas class="pieChart"></canvas>
+                                </div>
+                                
+                                <div class="text-center mt-5 d-none messageContainer">
+                                    <h5 class="text-muted">لا يوجد بيانات لتحليلها</h5>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+
+                </div>
+
+                <!-- التحليلات والرؤى -->
+                <div class="row g-4 mb-5 d-none reveal" id="analysesAndInsightsCard">
+                    <div class="col-lg-8">
+                        <div class="insight-card">
+                            <h6 class="mb-3">
+                                <i class="fas fa-lightbulb text-warning ms-2"></i>
+                                الرؤى والتحليلات
+                            </h6>
+
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <div class="d-flex align-items-center">
+                                        <div class="bg-primary bg-opacity-20 p-2 rounded-circle me-3">
+                                            <i class="fas fa-chart-line text-primary fs-5"></i>
+                                        </div>
+                                        <div>
+                                            <h6 class="mb-1">ساعة الذروة</h6>
+                                            <p class="text-muted mb-0" id="peakHour"></p>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-6 mb-3">
+                                    <div class="d-flex align-items-center">
+                                        <div class="bg-success bg-opacity-20 p-2 rounded-circle me-3">
+                                            <i class="fas fa-chart-line text-success fs-5"></i>
+                                        </div>
+                                        <div>
+                                            <h6 class="mb-1">أفضل أيام الأسبوع</h6>
+                                            <p class="text-muted mb-0" id="bestDay"></p>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-6 mb-3">
+                                    <div class="d-flex align-items-center">
+                                        <div class="bg-warning bg-opacity-20 p-2 rounded-circle me-3">
+                                            <i class="fas fa-exclamation-triangle text-warning fs-5"></i>
+                                        </div>
+                                        <div>
+                                            <h6 class="mb-1">عدد الطلبات السفري</h6>
+                                            <p class="mb-0" id="delivaryOrders">
+                                                <span class="text-muted"></span>
+                                                <span class="text-muted"></span>
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-6 mb-3">
+                                    <div class="d-flex align-items-center">
+                                        <div class="purple-background bg-opacity-20 p-2 rounded-circle me-3">
+                                            <i class="fas fa-users fs-5"></i>
+                                        </div>
+                                        <div>
+                                            <h6 class="mb-1">عدد الطلبات على الطاولة</h6>
+                                            <p class="mb-0" id="tableOrders">
+                                                <span class="text-muted"></span>
+                                                <span class="text-muted"></span>
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+
+
+                                <div class="col-md-6 mb-3">
+                                    <div class="d-flex align-items-center">
+                                        <div class="bg-info bg-opacity-20 p-2 rounded-circle me-3">
+                                            <i class="fas fa-users fs-5 text-info"></i>
+                                        </div>
+                                        <div>
+                                            <h6 class="mb-1"> أكثر المنتجات مبيعا</h6>
+                                            <p class="mb-0" id="topSellingItems">
+                                                <span class="text-muted"> </span>
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-6 mb-3">
+                                    <div class="d-flex align-items-center">
+                                        <div class="bg-danger bg-opacity-20 p-2 rounded-circle me-3">
+                                            <i class="fas fa-users text-danger fs-5"></i>
+                                        </div>
+                                        <div>
+                                            <h6 class="mb-1">أقل المنتجات مبيعا</h6>
+                                            <p class="mb-0" id="leastSellingItems">
+                                                <span class="text-muted"></span>
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-lg-4">
+                        <div class="card border-0 shadow-sm h-100">
+                            <div class="card-body">
+                                <h6 class="card-title mb-3">
+                                    <i class="fas fa-calculator text-success ms-2"></i>
+                                    متوسط الطلب
+                                </h6>
+                                <h2 class="mb-2" id="avaDemand"></h2>
+                                <div class="progress" style="height: 8px;">
+                                    <div class="progress-bar" id="avgBar"></div>
+                                </div>
+                                <small> 
+                                    <i id="iconAvg"></i>
+                                    <span id="avgText" ></span>
+                                </small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            
+                <div class="row mt-5 d-none" id="loaderCard">
+                    <div class="col-12">
+                        <div class="card border-0 table-card">
+                            <div class="card-body d-flex align-items-center justify-content-center" style="height: 100px;">
+                                <div class="spinner-border text-primary" role="status"> </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+
+
+
+
+        <script src="../../../wroot/assets/bootstrap/js/bootstrap.bundle.min.js"></script>
+
+        <script src="../../../wroot/assets/jquery/jquery-3.7.1.min.js"></script>
+        <script src="../../../wroot/assets/bootbox/bootbox.min.js"></script>
+
+
+        <script src="../../../wroot/assets/chart/chart.js"></script>
+        <script src="../../../wroot/assets/chart/chartjs-plugin-datalabels.js"></script>
+        
+        
+        <script type="module" src="../../../public/js/admin/report/performance.js"></script>
+
+    </body>
+</html>

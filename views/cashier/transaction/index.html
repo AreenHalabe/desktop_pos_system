@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Coffee Corner</title>
+        
+        <!-- Bootstrap 5.3.2 RTL -->
+
+        <link href="../../../wroot/assets/bootstrap/css/bootstrap.rtl.min.css" rel="stylesheet">
+        <link href="../../../wroot/assets/bootstrap/css/bootstrap-icons.css" rel="stylesheet">
+
+        <!-- FontAwesome -->
+        <link href="../../../wroot/assets/fontawesome/css/all.min.css" rel="stylesheet">
+
+
+
+       <link rel="stylesheet" href="../../../public/style/cashier/header.css" />
+
+        <link rel="stylesheet" href="../../../public/style/cashier/transaction/transaction.css"/>
+
+    </head>
+    <body>
+
+        
+        
+        <!-- محتوى الصفحة -->
+        <div style="padding: 5px;">
+            <div class="container-fluid">
+                <div class="p-2">
+                    <site-header></site-header>
+                </div>
+                <!-- ترويسة الصفحة -->
+                <div class="page-header d-flex justify-content-between align-items-center flex-wrap gap-3">
+                    <div>
+                        <h4 class="mb-1">
+                            <i class="fas fa-wallet text-success ms-2"></i>
+                            المعاملات المالية
+                        </h4>
+                        <p class="text-muted mb-0">إدارة المدفوعات والسحوبات</p>
+                    </div>
+                    <div class="ms-auto"  id="transactionContainerBtn" >
+                         <span id="cashSessionStatus"></span>
+                        
+                        <span data-bs-toggle="tooltip" title="يجب فتح الصندوق">
+                            <button class="btn transaction-add" data-bs-toggle="modal" data-bs-target="#transactionModal" id="openTransactionModal" disabled>
+                                <i class="fas fa-plus me-2"></i>
+                                إنشاء معاملة
+                            </button>
+                        </span>
+                    </div>
+                    
+                </div>
+
+                <!-- بطاقة الرصيد الحالي -->
+                <div class="row mb-4 justify-content-evenly">
+
+                    <div class="col-md-4">
+                        <div class="balance-card">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h6 class="mb-1">الرصيد الحالي</h6>
+                                    <h2 class="mb-0" id="expectedCash"></h2>
+                                </div>
+                                <div class="fs-1">
+                                    <i class="fas fa-shekel-sign"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-4">
+                        <div class="card border-0 shadow-sm">
+                            <div class="card-body text-center">
+                                <h6 class="text-muted mb-2"> الكاش الإفتتاحي</h6>
+                                <h4 class="text mb-0" id="openingCash"></h4>
+                            </div>
+                        </div>
+                    </div>
+
+
+                    <div class="col-md-4">
+                        <div class="card border-0 shadow-sm">
+                            <div class="card-body text-center">
+                                <h6 class="text-muted mb-2">مبيعات الكاش</h6>
+                                <h4 class="text-success mb-0" id="cashSales"></h4>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+
+                <div class="col-12 col-md-8 col-lg-6 col-xl-5 mx-auto mb-4">
+                    <div class="d-flex card border-0 shadow-sm">
+                        <div class="d-flex">
+                            <div class="card-body text-center border-end border-2 bg-success bg-opacity-10">
+                                <h6 class="text-muted mb-2">الإضافات</h6>
+                                <h4 class="text-success mb-0" id="cashIn"></h4>
+                            </div>
+
+                            <div class="card-body text-center bg-danger bg-opacity-10">
+                                <h6 class="text-muted mb-2">المصروفات</h6>
+                                <h4 class="text-danger mb-0" id="cashOut"></h4>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- جدول المعاملات -->
+                <div class="row">
+                    <div class="col-12">
+                        <div class="card border-0 table-card">
+                            <div class="card-body">
+                                <div class="table-responsive">
+                                    <table class="table table-hover mb-0">
+                                        <thead>
+                                            <tr>
+                                                <th>رقم المعاملة</th>
+                                                <th>الوقت</th>
+                                                <th class="position-relative">
+                                                    التاريخ
+                                                    <div class="position-absolute bottom-0 text-muted opacity-75" style="font-size:12px;">
+                                                    يوم - شهر - سنة
+                                                    </div>
+                                                </th>
+                                                <th>القيمة</th>
+                                                <th>النوع</th>
+                                                <th>الوصف</th>
+                                                <th>الإجراءات</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="transactions-table-body">
+                                        </tbody>
+                                    </table>
+                                </div>
+                                <div class="pagination-button mt-4" id="paginationBtn">
+                                    <button class="btn btn-sm btn-outline-secondary prevBtn" id="prevBtn">
+                                        <i class="fas fa-chevron-right"></i>
+                                    </button>
+                                    <span class="mx-2" id="pageInfo">  </span>
+                                    <button class="btn btn-sm btn-outline-secondary nextBtn" id="nextBtn">
+                                        <i class="fas fa-chevron-left"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal إنشاء معاملة -->
+        <div class="modal fade" id="transactionModal" tabindex="-1">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">
+                            <i class="fas fa-plus-circle text-success ms-2"></i>
+                            إنشاء معاملة مالية جديدة
+                        </h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <form>
+                            <div class="mb-3">
+                                <label class="form-label">القيمة <span class="text-danger">*</span></label>
+                                <input type="number" class="form-control" placeholder="أدخل المبلغ بالشيكل" step="0.01" min="0" id="transactionAmount">
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label class="form-label">النوع <span class="text-danger">*</span></label>
+                                <select class="form-select" id="transactionType">
+                                    <option value="" selected disabled>اختر النوع...</option>
+                                    <option value="إضافة">إضافة</option>
+                                    <option value="سحب">سحب</option>
+                                </select>
+                            </div>
+
+
+                            <div class="mb-3">
+                                <label class="form-label">وصف المعاملة <span class="text-danger">*</span></label>
+                                <textarea class="form-control" rows="3" placeholder="شرح سبب هذه المعاملة..." id="transactionNote"></textarea>
+                            </div>
+                            
+                            <div class="form-text">
+                                <i class="fas fa-info-circle me-1"></i>
+                                سيتم تسجيل المعاملة فوراً مع تاريخ اليوم والوقت الحالي
+                            </div>
+                        </form>
+                    </div>
+
+
+
+                    <div class="modal-footer">
+                        <button type="button" class="btn cancel-btn" data-bs-dismiss="modal">
+                            <i class="fas fa-times me-2"></i>
+                            إلغاء
+                        </button>
+                        <button type="button" class="btn add-btn" id="creatTransactionBtn" disabled>
+                            <i class="fas fa-save me-2"></i>
+                            إنشاء المعاملة
+                        </button>
+                    </div>
+
+                    <div id="modal-loading-overlay" class="modal-loading-overlay d-none">
+                        <div class="spinner-border text-light" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Bootstrap JS -->
+        <script src="../../../wroot/assets/bootstrap/js/bootstrap.bundle.min.js"></script>
+
+        <script src="../../../wroot/assets/jquery/jquery-3.7.1.min.js"></script>
+        <script src="../../../wroot/assets/bootbox/bootbox.min.js"></script>
+
+
+        <script type="module" src="../../../public/js/cashier/transaction/transactions.js"></script>
+
+    </body>
+</html>

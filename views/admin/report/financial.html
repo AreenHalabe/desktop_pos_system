@@ -1,0 +1,617 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Coffee Corner</title>
+        
+        <!-- Bootstrap 5.3.2 RTL -->
+        <link href="../../../wroot/assets/bootstrap/css/bootstrap.rtl.min.css" rel="stylesheet">
+        <link href="../../../wroot/assets/bootstrap/css/bootstrap-icons.css" rel="stylesheet">
+
+        <!-- FontAwesome -->
+        <link href="../../../wroot/assets/fontawesome/css/all.min.css" rel="stylesheet">
+
+        <link rel="stylesheet" href="../../../public/style/admin/header.css"/>
+        <link rel="stylesheet" href="../../../public/style/admin/reports/financial.css">
+    </head>
+    <body>
+
+        <site-header></site-header>
+
+
+        <!-- محتوى الصفحة -->
+        <div style="padding: 20px;">
+            <div class="container-fluid p-0">
+                
+                <!-- ترويسة الصفحة -->
+                <div class="page-header">
+                    <div class="row align-items-center">
+                        <div class="col-12">
+                            <h3 class="mb-2">
+                                <i class="fas fa-file-invoice text-primary ms-2"></i>
+                                 التقرير المالي للصناديق 
+                            </h3>
+                            <p class="text-muted mb-0">يشمل هذا التقرير الصناديق التي تم فتحها ضمن الفترة المحددة، سواء أُغلقت خلالها أو ما تزال نشطة، ويعرض جميع الحركات المالية المرتبطة بها.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- تحديد الفترة الزمنية -->
+                <div class="filter-section">
+                    <h6 class="mb-4">
+                        <i class="fas fa-calendar-alt text-primary ms-2"></i>
+                        تحديد الفترة الزمنية
+                    </h6>
+
+                    <div class="row g-3">
+
+                        <div class="col-md-3">
+                            <label class="form-label">من تاريخ و وقت</label>
+                            <input type="datetime-local" class="form-control date-picker" id="startDate">
+                        </div>
+
+
+                        <div class="col-md-3">
+                            <label class="form-label">إلى تاريخ و وقت</label>
+                            <input type="datetime-local" class="form-control date-picker" id="endDate">
+                        </div>
+
+                        
+
+
+                        <div class="col-md-3 ms-auto">
+                            <label class="form-label">&nbsp;</label>
+                            <button class="btn btn-primary w-100 search-btn" id="searchBtn" disabled>
+                                <i class="fas fa-search ms-1"></i>
+                                تحديث التقرير
+                            </button>
+                        </div>
+
+
+                        <div class="row mt-3 d-none" id="filterDateRange">
+                            <div class="col-12 d-flex justify-content-center">
+                                <div class="header-container text-center" style="width: 50%;">
+                                    <small class="text-muted d-block">
+                                        الفترة المدخلة حالياً لعرض البيانات.
+                                    </small>
+                                    <div class="date-range mt-1">
+                                       <span class="text-muted fw-bold">من</span>
+                                        <strong>
+                                            <span class="date nowrap-cell" id="filterDateStart" dir="ltr"></span>
+                                            <span class="time nowrap-cell" id="filterTimeStart" dir="ltr"></span>
+                                        </strong> 
+                                       <span class="text-muted fw-bold">إلى</span>
+                                        <strong>
+                                            <span class="date nowrap-cell" id="filterDateEnd" dir="ltr"></span>
+                                            <span class="time nowrap-cell" id="filterTimeEnd" dir="ltr"></span>
+                                        </strong>
+                                    </div>
+                                    <small class="text-muted d-block">
+                                         قم بتعديلها لتحديث التقرير بناءً على فترة زمنية مختلفة.
+                                    </small>
+                                </div>
+                            </div>
+                        </div>
+                        
+                    </div>
+                </div>
+
+                <div class="row mb-2 d-none reveal" id="error-dev">
+                    <div class="col-12">
+                        <div class="card border-0 table-card p-3">
+                            <h6 class="text-danger">
+                                <i class="fas fa-exclamation-triangle text-danger ms-2"></i>
+                                حدث خطأ أثناء تحميل البيانات
+                            </h6>
+                            <div class="error col-12">
+                                <ul class="list-group" id="error-list">
+                
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- الصناديق -->
+                <div class="row g-4 mb-5 d-none reveal" id="cashSessionsCard">
+                    <div class="col-12">
+                        <div class="card border-0 shadow-sm">
+                            <div class="card-header bg-light">
+                                <h6 class="mb-0" id="headerBoxes">
+                                </h6>
+                                <small class="text-muted d-block mt-1">
+                                
+                            * البيانات تشمل الصناديق المكتملة (تم فتحها وإغلاقها أو ما زالت مفتوحة) ضمن الفترة المحددة
+                                </small>
+                            </div>
+                            <div class="card-body">
+                                <!-- <div class="row g-4 justify-content-center" id="cashBoxesContainer">
+                                    
+                                </div> -->
+                                <div id="emptyMessage">
+
+                                </div>
+
+                                <div class="table-responsive mt-4">
+                                    <table class="table mb-0 table-striped">
+                                        <thead>
+                                            <tr>
+                                                <th>#</th>
+                                                <th>
+                                                    وقت الفتح
+                                                </th>
+                                                <th>
+                                                    وقت الإغلاق
+                                                </th>
+                                                <th>الكاش الإفتتاحي</th>
+                                                <th>مبيعات الكاش</th>
+                                                <th>مبيعات بطاقة</th>
+                                                <th class="position-relative">
+                                                    معاملات مالية
+                                                    <div class="position-absolute bottom-0 text-success opacity-75" style="font-size:14px;">
+                                                    إضافة
+                                                    </div>
+                                                </th>
+
+                                                <th class="position-relative">
+                                                    معاملات مالية
+                                                    <div class="position-absolute bottom-0 text-danger opacity-75" style="font-size:14px;">
+                                                    سحب
+                                                    </div>
+                                                </th>
+                                                <th>الكاش المتوقع</th>
+                                                <th>الكاش عند الإغلاق</th>
+                                                <th>الفرق</th>
+                                                <th>طباعة</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="cashBoxesContainer">
+                                            
+                                        </tbody>
+                                    </table>
+                                </div>
+
+
+
+                                <div class="pagination-button mt-4 d-none" id="sessionPaginationBtn" data-type="sessions">
+                                    <button class="btn btn-sm btn-outline-secondary prevBtn">
+                                        <i class="fas fa-chevron-right"></i>
+                                    </button>
+                                    <span class="mx-2 pageInfo">  </span>
+                                    <button class="btn btn-sm btn-outline-secondary nextBtn">
+                                        <i class="fas fa-chevron-left"></i>
+                                    </button>
+                                </div>
+                            </div>
+
+                            
+                        </div>
+                    </div>
+                </div>
+
+
+
+
+                <div class="row g-4 mb-5 justify-content-center d-none reveal" id="headerSummeryCard">
+                    <!-- الطلبات -->
+                    <div class="col-md-6 col-lg-4 d-flex">
+                        <div class="stat-card card p-3 bg-white w-100">
+                            <div class="d-flex flex-column">
+                                <div>
+                                    <p class="text-muted mb-1">إجمالي الطلبات</p>
+                                </div>
+
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <h3 class="mb-2" id="totalOrder">
+                                            <!-- <div class="spinner-border spinner-border-sm text-primary" role="status"></div> -->
+                                            <!-- 0 -->
+                                        </h3>
+                                    </div>
+
+                                    <div class="stat-icon bg-primary bg-opacity-10 text-primary">
+                                        <i class="fas fa-shopping-bag"></i>
+                                    </div>
+                                </div>
+                                <div class="d-flex justify-content-around mt-2">
+                                    <div class="fw-semibold text-success" id="completedOrder">
+                                        <!-- <i class="fas fa-check-circle"></i>
+                                        110 مكتملة -->
+                                    </div>
+
+                                    <div class="fw-semibold text-danger" id="deletedOrder">
+                                        <!-- <i class="fas fa-times-circle"></i>
+                                        14 ملغية -->
+                                    </div> 
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- الإيرادات -->
+                    <div class="col-md-6 col-lg-4 d-flex">
+                        <div class="stat-card card p-3 bg-white w-100">
+                            <div class="d-flex flex-column">
+                                <div>
+                                    <p class="text-muted mb-1">الايرادات</p>
+                                </div>
+
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <h3 class="mb-2" id="totalSales">
+
+                                            <!-- <div class="spinner-border spinner-border-sm text-primary" role="status"></div> -->
+                                            <!-- 8002  ₪ -->
+                                        </h3>
+                                    </div>
+
+                                    <div class="stat-icon bg-success bg-opacity-10 text-success">
+                                        <i class="fas fa-shekel-sign"></i>
+                                    </div>
+                                </div>
+                                <div class="d-flex justify-content-around mt-2">
+                                    <div class="fw-semibold text-success" id="cashSales">
+                                        <!-- <i class="fas fa-money-bill-wave"></i>
+                                        2,950 ₪ كاش -->
+                                    </div>
+
+                                    <div class="fw-semibold text-info" id="cardSales">
+                                        <!-- <i class="fas fa-credit-card"></i>
+                                        1,570 ₪ بطاقة -->
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-6 col-lg-4 d-flex">
+                        <div class="stat-card card p-3 bg-white w-100">
+                            <div class="d-flex flex-column">
+
+                                <div>
+                                    <p class="text-muted mb-1">المعاملات المالية</p>
+                                </div>
+
+                                <div class="d-flex flex-wrap justify-content-between align-items-center"> 
+                                    <div class="w-50 p-1 h-100"> 
+                                        <div class="d-flex flex-column align-items-center justify-content-center rounded bg-danger bg-opacity-10 h-100">
+                                            <div class="text-danger mt-1"> 
+                                                <i class="fas fa-minus-circle"></i> 
+                                                <small class="text-muted">مصروفات</small> 
+                                            </div> 
+                                            <div> 
+                                                <h5 class="fw-bold text-danger mt-2" id="expenses"> - 700000 ₪</h5>
+                                            </div> 
+                                        </div>
+                                    </div> 
+
+                                    <!-- <div class="vr ms-auto"></div> -->
+                                    
+                                    <div class="w-50 p-1 h-100"> 
+                                        <div class="d-flex flex-column align-items-center justify-content-center rounded bg-success bg-opacity-10 h-100"> 
+                                            <div class="text-success mt-1"> 
+                                                <i class="fas fa-plus-circle"></i> 
+                                                <small class="text-muted">إضافات</small> 
+                                            </div> 
+                                            <div> 
+                                                <h5 class="fw-bold text-success mt-2" id="additionCash"> + 500000 ₪</h5> 
+                                            </div> 
+                                        </div> 
+                                    </div>
+                                </div>
+
+
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+                <div class="row g-4 mb-5 justify-content-center d-none reveal" id="summeryRevenue">
+                    <div class="col-md-12 col-lg-8 d-flex summery-container">
+                        <div class="stat-card card p-3 bg-white w-100">
+                            <div class="d-flex flex-column">
+                                <div>
+                                    <p class="text-dark fs-5 mb-1">صافي الأرباح</p>
+                                </div>
+
+
+                                <div class="d-flex flex-wrap justify-content-center align-items-center gap-3 mt-3 calc-flow">
+
+                                    <!-- الإيرادات -->
+                                    <div class="rounded-4 px-4 py-3 bg-success bg-opacity-10 border border-success border-opacity-25 text-center">
+                                        <div class="d-flex align-items-center gap-2 mb-2 justify-content-center">
+                                            <i class="fas fa-sack-dollar text-success"></i>
+                                            <small class="text-muted">الإيرادات</small>
+                                        </div>
+
+                                        <h5 class="fw-bold text-success mb-0" id="revenueSummery">
+                                            
+                                        </h5>
+                                    </div>
+
+                                    <!-- + -->
+                                    <div class="op-symbol fs-3 fw-bold text-success">
+                                        +
+                                    </div>
+
+                                    <!-- الإضافات -->
+                                    <div class="rounded-4 px-4 py-3 bg-primary bg-opacity-10 border border-primary border-opacity-25 text-center">
+                                        <div class="d-flex align-items-center gap-2 mb-2 justify-content-center">
+                                            <i class="fas fa-plus-circle text-primary"></i>
+                                            <small class="text-muted">الإضافات</small>
+                                        </div>
+
+                                        <h5 class="fw-bold text-primary mb-0" id="additionCashSummery">
+                                            
+                                        </h5>
+                                    </div>
+
+                                    <!-- - -->
+                                    <div class="op-symbol fs-3 fw-bold text-danger">
+                                        −
+                                    </div>
+
+                                    <!-- المصاريف -->
+                                    <div class="rounded-4 px-4 py-3 bg-danger bg-opacity-10 border border-danger border-opacity-25 text-center">
+                                        <div class="d-flex align-items-center gap-2 mb-2 justify-content-center">
+                                            <i class="fas fa-money-bill-wave text-danger"></i>
+                                            <small class="text-muted">المصاريف</small>
+                                        </div>
+
+                                        <h5 class="fw-bold text-danger mb-0" id="expensesSummery">
+                                            
+                                        </h5>
+                                    </div>
+
+                                    <!-- = -->
+                                    <div class="op-symbol equal-symbol fs-3 fw-bold text-dark">
+                                        =
+                                    </div>
+
+                                    <!-- الناتج -->
+                                    <div class="rounded-4 px-4 py-3 bg-dark text-white text-center shadow-sm">
+                                        <div class="d-flex align-items-center gap-2 mb-2 justify-content-center">
+                                            <i class="fas fa-wallet text-warning"></i>
+                                            <small class="opacity-75">الصافي</small>
+                                        </div>
+
+                                        <h4 class="fw-bold mb-0" id="netProfit">
+                                            
+                                        </h4>
+                                    </div>
+
+                                </div>
+
+                                
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+             <!-- جدول المعاملات -->
+                <div class="row d-none reveal" id="transactionTableCard">
+                    <div class="col-12">
+                        <div class="card border-0 table-card">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between align-items-center mb-3">
+                                    <h5 class="card-title">
+                                        <i class="fas fa-list ms-2 text-secondary"></i>
+                                    قائمة المعاملات
+                                    </h5>
+                                    <div class="btn-group position-relative">
+                                        <button class="btn btn-outline-secondary btn-sm dropdown-toggle" data-bs-toggle="dropdown" data-bs-container="body">
+                                            فلترة
+                                        </button>
+                                        <ul class="dropdown-menu p-2">
+                                            <li><a class="dropdown-item rounded">الكل</a></li>
+                                            <li><a class="dropdown-item rounded">المصروفات</a></li>
+                                            <li><a class="dropdown-item rounded">الإضافات</a></li>
+                                        </ul>
+                                    </div>
+                                </div>
+
+                                <div class="row g-2 mb-3">
+
+                                    <!-- المصروفات -->
+                                    <div class="col-md-6">
+                                        <div class="d-flex justify-content-between align-items-center p-3 rounded bg-danger bg-opacity-10">
+                                            <div>
+                                                <small class="text-muted">إجمالي المصروفات</small>
+                                                <h5 class="fw-bold text-danger mb-0" id="totalExpenses">- 0 ₪</h5>
+                                            </div>
+                                            <div class="text-danger fs-4">
+                                                <i class="fas fa-minus-circle"></i>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- الإضافات -->
+                                    <div class="col-md-6">
+                                        <div class="d-flex justify-content-between align-items-center p-3 rounded bg-success bg-opacity-10">
+                                            <div>
+                                                <small class="text-muted">إجمالي الإضافات</small>
+                                                <h5 class="fw-bold text-success mb-0" id="totalAdditions">+ 0 ₪</h5>
+                                            </div>
+                                            <div class="text-success fs-4">
+                                                <i class="fas fa-plus-circle"></i>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                </div>
+
+                                <div class="d-flex justify-content-center mb-2 d-none" id="headerFilterType">
+                                    <h5 id="title" class="mb-0">
+                                        <span class="d-flex align-items-center gap-2 px-3 py-2 p-2 rounded" id="typeBadge">
+                                            <i id="typeIcon"></i>
+                                            <span id="typeText"> 
+                                                
+                                            </span>
+                                        </span>
+                                    </h5>
+                                </div>
+
+
+                                <div class="table-responsive">
+                                    <table class="table mb-0 table-striped">
+                                        <thead>
+                                            <tr>
+                                                <th>رقم المعاملة</th>
+                                                <th class="position-relative">
+                                                    التاريخ
+                                                    <div class="position-absolute bottom-0 text-muted opacity-75" style="font-size:12px;">
+                                                    يوم - شهر - سنة
+                                                    </div>
+                                                </th>
+                                                <th>الوقت</th>
+                                                <th>النوع</th>
+                                                <th>القيمة</th>
+                                                <th>الوصف</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="transactions-table-body">
+                                            
+                                        </tbody>
+                                    </table>
+                                </div>
+
+                                <div class="pagination-button mt-4 d-none" id="transactionPaginationBtn" data-type="transactions">
+                                    <button class="btn btn-sm btn-outline-secondary prevBtn">
+                                        <i class="fas fa-chevron-right"></i>
+                                    </button>
+                                    <span class="mx-2 pageInfo">  </span>
+                                    <button class="btn btn-sm btn-outline-secondary nextBtn">
+                                        <i class="fas fa-chevron-left"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            
+                <div class="row mt-5 d-none" id="loaderCard">
+                    <div class="col-12">
+                        <div class="card border-0 table-card">
+                            <div class="card-body d-flex align-items-center justify-content-center" style="height: 100px;">
+                                <div class="spinner-border text-primary" role="status"> </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+                
+
+        <div class="modal fade" id="cashBoxModal" tabindex="-1">
+            <div class="modal-dialog modal-m">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">
+                            <i class="fas fa-cash-register text-primary ms-2"></i>
+                            تفاصيل الصندوق
+                        </h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+
+                    <div class="modal-body">
+                        <div class="row g-3 mb-4">
+                            <div class="col-12">
+                                <div class="card border-0 bg-light">
+                                    <div class="card-body text-center p-3">
+                                        <h6 class="text-muted mb-1">وقت الفتح</h6>
+                                        <h5 class="text-primary mb-0" id="openAt"></h5>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-12">
+                                <div class="card border-0 bg-light">
+                                    <div class="card-body text-center p-3">
+                                        <h6 class="text-muted mb-1">وقت الإغلاق</h6>
+                                        <h5 class="text-muted mb-0" id="closedAt"></h5>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+
+
+                        <div class="row">
+                            <!-- ملخص مالي -->
+                            <div class="col-12">
+                                <div class="card border-0 shadow-sm sticky-top" style="top: 20px;">
+                                    <div class="card-header bg-gradient text-black">
+                                        <h6 class="mb-0">
+                                            <i class="fas fa-calculator ms-2"></i>
+                                            ملخص الصندوق
+                                        </h6>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="mb-3">
+                                            <small class="text-muted">الكاش الإفتتاحي</small>
+                                            <h5 class="text-primary mb-0" id="openingCash"> </h5>
+                                        </div>
+
+                                        <div class="mb-3">
+                                            <small class="text-muted">مبيعات الكاش</small>
+                                            <h5 class="text-success mb-0" id="cashSalesSession">  </h5>
+                                        </div>
+                                        <div class="mb-3">
+                                            <small class="text-muted">مبيعات البطاقة</small>
+                                            <h5 class="text-info mb-0" id="cardSalesSession"> </h5>
+                                        </div>
+
+                                        <div class="mb-3">
+                                            <small class="text-muted">معاملات مالية (إضافة)</small>
+                                            <h5 class="text-success mb-0" style="opacity: 0.8;" id="cashIn"></h5>
+                                        </div>
+
+                                        <div class="mb-3">
+                                            <small class="text-muted">معاملات مالية (سحب)</small>
+                                            <h5 class="text-danger mb-0" id="cashOut"></h5>
+                                        </div>
+                                        
+                                        <div class="mb-4">
+                                            <small class="text-muted">الكاش المتوقع</small>
+                                            <h5 class="text mb-0" id="expectedCash"></h5>
+                                        </div>
+
+                                        <div class="mb-3">
+                                            <small class="text-muted">الكاش عند الإغلاق</small>
+                                            <h5 class="text-warning mb-0" id="actualCash"></h5>
+                                        </div>
+
+                                        
+
+                                        <div class="alert alert-danger" id="differanceStatus">
+                                            <strong>الفرق:</strong> <span class="fw-bold" id="differance"></span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إغلاق</button>
+                        <button type="button" class="btn btn-primary print-btn">
+                            <i class="fas fa-print ms-2"></i>
+                            طباعة التقرير
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <script src="../../../wroot/assets/bootstrap/js/bootstrap.bundle.min.js"></script>
+
+        <script src="../../../wroot/assets/jquery/jquery-3.7.1.min.js"></script>
+        <script src="../../../wroot/assets/bootbox/bootbox.min.js"></script>
+
+
+        <script type="module" src="../../../public/js/admin/report/financial.js"></script>
+
+    </body>
+</html>

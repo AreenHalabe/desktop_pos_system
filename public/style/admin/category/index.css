@@ -1,0 +1,361 @@
+/* =========================
+   BASE (Desktop & Default)
+   ========================= */
+body {
+    font-family: system-ui, sans-serif;
+    background-color: #c8ced3;
+}
+
+.box{
+    background-color: #dde8f1;
+}
+
+h1{
+font-size: 26px;
+}
+.card-body h5 {
+    font-size: 1.4rem;
+}
+
+.card-body .btn {
+    font-size: 0.90rem;
+     /* padding: 6px 12px;  */
+}
+
+.btn-group-sm{
+    gap: 0.8rem !important;
+}
+
+.card-body .list-group-item {
+    font-size: 1.1rem;
+    /* font-weight: 500; */
+}
+
+.danger-box {
+    margin-top: 8px;
+    padding: 8px;
+    border: 1px solid #dc3545;
+    color: #dc3545;
+    background-color: #f8d7da;
+    border-radius: 4px;
+    font-weight: 600;
+    text-align: center;
+}
+
+.btn {
+    font-weight: 600;
+}
+
+#categoryModal .modal-dialog {
+    max-width: 600px;
+}
+
+#categoryModal .modal-title-two {
+    font-size: 1.4rem;
+    font-weight: 600;
+}
+
+#categoryModal .form-control,
+#categoryModal .form-select {
+    font-size: 1rem;
+    padding: 0.6rem 0.75rem;
+}
+
+#categoryModal label {
+    font-size: 0.95rem;
+}
+
+#categoryModal .btn {
+    font-size: 1rem;
+    /* padding: 0.5rem 1.2rem; */
+}
+
+#mainCategoryModal .modal-dialog {
+    max-width: 500px;
+}
+
+#mainCategoryModal .modal-title-one {
+    font-size: 1.4rem;
+    font-weight: 600;
+}
+
+#mainCategoryModal .form-control {
+    font-size: 1rem;
+    padding: 0.6rem 0.75rem;
+}
+
+#mainCategoryModal .btn {
+    font-size: 1rem;
+    /* padding: 0.5rem 1.2rem; */
+}
+
+.modal-label{
+    /* font-size: clamp(0.9rem, 2.5vw, 1.1rem); */
+    font-weight: 500;
+}
+
+
+.delete-btn {
+    background: rgba(220, 53, 69, 0.1);
+    border: 1px solid rgba(220, 53, 69, 0.3);
+    color: #dc3545;
+    border-radius: 8px;
+    padding: 6px 12px;
+    transition: all 0.3s ease;
+}
+.delete-btn:hover {
+    background: rgba(220, 53, 69, 0.2);
+    transform: translateY(-1px);
+}
+
+/* =========================
+   MOBILE (<= 767px)
+   ========================= */
+
+@media(max-width: 500px){
+    #categoryForm  .form-control{
+        width: 100% !important;
+    }
+    #categoryForm .form-select{
+        width: 100% !important;
+    }
+    #mainCategoryForm .form-control{
+        width: 100% !important;
+    }
+
+    /* عناوين الأقسام */
+    .card-body h5 {
+        font-size: 1.1rem;
+    }
+
+    /* عناصر الفئات */
+    .card-body .list-group-item {
+        font-size: 0.96rem;
+        font-weight: 500;
+        padding: 12px;
+    }
+
+}
+
+@media(min-width: 501px ) and (max-width: 800px){
+    #categoryForm  .form-control{
+        width: 60% !important;
+    }
+    #categoryForm .form-select{
+        width: 60% !important;
+    }
+    #mainCategoryForm .form-control{
+        width: 60% !important;
+    }
+
+    /* عناوين الأقسام */
+    .card-body h5 {
+        font-size: 1.3rem;
+    }
+
+    /* عناصر الفئات */
+    .card-body .list-group-item {
+        font-size: 1.2rem;
+        font-weight: 500;
+        padding: 15px;
+    }
+    
+}
+
+@media(min-width: 801px ) and (max-width: 1023px){
+    #mainCategoryForm .form-control{
+        width: 60% !important;
+    }
+
+    /* عناوين الأقسام */
+    .card-body h5 {
+        font-size: 1.4rem;
+    }
+
+    /* عناصر الفئات */
+    .card-body .list-group-item {
+        font-size: 18px;
+        padding: 15px;
+    }
+}
+
+@media (max-width: 767px) {
+
+    /* العنوان */
+    .card-header h1 {
+        font-size: 1.3rem !important;
+        text-align: center;
+    }
+
+    /* أزرار الإضافة */
+    .card-body .mb-4 {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .card-body .mb-4 .btn {
+        width: 70%;
+        /* font-size: 0.95rem; */
+        padding: 10px;
+    }
+
+   
+
+    .span-button{
+        display:flex;
+        text-align: center;
+        width: 100%;
+    }
+
+
+    .button-container{
+        gap: 1.4rem !important;
+    }
+
+    .btn-group-sm{
+        gap: 0.7rem !important;
+    }
+
+   
+    
+    
+    .btn-group-sm .btn {
+        padding: 5px 7px;   /* أكبر للمس */
+        font-size: 0.90rem;
+    }
+     #categoryModal .modal-dialog {
+        max-width: 100%;
+        margin: 0.5rem;
+    }
+
+    #categoryModal .modal-content {
+        border-radius: 12px;
+    }
+
+    #categoryModal .modal-title-two {
+        font-size: 1.3rem;
+        text-align: center;
+        width: 100%;
+    }
+
+    #categoryModal .modal-body {
+        gap: 0.75rem;
+    }
+
+    #categoryModal .form-control,
+    #categoryModal .form-select {
+        font-size: 1.1rem;
+        padding: 0.5rem 0.65rem;
+    }
+
+    #categoryModal .modal-footer {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    #categoryModal .btn {
+        width: 35%;
+        padding: 0.55rem;
+    }
+
+    #mainCategoryModal .modal-dialog {
+        max-width: 100%;
+        margin: 0.5rem;
+    }
+
+    #mainCategoryModal .modal-content {
+        border-radius: 12px;
+    }
+
+    #mainCategoryModal .modal-title-one {
+        font-size: 1.3rem;
+        text-align: center;
+        width: 100%;
+    }
+
+    #mainCategoryModal .modal-body {
+        padding: 1rem;
+    }
+
+    #mainCategoryModal .form-control {
+        font-size: 1.1rem;
+        padding: 0.5rem 0.65rem;
+    }
+
+    #mainCategoryModal .modal-footer {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    #mainCategoryModal .btn {
+        width: 35%;
+        padding: 0.55rem;
+    }
+
+}
+
+/* =========================
+   TABLET (768px - 1023px)
+   ========================= */
+@media (min-width: 768px) and (max-width: 1023px) {
+
+    .card-header h1 {
+        font-size: 1.6rem !important;
+    }
+
+    /* أزرار الإضافة */
+    .card-body .mb-4 .btn {
+        font-size: 0.9rem;
+        padding: 8px 14px;
+    }
+
+    
+
+    .btn-group-sm .btn {
+        font-size: 0.8rem;
+        padding: 5px 8px;
+    }
+
+    
+
+
+    #categoryModal .modal-dialog {
+        max-width: 90%;
+    }
+
+    #categoryModal .modal-title-two {
+        font-size: 1.25rem;
+    }
+
+    #categoryModal .form-control,
+    #categoryModal .form-select {
+        font-size: 1.1rem;
+        padding: 0.55rem 0.7rem;
+    }
+
+    
+
+    #categoryModal .btn {
+        padding: 0.45rem 1rem;
+    }
+
+
+    #mainCategoryModal .modal-dialog {
+        max-width: 85%;
+    }
+
+    #mainCategoryModal .modal-title-one {
+        font-size: 1.25rem;
+    }
+
+    #mainCategoryModal .form-control {
+        font-size: 1.1rem;
+        padding: 0.55rem 0.7rem;
+    }
+
+    #mainCategoryModal .btn {
+        padding: 0.45rem 1rem;
+    }
+
+    
+}

@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+        <link href="../wroot/assets/bootstrap/css/bootstrap.rtl.min.css" rel="stylesheet">
+        <!-- FontAwesome -->
+        <link href="../wroot/assets/fontawesome/css/all.min.css" rel="stylesheet">
+        <link rel="stylesheet" href="../public/style/admin/login.css" />
+    </head>
+    
+    <body class="d-flex justify-content-center align-items-center min-vh-100">
+    <div class="container py-4">
+        <div class="card p-4 shadow-md login-card mx-auto">
+            <h1 class="text-center mb-4">لوحة التحكم</h1>
+
+            <form id="login-form" method="POST" class="d-flex flex-column" dir="ltr">
+                <input
+                    type="text"
+                    name="name"
+                    class="form-control mb-3"
+                    placeholder="اسم المستخدم"
+                    autocomplete="username"
+                    autocapitalize="none"
+                    autocorrect="off"
+                    spellcheck="false"
+                    required
+                />
+
+                    <input
+                    type="password"
+                    name="password"
+                    class="form-control mb-3"
+                    placeholder="كلمة المرور"
+                    autocomplete="current-password"
+                    autocapitalize="none"
+                    autocorrect="off"
+                    spellcheck="false"
+                    required
+                    />
+
+                <button id="login-btn" class="btn btn-primary mt-2 mx-auto">
+                    تسجيل الدخول
+                </button>
+            </form>
+
+            <div id="error_list"
+                 class="alert alert-danger p-2 mt-3"
+                 style="display:none;">
+                <div id="errors" class="mb-0 ps-3 text-danger"></div>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- المودال -->
+    <div class="modal fade" id="loginModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content shadow-lg border-0 rounded-4">
+            
+            <!-- Header -->
+            <div class="modal-header border-0">
+                <h5 class="modal-title fw-bold">
+                <i class="fas fa-user-lock text-primary ms-2"></i>
+                تسجيل الدخول
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+
+            <!-- Body -->
+            <div class="modal-body text-center">
+
+                <p class="text-muted mb-4">اختر نوع الدخول</p>
+
+                <div class="d-flex gap-3 justify-content-center">
+
+                <!-- Admin -->
+                <button class="btn btn-outline-primary w-100 py-3 role-btn" data-role="admin">
+                    <i class="fas fa-user-shield fa-2x mb-2"></i>
+                    <div class="fw-bold">أدمن</div>
+                </button>
+
+                <!-- Cashier -->
+                <button class="btn btn-outline-success w-100 py-3 role-btn" data-role="cashier">
+                    <i class="fas fa-cash-register fa-2x mb-2"></i>
+                    <div class="fw-bold">كاشير</div>
+                </button>
+
+                </div>
+
+            </div>
+
+            </div>
+        </div>
+    </div>
+
+
+        
+    <script src="../wroot/assets/bootstrap/js/bootstrap.bundle.min.js"></script>
+
+    <script src="../wroot/assets/jquery/jquery-3.7.1.min.js"></script>
+    <script src="../wroot/assets/bootbox/bootbox.min.js"></script>
+
+
+
+
+    <script type="module" src="../public/js/admin/login.js"></script>
+</body>
+
+</html>
