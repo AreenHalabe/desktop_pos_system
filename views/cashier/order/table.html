@@ -3,6 +3,7 @@
 
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>طلبات الطاولات</title>
 
     <link href="../../../wroot/assets/bootstrap/css/bootstrap.rtl.min.css" rel="stylesheet">
@@ -57,6 +58,27 @@
             animation: successPulse 2s infinite;
         }
 
+        .table-wrapper {
+            width: 100%;
+            max-width: 600px;
+            /* عدّل الرقم حسب اللي بدك */
+            margin: auto;
+            /* اختياري لتوسيطه */
+        }
+
+        .custom-box {
+            width: 80%;
+            margin: 0 auto;
+            /* توسيط */
+            border: 1px solid #ddd;
+            /* بوردر خفيف */
+            border-radius: 10px;
+            /* زوايا ناعمة */
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+            /* ظل خفيف */
+
+        }
+
         @keyframes successPulse {
             0% {
                 transform: scale(1);
@@ -107,7 +129,20 @@
             color: #333;
         }
 
- 
+        #orderDetailsModal .modal-header {
+            border-bottom: 1px solid rgba(0, 0, 0, 0.2);
+        }
+
+        #orderDetailsModal .modal-header,
+        #orderDetailsModal .modal-body {
+            border-bottom: 2px solid rgba(0, 0, 0, 0.2);
+        }
+
+        .modal-backdrop.show {
+            opacity: 0.8;
+            /* زيد الرقم لغمق أكثر (0.5 - 0.9) */
+            background-color: #000;
+        }
     </style>
 </head>
 
@@ -148,7 +183,7 @@
 
     <!-- Modal -->
     <div class="modal fade" id="orderDetailsModal" tabindex="-1">
-        <div class="modal-dialog modal-xl">
+        <div class="modal-dialog modal-lg">
             <div class="modal-content position-relative">
 
                 <!-- HEADER -->
@@ -164,13 +199,18 @@
                 <div class="modal-body">
 
                     <!-- معلومات الطلب -->
-                    <div class="row mb-2">
-                        <div class="col-md-6">
-                            <p><strong>رقم الطاولة : </strong> <span class="badge rounded-pill bg-dark px-3 py-2 fs-6" id="modalOrderId"></span></p>
-                        </div>
-                        <div class="col-md-6">
-                            <p><strong>الوقت : </strong> <span class="fw-bold" id="modaltime" dir="ltr"></span></p>
-                        </div>
+                    <!-- <div class="d-flex justify-content-around  p-2 align-items-center mb-2 border-rounded bg-light"> -->
+                    <div
+                        class="d-flex justify-content-around align-items-center p-2 mb-3 border rounded shadow-sm custom-box bg-light">
+
+                        <p class="mb-0"><strong>رقم الطاولة : </strong> <span
+                                class="badge rounded-pill bg-dark px-3 py-2 fs-6" id="modalOrderId"></span>
+                        </p>
+
+
+                        <p class="mb-0"><strong>الوقت : </strong> <span class="fw-bold" id="modaltime" dir="ltr"></span>
+                        </p>
+
                     </div>
 
                     <!-- جدول الأصناف -->
@@ -179,19 +219,23 @@
                         الأصناف المرتبطة
                     </h6>
 
-                    <div class="table-responsive">
-                        <table class="table table-sm table-bordered items-table">
-                            <thead class="table-light">
-                                <tr>
-                                    <th>الإسم</th>
-                                    <th>الكمية</th>
-                                    <th>سعر الوحدة</th>
-                                    <th>المجموع</th>
-                                </tr>
-                            </thead>
-                            <tbody id="modalItemsTable"></tbody>
-                        </table>
+                    <div class="table-wrapper">
+
+                        <div class="table-responsive">
+                            <table class="table table-sm table-bordered items-table">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>الإسم</th>
+                                        <th>الكمية</th>
+                                        <th>سعر الوحدة</th>
+                                        <th>المجموع</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="modalItemsTable"></tbody>
+                            </table>
+                        </div>
                     </div>
+
 
                     <hr>
 
