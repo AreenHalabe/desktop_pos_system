@@ -1,81 +1,201 @@
-/* ====== Default (أكبر من 1024px) ====== */
 body {
-    font-size: clamp(14px, 2vw, 16px);
-    background-color: #b5babe;
+    margin: 0;
+    font-family: "Cairo", sans-serif;
+
+    /* background: linear-gradient(135deg,
+            #0d6efd,
+            #1e88e5,
+            #42a5f5); */
+
+    background: linear-gradient(135deg, #198754, #20c997);
+
+    min-height: 100vh;
 }
 
+.login-container {
 
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    min-height: 100vh;
+
+    padding: 20px;
+}
 
 .login-card {
-    max-width: 500px;
+
+    width: 100%;
+    max-width: 430px;
+
+    border: none;
+    border-radius: 18px;
+
+    padding: 35px;
 }
 
-h1 {
-    font-size: 2rem;
+.logo {
+
+    width: 90px;
+    height: 90px;
+
+    margin: auto;
+
+    border-radius: 50%;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    /* background: linear-gradient(135deg,
+            #0d6efd,
+            #4dabf7); */
+
+    background: linear-gradient(135deg, #198754, #20c997);
+
+    color: white;
+
+    font-size: 40px;
+
+    /* box-shadow: 0 10px 25px rgba(13, 110, 253, .35); */
+
+    box-shadow: 0 10px 25px rgba(25, 135, 84, .35);
 }
 
-input.form-control {
-    font-size: 1rem;
-    padding: 0.75rem;
+h2 {
+
+    font-weight: 700;
+    color: #333;
 }
 
-#login-btn {
-    font-size: 1rem;
-    padding: 0.6rem 1.5rem;
-    width: 160px;
+.text-muted {
+
+    font-size: .95rem;
+}
+
+.input-group-text {
+
+    background: #f5f7fa;
+
+    /* border-right: none; */
+
+    /* color: #0d6efd; */
+    color:#198754;
+
+    font-size: 18px;
+
+    width:48px;
+    justify-content:center;
+
+
+    border-left:0;
+}
+
+.form-control {
+
+    border-left: none;
+
+    background: #f8f9fb;
+
+    padding: 12px;
+
+    font-size: 15px;
+
+    direction:ltr;
+    text-align:left;
+
+    border-right:0;
+}
+
+.form-control:focus {
+
+    background: white;
+
+    box-shadow: none;
+
+    /* border-color: #86b7fe; */
+    border-color: #198754;
+}
+
+.btn-primary {
+
+    height: 50px;
+
+    font-size: 17px;
+
+    font-weight: 600;
+
+    border-radius: 10px;
+
+    transition: .25s;
+
+    background-color: #198754 !important;
+    border-color: #198754 !important;
+}
+
+.btn-primary:hover {
+
+    transform: translateY(-2px);
+
+    /* box-shadow: 0 8px 18px rgba(13,110,253,.35); */
+
+    box-shadow: 0 8px 18px rgba(25,135,84,.35);
+}
+
+.alert {
+
+    border-radius: 10px;
 }
 
 
-input.form-control {
-    background-color: #e7e7e7;
-    border-radius: 8px;
-    color: black;
-    border: 1px solid #d0d7de;
+.password-wrapper{
+    position: relative;
 }
 
-input.form-control:focus {
-    background-color: #ffffff;
+.toggle-password{
+    position: absolute;
+    top: 50%;
+    right: 15px;
+
+    transform: translateY(-50%);
+
+    cursor: pointer;
+
+    color: #6c757d;
+
+    z-index: 10;
+
+    transition: .2s;
 }
 
-/* ====== من 768px إلى 1024px (Tablet) ====== */
-@media (max-width: 1024px) {
-    .login-card {
-        max-width: 420px;
-    }
-
-    h1 {
-        font-size: 1.7rem;
-    }
-
-    input.form-control {
-        font-size: 0.95rem;
-        padding: 0.65rem;
-    }
-
-    #login-btn {
-        font-size: 0.95rem;
-        width: 150px;
-    }
+.toggle-password:hover{
+    /* color: #0d6efd; */
+    color: #198754;
 }
 
-/* ====== أقل من 768px (Mobile) ====== */
-@media (max-width: 768px) {
-    .login-card {
-        max-width: 100%;
-        margin: 0 1rem;
+/* حتى ما يكتب النص فوق العين */
+#password{
+    padding-right: 45px;
+}
+
+@media (max-width:768px){
+
+    .login-card{
+
+        padding:25px;
     }
 
-    h1 {
-        font-size: 1.4rem;
+    .logo{
+
+        width:75px;
+        height:75px;
+
+        font-size:32px;
     }
 
-    input.form-control {
-        font-size: 0.9rem;
-        padding: 0.6rem;
+    h2{
+
+        font-size:1.5rem;
     }
 
-    #login-btn {
-        font-size: 0.9rem;
-        width: 100%;
-    }
 }

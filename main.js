@@ -4,7 +4,7 @@ import { fileURLToPath } from "url";
 import path from 'path';
 import { server } from "./server.js"
 import url from 'url';
-import { writeFileSync } from 'fs';
+// import { writeFileSync } from 'fs';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
@@ -51,8 +51,8 @@ app.on('ready', function () {
 
     await win.webContents.executeJavaScript(`new Promise(r => setTimeout(r, 200));`);
 
-    const pdf = await win.webContents.printToPDF({});
-    writeFileSync('test.pdf', pdf);
+    // const pdf = await win.webContents.printToPDF({});
+    // writeFileSync('test.pdf', pdf);
 
 
 

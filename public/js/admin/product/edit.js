@@ -138,6 +138,7 @@ form.addEventListener("submit",  async function(e){
         name: formData.get("name"),
         category_id : formData.get('category_id'),
         price : formData.get('price'),
+        station : formData.get('station'),
         has_variants : formData.get('has_variants'),
         variantsSize : formData.getAll('variants[size][]'),
         variantsPrice : formData.getAll('variants[price][]')
@@ -207,18 +208,12 @@ function toggleVariants(enabled) {
 
 function addDataIntoFormData(item) {
     document.getElementById('name').value = item.name || '';
-    // document.getElementById('description').value = item.description || '';
     document.getElementById('category_id').value = item.category_id ;
     document.getElementById('price').value = item.price || '';
     document.getElementById('old-image').value = item.image || '' ;
+    document.getElementById('station').value = item.station || '';
     categoryId = item.category_id;
-    // const imgContainer    = document.getElementById('image-file');
-    // if(item.image){
-    //     imgContainer.innerHTML = `<img src="${item.image}" class="img-fluid rounded" loading="lazy" alt="صورة المنتج">`;
-    // }
-    // else{
-    //     imgContainer.innerHTML = `<img src="https://dummyimage.com/200x200/cccccc/ffffff&text=No+Image" class="img-fluid rounded" loading="lazy" alt="صورة المنتج">`;
-    // }
+
 }
 
 function handleVariants(variants) {

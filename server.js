@@ -1,5 +1,4 @@
 import express from "express";
-//import {connectToDB} from "./DataBaseConnections/dbconnection.js";
 import {poolConnect } from "./DataBaseConnections/dbconnection.js";
 import bodyParser from "body-parser";
 import cors from "cors";
@@ -33,29 +32,6 @@ app.use(OrderRoute);
 app.use(TransactionRoute);
 app.use(ReportRoute);
 app.use(TableRoute);
-// connectToDB().then(()=>{
-//   console.log("Connect with DB");
-//     server = app.listen(port, () => {
-//     console.log(`Server running at http://localhost:${port}`);
-//   });
-// }).catch((err) => console.log(err));
-
-
-// try {
-//   await connectToDB();
-
-//   console.log("Connect with DB");
-
-//   server = app.listen(port, () => {
-//       console.log(`Server running at http://localhost:${port}`);
-//   });
-
-// } catch (err) {
-//     console.log("DB Connection Failed:");
-//     console.log(err);
-
-//     process.exit(1); // يوقف التطبيق بالكامل
-// }
 
 
 
@@ -85,3 +61,5 @@ process.on('SIGTERM', () => {
 
 
 export {server};
+
+// "package-win": "electron-packager . electron-tutorial-app --overwrite --asar=true --platform=win32 --arch=x64 --icon=assets/icons/win/icon.ico --prune=true --out=release-builds --version-string.CompanyName=CE --version-string.FileDescription=CE --version-string.ProductName=\"Student Maneger Sysytem\"",

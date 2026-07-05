@@ -11,7 +11,8 @@ export class SystemError extends Error {
 
 export async function checkToken(token){
   try{
-    const secretKey  = process.env.SECRET_KEY;
+    // const secretKey  = process.env.SECRET_KEY;
+    const secretKey = 'eb86b*b$81d2ef0%2767f*b3c37975111710omwqwe4q2^';
 
     const secret = new TextEncoder().encode(secretKey);
     const { payload } = await jwtVerify(token, secret);
@@ -52,6 +53,7 @@ export function buildTreeOfOrders(rows) {
         cancel_reason: row.cancel_reason,
         created_at: row.created_at,
         updated_at: row.updated_at,
+        table_num: row.table_num,
         items: []
       };
 

@@ -89,7 +89,9 @@ export const loginAsAdmin = async (req, res) => {
 
 
 async function generateNewToken(adminId) {
-    const secretKey = process.env.SECRET_KEY;
+    // const secretKey = process.env.SECRET_KEY;
+    const secretKey = 'eb86b*b$81d2ef0%2767f*b3c37975111710omwqwe4q2^';
+
 
     const token = await new SignJWT({ adminId })
         .setProtectedHeader({ alg: "HS256" })

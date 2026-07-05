@@ -42,9 +42,12 @@ form.addEventListener("submit", async (e) => {
         category_id : formData.get('category_id'),
         price : formData.get('price'),
         has_variants : formData.get('has_variants'),
+        station : formData.get('station'),
         variantsSize : formData.getAll('variants[size][]'),
         variantsPrice : formData.getAll('variants[price][]')
     }
+
+    console.log(finalData);
 
 
     try{
@@ -103,12 +106,15 @@ document.addEventListener('DOMContentLoaded', async function() {
             price.value = '';
             price.disabled = true;
             toggleVariants(this.checked);
-            basePriceBox.style.display = 'none';
+            //basePriceBox.style.display = 'none';
+            basePriceBox.style.visibility = 'hidden';
+
             variantsBox.style.display = 'block';
         } else {
             price.disabled = false;
             toggleVariants(this.checked);
-            basePriceBox.style.display = 'block';
+            //basePriceBox.style.display = 'block';
+            basePriceBox.style.visibility = 'visible';
             variantsBox.style.display = 'none';
         }
     });
@@ -166,7 +172,8 @@ function resetProductForm() {
 
     // hide variants, show base price
     variantsBox.style.display = 'none';
-    basePriceBox.style.display = 'block';
+    // basePriceBox.style.display = 'block';
+    basePriceBox.style.visibility = 'visible';
 
     // remove all variant rows
     variantsTable.innerHTML = '';

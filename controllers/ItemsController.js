@@ -79,6 +79,7 @@ export const addItem = async (req, res) => {
       name: body.name,
       category_id: body.category_id,
       price: body.price || null,
+      station: body.station , 
       hasVariants,
       variants
     };
@@ -105,13 +106,14 @@ export const addItem = async (req, res) => {
     const result = await transaction
       .request()
       .input("name", sql.NVarChar, validated.data.name)
+      .input("station", sql.NVarChar, validated.data.station)
       .input("category_id", sql.Int, validated.data.category_id)
       .input("price", sql.Int, validated.data.price)
       .input("admin_id", sql.Int, adminId)
       .query(`
-        INSERT INTO items (name, category_id, price, admin_id)
+        INSERT INTO items (name, station, category_id, price, admin_id)
         OUTPUT INSERTED.id
-        VALUES (@name, @category_id, @price, @admin_id)
+        VALUES (@name, @station, @category_id, @price, @admin_id)
       `)
     ;
 
@@ -180,6 +182,7 @@ export const updateItem = async (req, res) => {
       name: body.name,
       category_id: body.category_id,
       price: body.price || null,
+      station: body.station ,
       hasVariants,
       variants
     };
@@ -202,15 +205,16 @@ export const updateItem = async (req, res) => {
 
     await transaction.request()
       .input("name", sql.NVarChar, validated.data.name)
+      .input("station", sql.NVarChar, validated.data.station)
       .input("category_id", sql.Int, validated.data.category_id)
       .input("price", sql.Int, validated.data.price)
       .input("id", sql.Int, itemId)
       .query(`
         UPDATE items
-        SET name = @name, category_id = @category_id, price = @price
+        SET name = @name, station = @station, category_id = @category_id, price = @price
         WHERE id = @id
       `)
-      ;
+    ;
 
 
     if (hasVariants) {
@@ -348,6 +352,7 @@ export const getMenueTree = async (req , res)=>{
           i.id    AS item_id,
           i.name  AS item_name,
           i.price AS item_price,
+          i.station AS item_station,
 
           s.id    AS size_id,
           s.name  AS size_name,
@@ -555,6 +560,7 @@ function buildMenuTree(rows) {
         id: row.item_id,
         name: row.item_name,
         price: row.item_price,
+        station: row.item_station,
         category_id: row.category_id,
         sizes: []
       };
@@ -598,6 +604,10 @@ function buildProductSchema(hasVariants) {
       .min(1, "اسم المنتج مطلوب")
       .regex(/^[\p{L}\p{N}\s]+$/u,  "الاسم يجب أن يحتوي على حروف أو أرقام فقط"),
 
+    station: z
+      .string()
+      .min(1, "القسم المسؤول مطلوب")
+      .regex(/^(?:[\u0600-\u06FF]|[A-Za-z0-9 ])+$/, "القسم المسؤول يجب أن يحتوي على حروف فقط"),
 
     category_id: z.preprocess(
       (val) => {

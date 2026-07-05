@@ -285,11 +285,11 @@ document.addEventListener("click", async function (e) {
     else if (e.target.closest('.print-invoice-btn')) {
         closeSuccessModal();
         showPrintLoader();
-        try{
-           await printInvoiceFromCashier(finalOrderDetails);
-        }catch(e){
+        try {
+            await printInvoiceFromCashier(finalOrderDetails);
+        } catch (e) {
             bootboxError(e.message);
-        }finally{
+        } finally {
             hidePrintLoader();
             clearFinalOrderDetails();
         }
@@ -523,6 +523,7 @@ function addToOrder(productId, sizeIndex) {
                 id: product.id,
                 name: product.name,
                 price: product.price,
+                station: product.station,
                 qty: 1
             });
         }
@@ -541,6 +542,7 @@ function addToOrder(productId, sizeIndex) {
                 name: product.name,
                 sizeName: size.name,
                 price: size.price,
+                station: product.station,
                 sizeIndex: sizeIndex,
                 qty: 1
             });
@@ -685,21 +687,21 @@ function toggleDeliveryFields() {
     const tableNumberDiv = document.getElementById('tableNumberDiv');
     const customerPhoneDiv = document.getElementById('customerPhoneDiv');
     const customerAddressDiv = document.getElementById('customerAddressDiv');
-    const paymentStatusDiv  = document.getElementById('paymentStatusDiv');
-    const paymentMethodDiv  = document.getElementById('paymentMethodDiv');
+    const paymentStatusDiv = document.getElementById('paymentStatusDiv');
+    const paymentMethodDiv = document.getElementById('paymentMethodDiv');
 
-    
+
 
     if (orderType.value === 'سفري') {
         customerPhoneDiv.style.display = 'block';
         customerAddressDiv.style.display = 'block';
-        paymentMethodDiv.style.display   = 'block';
+        paymentMethodDiv.style.display = 'block';
         tableNumberDiv.style.display = 'none';
         paymentStatusDiv.style.display = 'none';
         tableNumber.value = '';
 
     }
-    else{
+    else {
         tableNumberDiv.style.display = 'block';
         customerPhoneDiv.style.display = 'none';
         customerAddressDiv.style.display = 'none';
@@ -724,7 +726,11 @@ async function confirmAndSendOrder() {
     finalOrderDetails.discount = Number(discountInput.value);
 
     finalOrderDetails.paymentStatus = getPaymentStatus();
+
+
     // console.log(finalOrderDetails);
+
+    //  splitByStation(finalOrderDetails);
 
     const res = await createOrder();
     if (res.success) {
@@ -759,7 +765,46 @@ function getPaymentStatus() {
     return selected.value;
 }
 
+function splitByStation(orderDetails) {
 
+    const result = {
+        kitchen: {
+            inv_num : orderDetails.inv_num,
+            orderType: orderDetails.orderType,
+            note: orderDetails.note,
+            tableNum: orderDetails.tableNum,
+            phoneNum: orderDetails.phoneNum,
+            address: orderDetails.address,
+            items: []
+        },
+        bar: { 
+            inv_num : orderDetails.inv_num,
+            orderType: orderDetails.orderType,
+            note: orderDetails.note,
+            tableNum: orderDetails.tableNum,
+            phoneNum: orderDetails.phoneNum,
+            address: orderDetails.address,
+            items: [] 
+        },
+        shisha: { 
+            inv_num : orderDetails.inv_num,
+            orderType: orderDetails.orderType,
+            note: orderDetails.note,
+            tableNum: orderDetails.tableNum,
+            phoneNum: orderDetails.phoneNum,
+            address: orderDetails.address,
+            items: [] 
+        }
+    };
+
+    orderDetails.items.forEach(item => {
+        result[item.station].items.push(item);
+    });
+
+
+    console.log("Order split by station:", result);
+
+}
 
 function clearModalData() {
     orderType.value = 'طاولة';

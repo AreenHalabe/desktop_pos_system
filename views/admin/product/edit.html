@@ -59,22 +59,43 @@
                                 </div>
 
                                 <!-- السعر + checkbox -->
-                                <div class="row g-3 mb-3 flex-column">
-                                    <div class="row g-3">
-                                        <div id="base_price_box" class="col-12 col-md-6">
-                                            <label for="price" class="form-label fw-bold">السعر الأساسي</label>
-                                            <input type="number" class="form-control bg-light" id="price" name="price" placeholder="السعر" required>
-                                        </div>
+                                <div class="row g-3 mb-3">
+                                
+
+                                <div class="col-12 col-md-6">
+                                    
+                                    <div id="base_price_box">
+                                        <label for="price" class="form-label fw-bold">السعر الأساسي</label>
+                                        <input type="number" class="form-control bg-light" id="price" name="price"
+                                            placeholder="السعر" required>
                                     </div>
 
-                                    <div class="col-12 col-md-6 d-flex align-items-center">
-                                        <input type="checkbox" id="has_variants" name="has_variants" value="1"
-                                            style="cursor:pointer;">
-                                        <label for="has_variants" class="ms-2 mb-0">
+                                    
+                                    <div class="d-flex align-items-center mt-3">
+                                        <input type="checkbox" id="has_variants" name="has_variants" value="1" style="cursor:pointer;">
+                                        <label for="has_variants" class="form-label ms-2 mb-0 fw-bold" style="cursor:pointer;">
                                             هذا المنتج له أحجام وأسعار مختلفة
                                         </label>
                                     </div>
+
+
                                 </div>
+
+
+                                <div class="col-12 col-md-6">
+                                    <label for="station" class="form-label fw-bold">يُرسل إلى قسم</label>
+                                    <select class="form-select bg-light" id="station" name="station" required>
+                                        <option value="" selected disabled>-- إختر قسم --</option>
+                                        <option value="kitchen" > مطبخ </option>
+                                        <option value="bar" > بار </option>
+                                        <option value="shisha" > أراجيل </option>
+                                    </select>
+                                </div>
+
+
+
+                            </div>
+
 
                                 <!-- جدول الأحجام -->
                                 <div id="variants_box">

@@ -265,7 +265,6 @@ function renderOrdersTable() {
     const firstIsCanceled = pageOrders[0]?.status === 'ملغي';
 
 
-
     pageOrders.forEach((order) => {
         const statusClass = order.status === 'مكتمل' ? 'status-completed' :
             order.status === 'معدل' ? 'status-pending' : 'status-cancelled';
@@ -274,17 +273,29 @@ function renderOrdersTable() {
             order.payment_method === 'بطاقة' ? 'bg-info text-white' : 'status-pending'
 
 
+        // const paymentCell = firstIsCanceled
+        // ? `${order.payment_method}`
+        // : order.payment_method === 'غير محدد'
+        //     ? `${order.payment_method}`
+        //     : `
+        //     <select class="payment-method" data-order='{"id":${order.id},"inv_num":"${order.invoice_num}"}'>
+        //         <option value="كاش" ${order.payment_method === 'كاش' ? 'selected' : ''}>كاش</option>
+        //         <option value="بطاقة" ${order.payment_method === 'بطاقة' ? 'selected' : ''}>بطاقة</option>
+        //     </select>
+        //     `;
+
+
         const row = `
             <tr>
                 <td data-label = 'رقم الطلب'>${order.invoice_num}</td>
                
                 <td data-label = 'طريقة الدفع' class="payment-cell">
-                   
+                
                     <span class='status-badge ${paymentClass}' >  ${order.payment_method}</span>
                 </td>
 
 
-                <td data-label = 'التاريخ' class='nowrap-cell'>${formatDateOnly(utcToPalestine(order.created_at))}</td>
+                <td data-label = 'التاريخ' class='nowrap-cell'>${renderOrderType(order)}</td>
                 <td data-label = 'الوقت' class='nowrap-cell'>${formatTimeOnly(utcToPalestine(order.created_at))}</td>
                 <td data-label = 'المبلغ' class='nowrap-cell'>${order.total_price} ₪</td>
                 <td data-label = 'الحالة'><span class="status-badge ${statusClass}">${order.status}</span></td>
@@ -329,6 +340,27 @@ function getOrderActions(order) {
             <i class="fas fa-trash"></i>
         </button>
     `;
+}
+
+function renderOrderType(order) {
+  if(order.type === "سفري") {
+    return `
+      <span class="badge text-secondary border border-secondary bg-transparent px-3 py-2">
+      <i class="fa-solid fa-box"></i>
+      سفري
+    </span>
+    `;
+  }
+
+  if(order.type === "طاولة") {
+    return `
+       <span class="badge text-primary border border-primary bg-transparent px-3 py-2">
+            <i class="bi bi-person-seat me-1"></i>
+            طاولة - ${order.table_num}
+        </span>
+    `;
+  }
+
 }
 
 

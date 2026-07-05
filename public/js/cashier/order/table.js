@@ -106,12 +106,18 @@ document.addEventListener("click", async function (e) {
 
     else if (e.target.closest('.update-order-btn')) {
         const total = calculateTotalPrice();
+        const note = document.getElementById('orderNotes').value.trim();
+        const table = getCurrentTable();
+
         let finalOrder = {
+            tableNum: table.table_id,
             order_id: currentDisplayedOrderId,
             total_price: total,
-            new_items: cart
+            new_items: cart,
+            note: note
         };
         await addNewItems(finalOrder);
+        //splitByStation(finalOrder);
 
     }
 
@@ -419,8 +425,6 @@ async function fetchMenuDetails() {
         if (res.status === 200) {
             mainCategories = data.mainCategories;
             items = data.items;
-            console.log(mainCategories);
-            console.log(items);
         }
         else {
             bootboxError(data.message);
@@ -570,6 +574,40 @@ async function moveOrder(tableId, targetTable) {
     }
 }
 
+function splitByStation(orderDetails) {
+
+    const result = {
+        kitchen: {
+            orderType: 'طاولة',
+            note: orderDetails.note,
+            tableNum: orderDetails.tableNum,
+
+            items: []
+        },
+        bar: { 
+            orderType: 'طاولة',
+            note: orderDetails.note,
+            tableNum: orderDetails.tableNum,
+
+            items: [] 
+        },
+        shisha: { 
+            orderType: 'طاولة',
+            note: orderDetails.note,
+            tableNum: orderDetails.tableNum,
+
+            items: [] 
+        }
+    };
+
+    orderDetails.new_items.forEach(item => {
+        result[item.station].items.push(item);
+    });
+
+
+    console.log("Order split by station:", result);
+
+}
 function updateTotals() {
     const table = getCurrentTable();
     let discount = parseFloat(discountInput.value) || 0;
@@ -736,6 +774,9 @@ function renderTables(tables) {
     });
 }
 
+
+
+
 function displaySpinnerLoader() {
     const spinnerLoader = document.getElementById("modal-loading-overlay");
     spinnerLoader.classList.remove('d-none');
@@ -744,6 +785,7 @@ function hiddeSpinnerLoader() {
     const spinnerLoader = document.getElementById("modal-loading-overlay");
     spinnerLoader.classList.add('d-none');
 }
+
 
 
 function closeModal() {
@@ -1009,6 +1051,7 @@ function addItemToOrder(itemId, sizeId = 0) {
             id: item.id,
             name: item.name + ' - ' + size.name,
             price: size.price,
+            station: item.station,
             qty: 1,
             sizeindex: size.id
         });
@@ -1020,6 +1063,7 @@ function addItemToOrder(itemId, sizeId = 0) {
         id: item.id,
         name: item.name,
         price: item.price,
+        station: item.station,
         qty: 1,
         sizeindex: 0
     });

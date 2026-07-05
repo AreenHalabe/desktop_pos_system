@@ -219,61 +219,70 @@ function escapeHtml(text) {
 function buildRow(product, index) {
   let priceOrVariants = '';
   if (product.variants && product.variants.length > 0) {
-
     priceOrVariants = `
-          <ul class="list-unstyled m-0 ul_box">
-              ${product.variants.map(variant => `
-                  <li class="list" >
-                    <span class="badge bg-primary" dir="ltr"> 
-                      ${escapeHtml(variant.name)} :  ₪ ${escapeHtml(variant.price)} 
-                    </span>
-                     
-                  </li>
-              `).join('')}
-          </ul>
-      `;
-
-  } else {
-    // ما في أحجام → نعرض السعر العادي
-    priceOrVariants = `
-            <span class="badge bg-primary fs-6"> ${escapeHtml(product.price ?? '-')} ₪ </span>
-        `;
-  }
-  return `
-        <tr>
-            <td class="align-middle" data-label="الرقم">
-                ${index + 1}
-            </td>
-
-            <td class="align-middle" data-label="إسم الصنف">
-                ${escapeHtml(product.name || '')}
-            </td>
-
-            <td class="align-middle" data-label="السعر"  style="vertical-align: middle;">
-                ${priceOrVariants}
-            </td>
-
-            <td class="align-middle" data-label="تعديل / حذف">
-              <div class="d-flex justify-content-center gap-2 flex-wrap btn-group-sm">
-                <a href="./edit.html?item_id=${product.id}" class="btn btn-sm btn-secondary">
-                  <i class="fas fa-pen-to-square"></i>
-                </a>
-                <form class = 'delete-item-form'
-                  data-confirm-message = 'هل أنت متأكد من حذف هذا الصنف <strong>${product.name}</strong>؟'
-                >
-                  <button type="submit" 
-                    class="btn btn-sm delete-btn"
-                    data-item-id="${product.id}"
-                    data-category-id="${product.category_id}"
-                  >
-                   <i class="fas fa-trash"></i>
-                  </button>
-                </form>
-              </div>
-            </td>
-        </tr>
+        <ul class="list-unstyled m-0 ul_box">
+          ${product.variants.map(variant => `
+            <li class="list" >
+              <span class="badge bg-primary" dir="ltr"> 
+                ${escapeHtml(variant.name)} :  ₪ ${escapeHtml(variant.price)} 
+              </span>
+                
+            </li>
+          `).join('')}
+        </ul>
       `
     ;
+
+  } else {
+    priceOrVariants = `
+        <span class="badge bg-primary fs-6"> ${escapeHtml(product.price ?? '-')} ₪ </span>
+      `
+    ;
+  }
+
+  const station = product.station ==='kitchen' ? 'المطبخ'
+    : product.station === 'bar' ? 'البار' 
+    : 'أراجيل' 
+  ;
+  return `
+      <tr>
+          <td class="align-middle" data-label="الرقم">
+              ${index + 1}
+          </td>
+
+          <td class="align-middle" data-label="إسم الصنف">
+              ${escapeHtml(product.name || '')}
+          </td>
+
+          <td class="align-middle" data-label="يُرسل إلى قسم">
+              ${station}
+          </td>
+
+          <td class="align-middle" data-label="السعر"  style="vertical-align: middle;">
+              ${priceOrVariants}
+          </td>
+
+          <td class="align-middle" data-label="تعديل / حذف">
+            <div class="d-flex justify-content-center gap-2 flex-wrap btn-group-sm">
+              <a href="./edit.html?item_id=${product.id}" class="btn btn-sm btn-secondary">
+                <i class="fas fa-pen-to-square"></i>
+              </a>
+              <form class = 'delete-item-form'
+                data-confirm-message = 'هل أنت متأكد من حذف هذا الصنف <strong>${product.name}</strong>؟'
+              >
+                <button type="submit" 
+                  class="btn btn-sm delete-btn"
+                  data-item-id="${product.id}"
+                  data-category-id="${product.category_id}"
+                >
+                  <i class="fas fa-trash"></i>
+                </button>
+              </form>
+            </div>
+          </td>
+      </tr>
+    `
+  ;
 }
 
 function setCategoryTitle(categoryId) {

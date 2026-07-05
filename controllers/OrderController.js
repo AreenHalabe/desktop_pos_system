@@ -2,7 +2,7 @@ import { body, query } from "express-validator";
 import { StatusCode } from "../HTTPSStatusCode/StatusCode.js";
 import { pool, sql } from "../DataBaseConnections/dbconnection.js";
 import { checkToken, SystemError, buildTreeOfOrders } from "../shared/functionality.js";
-import { getOrderAndItemsBySession } from "../shared/api.js";
+import { getOrderAndItemsBySession , checkSession} from "../shared/api.js";
 import { z } from "zod";
 
 
@@ -26,6 +26,8 @@ export const createOrder = async (req, res) => {
 
         const parsedData  = orderSchema.parse(orderData);
 
+        const tableNum = Number(parsedData.tableNum) === 0 ? null : Number(parsedData.tableNum);
+
         let {status , paymentMethod} = checkStatus(parsedData.orderType, parsedData.paymentStatus, parsedData.paymentMethod);
 
 
@@ -33,7 +35,7 @@ export const createOrder = async (req, res) => {
         transactionStarted = true;
 
         const invoiceNum = await generateInvoiceInfo(sessionId, transaction);
-        const orderId    = await insertOrder(adminId, sessionId, invoiceNum, parsedData.totalPrice, orderData.discount, paymentMethod, parsedData.orderType, status, transaction);
+        const orderId    = await insertOrder(adminId, sessionId, invoiceNum, parsedData.totalPrice, orderData.discount, paymentMethod, parsedData.orderType, status, tableNum, transaction);
         await insertItems(orderId, orderData.items, transaction);
 
         if(parsedData.orderType === 'طاولة'){
@@ -251,33 +253,46 @@ export const payOrder = async (req , res) =>{
         if (!token) {
             throw new SystemError("إنتهت صلاحية الجلسة , الرجاء تسجيل الدخول مرة أخرى", 401);
         }
-        await checkToken(token);
+        const adminId = await checkToken(token);
 
         const body = req.body;
         const orderId  = Number(body.order_id);
         const discount = Number(body.new_discount);
         const paymentMethod = body.payment_method;
 
-        const order = await getOrderById(orderId);
+        const session = await checkSession(adminId, pool, sql);
+        const hasOpeningSession = !!session;
 
-        if(order.total_price < discount){
-            throw new SystemError("خطأ : قيمة الخصم أكبر من السعر الإجمالي", 400);
+        if(hasOpeningSession){
+
+            const order = await getOrderById(orderId);
+
+            if(order.total_price < discount){
+                throw new SystemError("خطأ : قيمة الخصم أكبر من السعر الإجمالي", 400);
+            }
+
+            await transaction.begin();
+            transactionStarted = true;
+
+            await payment(orderId, paymentMethod, discount, transaction);
+
+            await closeTable(orderId, transaction);
+
+            
+
+            await transaction.commit();
+
+            return res.status(200).json({
+                message: 'تم تسديد الطلب وإغلاق الطاولة بنجاح.'
+            });
+
+
         }
-
-        await transaction.begin();
-        transactionStarted = true;
-
-        await payment(orderId, paymentMethod, discount, transaction);
-
-        await closeTable(orderId, transaction);
-
-        
-
-        await transaction.commit();
-
-        return res.status(200).json({
-            message: 'تم تسديد الطلب وإغلاق الطاولة بنجاح.'
-        });
+        else{
+            return res.status(400).json({
+                message: 'خطأ : لا يوجد صندوق مفتوح , الرجاء فتح صندوق جديد قبل تسديد الطاولة.'
+            });
+        }
         
     }catch(e){
         if(transactionStarted){
@@ -519,7 +534,7 @@ async function generateInvoiceInfo(sessionId, transaction) {
     return invoiceNum;
 }
 
-async function insertOrder( adminId, sessionId, invoiceNum,  mainPrice, discount, paymentMethod, orderType, status, transaction){
+async function insertOrder( adminId, sessionId, invoiceNum,  mainPrice, discount, paymentMethod, orderType, status, tableNum, transaction){
 
     const totalPrice = mainPrice - discount;
 
@@ -535,10 +550,11 @@ async function insertOrder( adminId, sessionId, invoiceNum,  mainPrice, discount
         .input('status', sql.NVarChar, status)
         .input('type', sql.NVarChar, orderType)
         .input("created_at", sql.DateTime2, currentTimeStamp)
+        .input('table_num' , tableNum)
         .query(`
-            INSERT INTO orders (admin_id, session_id, invoice_num, total_price, discount, payment_method, status, type, created_at)
+            INSERT INTO orders (admin_id, session_id, invoice_num, total_price, discount, payment_method, status, type, created_at, table_num)
             OUTPUT INSERTED.id
-            VALUES (@admin_id, @session_id, @invoice_num, @total_price, @discount, @payment_method, @status, @type, @created_at)
+            VALUES (@admin_id, @session_id, @invoice_num, @total_price, @discount, @payment_method, @status, @type, @created_at, @table_num)
         `)
     ;
 

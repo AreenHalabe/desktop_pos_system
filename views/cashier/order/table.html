@@ -268,15 +268,20 @@
                             <table class="table table-sm table-bordered items-table">
                                 <thead>
                                     <tr>
-                                        <th>الصنف</th>
-                                        <th>الكمية</th>
-                                        <th>سعر الوحدة</th>
-                                        <th>المجموع</th>
-                                        <th>حذف</th>
+                                        <th class="text-center">الصنف</th>
+                                        <th class="text-center">الكمية</th>
+                                        <th class="text-center">سعر الوحدة</th>
+                                        <th class="text-center">المجموع</th>
+                                        <th class="text-center">حذف</th>
                                     </tr>
                                 </thead>
                                 <tbody id="cartTable"></tbody>
                             </table>
+                        </div>
+                        <div class="col-8">
+                            <label class="form-label fw-bold">ملاحظات</label>
+                            <textarea class="form-control" id="orderNotes" rows="2"
+                                placeholder="أي ملاحظات على الطلب (اختياري)"></textarea>
                         </div>
 
                         <h6 class="text-end">
