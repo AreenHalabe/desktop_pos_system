@@ -2,9 +2,15 @@
 import { app, BrowserWindow, ipcMain, dialog, Menu } from "electron";
 import { fileURLToPath } from "url";
 import path from 'path';
-import { server } from "./server.js"
+import { server , initServer} from "./server.js"
 import url from 'url';
-// import { writeFileSync } from 'fs';
+
+function fatalError(title, message) {
+  shutdownAndExit(`${title}\n\n${message}`);
+}
+
+
+
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
@@ -14,8 +20,15 @@ let serverProcess;
 
 let mainWindow;
 
-app.on('ready', function () {
+app.on('ready', async () => {
+  try {
+    await initServer(3000);
+  } catch (err) {
+    fatalError("Startup Error", err.message);
+  }
   serverProcess = server;
+
+
   Menu.setApplicationMenu(null);
   mainWindow = new BrowserWindow({
     webPreferences: {
@@ -51,10 +64,6 @@ app.on('ready', function () {
 
     await win.webContents.executeJavaScript(`new Promise(r => setTimeout(r, 200));`);
 
-    // const pdf = await win.webContents.printToPDF({});
-    // writeFileSync('test.pdf', pdf);
-
-
 
     return new Promise((resolve) => {
       win.webContents.print({
@@ -83,28 +92,6 @@ app.on('ready', function () {
   });
 });
 
-ipcMain.on("show-alert", (event, message) => {
-  if (mainWindow) {
-    dialog.showMessageBox(mainWindow, {
-      type: "info",
-      title: "تنبيه",
-      message: message,
-      buttons: ["موافق"],
-    });
-  }
-});
-
-ipcMain.handle("show-confirm", async (event, message) => {
-  const result = await dialog.showMessageBox(mainWindow, {
-    type: "warning",
-    title: "تأكيد",
-    message: message,
-    buttons: ["إلغاء", "موافق"],
-    defaultId: 1,
-    cancelId: 0,
-  });
-  return result.response === 1; // Return true if "موافق" is clicked
-});
 
 
 
@@ -116,3 +103,19 @@ app.on('will-quit', () => {
   }
 });
 
+
+
+function shutdownAndExit(message) {
+
+  dialog.showErrorBox("Fatal Error", message);
+
+  if (serverProcess && serverProcess.close) {
+    serverProcess.close(() => {
+      console.log("Server stopped gracefully");
+      app.quit(); 
+    });
+  } else {
+     console.log("Server not found to close it");
+    app.quit();
+  }
+}
