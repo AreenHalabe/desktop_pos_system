@@ -100,13 +100,6 @@ header.addEventListener("header:ready", () => {
         });
     });
 
-
-    const loginAsAdmin = document.getElementById('openAdminLoginModal');
-    loginAsAdmin.addEventListener('click', function (e) {
-        closeSideBar();
-        bootboxLoginAsAdmin();
-    });
-
 });
 
 

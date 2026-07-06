@@ -5,13 +5,10 @@ import cors from "cors";
 // import dotenv from "dotenv";
 import { config } from './env.js';
 import { AdminRoute } from "./routes/AdminRoute.js";
-import { MainCategoryRoute } from "./routes/MainCategoryRoute.js";
-import { CategoryRoute } from "./routes/CategoryRoute.js";
 import { ItemRoute } from "./routes/ItemsRoute.js";
 import { SessionRoute } from "./routes/SessionRoute.js";
 import { OrderRoute } from "./routes/OrderRoute.js";
 import { TransactionRoute } from "./routes/TransactionRoute.js";
-import { ReportRoute } from "./routes/ReportRoute.js";
 import { TableRoute } from "./routes/TableRoute.js";
 const app = express();
 // dotenv.config();
@@ -23,13 +20,10 @@ app.use(express.json());
 app.use(cors());
 
 app.use(AdminRoute);
-app.use(MainCategoryRoute);
-app.use(CategoryRoute);
 app.use(ItemRoute);
 app.use(SessionRoute);
 app.use(OrderRoute);
 app.use(TransactionRoute);
-app.use(ReportRoute);
 app.use(TableRoute);
 
 

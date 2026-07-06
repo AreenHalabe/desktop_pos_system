@@ -79,6 +79,28 @@
 
         }
 
+
+        .bootbox.modal {
+            z-index: 1070 !important;
+        }
+
+        .bootbox.modal+.modal-backdrop {
+            z-index: 1065 !important;
+            background-color: #000;
+            opacity: 0.6;
+        }
+
+        .bootbox.modal {
+            display: flex !important;
+            align-items: center !important;  
+            justify-content: center !important; 
+            height: 100vh;
+        }
+        .bootbox.modal .modal-dialog {
+            width: 100%;
+            max-width: 500px;
+            margin: 0 !important;
+        }
         @keyframes successPulse {
             0% {
                 transform: scale(1);

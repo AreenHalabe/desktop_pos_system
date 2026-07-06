@@ -38,27 +38,17 @@ form.addEventListener('submit', async (e) => {
             setAdminId(data.id);
             window.location.href = './cashier/order/index.html';
         }
-        else if(res.status === 403){
-            bootbox.alert({
-                title: "⚠️ تنبيه",
-                message: data.message,
-                centerVertical: true,
-                backdrop: true,
-                className: "fs-6"
-            });
-        }
         else {
+            enableLoginButton();
             errorList.style.display = 'block';
             errorMessage.innerHTML = data.message;
         }
     }
     catch(error){
+        enableLoginButton();
         errorList.style.display = 'block';
         errorMessage.innerHTML = `${error.message}`;
-    }finally{
-        enableLoginButton();
     }
-
 });
 
 

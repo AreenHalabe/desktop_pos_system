@@ -65,11 +65,6 @@ header.addEventListener("header:ready", () => {
         });
     });
 
-    const loginAsAdmin = document.getElementById('openAdminLoginModal');
-    loginAsAdmin.addEventListener('click', function (e) {
-        closeSideBar();
-        bootboxLoginAsAdmin();
-    });
 });
 
 document.addEventListener('DOMContentLoaded', async function () {
@@ -271,18 +266,6 @@ function renderOrdersTable() {
 
         const paymentClass = order.payment_method === 'كاش' ? 'status-completed' :
             order.payment_method === 'بطاقة' ? 'bg-info text-white' : 'status-pending'
-
-
-        // const paymentCell = firstIsCanceled
-        // ? `${order.payment_method}`
-        // : order.payment_method === 'غير محدد'
-        //     ? `${order.payment_method}`
-        //     : `
-        //     <select class="payment-method" data-order='{"id":${order.id},"inv_num":"${order.invoice_num}"}'>
-        //         <option value="كاش" ${order.payment_method === 'كاش' ? 'selected' : ''}>كاش</option>
-        //         <option value="بطاقة" ${order.payment_method === 'بطاقة' ? 'selected' : ''}>بطاقة</option>
-        //     </select>
-        //     `;
 
 
         const row = `

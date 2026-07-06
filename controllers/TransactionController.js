@@ -65,6 +65,23 @@ export const createTransaction = async(req , res) => {
         const parsedData       = transactionSchema.parse(transaction);
         const currentTimeStamp = new Date();
 
+        const[
+            session,
+            cashSummery
+        ] = await Promise.all([
+            checkSession(adminId, pool, sql),
+            getCashSummery(sessionId, pool, sql)
+        ]);
+
+       
+
+        const expected_cash =
+                session.opening_cash + cashSummery.cash_sales + cashSummery.cash_in - cashSummery.cash_out;
+
+        if(parsedData.type === "سحب" && parsedData.amount > expected_cash){
+            throw new SystemError("لا يمكن سحب مبلغ أكبر من الرصيد الحالي", 400);
+        }
+
         const result = await pool
             .request()
             .input("session_id", sql.Int, sessionId)

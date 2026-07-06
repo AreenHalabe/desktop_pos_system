@@ -69,11 +69,6 @@ header.addEventListener("header:ready", () => {
         });
     });
 
-    const loginAsAdmin = document.getElementById('openAdminLoginModal');
-    loginAsAdmin.addEventListener('click', function (e) {
-        closeSideBar();
-        bootboxLoginAsAdmin();
-    });
 });
 
 
@@ -116,9 +111,7 @@ document.addEventListener("click", async function (e) {
             new_items: cart,
             note: note
         };
-        await addNewItems(finalOrder);
-        //splitByStation(finalOrder);
-
+        showConfirmAddItemsDialog(finalOrder);        
     }
 
     // فتح قسم الدفع
@@ -154,8 +147,8 @@ document.addEventListener("click", async function (e) {
             order_id       : currentClosedTable.order.id,
             items          : currentClosedTable.order.items
         }
-
-        await payOrder(currentPaymentOrder);
+        showPayOrderDialog(currentPaymentOrder);
+        //await payOrder(currentPaymentOrder);
     }
 
     else if (e.target.closest('.deleteTableBtn')) {
@@ -458,6 +451,7 @@ async function addNewItems(finalOrder) {
         }
 
         if (res.status === 200) {
+            //splitByStation(finalOrder);
             closeModal();
             bootboxSuccess(data.message);
             await loadTableOrders();
@@ -1247,4 +1241,150 @@ function bootboxTableAction({
     dialog.init(() => {
         $("#targetTable").trigger("focus");
     });
+}
+
+
+
+function showPayOrderDialog(order) {
+
+    bootbox.dialog({
+        title: '<i class="fas fa-cash-register me-2"></i> تسديد الطاولة',
+
+        message: `
+            <div class="container-fluid">
+
+                <div class="row mb-2">
+                    <div class="col-6 fw-bold">طريقة الدفع</div>
+                    <div class="col-6 text-end fw-bold">${order.payment_method}</div>
+                </div>
+
+                <hr>
+
+                <div class="row mb-2">
+                    <div class="col-6 fw-bold">السعر الأساسي</div>
+                    <div class="col-6 text-end fw-bold"> ₪ ${order.total_price + order.new_discount} </div>
+                </div>
+
+                <div class="row mb-2">
+                    <div class="col-6 fw-bold">الخصم</div>
+                    <div class="col-6 text-end fw-bold">₪ ${order.new_discount} </div>
+                </div>
+
+                <hr>
+
+                <div class="row">
+                    <div class="col-6 fw-bold text-success fs-5">الإجمالي</div>
+                    <div class="col-6 text-end fs-5 text-success fw-bold">
+                        ₪ ${order.total_price} 
+                    </div>
+                </div>
+
+            </div>
+        `,
+        buttons: {
+
+            cancel: {
+                label: "إلغاء",
+                className: "btn-secondary"
+            },
+            
+
+            confirm: {
+                label: '<i class="fas fa-check me-1"></i> تسديد',
+                className: "btn-success fw-bold",
+
+                callback: async function () {
+                    await payOrder(order);
+                    return false;
+                }
+            }
+
+        }
+    });
+
+}
+
+function showConfirmAddItemsDialog(finalOrder) {
+       const itemsHtml = finalOrder.new_items.map(item => `
+        <tr>
+            <td class="text-center">${item.name}</td>
+            <td class="text-center">${item.qty}</td>
+            <td class="text-center">₪ ${item.price}</td>
+            <td class="text-center fw-bold">₪ ${item.qty * item.price}</td>
+        </tr>
+    `).join('');
+
+
+    bootbox.dialog({
+
+        title: '<i class="fas fa-cart-plus me-2"></i> تأكيد إضافة أصناف',
+        message: `
+            <div class="container-fluid">
+
+                <div class="text-center mb-4">
+                    <i class="fas fa-circle-question text-warning fs-1 mb-3"></i>
+
+                    <p class="mb-0 fw-bold">
+                        هل أنت متأكد من إضافة الأصناف الجديدة إلى الطلب؟
+                    </p>
+                </div>
+
+                <hr>
+                <div style="max-height:250px; overflow:auto;">
+
+                    <table class="table table-sm table-bordered text-center align-middle">
+
+                        <thead class="table-light">
+                            <tr>
+                                <th>الصنف</th>
+                                <th>الكمية</th>
+                                <th>السعر</th>
+                                <th>الإجمالي</th>
+                            </tr>
+                        </thead>
+
+                        <tbody>
+                            ${itemsHtml}
+                        </tbody>
+
+                    </table>
+
+                </div>
+
+                <hr>
+
+                <div class="row">
+                    <div class="col-6 fw-bold text-success fs-5">
+                        إجمالي الإضافة
+                    </div>
+
+                    <div class="col-6 text-end text-success fw-bold fs-5">
+                        ₪ ${finalOrder.total_price}
+                    </div>
+                </div>
+
+            </div>
+        `,
+
+        buttons: {
+
+            cancel: {
+                label: "إلغاء",
+                className: "btn-secondary"
+            },
+
+            confirm: {
+                label: '<i class="fas fa-check me-1"></i> تأكيد الإضافة',
+                className: "btn-success fw-bold",
+
+                callback: async function () {
+                    await addNewItems(finalOrder);
+                    return false;
+                }
+            }
+
+        }
+
+    });
+
 }
