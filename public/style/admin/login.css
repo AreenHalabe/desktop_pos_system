@@ -104,7 +104,7 @@ h2 {
     direction:ltr;
     text-align:left;
 
-    border-right:0;
+    /* border-right:0; */
 }
 
 .form-control:focus {
