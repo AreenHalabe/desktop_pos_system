@@ -2,12 +2,12 @@ body {
     margin: 0;
     font-family: "Cairo", sans-serif;
 
-    /* background: linear-gradient(135deg,
+    background: linear-gradient(135deg,
             #0d6efd,
             #1e88e5,
-            #42a5f5); */
+            #42a5f5);
 
-    background: linear-gradient(135deg, #198754, #20c997);
+    /* background: linear-gradient(135deg, #198754, #20c997); */
 
     min-height: 100vh;
 }
@@ -47,19 +47,19 @@ body {
     justify-content: center;
     align-items: center;
 
-    /* background: linear-gradient(135deg,
+    background: linear-gradient(135deg,
             #0d6efd,
-            #4dabf7); */
+            #4dabf7);
 
-    background: linear-gradient(135deg, #198754, #20c997);
+    /* background: linear-gradient(135deg, #198754, #20c997); */
 
     color: white;
 
     font-size: 40px;
 
-    /* box-shadow: 0 10px 25px rgba(13, 110, 253, .35); */
+    box-shadow: 0 10px 25px rgba(13, 110, 253, .35);
 
-    box-shadow: 0 10px 25px rgba(25, 135, 84, .35);
+    /* box-shadow: 0 10px 25px rgba(25, 135, 84, .35); */
 }
 
 h2 {
@@ -79,8 +79,8 @@ h2 {
 
     /* border-right: none; */
 
-    /* color: #0d6efd; */
-    color:#198754;
+    color: #0d6efd;
+    /* color:#198754; */
 
     font-size: 18px;
 
@@ -104,7 +104,7 @@ h2 {
     direction:ltr;
     text-align:left;
 
-    border-right:0;
+    /* border-right:0; */
 }
 
 .form-control:focus {
@@ -113,8 +113,8 @@ h2 {
 
     box-shadow: none;
 
-    /* border-color: #86b7fe; */
-    border-color: #198754;
+    border-color: #86b7fe;
+    /* border-color: #198754; */
 }
 
 .btn-primary {
@@ -129,17 +129,17 @@ h2 {
 
     transition: .25s;
 
-    background-color: #198754 !important;
-    border-color: #198754 !important;
+    /* background-color: #198754 !important;
+    border-color: #198754 !important; */
 }
 
 .btn-primary:hover {
 
     transform: translateY(-2px);
 
-    /* box-shadow: 0 8px 18px rgba(13,110,253,.35); */
+    box-shadow: 0 8px 18px rgba(13,110,253,.35);
 
-    box-shadow: 0 8px 18px rgba(25,135,84,.35);
+    /* box-shadow: 0 8px 18px rgba(25,135,84,.35); */
 }
 
 .alert {
@@ -169,13 +169,18 @@ h2 {
 }
 
 .toggle-password:hover{
-    /* color: #0d6efd; */
-    color: #198754;
+    color: #0d6efd;
+    /* color: #198754; */
 }
 
 /* حتى ما يكتب النص فوق العين */
 #password{
     padding-right: 45px;
+}
+
+
+.box{
+    border: 1px solid #f70000;
 }
 
 @media (max-width:768px){

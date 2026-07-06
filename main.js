@@ -44,7 +44,7 @@ app.on('ready', async () => {
     protocol: 'file:',
     slashes: true
   }));
-  mainWindow.webContents.openDevTools();// for develper tools => open console 
+  //mainWindow.webContents.openDevTools();// for develper tools => open console 
 
 
   ipcMain.handle('print-invoice', async (event, html) => {

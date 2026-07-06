@@ -39,28 +39,26 @@ export const loginAsCashier = async (req, res) => {
 }
 
 export const loginAsAdmin = async (req, res) => {
-    const adminId = Number(req.query.admin_id);
 
     try {
-        const {admin_password} = req.body;
+
+        const {name, password} = req.body;
 
         // const passwordHash = await hashPassword(admin_password.trim());
 
-        const adminResult = await pool.request().query(
-            `SELECT * FROM admin WHERE id = ${adminId}`
-        );
+        const adminResult = await pool
+            .request()
+            .input("user_name", sql.NVarChar, name)
+            .query("SELECT * FROM admin WHERE name = @user_name");
+
+        // const adminResult = await pool.request().query(
+        //     `SELECT * FROM admin WHERE id = ${adminId}`
+        // );
 
         const admin = adminResult.recordset[0];
 
-        if (!admin || admin.admin_password !== admin_password) {
+        if (!admin || admin.admin_password !== password) {
             throw new SystemError("اسم المستخدم أو كلمة المرور غير صحيحة", 401);
-        }
-
-        if (admin.status === 0) {
-            throw new SystemError(
-                "انتهت صلاحية اشتراكك حالياً. تواصل معنا لتجديده والاستمرار في استخدام الخدمة.",
-                403
-            );
         }
 
         const token = await generateNewToken(admin.id);
