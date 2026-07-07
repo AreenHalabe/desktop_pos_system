@@ -1,4 +1,3 @@
-import { body, query } from "express-validator";
 import { StatusCode } from "../HTTPSStatusCode/StatusCode.js";
 import { pool, sql } from "../DataBaseConnections/dbconnection.js";
 import { checkToken, SystemError, buildTreeOfOrders } from "../shared/functionality.js";

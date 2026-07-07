@@ -1,4 +1,3 @@
-import { body, query } from "express-validator";
 import { pool, sql } from "../DataBaseConnections/dbconnection.js";
 import { checkToken, SystemError } from "../shared/functionality.js";
 import { z } from "zod";

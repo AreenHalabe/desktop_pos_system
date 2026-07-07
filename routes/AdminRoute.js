@@ -1,5 +1,4 @@
 import  express  from "express";
-import { body,query} from "express-validator";
 
 import { loginAsCashier , loginAsAdmin } from "../controllers/AdminController.js";
 export const AdminRoute = express.Router();

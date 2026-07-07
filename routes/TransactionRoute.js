@@ -1,5 +1,4 @@
 import  express  from "express";
-import { body,query} from "express-validator";
 import { createTransaction, deleteTransaction, loadTransactions } from "../controllers/TransactionController.js";
 
 export const TransactionRoute = express.Router();
