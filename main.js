@@ -11,7 +11,7 @@ const __dirname = path.dirname(__filename);
 let serverProcess = null;
 let initServer = null;
 let mainWindow = null;
-
+let listenOnPort ;
 
 
 // يمسك أي Exception غير متوقع
@@ -51,6 +51,9 @@ app.whenReady().then(async () => {
 
     initServer = serverModule.initServer;
     serverProcess = await initServer(3000);
+    listenOnPort = serverModule.server_port;
+
+    ipcMain.handle("get-port", () => listenOnPort);
 
     Menu.setApplicationMenu(null);
 

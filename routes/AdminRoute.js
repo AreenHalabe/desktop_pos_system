@@ -1,6 +1,6 @@
 import  express  from "express";
 
-import { loginAsCashier , loginAsAdmin } from "../controllers/AdminController.js";
+import { loginAsCashier } from "../controllers/AdminController.js";
 export const AdminRoute = express.Router();
 
 AdminRoute.post('/login',async(req , res)=>{
@@ -8,7 +8,3 @@ AdminRoute.post('/login',async(req , res)=>{
     }
 );
 
-AdminRoute.post('/login-as-admin',async(req , res)=>{
-        loginAsAdmin(req,res);
-    }
-);

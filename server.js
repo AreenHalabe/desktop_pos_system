@@ -2,7 +2,6 @@ import express from "express";
 import { poolConnect } from "./DataBaseConnections/dbconnection.js";
 import bodyParser from "body-parser";
 import cors from "cors";
-import { config } from './env.js';
 import { AdminRoute } from "./routes/AdminRoute.js";
 import { ItemRoute } from "./routes/ItemsRoute.js";
 import { SessionRoute } from "./routes/SessionRoute.js";
@@ -26,24 +25,36 @@ app.use(TableRoute);
 
 
 
+let server_port;
 
+async function startServer(port) {
+  return new Promise((resolve, reject) => {
 
-function startServer(port) {
-  config.DEFAULT_PORT = port;
-  let server = app.listen(port)
-    .on('listening', () => {
+    const server = app.listen(port);
+
+    server.once("listening", () => {
+      server_port = port;
       console.log(`Server running at http://localhost:${port}`);
-    })
-    .on('error', (err) => {
-      if (err.code === 'EADDRINUSE') {
-        console.log(`Port ${port} busy, trying ${port + 1}`);
-        startServer(port + 1);
-      } else {
-        console.error("Server error:", err);
-        process.exit(1);
-      }
+      resolve(server);
     });
-   return server;
+
+    server.once("error", (err) => {
+
+      if (err.code === "EADDRINUSE") {
+
+        console.log(`Port ${port} busy, trying ${port + 1}`);
+
+        resolve(startServer(port + 1));
+
+      } else {
+
+        reject(err);
+
+      }
+
+    });
+
+  });
 }
 
 
@@ -74,7 +85,7 @@ process.on('SIGTERM', shutdown);
 process.on('SIGINT', shutdown); 
 
 
-export { initServer};
+export { initServer , server_port};
 
 
 

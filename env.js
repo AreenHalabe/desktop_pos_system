@@ -1,3 +1,14 @@
-export const config = {
-  DEFAULT_PORT: 3000
-};
+export function getPortNumber() {
+
+  return sessionStorage.getItem("PORT");
+
+}
+
+export function setPortNumber(port) {
+
+  sessionStorage.setItem(
+    "PORT",
+    port
+  );
+
+}

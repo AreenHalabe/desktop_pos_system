@@ -1,5 +1,5 @@
 
-import { url } from "../../api/urlEndPoint.js";
+import { setPortNumber} from "../../../env.js";
 import { getAuthToken, setAuthToken, setAdminId } from "../../component/auth.js";
 
 const errorList    = document.getElementById('error_list');
@@ -20,6 +20,11 @@ form.addEventListener('submit', async (e) => {
         name: form.name.value,
         password: form.password.value
     };
+
+    const port = await window.electronAPI.getPort();
+    setPortNumber(port);
+
+    const url = `http://localhost:${port}`;
     
     try{
         const res = await fetch(url + '/login', {
