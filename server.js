@@ -2,7 +2,6 @@ import express from "express";
 import { poolConnect } from "./DataBaseConnections/dbconnection.js";
 import bodyParser from "body-parser";
 import cors from "cors";
-import { config } from './env.js';
 import { AdminRoute } from "./routes/AdminRoute.js";
 import { MainCategoryRoute } from "./routes/MainCategoryRoute.js";
 import { CategoryRoute } from "./routes/CategoryRoute.js";
@@ -30,36 +29,69 @@ app.use(ReportRoute);
 app.use(TableRoute);
 
 
+let server_port;
 
 
 
+// function startServer(port) {
+//   server_port = port;
 
-function startServer(port) {
-  config.DEFAULT_PORT = port;
-  let server = app.listen(port)
-    .on('listening', () => {
+
+//   let server = app.listen(port)
+//     .on('listening', () => {
+//       console.log(`Server running at http://localhost:${port}`);
+//       return server;
+//     })
+//     .on('error', (err) => {
+//       if (err.code === 'EADDRINUSE') {
+//         console.log(`Port ${port} busy, trying ${port + 1}`);
+//         startServer(port + 1);
+//       } else {
+//         console.error("Server error:", err);
+//         process.exit(1);
+//       }
+//     });
+// }
+
+
+
+async function startServer(port) {
+  return new Promise((resolve, reject) => {
+
+    const server = app.listen(port);
+
+    server.once("listening", () => {
+      server_port = port;
       console.log(`Server running at http://localhost:${port}`);
-    })
-    .on('error', (err) => {
-      if (err.code === 'EADDRINUSE') {
-        console.log(`Port ${port} busy, trying ${port + 1}`);
-        startServer(port + 1);
-      } else {
-        console.error("Server error:", err);
-        process.exit(1);
-      }
+      resolve(server);
     });
-  return server;
+
+    server.once("error", (err) => {
+
+      if (err.code === "EADDRINUSE") {
+
+        console.log(`Port ${port} busy, trying ${port + 1}`);
+
+        resolve(startServer(port + 1));
+
+      } else {
+
+        reject(err);
+
+      }
+
+    });
+
+  });
 }
 
 
 
-
 async function initServer(port) {
-  await poolConnect; 
+  await poolConnect;
   console.log("Connected to SQL Server");
-  
-  const server = startServer(port);
+
+  const server = await startServer(port);
   return server;
 
 }
@@ -76,9 +108,9 @@ function shutdown() {
 }
 
 process.on('SIGTERM', shutdown);
-process.on('SIGINT', shutdown); 
+process.on('SIGINT', shutdown);
 
-export { initServer};
+export { initServer, server_port };
 
 
 

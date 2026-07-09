@@ -1,7 +1,6 @@
 
-import { url } from "../../api/urlEndPoint.js";
 import { getAuthToken, setAuthToken, setAdminId } from "../../component/auth.js";
-
+import { setPortNumber} from "../../../env.js";
 const errorList    = document.getElementById('error_list');
 const errorMessage = document.getElementById('errors');
 const form         = document.getElementById('login-form');
@@ -27,6 +26,11 @@ form.addEventListener('submit', async (e) => {
         name: form.name.value,
         password: form.password.value
     };
+
+    const port = await window.electronAPI.getPort();
+    setPortNumber(port);
+
+    const url = `http://localhost:${port}`;
     
     try{
         const res = await fetch(url + '/login-as-admin', {
@@ -38,6 +42,7 @@ form.addEventListener('submit', async (e) => {
             credentials: 'include'
         });
         const data = await res.json();
+
         
         if (res.status === 200) {
             adminId = data.id;
