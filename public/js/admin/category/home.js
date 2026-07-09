@@ -3,8 +3,6 @@ import { url } from "../../../api/urlEndPoint.js";
 import { fetchMainCategories } from "../../../api/category.js";
 import { removeAuthToken, getAuthToken } from "../../../component/auth.js";
 
-import { config } from "../../../../env.js";
-
 
 const header = document.querySelector("site-header");
 

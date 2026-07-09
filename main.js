@@ -135,7 +135,7 @@ const __dirname = path.dirname(__filename);
 let serverProcess = null;
 let initServer = null;
 let mainWindow = null;
-let listenOnPort ;
+let listenOnPort;
 
 
 
@@ -216,7 +216,7 @@ app.whenReady().then(async () => {
 
 
 
-    mainWindow.webContents.openDevTools(); // for dev tools
+    //mainWindow.webContents.openDevTools(); // for dev tools
 
     ipcMain.handle("print-invoice", async (event, html) => {
       try {
