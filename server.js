@@ -64,7 +64,7 @@ async function initServer(port) {
   await poolConnect; 
   console.log("Connected to SQL Server");
   
-  const server = startServer(port);
+  const server = await startServer(port);
 
   return server;
 
