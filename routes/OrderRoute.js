@@ -1,5 +1,4 @@
 import  express  from "express";
-import { body,query} from "express-validator";
 import { addNewItems, createOrder, deleteOrder, destroyOrderTable, getDaliyOrders, payOrder } from "../controllers/OrderController.js";
 
 export const OrderRoute = express.Router();

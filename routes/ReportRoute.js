@@ -1,5 +1,4 @@
 import  express  from "express";
-import { body,query} from "express-validator";
 import { getFinancialAnalysis, getItemsSellingAnalysis, getOrderAnalysis, getPerformanceAnalysis, getTransactionsForSessions, getWeklyAnalysis, loadMoreOrdersAnalysis } from "../controllers/ReportController.js";
 
 export const ReportRoute = express.Router();
