@@ -333,7 +333,7 @@ function renderOrdersTable() {
             <tr>
                 <td>${order.invoice_num}</td>
                 <td><span class='status-badge ${paymentClass}'>  ${order.payment_method}</span></td>
-                <td class='nowrap-cell'>${renderOrderType(order)}</td>
+                <td class='nowrap-cell'>${formatDateOnly(order.created_at)}</td>
                 <td class='nowrap-cell'>${formatTimeOnly(utcToPalestine(order.created_at))}</td>
                 <td class='nowrap-cell'>${order.total_price} ₪</td>
                 <td><span class="badge ${badgeClass}">${order.status}</span></td>
@@ -352,26 +352,6 @@ function renderOrdersTable() {
     updatePagination(orderPaginationBtnContainer);
 }
 
-function renderOrderType(order) {
-  if(order.type === "سفري") {
-    return `
-      <span class="badge text-secondary border border-secondary bg-transparent px-3 py-2">
-      <i class="fa-solid fa-box"></i>
-      سفري
-    </span>
-    `;
-  }
-
-  if(order.type === "طاولة") {
-    return `
-       <span class="badge text-primary border border-primary bg-transparent px-3 py-2">
-            <i class="bi bi-person-seat me-1"></i>
-            طاولة - ${order.table_num}
-        </span>
-    `;
-  }
-
-}
 
 
 function renderTransactionsTable(){

@@ -102,7 +102,7 @@ export const addItem = async (req, res) => {
 
 
 
-    if(validated.data.barcode !== null) {
+    if(validated.data.barcode) {
       const item = await checkBarcode(validated.data.barcode);
       if (item) {
         throw new SystemError("خطأ : الباركود المدخل مُعرف لصنف آخر , الرجاء إدخال باركود مختلف ", 409);
@@ -192,7 +192,7 @@ export const updateItem = async (req, res) => {
       name: body.name,
       category_id: body.category_id,
       price: body.price || null,
-      station: body.station,
+      barcode: body.barcode,
       hasVariants,
       variants
     };
@@ -210,18 +210,25 @@ export const updateItem = async (req, res) => {
       });
     }
 
+    if(validated.data.barcode){
+      const existId = await checkBarcode(validated.data.barcode);
+      if (existId && existId !== itemId) {
+        throw new SystemError("خطأ : الباركود المدخل مُعرف لصنف آخر , الرجاء إدخال باركود مختلف ", 409);
+      }
+    }
+
     await transaction.begin();
 
 
     await transaction.request()
       .input("name", sql.NVarChar, validated.data.name)
-      .input("station", sql.NVarChar, validated.data.station)
+      .input("barcode", sql.NVarChar, validated.data.barcode)
       .input("category_id", sql.Int, validated.data.category_id)
       .input("price", sql.Int, validated.data.price)
       .input("id", sql.Int, itemId)
       .query(`
         UPDATE items
-        SET name = @name, station = @station, category_id = @category_id, price = @price
+        SET name = @name, barcode = @barcode, category_id = @category_id, price = @price
         WHERE id = @id
       `)
       ;
@@ -633,6 +640,7 @@ function buildProductSchema(hasVariants) {
       },
       z.string()
         .regex(/^\d+$/, "الباركود يجب أن يحتوي على أرقام فقط")
+        .max(20, "الباركود يجب ألا يتجاوز 20 رقم")
         .nullable()
         .optional()
     ),

@@ -240,10 +240,7 @@ function buildRow(product, index) {
     ;
   }
 
-  const station = product.station ==='kitchen' ? 'المطبخ'
-    : product.station === 'bar' ? 'البار' 
-    : 'أراجيل' 
-  ;
+ 
   return `
       <tr>
           <td class="align-middle" data-label="الرقم">
@@ -254,8 +251,8 @@ function buildRow(product, index) {
               ${escapeHtml(product.name || '')}
           </td>
 
-          <td class="align-middle" data-label="يُرسل إلى قسم">
-              ${station}
+          <td class="align-middle" data-label="الباركود">
+              ${product?.barcode || 'غير مُدخل'}
           </td>
 
           <td class="align-middle" data-label="السعر"  style="vertical-align: middle;">

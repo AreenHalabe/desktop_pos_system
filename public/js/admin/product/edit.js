@@ -138,7 +138,7 @@ form.addEventListener("submit",  async function(e){
         name: formData.get("name"),
         category_id : formData.get('category_id'),
         price : formData.get('price'),
-        station : formData.get('station'),
+        barcode : formData.get('barcode'),
         has_variants : formData.get('has_variants'),
         variantsSize : formData.getAll('variants[size][]'),
         variantsPrice : formData.getAll('variants[price][]')
@@ -211,7 +211,7 @@ function addDataIntoFormData(item) {
     document.getElementById('category_id').value = item.category_id ;
     document.getElementById('price').value = item.price || '';
     document.getElementById('old-image').value = item.image || '' ;
-    document.getElementById('station').value = item.station || '';
+    document.getElementById('barcode').value = item.barcode || '';
     categoryId = item.category_id;
 
 }

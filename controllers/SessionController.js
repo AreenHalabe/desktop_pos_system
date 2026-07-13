@@ -79,12 +79,6 @@ export const openNewSession = async (req , res) =>{
         
         const sessionId = result.recordset[0].id;
 
-        const orderTablesThatNotClosed = await getOrderTablesThatNotClosedFromPreviousSession();
-
-        if(orderTablesThatNotClosed.length > 0) {
-            await moveOrderTablesToNewSession(sessionId);
-        }
-
 
         return res.status(200).json(
             {
@@ -241,28 +235,6 @@ async function getSession(sessionId) {
         ;
     return session.recordset[0] || null;
 }
-
-async function getOrderTablesThatNotClosedFromPreviousSession() {
-    const result = await pool
-    .query(`
-        SELECT * FROM table_order
-    `);
-    return result.recordset;
-}
-
-async function moveOrderTablesToNewSession(newSessionId) {
-    await pool.request()
-    .input("sessionId", sql.Int, newSessionId)
-    .query(`
-        UPDATE orders
-        SET session_id = @sessionId
-        WHERE id IN (
-            SELECT order_id
-            FROM table_order
-        )
-    `);
-}
-
 
 
 
