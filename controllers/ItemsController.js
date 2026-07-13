@@ -51,7 +51,7 @@ export const getItem = async (req, res) => {
 
 export const addItem = async (req, res) => {
   const transaction = new sql.Transaction(pool);
-   let transactionStarted = false;
+  let transactionStarted = false;
   try {
     const token = req.headers.authorization;
     if (!token) {
@@ -78,10 +78,12 @@ export const addItem = async (req, res) => {
       name: body.name,
       category_id: body.category_id,
       price: body.price || null,
-      station: body.station , 
+      barcode: body.barcode,
       hasVariants,
       variants
     };
+
+
 
 
     const validated = schema.safeParse(rawData);
@@ -98,6 +100,15 @@ export const addItem = async (req, res) => {
       });
     }
 
+
+
+    if(validated.data.barcode !== null) {
+      const item = await checkBarcode(validated.data.barcode);
+      if (item) {
+        throw new SystemError("خطأ : الباركود المدخل مُعرف لصنف آخر , الرجاء إدخال باركود مختلف ", 409);
+      }
+    }
+
     // 🔥 start transaction
     await transaction.begin();
     transactionStarted = true;
@@ -105,16 +116,16 @@ export const addItem = async (req, res) => {
     const result = await transaction
       .request()
       .input("name", sql.NVarChar, validated.data.name)
-      .input("station", sql.NVarChar, validated.data.station)
       .input("category_id", sql.Int, validated.data.category_id)
       .input("price", sql.Int, validated.data.price)
+      .input('barcode', sql.VarChar, validated.data.barcode)
       .input("admin_id", sql.Int, adminId)
       .query(`
-        INSERT INTO items (name, station, category_id, price, admin_id)
+        INSERT INTO items (name, category_id, price, barcode, admin_id)
         OUTPUT INSERTED.id
-        VALUES (@name, @station, @category_id, @price, @admin_id)
+        VALUES (@name, @category_id, @price, @barcode, @admin_id)
       `)
-    ;
+      ;
 
 
     const itemId = result.recordset[0].id;
@@ -131,7 +142,7 @@ export const addItem = async (req, res) => {
       message: "تم إنشاء الصنف بنجاح",
     });
   } catch (e) {
-    if(transactionStarted){
+    if (transactionStarted) {
       try {
         await transaction.rollback();
       } catch (err) {
@@ -181,7 +192,7 @@ export const updateItem = async (req, res) => {
       name: body.name,
       category_id: body.category_id,
       price: body.price || null,
-      station: body.station ,
+      station: body.station,
       hasVariants,
       variants
     };
@@ -213,7 +224,7 @@ export const updateItem = async (req, res) => {
         SET name = @name, station = @station, category_id = @category_id, price = @price
         WHERE id = @id
       `)
-    ;
+      ;
 
 
     if (hasVariants) {
@@ -326,7 +337,7 @@ export const filterItemsByCategory = async (req, res) => {
 
 }
 
-export const getMenueTree = async (req , res)=>{
+export const getMenueTree = async (req, res) => {
   try {
     const token = req.headers.authorization;
 
@@ -366,7 +377,7 @@ export const getMenueTree = async (req , res)=>{
           mc.admin_id = @admin_id
         ORDER BY mc.id, c.id, i.id, s.price ASC;
       `)
-    ;
+      ;
 
     const row = result.recordset;
     const menue = buildMenuTree(row);
@@ -475,7 +486,7 @@ async function attachVariantsIfExist(items) {
       WHERE item_id IN (${itemIds})
       ORDER BY price ASC
     `)
-  ;
+    ;
 
   const variants = result.recordset;
 
@@ -522,6 +533,17 @@ async function insertSizes(itemId, rawData, transaction) {
   await request.query(query);
 }
 
+async function checkBarcode(barcode) {
+  const result = await pool
+    .request()
+    .input('barcode', barcode)
+    .query(`
+      SELECT id
+      FROM items
+      WHERE barcode = @barcode
+    `);
+  return result.recordset[0];
+}
 
 
 function buildMenuTree(rows) {
@@ -601,12 +623,19 @@ function buildProductSchema(hasVariants) {
     name: z
       .string()
       .min(1, "اسم المنتج مطلوب")
-      .regex(/^[\p{L}\p{N}\s]+$/u,  "الاسم يجب أن يحتوي على حروف أو أرقام فقط"),
+      .regex(/^[\p{L}\p{N}\s]+$/u, "الاسم يجب أن يحتوي على حروف أو أرقام فقط"),
 
-    station: z
-      .string()
-      .min(1, "القسم المسؤول مطلوب")
-      .regex(/^(?:[\u0600-\u06FF]|[A-Za-z0-9 ])+$/, "القسم المسؤول يجب أن يحتوي على حروف فقط"),
+
+    barcode: z.preprocess(
+      (v) => {
+        if (v === null || v === undefined || v === "") return null;
+        return String(v);
+      },
+      z.string()
+        .regex(/^\d+$/, "الباركود يجب أن يحتوي على أرقام فقط")
+        .nullable()
+        .optional()
+    ),
 
     category_id: z.preprocess(
       (val) => {

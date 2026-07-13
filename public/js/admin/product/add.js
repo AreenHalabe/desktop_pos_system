@@ -42,12 +42,11 @@ form.addEventListener("submit", async (e) => {
         category_id : formData.get('category_id'),
         price : formData.get('price'),
         has_variants : formData.get('has_variants'),
-        station : formData.get('station'),
+        barcode : formData.get('barcode'),
         variantsSize : formData.getAll('variants[size][]'),
         variantsPrice : formData.getAll('variants[price][]')
     }
 
-    console.log(finalData);
 
 
     try{
