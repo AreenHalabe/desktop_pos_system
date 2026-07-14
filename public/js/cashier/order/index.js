@@ -17,12 +17,16 @@ const customerAddress = document.getElementById('customerAddress');
 const orderNotes = document.getElementById('orderNotes');
 const spinnerLoad = document.getElementById('spinnerLoad');
 const errorBox = document.getElementById('error-box');
-const cashBalance = document.getElementById('cash-balance');
-const cardBalance = document.getElementById('card-balance');
+
 
 const confirmSendBtn = document.getElementById('confirmSendBtn');
 const confirmOrderModal = document.getElementById('confirmOrderModal');
 const successModelOrder = document.getElementById('successModal');
+
+const orderItemsList = document.getElementById("order-items-list");
+
+const barcodeInput = document.getElementById("barcode-input");
+
 
 
 
@@ -58,6 +62,8 @@ let categoriesData = [];
 
 let hasOneMainCategory = false;
 let selectedProductForSize = null;
+
+let openModel = false;
 
 class SiteHeader extends HTMLElement {
     async connectedCallback() {
@@ -108,6 +114,7 @@ document.addEventListener("DOMContentLoaded", async function () {
     const hasOpeningSession = await checkSession();
     if (hasOpeningSession) {
         await loadAndRenderItems();
+        resetBarcodeInput();
     }
     else {
         handleSessionStatus();
@@ -132,7 +139,6 @@ document.addEventListener("DOMContentLoaded", async function () {
 confirmOrderModal.addEventListener('hidden.bs.modal', () => {
     paymentMethod.value = 'كاش';
     orderType.value = 'طاولة';
-    toggleDeliveryFields();
     discountInput.value = '';
     finalTotalPrice.textContent = '0 ₪';
     confirmSendBtn.disabled = false;
@@ -140,11 +146,35 @@ confirmOrderModal.addEventListener('hidden.bs.modal', () => {
     customerPhone.value = '';
     customerAddress.value = '';
     orderNotes.value = '';
+    openModel = false;
+    resetBarcodeInput();
 });
 
-
+barcodeInput.addEventListener("keydown", (e) => {
+    if (e.key === "Enter") {
+        const product = searchItem(barcodeInput.value);
+        if(product){
+            addToOrder(product.id , 0);
+            resetBarcodeInput(); 
+        }else{
+            bootboxError("الباركود المدخل غير موجود");
+            $(document).one("hidden.bs.modal", function () {
+                resetBarcodeInput();
+            });
+        }
+    }
+});
 discountInput.addEventListener("input", updateFinalTotal);
 
+function resetBarcodeInput(){
+    barcodeInput.value = "";
+    barcodeInput.focus();
+}
+
+function searchItem(barcode){
+    const product = products.find(p => p.barcode === barcode);
+    return product;
+}
 
 function updateFinalTotal() {
     // استخراج الرقم من النص
@@ -175,7 +205,7 @@ function checkDiscount(discount, total) {
     }
 }
 
-orderType.addEventListener('change', toggleDeliveryFields);
+
 
 
 document.addEventListener("click", async function (e) {
@@ -213,14 +243,12 @@ document.addEventListener("click", async function (e) {
             checkIcon.style.display = 'none';
         }, 1000);
 
-        return;
     }
 
     else if (e.target.closest('.size-option')) {
         const sizeBtn = e.target.closest('.size-option');
         const index = sizeBtn.dataset.index;
         selectSize(Number(index));
-        return;
     }
 
     else if (e.target.closest('.qty-plus')) {
@@ -236,7 +264,6 @@ document.addEventListener("click", async function (e) {
             changeQty(Number(id), Number(sizeindex), 1);
         }
 
-        return;
     }
 
     else if (e.target.closest('.qty-minus')) {
@@ -249,7 +276,6 @@ document.addEventListener("click", async function (e) {
         else {
             changeQty(Number(id), Number(sizeindex), -1);
         }
-        return;
     }
 
     else if (e.target.closest('.remove-item')) {
@@ -259,20 +285,18 @@ document.addEventListener("click", async function (e) {
 
         if (sizeindex === 'hasOnePrice') {
             removeFromOrder(Number(id), sizeindex);
-            return;
         }
-        removeFromOrder(Number(id), Number(sizeindex));
-        return;
+        else{
+            removeFromOrder(Number(id), Number(sizeindex));
+        }
     }
 
     else if (e.target.closest('.submit-order-btn')) {
         submitOrder();
-        return;
     }
 
     else if (e.target.closest('.send-order-btn')) {
         confirmAndSendOrder();
-        return;
     }
 
     else if (e.target.closest('.print-invoice-btn')) {
@@ -286,50 +310,24 @@ document.addEventListener("click", async function (e) {
             hidePrintLoader();
             clearFinalOrderDetails();
         }
+        return;
     }
 
     else if (e.target.closest('.close-success-modal')) {
         clearFinalOrderDetails();
         closeSuccessModal();
-        return;
     }
 
-    else if (e.target.closest('.switch-admin-btn')) {
-        const input = document.getElementById('adminPassword');
-        await SwitchToAdmin(url, input.value);
+
+    if (e.target !== barcodeInput) {
+        if(!openModel){
+            resetBarcodeInput();
+        }
     }
 });
 
-document.querySelectorAll('input[name="payment_status"]').forEach(input => {
-    input.addEventListener("change", handlePaymentStatus);
-});
 
-function handlePaymentStatus() {
-    const selected = document.querySelector(
-        'input[name="payment_status"]:checked'
-    );
 
-    if (!selected) return;
-
-    const paymentMethodDiv = document.getElementById('paymentMethodDiv');
-
-    if (selected.value === "paid") {
-        paymentMethodDiv.style.display = 'block';
-    } else {
-        paymentMethodDiv.style.display = 'none';
-    }
-}
-
-function setPayLater() {
-    const payLaterInput = document.getElementById("pay_later");
-
-    if (!payLaterInput) return;
-
-    payLaterInput.checked = true;
-
-    // مهم جداً: تشغيل نفس منطق الـ change
-    handlePaymentStatus();
-}
 
 
 
@@ -542,7 +540,7 @@ function addToOrder(productId, sizeIndex) {
         }
     }
 
-    updateOrderUI();
+    updateOrderUI(true);
 
 }
 function removeFromOrder(productId, sizeIndex) {
@@ -575,7 +573,7 @@ function changeQty(productId, sizeIndex, change) {
 }
 
 
-function updateOrderUI() {
+function updateOrderUI(addNewItem = false) {
     const list = document.getElementById('order-items-list');
     const totalEl = document.getElementById('total-price');
 
@@ -615,7 +613,7 @@ function updateOrderUI() {
                                 data-id="${item.id}" data-sizeindex="${item.sizeIndex ?? 'hasOnePrice'}">
                             <i class="fas fa-minus"></i>
                         </button>
-                        <span class="btn btn-sm btn-light disabled">${item.qty}</span>
+                        <span class="btn btn-sm btn-light text-dark fw-bold disabled ">${item.qty}</span>
                         <button class="btn btn-sm btn-outline-secondary qty-btn qty-plus" 
                                 data-id="${item.id}" 
                                 data-sizeindex="${item.sizeIndex ?? 'hasOnePrice'}"
@@ -632,6 +630,11 @@ function updateOrderUI() {
     });
     list.innerHTML = html;
     totalEl.innerText = total + ' ₪';
+
+    if(addNewItem){
+        orderItemsList.scrollTop = orderItemsList.scrollHeight;
+    }
+    
 }
 
 
@@ -639,11 +642,16 @@ function updateOrderUI() {
 function submitOrder() {
     if (currentOrder.length === 0) {
         bootboxError('الرجاء إضافة عناصر للطلب أولاً');
+        $(document).one("hidden.bs.modal", function () {
+            resetBarcodeInput();
+        });
         return;
     }
     updateOrderDetailsModal();
     const modal = new bootstrap.Modal(document.getElementById('confirmOrderModal'));
     modal.show();
+    openModel = true;
+
 }
 function updateOrderDetailsModal() {
     const list = document.getElementById('order-details-list');
@@ -656,11 +664,12 @@ function updateOrderDetailsModal() {
 
         html += `
             <div class="order-summary-item">
-                <div>
+                <div class = "d-flex gap-2">
                     <div class="item-name">
                         ${item.name}
                         ${item.sizeName ? `<span class="item-size"> - ${item.sizeName}</span>` : ''}
                     </div>
+                    <span class="item-qty">${item.qty}</span>
                 </div>
                 <div class="d-flex align-items-center gap-2">
                     <span class="item-qty">${item.qty}</span>
@@ -675,33 +684,7 @@ function updateOrderDetailsModal() {
     document.getElementById('modal-total-price').innerText = total + ' ₪';
     finalTotalPrice.textContent = total + ' ₪';
 }
-function toggleDeliveryFields() {
 
-    const tableNumberDiv = document.getElementById('tableNumberDiv');
-    const customerPhoneDiv = document.getElementById('customerPhoneDiv');
-    const customerAddressDiv = document.getElementById('customerAddressDiv');
-    const paymentStatusDiv = document.getElementById('paymentStatusDiv');
-    const paymentMethodDiv = document.getElementById('paymentMethodDiv');
-
-
-
-    if (orderType.value === 'سفري') {
-        customerPhoneDiv.style.display = 'block';
-        customerAddressDiv.style.display = 'block';
-        paymentMethodDiv.style.display = 'block';
-        tableNumberDiv.style.display = 'none';
-        paymentStatusDiv.style.display = 'none';
-        tableNumber.value = '';
-
-    }
-    else {
-        tableNumberDiv.style.display = 'block';
-        customerPhoneDiv.style.display = 'none';
-        customerAddressDiv.style.display = 'none';
-        paymentStatusDiv.style.display = 'block';
-        setPayLater();
-    }
-}
 async function confirmAndSendOrder() {
     let total_price = 0;
     currentOrder.forEach(item => {
@@ -718,12 +701,10 @@ async function confirmAndSendOrder() {
     finalOrderDetails.address = customerAddress.value;
     finalOrderDetails.discount = Number(discountInput.value);
 
-    finalOrderDetails.paymentStatus = getPaymentStatus();
 
 
     // console.log(finalOrderDetails);
 
-    //  splitByStation(finalOrderDetails);
 
     const res = await createOrder();
     if (res.success) {
@@ -750,54 +731,8 @@ function clearFinalOrderDetails() {
     };
 }
 
-function getPaymentStatus() {
-    const selected = document.querySelector('input[name="payment_status"]:checked');
-
-    if (!selected) return null;
-
-    return selected.value;
-}
-
-function splitByStation(orderDetails) {
-
-    const result = {
-        kitchen: {
-            inv_num : orderDetails.inv_num,
-            orderType: orderDetails.orderType,
-            note: orderDetails.note,
-            tableNum: orderDetails.tableNum,
-            phoneNum: orderDetails.phoneNum,
-            address: orderDetails.address,
-            items: []
-        },
-        bar: { 
-            inv_num : orderDetails.inv_num,
-            orderType: orderDetails.orderType,
-            note: orderDetails.note,
-            tableNum: orderDetails.tableNum,
-            phoneNum: orderDetails.phoneNum,
-            address: orderDetails.address,
-            items: [] 
-        },
-        shisha: { 
-            inv_num : orderDetails.inv_num,
-            orderType: orderDetails.orderType,
-            note: orderDetails.note,
-            tableNum: orderDetails.tableNum,
-            phoneNum: orderDetails.phoneNum,
-            address: orderDetails.address,
-            items: [] 
-        }
-    };
-
-    orderDetails.items.forEach(item => {
-        result[item.station].items.push(item);
-    });
 
 
-    console.log("Order split by station:", result);
-
-}
 
 function clearModalData() {
     orderType.value = 'طاولة';
@@ -806,7 +741,6 @@ function clearModalData() {
     customerPhone.value = '';
     customerAddress.value = '';
     orderNotes.value = '';
-    toggleDeliveryFields();
 }
 function showSuccessModal() {
     const modal = new bootstrap.Modal(successModelOrder);
@@ -841,6 +775,7 @@ async function fetchMenuDetails() {
 
             categoriesData = data.mainCategories;
             products = data.items;
+           
 
         }
         else {
@@ -854,9 +789,6 @@ async function fetchMenuDetails() {
 async function createOrder() {
     displaySpinnerLoader(confirmOrderModal);
     try {
-        // urlServer + `/creat/order?session_id=${sessionId}`;
-        // /api/order/creat?session_id=${sessionId}
-
         const res = await fetch(urlServer + `/creat/order?session_id=${sessionId}`, {
             method: 'POST',
             headers: {
@@ -871,7 +803,6 @@ async function createOrder() {
             return false;
         }
         else if (res.status === 200) {
-            updateCashSammary();
             return {
                 inv_num: data.invoiceNum,
                 success: data.success
@@ -908,8 +839,6 @@ async function checkSession() {
             if (data.hasOpeningSession) {
                 cashSummery = data.cash_summery;
                 sessionId = data.session_id;
-                cashBalance.textContent = `${data.cash_summery?.expected_cash || 0} ₪`;
-                cardBalance.textContent = `${data.cash_summery?.card_sales || 0} ₪`;
             }
             return data.hasOpeningSession
         }
@@ -926,29 +855,6 @@ async function loadAndRenderItems() {
     await fetchMenuDetails();
     renderMainCategories(categoriesData);
 }
-
-
-function updateCashSammary() {
-    let totalPrice = finalOrderDetails.totalPrice;
-    let discount = finalOrderDetails.discount;
-    let finalPrice = totalPrice - discount;
-
-    if (finalOrderDetails.paymentMethod === 'بطاقة') {
-        cashSummery.card_sales += finalPrice;
-        updatePaymentMethodeBalance(cardBalance, finalPrice);
-    } else if (finalOrderDetails.paymentMethod === 'كاش') {
-        cashSummery.cash_sales += finalPrice;
-        cashSummery.expected_cash += finalPrice;
-        updatePaymentMethodeBalance(cashBalance, finalPrice);
-
-    }
-}
-function updatePaymentMethodeBalance(paymentBalance, OrderPrice) {
-    let currentValue = parseFloat(paymentBalance.textContent.replace('₪', '').trim()) || 0;
-    let newValue = currentValue + OrderPrice;
-    paymentBalance.textContent = newValue + " ₪";
-}
-
 
 
 
@@ -1022,3 +928,5 @@ function initHorizontalScroll({ container, leftArrow, rightArrow, step }) {
 
     requestAnimationFrame(updateArrows);
 }
+
+

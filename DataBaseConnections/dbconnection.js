@@ -5,7 +5,7 @@ const config = {
     user: "BLACK",
     password: "20012001",
     server: "DESKTOP-63T0OB5//SQLEXPRESS",     
-    database: "restorant",    
+    database: "barckode",    
     options: {
         trustServerCertificate: true
     }
