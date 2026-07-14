@@ -333,7 +333,7 @@ function renderOrdersTable() {
             <tr>
                 <td>${order.invoice_num}</td>
                 <td><span class='status-badge ${paymentClass}'>  ${order.payment_method}</span></td>
-                <td class='nowrap-cell'>${formatDateOnly(order.created_at)}</td>
+                <td class='nowrap-cell'>${formatDateOnly(utcToPalestine(order.created_at))}</td>
                 <td class='nowrap-cell'>${formatTimeOnly(utcToPalestine(order.created_at))}</td>
                 <td class='nowrap-cell'>${order.total_price} ₪</td>
                 <td><span class="badge ${badgeClass}">${order.status}</span></td>
