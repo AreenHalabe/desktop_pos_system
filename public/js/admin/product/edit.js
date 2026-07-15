@@ -11,7 +11,6 @@
 
     
     const hasVariantsCheckbox = document.getElementById('has_variants');
-    const basePriceBox        = document.getElementById('base_price_box');
     const variantsBox         = document.getElementById('variants_box');
     const addVariantBtn       = document.getElementById('add_variant_btn');
     const variantsTable       = document.getElementById('variants_table');
@@ -89,12 +88,14 @@ hasVariantsCheckbox.addEventListener('change', function() {
         price.value = '';
         price.disabled = true;
         toggleVariants(this.checked);
-        basePriceBox.style.display = 'none';
+        price.placeholder = 'السعر يُحدد في جدول الأحجام';
+        price.style.cursor = 'not-allowed';
         variantsBox.style.display = 'block';
     } else {
         price.disabled = false;
+        price.placeholder = 'السعر';
+        price.style.cursor = 'default'; 
         toggleVariants(this.checked);
-        basePriceBox.style.display = 'block';
         variantsBox.style.display = 'none';
     }
 });
@@ -220,7 +221,9 @@ function handleVariants(variants) {
     hasVariantsCheckbox.checked = true;
     price.disabled = true;
     variantsBox.style.display = 'block';
-    basePriceBox.style.display = 'none';
+    price.placeholder = 'السعر يُحدد في جدول الأحجام';
+    price.style.cursor = 'not-allowed';
+
     // حذف أي صفوف قديمة
     variantsTable.innerHTML = '';
     variants.forEach(variant => {

@@ -7,7 +7,6 @@
     
     
     const hasVariantsCheckbox = document.getElementById('has_variants');
-    const basePriceBox        = document.getElementById('base_price_box');
     const variantsBox         = document.getElementById('variants_box');
     const addVariantBtn       = document.getElementById('add_variant_btn');
     const variantsTable       = document.getElementById('variants_table');
@@ -105,16 +104,19 @@ document.addEventListener('DOMContentLoaded', async function() {
         if (this.checked) {
             price.value = '';
             price.disabled = true;
+            price.placeholder = 'السعر يُحدد في جدول الأحجام';
+            price.style.cursor = 'not-allowed';
             toggleVariants(this.checked);
-            //basePriceBox.style.display = 'none';
-            basePriceBox.style.visibility = 'hidden';
+           
 
             variantsBox.style.display = 'block';
         } else {
             price.disabled = false;
+            price.placeholder = 'السعر';
+            price.style.cursor = 'default'; 
             toggleVariants(this.checked);
-            //basePriceBox.style.display = 'block';
-            basePriceBox.style.visibility = 'visible';
+            
+
             variantsBox.style.display = 'none';
         }
     });
@@ -169,11 +171,11 @@ function resetProductForm() {
     // reset price
     price.disabled = false;
     price.value = '';
-
+    price.placeholder = 'السعر';
+    price.style.cursor = 'default'; // أو 'auto'
     // hide variants, show base price
     variantsBox.style.display = 'none';
-    // basePriceBox.style.display = 'block';
-    basePriceBox.style.visibility = 'visible';
+
 
     // remove all variant rows
     variantsTable.innerHTML = '';
