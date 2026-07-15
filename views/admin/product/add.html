@@ -14,6 +14,11 @@
     <link href="../../../wroot/assets/fontawesome/css/all.min.css" rel="stylesheet">
 
     <link rel="stylesheet" href="../../../public/style/admin/product/add-edit-product.css" />
+    <style>
+        .box{
+            border: 1px solid black;
+        }
+    </style>
 
 </head>
 
@@ -64,20 +69,22 @@
 
                             <!-- السعر الأساسي + checkbox -->
                             <div class="row g-3 mb-3">
-                                
+
 
                                 <div class="col-12 col-md-6">
-                                    
+
                                     <div id="base_price_box">
                                         <label for="price" class="form-label fw-bold">السعر الأساسي</label>
                                         <input type="number" class="form-control bg-light" id="price" name="price"
                                             placeholder="السعر" required>
                                     </div>
 
-                                    
-                                    <div class="d-flex align-items-center mt-3">
-                                        <input type="checkbox" id="has_variants" name="has_variants" value="1" style="cursor:pointer;">
-                                        <label for="has_variants" class="form-label ms-2 mb-0 fw-bold" style="cursor:pointer;">
+
+                                    <div class="form-check d-flex align-items-center mt-2">
+                                        <input type="checkbox" class="form-check-input" id="has_variants" name="has_variants" value="1"
+                                            style="cursor:pointer;">
+                                        <label for="has_variants" class="form-label ms-2 mb-0 fw-bold"
+                                            style="cursor:pointer;">
                                             هذا المنتج له أحجام وأسعار مختلفة
                                         </label>
                                     </div>
@@ -85,11 +92,19 @@
 
                                 </div>
 
-
                                 <div class="col-12 col-md-6">
                                     <label for="barcode" class="form-label fw-bold">الباركود</label>
+
                                     <input type="number" class="form-control bg-light" id="barcode" name="barcode"
-                                            placeholder="باركود" >
+                                        placeholder="باركود">
+
+                                    <div class="form-check mt-2">
+                                        <input class="form-check-input" name="auto_barcode" type="checkbox" id="auto_barcode" value="1" style="cursor:pointer;">
+                                        <label class="form-check-label fw-bold" for="auto_barcode"
+                                            style="cursor:pointer;">
+                                            توليد باركود تلقائيًا
+                                        </label>
+                                    </div>
                                 </div>
 
 

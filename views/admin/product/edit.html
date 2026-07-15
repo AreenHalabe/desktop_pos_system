@@ -74,8 +74,8 @@
                                     </div>
 
 
-                                    <div class="d-flex align-items-center mt-3">
-                                        <input type="checkbox" id="has_variants" name="has_variants" value="1"
+                                    <div class="form-check d-flex align-items-center mt-2">
+                                        <input type="checkbox" class="form-check-input" id="has_variants" name="has_variants" value="1"
                                             style="cursor:pointer;">
                                         <label for="has_variants" class="form-label ms-2 mb-0 fw-bold"
                                             style="cursor:pointer;">
@@ -88,11 +88,18 @@
 
 
                                 <div class="col-12 col-md-6">
-                                    
-                                        <label for="barcode" class="form-label fw-bold">الباركود</label>
-                                        <input type="number" class="form-control bg-light" id="barcode" name="barcode"
-                                            placeholder="باركود">
-                                    
+                                    <label for="barcode" class="form-label fw-bold">الباركود</label>
+
+                                    <input type="number" class="form-control bg-light" id="barcode" name="barcode"
+                                        placeholder="باركود">
+
+                                    <div class="form-check mt-2">
+                                        <input class="form-check-input" name="auto_barcode" type="checkbox" id="auto_barcode" value="1" style="cursor:pointer;">
+                                        <label class="form-check-label fw-bold" for="auto_barcode"
+                                            style="cursor:pointer;">
+                                            توليد باركود تلقائيًا
+                                        </label>
+                                    </div>
                                 </div>
 
 
