@@ -123,6 +123,7 @@
                     <th>#</th>
                     <th>إسم الصنف</th>
                     <th>الباركود</th>
+                    <th>الفئة</th>
                     <th>السعر</th>
                     <th>تعديل/حذف</th>
                   </tr>
@@ -131,6 +132,20 @@
                 </tbody>
               </table>
             </div>
+
+            <div class="pagination-button mt-4" id="paginationBtn">
+              <button class="btn btn-sm btn-outline-secondary prevBtn" disabled id="prevBtn">
+                <i class="fas fa-chevron-right"></i>
+              </button>
+              <span class="mx-2" id="pageInfo"> </span>
+              <button class="btn btn-sm btn-outline-secondary nextBtn" disabled id="nextBtn">
+                <i class="fas fa-chevron-left"></i>
+              </button>
+              <div class="spinner-border spinner-border-sm text-primary mx-2 d-none" role="status" id="paginationLoder">
+              </div>
+            </div>
+
+
           </div>
         </div>
       </div>

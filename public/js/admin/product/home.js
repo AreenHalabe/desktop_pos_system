@@ -19,7 +19,15 @@ const searchInput = document.getElementById("searchInput");
 const params = new URLSearchParams(window.location.search);
 const categoryIdParams = params.get('cid');
 
+let currentDisplayedCategoryId;
+let categories = [];
 let items = [];
+let filteredItems;
+
+let currentPage;
+let itemsPerPage = 15;
+let totalPages;
+
 
 
 class SiteHeader extends HTMLElement {
@@ -73,9 +81,20 @@ document.addEventListener("DOMContentLoaded", async function () {
   await buildSelectCategory();
   await loadItems();
 
+
   if (categoryIdParams) {
     setValueForSelect(categoryIdParams);
+
+    filteredItems = items.filter(item => item.category_id === Number(categoryIdParams));
+    handelTotalPage(filteredItems.length);
+
     fetchProducts(Number(categoryIdParams));
+  }
+  else {
+    handelTotalPage(items.length);
+
+    fetchProducts(0);
+
   }
 
 });
@@ -86,7 +105,17 @@ categoryFilter.addEventListener('change', function () {
     window.location.href = '../category/home.html';
     return;
   }
-  fetchProducts(Number(this.value));
+  if(Number(this.value) === 0){
+    handelTotalPage(items.length);
+    fetchProducts(Number(this.value));
+  }
+  else{
+    filteredItems = items.filter(item => item.category_id === Number(this.value));
+    handelTotalPage(filteredItems.length);
+    fetchProducts(Number(this.value));
+  }
+
+  
   searchInput.value = '';
 });
 
@@ -101,7 +130,16 @@ document.addEventListener('submit', function (e) {
   }
 });
 
+document.addEventListener("click", async function (e) {
 
+  if (e.target.closest('.prevBtn')) {
+    prevPage();
+  }
+  else if (e.target.closest('.nextBtn')) {
+    nextPage();
+  }
+
+});
 
 searchInput.addEventListener("keydown", (e) => {
   if (e.key === "Enter") {
@@ -109,11 +147,11 @@ searchInput.addEventListener("keydown", (e) => {
 
 
     const item = items.find(item => item.barcode === value);
-  
+
     if (!item) {
       bootboxError("لم يتم العثور على صنف مرتبط بالباركود المدخل.");
     }
-    else{
+    else {
       renderItemIntable(item);
     }
   }
@@ -146,7 +184,7 @@ function renderItemIntable(product) {
   }
 
 
-  tbody.innerHTML =  `
+  tbody.innerHTML = `
       <tr>
           <td class="align-middle" data-label="الرقم">
               ${1}
@@ -158,6 +196,9 @@ function renderItemIntable(product) {
 
           <td class="align-middle" data-label="الباركود">
               ${product?.barcode || '<span class="text-muted">بدون باركود</span>'}
+          </td>
+           <td class="align-middle" data-label="الفئة">
+              ${categories.find(category => category.id === product.category_id).name}
           </td>
 
           <td class="align-middle" data-label="السعر"  style="vertical-align: middle;">
@@ -193,7 +234,7 @@ function setValueForSelect(categoryId) {
 }
 
 async function buildSelectCategory() {
-  const categories = await fetchCategories();
+  categories = await fetchCategories();
   const select = document.getElementById("categoryFilter");
 
   if (categories.length > 0) {
@@ -211,54 +252,92 @@ async function buildSelectCategory() {
 }
 
 
+function prevPage() {
+  if (currentPage > 1) {
+    currentPage--;
+    fetchProducts(currentDisplayedCategoryId);
+  }
+}
+function nextPage() {
+  if (currentPage < totalPages) {
+    currentPage++;
+    fetchProducts(currentDisplayedCategoryId);
+  }
+}
 
 
+function handelTotalPage(numOfItems) {
+  if (numOfItems == 0) return;
+  currentPage = 1;
+
+  handleTotalItems(numOfItems)
+}
+
+function handleTotalItems(numOfItems) {
+  if (numOfItems == 0) return;
+  const totalItems = numOfItems;
+  totalPages = Math.ceil(totalItems / itemsPerPage);
+
+  if(totalPages === 1){
+    currentPage = 1;
+  }
+}
+
+function updatePagination() {
+  const pageInfo = document.getElementById('pageInfo');
+  pageInfo.textContent = `صفحة ${currentPage} من ${totalPages}`;
+  document.getElementById('prevBtn').disabled = currentPage === 1;
+  document.getElementById('nextBtn').disabled = currentPage === totalPages;
+}
 
 function fetchProducts(categoryId) {
-  try {
-    showLoader();
-    clearTable();
-    showEmptyNotice(false);
-    setCategoryTitle(categoryId);
-
-    let filteredItems;
+  currentDisplayedCategoryId = categoryId;
+  showLoader();
+  clearTable();
+  showEmptyNotice(false);
+  setCategoryTitle(categoryId);
 
 
-    if (categoryId === 0) {
-      filteredItems = items;
-    }
-    else {
-      filteredItems = items.filter(item => item.category_id === categoryId);
-    }
 
-
-    if (filteredItems.length === 0) {
-      hideTable();
-      showEmptyNotice(true, 'لا توجد أصناف في هذه الفئة');
-      return;
-    }
-
-
-    displayTable();
-    let html = '';
-    filteredItems.forEach((p, i) => {
-      html += buildRow(p, i);
-    });
-    tbody.innerHTML = html;
-
-  } catch (err) {
-    showEmptyNotice(true, err.message);
-  } finally {
-    hideLoader();
+  if (categoryId === 0) {
+    filteredItems = items;
   }
+
+
+
+  if (filteredItems.length === 0) {
+    hideTable();
+    showEmptyNotice(true, 'لا توجد أصناف في هذه الفئة');
+    hideLoader();
+    return;
+  }
+
+  const start = (currentPage - 1) * itemsPerPage;
+  const end = start + itemsPerPage;
+  const pageItems = filteredItems.slice(start, end);
+
+  let counter = (currentPage * 15) - (15);
+
+  displayTable();
+  let html = '';
+  pageItems.forEach(p => {
+    html += buildRow(p, counter);
+    ++counter;
+  });
+  tbody.innerHTML = html;
+
+  updatePagination();
+
+  hideLoader();
+
 }
 
 
 async function loadItems() {
   showLoader();
   showEmptyNotice(false);
-  clearTable();
-  setCategoryTitle(0)
+  // clearTable();
+  // setCategoryTitle(0);
   try {
     const res = await fetch(url + '/items', {
       method: 'GET',
@@ -276,21 +355,6 @@ async function loadItems() {
     }
     else if (res.status === 200) {
       items = data.items;
-      if (items.length === 0) {
-        hideTable();
-        showEmptyNotice(true, 'لم يتم إضافة أي أصناف');
-        return;
-      }
-
-      displayTable();
-
-
-      let html = '';
-      items.forEach((p, i) => {
-        html += buildRow(p, i);
-      });
-      tbody.innerHTML = html;
-
     }
     else {
       showEmptyNotice(data.message);
@@ -301,6 +365,7 @@ async function loadItems() {
     hideLoader();
   }
 }
+
 
 async function deleteItem({ itemId, categoryId }) {
   showEmptyNotice(false);
@@ -319,7 +384,18 @@ async function deleteItem({ itemId, categoryId }) {
     }
     if (res.status === 200) {
       bootboxSuccess(data.message);
-      fetchProducts(categoryId);
+
+      await loadItems();
+
+      if(currentDisplayedCategoryId === 0){
+        handleTotalItems(items.length);
+      }
+      else{
+        filteredItems = items.filter(item => item.category_id === Number(currentDisplayedCategoryId));
+        handleTotalItems(filteredItems.length);
+      }
+      
+      fetchProducts(Number(currentDisplayedCategoryId));
       return;
     }
     showEmptyNotice(true, data.message);
@@ -344,7 +420,7 @@ function escapeHtml(text) {
     .replace(/'/g, '&#039;');
 }
 
-function buildRow(product, index) {
+function buildRow(product, counter) {
   let priceOrVariants = '';
   if (product.variants && product.variants.length > 0) {
     priceOrVariants = `
@@ -372,7 +448,7 @@ function buildRow(product, index) {
   return `
       <tr>
           <td class="align-middle" data-label="الرقم">
-              ${index + 1}
+              ${++counter}
           </td>
 
           <td class="align-middle" data-label="إسم الصنف">
@@ -382,6 +458,11 @@ function buildRow(product, index) {
           <td class="align-middle" data-label="الباركود">
               ${product?.barcode || '<span class="text-muted">بدون باركود</span>'}
           </td>
+
+          <td class="align-middle" data-label="الفئة">
+              ${categories.find(category => category.id === product.category_id).name}
+          </td>
+
 
           <td class="align-middle" data-label="السعر"  style="vertical-align: middle;">
               ${priceOrVariants}
@@ -412,7 +493,7 @@ function buildRow(product, index) {
 
 function setCategoryTitle(categoryId) {
   const categoryTitle = document.getElementById('category_title');
-  if(categoryId === -1){
+  if (categoryId === -1) {
     categoryTitle.innerHTML = 'بحث حسب الباركود';
     return;
   }
