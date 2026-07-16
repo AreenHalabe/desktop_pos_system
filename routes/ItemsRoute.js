@@ -1,11 +1,17 @@
 import  express  from "express";
-import { addItem, deleteItem, getItem, updateItem, filterItemsByCategory, getMenueTree } from "../controllers/ItemsController.js";
+import { addItem, deleteItem, getItem, updateItem, filterItemsByCategory, getMenueTree, getAllItems } from "../controllers/ItemsController.js";
 
 export const ItemRoute = express.Router();
 
 
 ItemRoute.get('/item/get' , async(req , res) => {
         getItem(req , res);
+    }
+);
+
+
+ItemRoute.get('/items', async(req , res) =>{
+        getAllItems(req , res);
     }
 );
 

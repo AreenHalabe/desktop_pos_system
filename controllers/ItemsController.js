@@ -362,6 +362,41 @@ export const filterItemsByCategory = async (req, res) => {
 
 }
 
+
+export const getAllItems = async(req , res) =>{
+  try {
+    const token = req.headers.authorization;
+
+    if (!token) {
+      return res.status(401).json({
+        message: "إنتهت صلاحية الجلسة , الرجاء تسجيل الدخول مرة أخرى"
+      });
+    }
+
+    await checkToken(token);
+
+    const result = await pool.request().query(`
+      SELECT * 
+      FROM items
+      ORDER BY name ASC
+    `);
+
+    let items = result.recordset;
+
+    if (items.length > 0) {
+      items = await attachVariantsIfExist(items);
+    }
+
+    return res.status(200).json({items});
+
+  }catch(e){
+    return res.status(e.status || 500).json({
+      success: false,
+      message: e.message || "حدث خطأ غير معروف"
+    });
+  }
+}
+
 export const getMenueTree = async (req, res) => {
   try {
     const token = req.headers.authorization;
