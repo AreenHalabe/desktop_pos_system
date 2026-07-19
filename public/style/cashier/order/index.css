@@ -173,9 +173,28 @@ hr {
     box-shadow: 0 0 15px rgba(0,0,0,0.05);
     height: calc(100vh - 100px);
     width: 100%;
-    /* position: sticky;
-        top: 10px; */
+    /* overflow-y: auto; */
+}
+#order-items-list{
     overflow-y: auto;
+    padding-left: 8px;
+    padding-right: 8px;
+    overflow-x: hidden;
+}
+
+.confirm-section{
+    padding-left: 8px;
+    padding-right: 8px;
+}
+
+
+#order-items-list::-webkit-scrollbar {
+    width:8px;
+}
+
+#order-items-list::-webkit-scrollbar-thumb {
+    background: rgba(0,0,0,0.15);
+    border-radius: 10px;
 }
 .right-section{
     width: calc(100% - 320px - 15px);
@@ -454,6 +473,8 @@ hr {
 .pointer:hover{
     cursor: pointer;
 }
+
+
 
 
 /* تنسيق المودل على الجوال */

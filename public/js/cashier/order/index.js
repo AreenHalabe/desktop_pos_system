@@ -43,14 +43,7 @@ let finalOrderDetails = {
 };
 
 let sessionId = 0;
-let cashSummery = {
-    card_sales: 0,
-    cash_in: 0,
-    cash_out: 0,
-    cash_sales: 0,
-    expected_cash: 0,
-    opening_cash: 0,
-};
+
 let currentOrder = [];
 
 let products = [];
@@ -542,7 +535,7 @@ function addToOrder(productId, sizeIndex) {
         }
     }
 
-    updateOrderUI();
+    updateOrderUI(true);
 
 }
 function removeFromOrder(productId, sizeIndex) {
@@ -575,7 +568,7 @@ function changeQty(productId, sizeIndex, change) {
 }
 
 
-function updateOrderUI() {
+function updateOrderUI(addNewItem = false) {
     const list = document.getElementById('order-items-list');
     const totalEl = document.getElementById('total-price');
 
@@ -632,6 +625,11 @@ function updateOrderUI() {
     });
     list.innerHTML = html;
     totalEl.innerText = total + ' ₪';
+
+
+    if(addNewItem){
+        list.scrollTop = list.scrollHeight;
+    }
 }
 
 
@@ -656,11 +654,12 @@ function updateOrderDetailsModal() {
 
         html += `
             <div class="order-summary-item">
-                <div>
+                <div class = "d-flex gap-2">
                     <div class="item-name">
                         ${item.name}
                         ${item.sizeName ? `<span class="item-size"> - ${item.sizeName}</span>` : ''}
                     </div>
+                    <span class="item-qty">${item.qty}</span>
                 </div>
                 <div class="d-flex align-items-center gap-2">
                     <span class="item-qty">${item.qty}</span>
@@ -871,7 +870,6 @@ async function createOrder() {
             return false;
         }
         else if (res.status === 200) {
-            updateCashSammary();
             return {
                 inv_num: data.invoiceNum,
                 success: data.success
@@ -905,12 +903,9 @@ async function checkSession() {
             return false;
         }
         else if (res.status === 200) {
-            if (data.hasOpeningSession) {
-                cashSummery = data.cash_summery;
+             if (data.hasOpeningSession) {
                 sessionId = data.session_id;
-                cashBalance.textContent = `${data.cash_summery?.expected_cash || 0} ₪`;
-                cardBalance.textContent = `${data.cash_summery?.card_sales || 0} ₪`;
-            }
+             }
             return data.hasOpeningSession
         }
         else {
@@ -926,29 +921,6 @@ async function loadAndRenderItems() {
     await fetchMenuDetails();
     renderMainCategories(categoriesData);
 }
-
-
-function updateCashSammary() {
-    let totalPrice = finalOrderDetails.totalPrice;
-    let discount = finalOrderDetails.discount;
-    let finalPrice = totalPrice - discount;
-
-    if (finalOrderDetails.paymentMethod === 'بطاقة') {
-        cashSummery.card_sales += finalPrice;
-        updatePaymentMethodeBalance(cardBalance, finalPrice);
-    } else if (finalOrderDetails.paymentMethod === 'كاش') {
-        cashSummery.cash_sales += finalPrice;
-        cashSummery.expected_cash += finalPrice;
-        updatePaymentMethodeBalance(cashBalance, finalPrice);
-
-    }
-}
-function updatePaymentMethodeBalance(paymentBalance, OrderPrice) {
-    let currentValue = parseFloat(paymentBalance.textContent.replace('₪', '').trim()) || 0;
-    let newValue = currentValue + OrderPrice;
-    paymentBalance.textContent = newValue + " ₪";
-}
-
 
 
 
