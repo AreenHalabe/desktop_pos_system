@@ -76,3 +76,11 @@ async function checkPassword(password, hash) {
 
     return isMatch;
 }
+
+async function hashPassword(password) {
+    const saltRounds = 12;
+
+    const hash = await bcrypt.hash(password, saltRounds);
+
+    return hash;
+}
