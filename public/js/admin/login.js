@@ -61,15 +61,15 @@ form.addEventListener('submit', async (e) => {
             });
         }
         else {
+            enableLoginButton();
             errorList.style.display = 'block';
             errorMessage.innerHTML = data.message;
         }
     }
     catch(error){
+        enableLoginButton();
         errorList.style.display = 'block';
         errorMessage.innerHTML = `${error.message}`;
-    }finally{
-        enableLoginButton();
     }
 
 });
