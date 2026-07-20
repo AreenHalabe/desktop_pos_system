@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Halabi_services</title>
+
+
+    <link href="../../../wroot/assets/bootstrap/css/bootstrap.rtl.min.css" rel="stylesheet">
+    <link href="../../../wroot/assets/bootstrap/css/bootstrap-icons.css" rel="stylesheet">
+
+    <!-- FontAwesome -->
+    <link href="../../../wroot/assets/fontawesome/css/all.min.css" rel="stylesheet">
+
+
+    <link rel="stylesheet" href="../../../public/style/cashier/header.css" />
+    <link rel="stylesheet" href="../../../public/style/cashier/order/index.css" />
+
+
+</head>
+
+<body class="body">
+
+
+
+    <div class="container-fluid px-3">
+
+        <div class="main-container">
+            <div class="d-flex flex-column right-section">
+
+                <div class="products-section">
+
+                    <div class="sticky-container">
+                        <div class="p-1 header-menue">
+                            <site-header></site-header>
+                        </div>
+
+                        <div class="main-categories" id="mainCategoriesContainer">
+                            <div class="main-categories-wrapper">
+
+                                <div class="scroll-arrow left" id="scrollLeft">
+                                    <i class="bi bi-chevron-left"></i>
+                                </div>
+
+                                <div class="scroll-arrow right" id="scrollRight">
+                                    <i class="bi bi-chevron-right"></i>
+                                </div>
+                                <div class="categories-inner scroll-bar d-flex gap-2 p-1" id="mainCategories">
+
+                                </div>
+
+
+                            </div>
+
+                            <div id="error-box" class="error-box fs-5 hidden"></div>
+                        </div>
+
+                        <hr id="categoryDivider">
+
+                        <div class="sub-category-wraper">
+                            <div class="scroll-arrow left" id="subScrollLeft">
+                                <i class="bi bi-chevron-left"></i>
+                            </div>
+
+                            <div class="scroll-arrow right" id="subScrollRight">
+                                <i class="bi bi-chevron-right"></i>
+                            </div>
+                            <div class="d-flex gap-2 sub-category scroll-bar p-1" id="categoryContainer">
+
+                            </div>
+
+                        </div>
+
+
+
+
+                    </div>
+
+
+
+
+                    <div class="d-flex flex-column align-items-center justify-content-center gap-2" id="spinnerLoad">
+                        <div class="spinner-border text-primary" role="status"></div>
+                        <span class="text-muted">جاري تحميل...</span>
+                    </div>
+                    <div class="d-flex flex-column align-items-center justify-content-center gap-2 d-none"
+                        id="sessionStatus">
+                        <span class="fs-3">لا يوجد صندوق مفتوح</span>
+                    </div>
+
+
+
+
+                    <div class="products-grid mt-3" id="products-grid">
+
+                    </div>
+                </div>
+            </div>
+
+
+
+            <!-- <div class="cart-section">
+                <div class="order-sidebar d-flex flex-column p-3">
+                    <h5 class="mb-3 text-center"><i class="fas fa-shopping-basket"></i> الطلب الحالي</h5>
+
+                    <div id="order-items-list">
+                        <p class="text-center text-muted mt-4">سلة الطلب فارغة</p>
+                    </div>
+
+                    <div class="mt-3 pt-3 border-top">
+                        <div class="d-flex justify-content-between mb-2">
+                            <span>المجموع الكلي:</span>
+                            <span class="text-success fw-bold" id="total-price">0 ₪</span>
+                        </div>
+                        <button class="btn btn-success w-100 mb-3 submit-order-btn">
+                            <i class="fas fa-check"></i> تأكيد الطلب
+                        </button>
+                    </div>
+                </div>
+            </div> -->
+
+            <div class="cart-section">
+                <div class="order-sidebar d-flex flex-column p-3">
+
+                    <h5 class="mb-3 text-center">
+                        <i class="fas fa-shopping-basket"></i> الطلب الحالي
+                    </h5>
+
+                    <div class="mb-3">
+                        <div class="input-group">
+                            <span class="input-group-text bg-white">
+                                <i class="fas fa-barcode text-secondary"></i>
+                            </span>
+
+                            <input type="text" id="barcode-input" dir="ltr" class="form-control"
+                                placeholder="امسح أو أدخل الباركود..." autocomplete="off" spellcheck="false">
+                        </div>
+                    </div>
+
+                    <div id="order-items-list">
+                        <p class="text-center text-muted mt-4">
+                            سلة الطلب فارغة
+                        </p>
+                    </div>
+
+                    <div class="mt-3 pt-3 border-top mt-auto">
+                        <div class="d-flex justify-content-between mb-2">
+                            <span>المجموع الكلي:</span>
+                            <span class="text-success fw-bold" id="total-price">0 ₪</span>
+                        </div>
+
+                        <button class="btn btn-success w-100 mb-3 submit-order-btn">
+                            <i class="fas fa-check"></i> تأكيد الطلب
+                        </button>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <div class="modal fade" id="sizeModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title" id="modalProductName">اختر الحجم</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
+                        aria-label="Close"></button>
+                </div>
+                <div class="modal-body" id="sizesContainer">
+                    <!-- سيتم ملؤه بالجافاسكريبت -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="confirmOrderModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content">
+                <div class="modal-header bg-success text-white">
+                    <h5 class="modal-title">
+                        <i class="fas fa-clipboard-check"></i> تأكيد الطلب
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
+                        aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <!-- تفاصيل الطلب -->
+                    <div class="card mb-3">
+                        <div class="card-header bg-light py-2">
+                            <h6 class="mb-0"><i class="fas fa-utensils"></i> تفاصيل الطلب</h6>
+                        </div>
+                        <div class="card-body" id="order-details-list">
+                            <!-- سيتم ملؤه بالجافاسكريبت -->
+                        </div>
+                        <div class="card-footer modal-footer-custom">
+                            <div class="d-flex justify-content-between fw-bold fs-5">
+                                <span>المجموع الكلي:</span>
+                                <span class="text-success" id="modal-total-price">0 ₪</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- خيارات الطلب -->
+                    <div class="row g-3">
+                        <!-- نوع الطلب -->
+                        <div class="col-md-6 d-none">
+                            <label class="form-label fw-bold">نوع الطلب <span class="text-danger">*</span></label>
+                            <select class="form-select" id="orderType">
+                                <option value="طاولة">طاولة</option>
+                                <option value="سفري">سفري</option>
+                            </select>
+                        </div>
+
+                        <!-- رقم الطاولة -->
+                        <div class="col-md-6 d-none" id="tableNumberDiv">
+                            <label class="form-label fw-bold">رقم الطاولة</label>
+                            <input type="number" class="form-control" id="tableNumber" placeholder="أدخل رقم الطاولة">
+                        </div>
+
+
+                        <div class="col-12 d-flex">
+
+
+                            <div class="col-12  d-none" id="paymentStatusDiv">
+                                <h6 class="mb-3 fw-bold">
+                                    <i class="bi bi-credit-card"></i>
+                                    حالة الدفع
+                                </h6>
+
+                                <div class="d-flex justify-content-around">
+                                    <div class="form-check mb-2">
+                                        <input class="form-check-input pointer" type="radio" name="payment_status"
+                                            id="pay_later" value="unpaid" checked>
+
+                                        <label class="form-check-label pointer" for="pay_later">
+                                            <i class="fa-solid fa-table me-1 text-primary"></i>
+                                            سيبقى الطلب مفتوحًا حتى يتم تسديده من صفحة الطاولات , عند إغلاق الطاولة.
+                                        </label>
+                                    </div>
+                                </div>
+
+                            </div>
+
+                            <div class="col-md-6" id="paymentMethodDiv">
+                                <label class="form-label fw-bold">طريقة الدفع <span class="text-danger">*</span></label>
+                                <select class="form-select" id="paymentMethod">
+                                    <option value="كاش">كاش</option>
+                                    <option value="بطاقة">بطاقة</option>
+                                </select>
+                            </div>
+                        </div>
+
+
+                        <!-- رقم الزبون -->
+                        <div class="col-md-6" id="customerPhoneDiv">
+                            <label class="form-label fw-bold">الزبون</label>
+                            <input type="tel" class="form-control" id="customerPhone"
+                                placeholder="إسم أو رقم الزبون (اختياري)">
+                        </div>
+
+                        <!-- العنوان -->
+                        <div class="col-md-6" id="customerAddressDiv">
+                            <label class="form-label fw-bold">العنوان</label>
+                            <textarea class="form-control" id="customerAddress" rows="2"
+                                placeholder="أدخل عنوان التوصيل (اختياري)"></textarea>
+                        </div>
+
+
+                        <!-- ملاحظات -->
+                        <div class="col-12">
+                            <label class="form-label fw-bold">ملاحظات</label>
+                            <textarea class="form-control" id="orderNotes" rows="2"
+                                placeholder="أي ملاحظات على الطلب (اختياري)"></textarea>
+                        </div>
+                        <!-- الخصم -->
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold">الخصم</label>
+
+                            <div class="input-group">
+                                <input type="number" class="form-control" id="discountAmount" placeholder="0" min="0">
+
+                                <span class="input-group-text">₪</span>
+                            </div>
+
+                            <small class="text-muted">
+                                اتركه فارغ إذا لا يوجد خصم
+                            </small>
+                        </div>
+
+                        <!-- المجموع بعد الخصم -->
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold">المجموع بعد الخصم</label>
+
+                            <div class="form-control bg-light fw-bold text-success" id="finalTotalPrice">
+                                0 ₪
+                            </div>
+                        </div>
+
+
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إلغاء</button>
+                    <button type="button" class="btn btn-success send-order-btn" id="confirmSendBtn">
+                        <i class="fas fa-paper-plane"></i> إرسال الطلب
+                    </button>
+                </div>
+
+                <div id="modal-loading-overlay" class="modal-loading-overlay hidden">
+                    <div class="spinner-border text-light" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <div class="modal fade" id="successModal" tabindex="-1" data-bs-backdrop="static" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-sm">
+            <div class="modal-content text-center">
+                <div class="modal-body p-4">
+                    <!-- أيقونة النجاح -->
+                    <div class="success-icon mb-3">
+                        <i class="fas fa-check-circle text-success" style="font-size: 4rem;"></i>
+                    </div>
+
+                    <!-- عنوان النجاح -->
+                    <h4 class="text-success mb-2">تم بنجاح!</h4>
+                    <!-- <p class="text-muted mb-4">تم إرسال الطلب رقم <span id="orderNumber" class="fw-bold">#001</span></p> -->
+
+                    <!-- أزرار الإجراءات -->
+                    <div class="d-flex gap-2">
+                        <button class="btn btn-primary flex-fill print-invoice-btn">
+                            <i class="fas fa-print"></i> طباعة الفاتورة
+                        </button>
+                        <button class="btn btn-secondary flex-fill close-success-modal">
+                            <i class="fas fa-times"></i> إلغاء
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+
+
+    <script src="../../../wroot/assets/bootstrap/js/bootstrap.bundle.min.js"></script>
+
+    <script src="../../../wroot/assets/jquery/jquery-3.7.1.min.js"></script>
+    <script src="../../../wroot/assets/bootbox/bootbox.min.js"></script>
+
+    <script type="module" src="../../../public/js/cashier/order/index.js"></script>
+
+</body>
+
+</html>

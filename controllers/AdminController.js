@@ -54,7 +54,88 @@ export const loginAsAdmin = async (req, res) => {
 }
 
 
+export const loginAdmin = async (req , res) =>{
+    try {
+        const {id , password} = req.body;
 
+        const adminResult = await pool
+            .request()
+            .input("id", sql.Int, Number(id))
+            .query("SELECT * FROM admin WHERE id = @id");
+
+        
+        const admin = adminResult.recordset[0];
+
+
+        if (!admin){
+            throw new SystemError("اسم المستخدم أو كلمة المرور غير صحيحة", 401);
+        }
+
+        const correctPassword = await checkPassword(password , admin.admin_password);
+
+        if(!correctPassword){
+            throw new SystemError("إسم المستخدم أو كلمة المرور غير صحيحة", 401);
+        }
+
+
+        
+
+        const token = await generateNewToken(admin.id);
+
+        return res.status(200).json({
+            success: true,
+            id: admin.id,
+            token: token,
+        });
+
+    } catch (e) {
+        const status = e.status || 500;
+        const message = e.message || "حدث خطأ غير معروف";
+
+        return res.status(status).json({
+            success: false,
+            message,
+        });
+    }
+}
+
+export const loginAsCashier = async (req, res) => {
+    try {
+        const { name, password } = req.body;
+
+        const result = await pool.request()
+            .input("name", sql.NVarChar, name)
+            .query("SELECT * FROM admin WHERE name = @name");
+
+        
+
+        const admin = result.recordset[0];
+
+        if (!admin){
+            throw new SystemError("اسم المستخدم أو كلمة المرور غير صحيحة", 401);
+        }
+
+        const correctPassword = await checkPassword(password , admin.password);
+        if(!correctPassword){
+            throw new SystemError("إسم المستخدم أو كلمة المرور غير صحيحة", 401);
+        }
+
+        const token = await generateNewToken(admin.id);
+
+        return res.status(200).json({
+            success: true,
+            id: admin.id,
+            token: token
+        });
+
+    } catch (e) {
+        return res.status(e.status || 500).json({
+            success: false,
+            message: e.message || "حدث خطأ غير معروف"
+        });
+    }
+
+}
 
 
 

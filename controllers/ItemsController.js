@@ -422,7 +422,7 @@ export const getMenueTree = async (req, res) => {
           i.id    AS item_id,
           i.name  AS item_name,
           i.price AS item_price,
-          i.station AS item_station,
+          i.barcode AS item_barcode,
 
           s.id    AS size_id,
           s.name  AS size_name,
@@ -667,7 +667,7 @@ function buildMenuTree(rows) {
         id: row.item_id,
         name: row.item_name,
         price: row.item_price,
-        station: row.item_station,
+        barcode: row.item_barcode,
         category_id: row.category_id,
         sizes: []
       };

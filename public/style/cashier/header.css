@@ -1,0 +1,129 @@
+
+.menu-btn {
+  background-color: #212529; /* dark */
+  color: white;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 8px;
+  transition: 0.2s;
+}
+
+.menu-btn i {
+  font-size: 18px;
+}
+
+.menu-btn:hover {
+  background-color: #343a40;
+  color: white;
+  transform: scale(1.05);
+}
+
+.menu-btn:active {
+  transform: scale(0.95);
+}
+
+/* .menu-indicator {
+  width: 8px;
+  height: 8px;
+  background-color: red;
+  border-radius: 50%;
+  position: absolute;
+  top: 5px;
+  right: 5px;
+  animation: pulse 1.5s infinite;
+} */
+
+@keyframes pulse {
+  0% { transform: scale(1); opacity: 1; }
+  70% { transform: scale(1.6); opacity: 0; }
+  100% { transform: scale(1); opacity: 0; }
+}
+
+
+
+
+
+
+
+
+.offcanvas{
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+    box-shadow: 0 2px 15px rgba(0,0,0,0.1);
+    z-index: 10000;
+}
+
+.nav-link {
+    color: rgba(255,255,255,0.8) !important;
+    padding: 0.5rem 1rem !important;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+    font-weight: 500;
+}
+
+.nav-link:hover {
+    color: #fff !important;
+    transform: translateY(-1px);
+    background: rgba(255,255,255,0.1);
+}
+
+.nav-link.active {
+    background: rgba(13, 110, 253, 0.2) !important;
+    color: #fff !important;
+}
+
+.offcanvas-body{
+    border-top: 1px solid rgb(255, 255, 255);
+}
+
+.offcanvas-body a {
+    display: block;
+    margin-bottom: 10px;
+}
+.close-btn{
+    filter: invert(1);
+}
+
+
+      /* .admin-btn {
+    background: rgba(255, 193, 7, 0.15);
+    border: 1px solid rgba(255, 193, 7, 0.4);
+    color: #ffc107 !important;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+.admin-btn:hover {
+    background: rgba(255, 193, 7, 0.25);
+    transform: translateY(-1px);
+    color: #fff !important;
+} */
+
+
+.admin-btn {
+    background: rgba(255, 193, 7, 0.1);
+    color: #ffc107 !important;
+    border: 1px solid rgba(255, 193, 7, 0.3);
+    transition: all 0.3s ease;
+}
+
+.admin-btn:hover {
+    background: rgba(255, 193, 7, 0.2) !important;
+    border-color: #ffc107;
+    transform: translateY(-1px);
+}
+
+.admin-btn i {
+    font-size: 0.95rem;
+}
+
+.logout-btn {
+    background: rgba(220, 53, 69, 0.1);
+    color: #ff6b6b !important;
+    border: 1px solid rgba(220, 53, 69, 0.3);
+}
+
+.logout-btn:hover {
+    background: rgba(220, 53, 69, 0.2) !important;
+    border-color: #dc3545;
+    transform: translateY(-1px);
+}
