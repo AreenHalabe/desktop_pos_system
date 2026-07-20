@@ -113,7 +113,7 @@ document.addEventListener('DOMContentLoaded', async function() {
         } else {
             price.disabled = false;
             price.placeholder = 'السعر';
-            price.style.cursor = 'default'; 
+            price.style.cursor = 'text'; 
             toggleVariants(this.checked);
             
 
@@ -172,7 +172,7 @@ function resetProductForm() {
     price.disabled = false;
     price.value = '';
     price.placeholder = 'السعر';
-    price.style.cursor = 'default'; // أو 'auto'
+    price.style.cursor = 'text';
     // hide variants, show base price
     variantsBox.style.display = 'none';
 

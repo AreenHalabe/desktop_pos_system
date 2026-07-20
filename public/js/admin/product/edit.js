@@ -94,7 +94,7 @@ hasVariantsCheckbox.addEventListener('change', function() {
     } else {
         price.disabled = false;
         price.placeholder = 'السعر';
-        price.style.cursor = 'default'; 
+        price.style.cursor = 'text'; 
         toggleVariants(this.checked);
         variantsBox.style.display = 'none';
     }
