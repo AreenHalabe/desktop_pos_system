@@ -3,6 +3,7 @@ import { pool , sql } from "../DataBaseConnections/dbconnection.js";
 import { SystemError } from "../shared/functionality.js";
 import { z } from "zod";
 import { SignJWT } from "jose";
+import bcrypt from "bcrypt";
 
 export const loginAsCashier = async (req, res) => {
     try {
@@ -16,8 +17,13 @@ export const loginAsCashier = async (req, res) => {
 
         const admin = result.recordset[0];
 
-        if (!admin || admin.password !== password) {
+        if (!admin){
             throw new SystemError("اسم المستخدم أو كلمة المرور غير صحيحة", 401);
+        }
+
+        const correctPassword = await checkPassword(password , admin.password);
+        if(!correctPassword){
+            throw new SystemError("إسم المستخدم أو كلمة المرور غير صحيحة", 401);
         }
 
         const token = await generateNewToken(admin.id);
@@ -46,7 +52,6 @@ export const loginAsCashier = async (req, res) => {
 
 
 async function generateNewToken(adminId) {
-    // const secretKey = process.env.SECRET_KEY;
     const secretKey = 'eb86b*b$81d2ef0%2767f*b3c37975111710omwqwe4q2^';
 
 
@@ -55,4 +60,10 @@ async function generateNewToken(adminId) {
         .setExpirationTime("15h")
         .sign(new TextEncoder().encode(secretKey));
     return token;
+}
+
+async function checkPassword(password, hash) {
+    const isMatch = await bcrypt.compare(password, hash);
+
+    return isMatch;
 }
