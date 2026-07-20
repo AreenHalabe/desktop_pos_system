@@ -352,6 +352,8 @@ function renderOrdersTable() {
     updatePagination(orderPaginationBtnContainer);
 }
 
+
+
 function renderTransactionsTable(){
     const tableBody = document.getElementById('transactions-table-body');
 

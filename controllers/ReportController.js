@@ -1,4 +1,3 @@
-import { body, query } from "express-validator";
 import { DateTime } from "luxon";
 import { StatusCode } from "../HTTPSStatusCode/StatusCode.js";
 import { pool, sql } from "../DataBaseConnections/dbconnection.js";

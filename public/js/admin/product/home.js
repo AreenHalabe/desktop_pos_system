@@ -1,6 +1,6 @@
 import { fetchCategories } from "../../../api/category.js";
 import { url } from "../../../api/urlEndPoint.js";
-import { showAuthExpired, bootboxConfirm, bootboxSuccess } from "../../../component/bootbox.js";
+import { showAuthExpired, bootboxConfirm, bootboxSuccess, bootboxError } from "../../../component/bootbox.js";
 import { setActiveNavLink } from "../../../component/bootbox.js";
 import { removeAuthToken, getAuthToken } from "../../../component/auth.js";
 
@@ -11,14 +11,23 @@ const emptyNotice = document.getElementById('emptyNotice');
 const header = document.querySelector("site-header");
 const loader = document.getElementById('loader-product-table');
 
+const searchInput = document.getElementById("searchInput");
 
-const modal = new bootstrap.Modal(document.getElementById('imageModal'));
-const modalImg = document.getElementById('modalImage');
 
 
 
 const params = new URLSearchParams(window.location.search);
 const categoryIdParams = params.get('cid');
+
+let currentDisplayedCategoryId;
+let categories = [];
+let items = [];
+let filteredItems;
+
+let currentPage;
+let itemsPerPage = 15;
+let totalPages;
+
 
 
 class SiteHeader extends HTMLElement {
@@ -70,22 +79,44 @@ header.addEventListener("header:ready", () => {
 
 document.addEventListener("DOMContentLoaded", async function () {
   await buildSelectCategory();
-  clearTable();
-  setupImageModal();
-  showEmptyNotice(true, 'الرجاء اختيار فئة لعرض الأصناف');
-  categoryFilter.addEventListener('change', function () {
-    if (this.value === 'goToPage') {
-      window.location.href = '../category/home.html';
-      return;
-    }
-    fetchProducts(this.value);
-  });
+  await loadItems();
+
 
   if (categoryIdParams) {
     setValueForSelect(categoryIdParams);
-    await fetchProducts(categoryIdParams);
+
+    filteredItems = items.filter(item => item.category_id === Number(categoryIdParams));
+    handelTotalPage(filteredItems.length);
+
+    fetchProducts(Number(categoryIdParams));
+  }
+  else {
+    handelTotalPage(items.length);
+
+    fetchProducts(0);
+
   }
 
+});
+
+
+categoryFilter.addEventListener('change', function () {
+  if (this.value === 'goToPage') {
+    window.location.href = '../category/home.html';
+    return;
+  }
+  if(Number(this.value) === 0){
+    handelTotalPage(items.length);
+    fetchProducts(Number(this.value));
+  }
+  else{
+    filteredItems = items.filter(item => item.category_id === Number(this.value));
+    handelTotalPage(filteredItems.length);
+    fetchProducts(Number(this.value));
+  }
+
+  
+  searchInput.value = '';
 });
 
 document.addEventListener('submit', function (e) {
@@ -99,6 +130,103 @@ document.addEventListener('submit', function (e) {
   }
 });
 
+document.addEventListener("click", async function (e) {
+
+  if (e.target.closest('.prevBtn')) {
+    prevPage();
+  }
+  else if (e.target.closest('.nextBtn')) {
+    nextPage();
+  }
+
+});
+
+searchInput.addEventListener("keydown", (e) => {
+  if (e.key === "Enter") {
+    const value = searchInput.value.trim();
+
+
+    const item = items.find(item => item.barcode === value);
+
+    if (!item) {
+      bootboxError("لم يتم العثور على صنف مرتبط بالباركود المدخل.");
+    }
+    else {
+      renderItemIntable(item);
+    }
+  }
+});
+
+
+function renderItemIntable(product) {
+  setCategoryTitle(-1);
+  let priceOrVariants = '';
+  if (product.variants && product.variants.length > 0) {
+    priceOrVariants = `
+        <ul class="list-unstyled m-0 ul_box">
+          ${product.variants.map(variant => `
+            <li class="list" >
+              <span class="badge bg-primary" dir="ltr"> 
+                ${escapeHtml(variant.name)} :  ₪ ${escapeHtml(variant.price)} 
+              </span>
+                
+            </li>
+          `).join('')}
+        </ul>
+      `
+      ;
+
+  } else {
+    priceOrVariants = `
+        <span class="badge bg-primary fs-6"> ${escapeHtml(product.price ?? '-')} ₪ </span>
+      `
+      ;
+  }
+
+
+  tbody.innerHTML = `
+      <tr>
+          <td class="align-middle" data-label="الرقم">
+              ${1}
+          </td>
+
+          <td class="align-middle" data-label="إسم الصنف">
+              ${escapeHtml(product.name)}
+          </td>
+
+          <td class="align-middle" data-label="الباركود">
+              ${product?.barcode || '<span class="text-muted">بدون باركود</span>'}
+          </td>
+           <td class="align-middle" data-label="الفئة">
+              ${categories.find(category => category.id === product.category_id).name}
+          </td>
+
+          <td class="align-middle" data-label="السعر"  style="vertical-align: middle;">
+              ${priceOrVariants}
+          </td>
+
+          <td class="align-middle" data-label="تعديل / حذف">
+            <div class="d-flex justify-content-center gap-2 flex-wrap btn-group-sm">
+              <a href="./edit.html?item_id=${product.id}" class="btn btn-sm btn-secondary">
+                <i class="fas fa-pen-to-square"></i>
+              </a>
+              <form class = 'delete-item-form'
+                data-confirm-message = 'هل أنت متأكد من حذف هذا الصنف <strong>${product.name}</strong>؟'
+              >
+                <button type="submit" 
+                  class="btn btn-sm delete-btn"
+                  data-item-id="${product.id}"
+                  data-category-id="${product.category_id}"
+                >
+                  <i class="fas fa-trash"></i>
+                </button>
+              </form>
+            </div>
+          </td>
+      </tr>
+    `
+    ;
+}
 
 
 function setValueForSelect(categoryId) {
@@ -106,7 +234,7 @@ function setValueForSelect(categoryId) {
 }
 
 async function buildSelectCategory() {
-  const categories = await fetchCategories();
+  categories = await fetchCategories();
   const select = document.getElementById("categoryFilter");
 
   if (categories.length > 0) {
@@ -117,29 +245,101 @@ async function buildSelectCategory() {
       select.appendChild(option);
     });
   }
+  const option2 = document.createElement("option");
+  option2.value = "goToPage";
+  option2.textContent = "➕ إنشاء فئة جديدة";
+  select.appendChild(option2);
+}
 
 
-  const newOption = document.createElement("option");
-  newOption.value = "goToPage";
-  newOption.textContent = "➕ إنشاء فئة جديدة";
-  select.appendChild(newOption);
+function prevPage() {
+  if (currentPage > 1) {
+    currentPage--;
+    fetchProducts(currentDisplayedCategoryId);
+  }
+}
+function nextPage() {
+  if (currentPage < totalPages) {
+    currentPage++;
+    fetchProducts(currentDisplayedCategoryId);
+  }
+}
+
+
+function handelTotalPage(numOfItems) {
+  if (numOfItems == 0) return;
+  currentPage = 1;
+
+  handleTotalItems(numOfItems)
+}
+
+function handleTotalItems(numOfItems) {
+  if (numOfItems == 0) return;
+  const totalItems = numOfItems;
+  totalPages = Math.ceil(totalItems / itemsPerPage);
+
+  if(totalPages === 1){
+    currentPage = 1;
+  }
+}
+
+function updatePagination() {
+  const pageInfo = document.getElementById('pageInfo');
+  pageInfo.textContent = `صفحة ${currentPage} من ${totalPages}`;
+  document.getElementById('prevBtn').disabled = currentPage === 1;
+  document.getElementById('nextBtn').disabled = currentPage === totalPages;
+}
+
+function fetchProducts(categoryId) {
+  currentDisplayedCategoryId = categoryId;
+  showLoader();
+  clearTable();
+  showEmptyNotice(false);
+  setCategoryTitle(categoryId);
+
+
+
+  if (categoryId === 0) {
+    filteredItems = items;
+  }
+
+
+
+  if (filteredItems.length === 0) {
+    hideTable();
+    showEmptyNotice(true, 'لا توجد أصناف في هذه الفئة');
+    hideLoader();
+    return;
+  }
+
+  const start = (currentPage - 1) * itemsPerPage;
+  const end = start + itemsPerPage;
+  const pageItems = filteredItems.slice(start, end);
+
+  let counter = (currentPage * 15) - (15);
+
+  displayTable();
+  let html = '';
+  pageItems.forEach(p => {
+    html += buildRow(p, counter);
+    ++counter;
+  });
+  tbody.innerHTML = html;
+
+  updatePagination();
+
+  hideLoader();
 
 }
 
 
-async function fetchProducts(categoryId) {
+async function loadItems() {
+  showLoader();
+  showEmptyNotice(false);
+  // clearTable();
+  // setCategoryTitle(0);
   try {
-    showLoader();
-    clearTable();
-    showEmptyNotice(false);
-    setCategoryTitle(categoryId);
-
-    if (!categoryId || categoryId === 'all') {
-      showEmptyNotice(true, 'الرجاء اختيار فئة لعرض الأصناف');
-      return;
-    }
-
-    const res = await fetch(url + `/item/by-category?category_id=${categoryId}`, {
+    const res = await fetch(url + '/items', {
       method: 'GET',
       headers: {
         "Authorization": `${getAuthToken('auth')}`
@@ -153,26 +353,19 @@ async function fetchProducts(categoryId) {
       showAuthExpired(data.message);
       return;
     }
-    if (data.length === 0) {
-      hideTable();
-      showEmptyNotice(true, 'لا توجد أصناف في هذه الفئة');
-      return;
+    else if (res.status === 200) {
+      items = data.items;
     }
-
-    displayTable();
-    // بناء الصفوف
-    let html = '';
-    data.forEach((p, i) => {
-      html += buildRow(p, i);
-    });
-    tbody.innerHTML = html;
-
-  } catch (err) {
-    showEmptyNotice(true, err.message);
+    else {
+      showEmptyNotice(data.message);
+    }
+  } catch (e) {
+    showEmptyNotice(e.message);
   } finally {
     hideLoader();
   }
 }
+
 
 async function deleteItem({ itemId, categoryId }) {
   showEmptyNotice(false);
@@ -191,7 +384,18 @@ async function deleteItem({ itemId, categoryId }) {
     }
     if (res.status === 200) {
       bootboxSuccess(data.message);
-      await fetchProducts(categoryId);
+
+      await loadItems();
+
+      if(currentDisplayedCategoryId === 0){
+        handleTotalItems(items.length);
+      }
+      else{
+        filteredItems = items.filter(item => item.category_id === Number(currentDisplayedCategoryId));
+        handleTotalItems(filteredItems.length);
+      }
+      
+      fetchProducts(Number(currentDisplayedCategoryId));
       return;
     }
     showEmptyNotice(true, data.message);
@@ -216,72 +420,93 @@ function escapeHtml(text) {
     .replace(/'/g, '&#039;');
 }
 
-function buildRow(product, index) {
+function buildRow(product, counter) {
   let priceOrVariants = '';
   if (product.variants && product.variants.length > 0) {
-
     priceOrVariants = `
-          <ul class="list-unstyled m-0 ul_box">
-              ${product.variants.map(variant => `
-                  <li class="list" >
-                    <span class="badge bg-primary" dir="ltr"> 
-                      ${escapeHtml(variant.name)} :  ₪ ${escapeHtml(variant.price)} 
-                    </span>
-                     
-                  </li>
-              `).join('')}
-          </ul>
-      `;
+        <ul class="list-unstyled m-0 ul_box">
+          ${product.variants.map(variant => `
+            <li class="list" >
+              <span class="badge bg-primary" dir="ltr"> 
+                ${escapeHtml(variant.name)} :  ₪ ${escapeHtml(variant.price)} 
+              </span>
+                
+            </li>
+          `).join('')}
+        </ul>
+      `
+      ;
 
   } else {
-    // ما في أحجام → نعرض السعر العادي
     priceOrVariants = `
-            <span class="badge bg-primary fs-6"> ${escapeHtml(product.price ?? '-')} ₪ </span>
-        `;
-  }
-  return `
-        <tr>
-            <td class="align-middle" data-label="الرقم">
-                ${index + 1}
-            </td>
-
-            <td class="align-middle" data-label="إسم الصنف">
-                ${escapeHtml(product.name || '')}
-            </td>
-
-            <td class="align-middle" data-label="السعر"  style="vertical-align: middle;">
-                ${priceOrVariants}
-            </td>
-
-            <td class="align-middle" data-label="تعديل / حذف">
-              <div class="d-flex justify-content-center gap-2 flex-wrap btn-group-sm">
-                <a href="./edit.html?item_id=${product.id}" class="btn btn-sm btn-secondary">
-                  <i class="fas fa-pen-to-square"></i>
-                </a>
-                <form class = 'delete-item-form'
-                  data-confirm-message = 'هل أنت متأكد من حذف هذا الصنف <strong>${product.name}</strong>؟'
-                >
-                  <button type="submit" 
-                    class="btn btn-sm delete-btn"
-                    data-item-id="${product.id}"
-                    data-category-id="${product.category_id}"
-                  >
-                   <i class="fas fa-trash"></i>
-                  </button>
-                </form>
-              </div>
-            </td>
-        </tr>
+        <span class="badge bg-primary fs-6"> ${escapeHtml(product.price ?? '-')} ₪ </span>
       `
+      ;
+  }
+
+
+  return `
+      <tr>
+          <td class="align-middle" data-label="الرقم">
+              ${++counter}
+          </td>
+
+          <td class="align-middle" data-label="إسم الصنف">
+              ${escapeHtml(product.name || '')}
+          </td>
+
+          <td class="align-middle" data-label="الباركود">
+              ${product?.barcode || '<span class="text-muted">بدون باركود</span>'}
+          </td>
+
+          <td class="align-middle" data-label="الفئة">
+              ${categories.find(category => category.id === product.category_id).name}
+          </td>
+
+
+          <td class="align-middle" data-label="السعر"  style="vertical-align: middle;">
+              ${priceOrVariants}
+          </td>
+
+          <td class="align-middle" data-label="تعديل / حذف">
+            <div class="d-flex justify-content-center gap-2 flex-wrap btn-group-sm">
+              <a href="./edit.html?item_id=${product.id}" class="btn btn-sm btn-secondary">
+                <i class="fas fa-pen-to-square"></i>
+              </a>
+              <form class = 'delete-item-form'
+                data-confirm-message = 'هل أنت متأكد من حذف هذا الصنف <strong>${product.name}</strong>؟'
+              >
+                <button type="submit" 
+                  class="btn btn-sm delete-btn"
+                  data-item-id="${product.id}"
+                  data-category-id="${product.category_id}"
+                >
+                  <i class="fas fa-trash"></i>
+                </button>
+              </form>
+            </div>
+          </td>
+      </tr>
+    `
     ;
 }
 
 function setCategoryTitle(categoryId) {
   const categoryTitle = document.getElementById('category_title');
+  if (categoryId === -1) {
+    categoryTitle.innerHTML = 'بحث حسب الباركود';
+    return;
+  }
+
   const select = document.getElementById("categoryFilter");
   const option = Array.from(select.options).find(opt => opt.value === `${categoryId}`);
 
-  categoryTitle.innerHTML = option.text;
+  if (option.text === "عرض الكل") {
+    categoryTitle.innerHTML = "كل الأصناف";
+  }
+  else {
+    categoryTitle.innerHTML = option.text;
+  }
 }
 
 
@@ -290,15 +515,7 @@ function clearTable() {
 }
 
 
-function setupImageModal() {
-  table.addEventListener("click", (e) => {
-    const img = e.target.closest(".modal-trigger");
-    if (!img) return;
 
-    modalImg.src = img.src;
-    modal.show();
-  });
-}
 
 
 function showLoader() {

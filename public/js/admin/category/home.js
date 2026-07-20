@@ -3,6 +3,7 @@ import { url } from "../../../api/urlEndPoint.js";
 import { fetchMainCategories } from "../../../api/category.js";
 import { removeAuthToken, getAuthToken } from "../../../component/auth.js";
 
+
 const header = document.querySelector("site-header");
 
 const addMainCategoryBtn = document.getElementById("addMainCategoryBtn");
@@ -341,7 +342,6 @@ async function deleteMainCategory({ id }) {
 }
 
 async function getMainCategoryDetiles() {
-
   try {
     const res = await fetch(url + '/maincategory/details', {
       method: "GET",

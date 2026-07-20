@@ -11,7 +11,8 @@
 
     
     const hasVariantsCheckbox = document.getElementById('has_variants');
-    const basePriceBox        = document.getElementById('base_price_box');
+    const autoBarcodeCheckbox = document.getElementById('auto_barcode');
+
     const variantsBox         = document.getElementById('variants_box');
     const addVariantBtn       = document.getElementById('add_variant_btn');
     const variantsTable       = document.getElementById('variants_table');
@@ -19,6 +20,7 @@
 
     const backBtn             = document.getElementById('backBtn');
     let price                 = document.getElementById('price');
+    const barcode             = document.getElementById('barcode');
     let loader                = document.getElementById("overlay_loader");
 
 
@@ -88,16 +90,35 @@ hasVariantsCheckbox.addEventListener('change', function() {
     if (this.checked) {
         price.value = '';
         price.disabled = true;
+        price.placeholder = 'السعر يُحدد في جدول الأحجام';
+        price.style.cursor = 'not-allowed';
         toggleVariants(this.checked);
-        basePriceBox.style.display = 'none';
+        
         variantsBox.style.display = 'block';
     } else {
         price.disabled = false;
+        price.placeholder = 'السعر';
+        price.style.cursor = 'text';
         toggleVariants(this.checked);
-        basePriceBox.style.display = 'block';
         variantsBox.style.display = 'none';
     }
 });
+
+autoBarcodeCheckbox.addEventListener('change', function () {
+    if (this.checked) {
+        barcode.value = '';
+        barcode.disabled = true;
+        barcode.placeholder = 'سيتم توليد باركود تلقائياً';
+        barcode.style.cursor = 'not-allowed';
+    } else {
+        barcode.disabled = false;
+        barcode.placeholder = 'الباركود';
+        barcode.style.cursor = 'text';
+
+    }
+});
+
+
 
 addVariantBtn?.addEventListener('click', function() {
     const row = document.createElement('tr');
@@ -138,6 +159,8 @@ form.addEventListener("submit",  async function(e){
         name: formData.get("name"),
         category_id : formData.get('category_id'),
         price : formData.get('price'),
+        auto_generated_barcode : formData.get('auto_barcode'),
+        barcode : formData.get('barcode'),
         has_variants : formData.get('has_variants'),
         variantsSize : formData.getAll('variants[size][]'),
         variantsPrice : formData.getAll('variants[price][]')
@@ -207,25 +230,20 @@ function toggleVariants(enabled) {
 
 function addDataIntoFormData(item) {
     document.getElementById('name').value = item.name || '';
-    // document.getElementById('description').value = item.description || '';
     document.getElementById('category_id').value = item.category_id ;
     document.getElementById('price').value = item.price || '';
     document.getElementById('old-image').value = item.image || '' ;
+    document.getElementById('barcode').value = item.barcode || '';
     categoryId = item.category_id;
-    // const imgContainer    = document.getElementById('image-file');
-    // if(item.image){
-    //     imgContainer.innerHTML = `<img src="${item.image}" class="img-fluid rounded" loading="lazy" alt="صورة المنتج">`;
-    // }
-    // else{
-    //     imgContainer.innerHTML = `<img src="https://dummyimage.com/200x200/cccccc/ffffff&text=No+Image" class="img-fluid rounded" loading="lazy" alt="صورة المنتج">`;
-    // }
+
 }
 
 function handleVariants(variants) {
     hasVariantsCheckbox.checked = true;
     price.disabled = true;
+    price.placeholder = 'السعر يُحدد في جدول الأحجام';
+    price.style.cursor = 'not-allowed';
     variantsBox.style.display = 'block';
-    basePriceBox.style.display = 'none';
     // حذف أي صفوف قديمة
     variantsTable.innerHTML = '';
     variants.forEach(variant => {

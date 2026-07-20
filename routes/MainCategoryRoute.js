@@ -1,5 +1,4 @@
 import  express  from "express";
-import { body,query} from "express-validator";
 import { getMainCategoryTree, addMainCategory, editMainCategor, updateMainCategory, deleteMainCategory, getMainCategoryList } from "../controllers/MainCategoryController.js";
 
 export const MainCategoryRoute = express.Router();

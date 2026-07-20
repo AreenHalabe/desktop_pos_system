@@ -1,12 +1,17 @@
 import  express  from "express";
-import { body,query} from "express-validator";
-import { addItem, deleteItem, getItem, updateItem, filterItemsByCategory, getMenueTree } from "../controllers/ItemsController.js";
+import { addItem, deleteItem, getItem, updateItem, filterItemsByCategory, getMenueTree, getAllItems } from "../controllers/ItemsController.js";
 
 export const ItemRoute = express.Router();
 
 
 ItemRoute.get('/item/get' , async(req , res) => {
         getItem(req , res);
+    }
+);
+
+
+ItemRoute.get('/items', async(req , res) =>{
+        getAllItems(req , res);
     }
 );
 
@@ -36,3 +41,10 @@ ItemRoute.get('/menu/details' , (req , res) => {
         getMenueTree(req , res);
     }
 )
+
+// ItemRoute.get('/test' , (req , res) => {
+//         return res.status(200).json({
+//             message: "Test route is working"
+//         });
+//     }
+// )

@@ -1,5 +1,4 @@
 import  express  from "express";
-import { body,query} from "express-validator";
 import { addCategory, getCategoryList, updateCategory, deleteCategory } from "../controllers/CategoryController.js";
 
 export const CategoryRoute = express.Router();

@@ -1,4 +1,3 @@
-import { body, query } from "express-validator";
 import { StatusCode } from "../HTTPSStatusCode/StatusCode.js";
 import { pool, sql } from "../DataBaseConnections/dbconnection.js";
 import { checkToken, SystemError, buildTreeOfOrders } from "../shared/functionality.js";
@@ -80,6 +79,7 @@ export const openNewSession = async (req , res) =>{
         
         const sessionId = result.recordset[0].id;
 
+
         return res.status(200).json(
             {
                 session_id : sessionId
@@ -113,10 +113,11 @@ export const closeSession = async (req , res) =>{
 
         await checkToken(token);
 
-
         const { actual_cash } = req.body;
 
         const actualCash  = RealNumberSchema.parse({ value:actual_cash }).value;
+
+        
 
         const currentSession = await getSession(sessionId);
 
@@ -234,10 +235,6 @@ async function getSession(sessionId) {
         ;
     return session.recordset[0] || null;
 }
-
-
-
-
 
 
 
