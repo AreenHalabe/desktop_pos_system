@@ -1,5 +1,4 @@
 import  express  from "express";
-import { body,query} from "express-validator";
 import { checkCashSession, closeSession, getSessionAnalytics, openNewSession } from "../controllers/SessionController.js";
 
 export const SessionRoute = express.Router();

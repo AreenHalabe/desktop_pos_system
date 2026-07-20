@@ -2,7 +2,6 @@ import express from "express";
 import { poolConnect } from "./DataBaseConnections/dbconnection.js";
 import bodyParser from "body-parser";
 import cors from "cors";
-import dotenv from "dotenv";
 import { config } from './env.js';
 import { AdminRoute } from "./routes/AdminRoute.js";
 import { MainCategoryRoute } from "./routes/MainCategoryRoute.js";
@@ -14,7 +13,6 @@ import { TransactionRoute } from "./routes/TransactionRoute.js";
 import { ReportRoute } from "./routes/ReportRoute.js";
 import { TableRoute } from "./routes/TableRoute.js";
 const app = express();
-dotenv.config();
 
 let server;
 

@@ -1,5 +1,4 @@
 import  express  from "express";
-import { body,query} from "express-validator";
 import { addItem, deleteItem, getItem, updateItem, filterItemsByCategory, getMenueTree } from "../controllers/ItemsController.js";
 
 export const ItemRoute = express.Router();

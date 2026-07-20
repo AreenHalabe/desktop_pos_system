@@ -1,5 +1,4 @@
 import  express  from "express";
-import { body,query} from "express-validator";
 import { addNewTable, deleteTable, destroyTables, getAllTable, LoadOrdersAccordingTables, moveOrder } from "../controllers/TableController.js";
 
 export const TableRoute = express.Router();
