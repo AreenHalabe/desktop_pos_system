@@ -12,10 +12,10 @@ TransactionRoute.get('/load-transaction/according-to-session' , (req , res) => {
 TransactionRoute.post('/creat-transaction' , (req , res) => {
         createTransaction(req , res);
     }
-)
+);
 
 
 TransactionRoute.delete('/delete-transaction' , (req , res) => {
         deleteTransaction(req , res);
     }
-)
+);

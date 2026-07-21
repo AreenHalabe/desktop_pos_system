@@ -14,7 +14,6 @@ import { ReportRoute } from "./routes/ReportRoute.js";
 import { TableRoute } from "./routes/TableRoute.js";
 const app = express();
 
-let server;
 
 app.use(bodyParser.json());
 app.use(express.json());
@@ -31,36 +30,70 @@ app.use(ReportRoute);
 app.use(TableRoute);
 
 
+let server_port;
 
 
 
+// function startServer(port) {
+//   server_port = port;
 
-function startServer(port) {
-  config.DEFAULT_PORT = port;
-  server = app.listen(port)
-    .on('listening', () => {
+
+//   let server = app.listen(port)
+//     .on('listening', () => {
+//       console.log(`Server running at http://localhost:${port}`);
+//       return server;
+//     })
+//     .on('error', (err) => {
+//       if (err.code === 'EADDRINUSE') {
+//         console.log(`Port ${port} busy, trying ${port + 1}`);
+//         startServer(port + 1);
+//       } else {
+//         console.error("Server error:", err);
+//         process.exit(1);
+//       }
+//     });
+// }
+
+
+
+async function startServer(port) {
+  return new Promise((resolve, reject) => {
+
+    const server = app.listen(port);
+
+    server.once("listening", () => {
+      server_port = port;
       console.log(`Server running at http://localhost:${port}`);
-    })
-    .on('error', (err) => {
-      if (err.code === 'EADDRINUSE') {
-        console.log(`Port ${port} busy, trying ${port + 1}`);
-        startServer(port + 1);
-      } else {
-        console.error("Server error:", err);
-        process.exit(1);
-      }
+      resolve(server);
     });
-  // return server;
+
+    server.once("error", (err) => {
+
+      if (err.code === "EADDRINUSE") {
+
+        console.log(`Port ${port} busy, trying ${port + 1}`);
+
+        resolve(startServer(port + 1));
+
+      } else {
+
+        reject(err);
+
+      }
+
+    });
+
+  });
 }
 
 
 
-
 async function initServer(port) {
-  await poolConnect; // DB لازم ينجح أولاً
+  await poolConnect;
   console.log("Connected to SQL Server");
-  
-   startServer(port);
+
+  const server = await startServer(port);
+  return server;
 
 }
 
@@ -76,25 +109,12 @@ function shutdown() {
 }
 
 process.on('SIGTERM', shutdown);
-process.on('SIGINT', shutdown); 
+process.on('SIGINT', shutdown);
 
-export { server , initServer};
-
-
+export { initServer, server_port };
 
 
 
-// try {
-//   await poolConnect;
 
-//   console.log("Connected to SQL Server");
 
-//   // ⬅️ بعد نجاح DB نشغل السيرفر
-//   startServer(config.DEFAULT_PORT);
-
-// } catch (err) {
-//   console.log("DB Connection Failed:");
-//   console.log(err);
-//   process.exit(1);
-// }
 // "package-win": "electron-packager . electron-tutorial-app --overwrite --asar=true --platform=win32 --arch=x64 --icon=assets/icons/win/icon.ico --prune=true --out=release-builds --version-string.CompanyName=CE --version-string.FileDescription=CE --version-string.ProductName=\"Student Maneger Sysytem\"",
