@@ -1,45 +1,85 @@
+html,
 body {
+    height: 100%;
     margin: 0;
-    font-family: "Cairo", sans-serif;
+    font-family: "Tajawal", sans-serif;
+}
 
-    background: linear-gradient(135deg,
-            #0d6efd,
-            #1e88e5,
-            #42a5f5);
 
-    /* background: linear-gradient(135deg, #198754, #20c997); */
+body {
 
+    /* background: linear-gradient(
+        135deg,
+        #334155,
+        #475569,
+        #64748b
+    ); */
+   
+
+
+
+    /* background:
+    radial-gradient(circle at 20% 20%,
+        rgba(37, 99, 235, .25),
+        transparent 45%),
+    #d5e3f3; */
+
+    background:
+    radial-gradient(circle at 15% 15%,
+        rgba(37, 99, 235, .22),
+        transparent 35%),
+    radial-gradient(circle at 85% 80%,
+        rgba(15, 23, 42, .08),
+        transparent 35%),
+    #dbe5f1;
+}
+
+
+
+.page {
     min-height: 100vh;
+    height: 100vh;
+
+    display: flex;
+    flex-direction: column;
 }
 
 .login-container {
+    flex: 1;
 
     display: flex;
+
     justify-content: center;
+
     align-items: center;
 
-    min-height: 100vh;
+    padding: 15px;
 
-    padding: 20px;
+    box-sizing: border-box;
+
+    min-height: 0;
 }
 
 .login-card {
-
+    display: flex;
+    flex-direction: column !important;
     width: 100%;
     max-width: 430px;
-
+    height: auto;
     border: none;
     border-radius: 18px;
-
     padding: 35px;
+    box-shadow:
+    0 25px 60px rgba(15, 23, 42, .15),
+    0 5px 15px rgba(37, 99, 235, .08);
 }
 
+
 .logo {
+    width: 125px;
+    height: 125px;
 
-    width: 90px;
-    height: 90px;
-
-    margin: auto;
+    margin: 0 auto 20px;
 
     border-radius: 50%;
 
@@ -47,23 +87,19 @@ body {
     justify-content: center;
     align-items: center;
 
-    background: linear-gradient(135deg,
-            #0d6efd,
-            #4dabf7);
+    overflow: hidden;
 
-    /* background: linear-gradient(135deg, #198754, #20c997); */
+    box-shadow:0 10px 25px rgba(26, 54, 114, 0.25);
+    filter: drop-shadow(0 8px 15px rgba(15,23,42,.15));
+}
 
-    color: white;
-
-    font-size: 40px;
-
-    box-shadow: 0 10px 25px rgba(13, 110, 253, .35);
-
-    /* box-shadow: 0 10px 25px rgba(25, 135, 84, .35); */
+.image-logo {
+    width: 85%;
+    height: 85%;
+    object-fit: contain;
 }
 
 h2 {
-
     font-weight: 700;
     color: #333;
 }
@@ -73,22 +109,20 @@ h2 {
     font-size: .95rem;
 }
 
+
 .input-group-text {
 
-    background: #f5f7fa;
+    background: #f8fafc;
 
-    /* border-right: none; */
-
-    color: #0d6efd;
-    /* color:#198754; */
+    color: #2563eb;
 
     font-size: 18px;
 
-    width:48px;
-    justify-content:center;
+    width: 48px;
 
+    justify-content: center;
 
-    border-left:0;
+    border-left: 0;
 }
 
 .form-control {
@@ -101,8 +135,8 @@ h2 {
 
     font-size: 15px;
 
-    direction:ltr;
-    text-align:left;
+    direction: ltr;
+    text-align: left;
 
     /* border-right:0; */
 }
@@ -128,17 +162,17 @@ h2 {
     border-radius: 10px;
 
     transition: .25s;
+    background: #2563eb !important;
 
-    /* background-color: #198754 !important;
-    border-color: #198754 !important; */
 }
 
 .btn-primary:hover {
 
     transform: translateY(-2px);
+    background: #1d4ed8 ;
 
-    box-shadow: 0 8px 18px rgba(13,110,253,.35);
-
+    /* box-shadow: 0 8px 18px rgba(13, 110, 253, .35); */
+    box-shadow: 0 8px 20px rgba(37, 99, 235, .30);
     /* box-shadow: 0 8px 18px rgba(25,135,84,.35); */
 }
 
@@ -148,11 +182,11 @@ h2 {
 }
 
 
-.password-wrapper{
+.password-wrapper {
     position: relative;
 }
 
-.toggle-password{
+.toggle-password {
     position: absolute;
     top: 50%;
     right: 15px;
@@ -168,39 +202,166 @@ h2 {
     transition: .2s;
 }
 
-.toggle-password:hover{
+.toggle-password:hover {
     color: #0d6efd;
     /* color: #198754; */
 }
 
 /* حتى ما يكتب النص فوق العين */
-#password{
+#password {
     padding-right: 45px;
 }
 
 
-.box{
+.box {
     border: 1px solid #f70000;
 }
 
-@media (max-width:768px){
+.company-footer {
+    color: white;
+    background: #0f172a;
 
-    .login-card{
+    flex-shrink: 0;
 
-        padding:25px;
+    padding: 20px 0;
+}
+
+
+.contact-info {
+
+    margin-bottom: 8px;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    gap: 8px;
+
+}
+
+
+.contact-info i {
+
+    font-size: 21px;
+
+}
+
+
+
+/* ألوان الأيقونات الأصلية */
+
+.facebook-icon {
+
+    color: #1877F2;
+
+}
+
+
+.instagram-icon {
+
+    color: #E4405F;
+
+}
+
+
+.whatsapp-icon {
+
+    color: #25D366;
+
+}
+
+@media (max-width:768px) {
+
+    .login-card {
+
+        padding: 25px;
     }
 
-    .logo{
+    .logo {
 
-        width:75px;
-        height:75px;
+        width: 75px;
+        height: 75px;
 
-        font-size:32px;
+        font-size: 32px;
     }
 
-    h2{
+    h2 {
 
-        font-size:1.5rem;
+        font-size: 1.5rem;
+    }
+
+}
+
+@media (max-height:800px) {
+
+    .login-card {
+
+        padding: 20px;
+
+        max-width: 380px;
+
+    }
+
+
+    .logo {
+
+        width: 90px;
+        height: 90px;
+
+        margin-bottom: 10px;
+    }
+
+
+    h2 {
+
+        font-size: 1.3rem;
+
+    }
+
+
+    .text-muted {
+
+        margin-bottom: 10px;
+
+    }
+
+
+    .form-control {
+
+        padding: 8px;
+
+    }
+
+
+    .btn-primary {
+
+        height: 45px;
+
+    }
+
+
+    .company-footer {
+
+        padding: 10px 0;
+
+        font-size: 13px;
+
+    }
+
+
+    .company-footer h4 {
+
+        font-size: 18px;
+
+    }
+
+
+    .company-footer h5 {
+
+        font-size: 16px;
+
     }
 
 }
