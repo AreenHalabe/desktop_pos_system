@@ -216,7 +216,7 @@ app.whenReady().then(async () => {
 
 
 
-    mainWindow.webContents.openDevTools(); // for dev tools
+   // mainWindow.webContents.openDevTools(); // for dev tools
 
     ipcMain.handle("print-invoice", async (event, html) => {
       try {
