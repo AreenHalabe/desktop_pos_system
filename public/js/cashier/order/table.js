@@ -572,24 +572,27 @@ function splitByStation(orderDetails) {
 
     const result = {
         kitchen: {
-            orderType: 'طاولة',
+            station : 'فاتورة المطبخ',
+            type: 'طاولة',
             note: orderDetails.note,
-            tableNum: orderDetails.tableNum,
-
+            table_num: orderDetails.tableNum,
+            printer_name : 'kitchen',
             items: []
         },
         bar: { 
-            orderType: 'طاولة',
+            station : 'فاتورة البار',
+            type: 'طاولة',
             note: orderDetails.note,
-            tableNum: orderDetails.tableNum,
-
+            table_num: orderDetails.tableNum,
+            printer_name : 'bar',
             items: [] 
         },
         shisha: { 
-            orderType: 'طاولة',
+            station : 'فاتورة الأراجيل',
+            type: 'طاولة',
             note: orderDetails.note,
-            tableNum: orderDetails.tableNum,
-
+            table_num: orderDetails.tableNum,
+            printer_name : 'shisha',
             items: [] 
         }
     };

@@ -722,11 +722,12 @@ async function confirmAndSendOrder() {
 
     // console.log(finalOrderDetails);
 
-    //  splitByStation(finalOrderDetails);
+   
 
     const res = await createOrder();
     if (res.success) {
         finalOrderDetails.inv_num = res.inv_num;
+        //splitByStation(finalOrderDetails);
         bootstrap.Modal.getInstance(document.getElementById('confirmOrderModal')).hide();
         currentOrder = [];
         updateOrderUI();
@@ -761,30 +762,36 @@ function splitByStation(orderDetails) {
 
     const result = {
         kitchen: {
+            station : 'فاتورة المطبخ',
             inv_num : orderDetails.inv_num,
-            orderType: orderDetails.orderType,
+            type: orderDetails.orderType,
             note: orderDetails.note,
-            tableNum: orderDetails.tableNum,
-            phoneNum: orderDetails.phoneNum,
+            table_num: orderDetails.tableNum,
+            phone_num: orderDetails.phoneNum,
             address: orderDetails.address,
+            printer_name : 'kitchen',
             items: []
         },
         bar: { 
+            station : 'فاتورة البار',
             inv_num : orderDetails.inv_num,
-            orderType: orderDetails.orderType,
+            type: orderDetails.orderType,
             note: orderDetails.note,
-            tableNum: orderDetails.tableNum,
-            phoneNum: orderDetails.phoneNum,
+            table_num: orderDetails.tableNum,
+            phone_num: orderDetails.phoneNum,
             address: orderDetails.address,
+            printer_name : 'bar',
             items: [] 
         },
         shisha: { 
+            station : 'فاتورة الأراجيل',
             inv_num : orderDetails.inv_num,
-            orderType: orderDetails.orderType,
+            type: orderDetails.orderType,
             note: orderDetails.note,
-            tableNum: orderDetails.tableNum,
-            phoneNum: orderDetails.phoneNum,
+            table_num: orderDetails.tableNum,
+            phone_num: orderDetails.phoneNum,
             address: orderDetails.address,
+            printer_name : 'shisha',
             items: [] 
         }
     };
@@ -793,8 +800,6 @@ function splitByStation(orderDetails) {
         result[item.station].items.push(item);
     });
 
-
-    console.log("Order split by station:", result);
 
 }
 

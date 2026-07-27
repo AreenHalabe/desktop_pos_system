@@ -24,7 +24,7 @@ export async function printInvoiceFromCashier(newOrder) {
             total: `${item.price * item.qty} ₪`
         }
     ));
-   await printInvoice(order);
+    await printInvoice(order);
 }
 
 export async function handelOrderDatabeforPrinting(order) {
@@ -53,13 +53,13 @@ export async function handelOrderDatabeforPrinting(order) {
     ));
 
 
-   await printInvoice(orderPrinting);
+    await printInvoice(orderPrinting);
 }
 
 
 export async function printInvoice(order) {
 
-    
+
     const invoiceHTML = `
         <div id="invoice" class="invoice">
             <div style="width: 100%; text-align: center;">
@@ -145,7 +145,7 @@ export async function printInvoice(order) {
         </div>
     `;
     await createHTMLOrder(invoiceHTML);
-    
+
 
 }
 
@@ -153,12 +153,12 @@ export async function printCashSummery(session, isSessionClosed = true) {
     let closeDate = session?.closed_at
         ? utcToPalestine(session.closed_at).split(' ')[0]
         : getCurrentDate()
-    ;
+        ;
 
     let closeTime = session?.closed_at
         ? formatHourForCashSession(utcToPalestine(session.closed_at).split(' ')[1], true)
         : formatHourForCashSessionCurrentTime(getCurrentTime())
-    ;
+        ;
 
 
     const cashHtml = `
@@ -232,14 +232,14 @@ export async function printCashSummery(session, isSessionClosed = true) {
             </div>
 
         `;
-    await  createHTMLCashSummary(cashHtml);
+    await createHTMLCashSummary(cashHtml);
 
 
 
 }
 
 export async function printTransaction(transaction) {
-    
+
     const transactionHTML = `
         <div id="financeInvoice" class="finance-invoice" dir="rtl">
             <h2 class="center">معاملة مالية</h2>
@@ -291,8 +291,62 @@ export async function printTransaction(transaction) {
         </div>
     
     `
-   await createHTMLTransaction(transactionHTML);
-    
+    await createHTMLTransaction(transactionHTML);
+
+}
+
+
+export async function generateStationInvoice(order) {
+    if(order.items.length === 0) return;
+
+    const invoiceHTML = `
+        <div id="invoice" class="invoice">
+
+            <div style="width: 100%; text-align: center;">
+                <h3 class="center">${order.station}</h3>
+            </div>
+
+            ${order.inv_num ?
+                `
+                    <p class="inv-num" dir="rtl">
+                        <strong>رقم الطلب :&nbsp;</strong>
+                        <span>${order.inv_num}</span>
+                    </p>
+                `
+                : ''
+            }
+            
+
+            ${handleOrderType(order)}
+
+            <hr>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>الصنف</th>
+                        <th>الكمية</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    ${order.items.map(item => `
+                        <tr>
+                            <td>${formatItemName(item)}</td>
+                            <td>${item.qty}</td>
+                        </tr>
+                    `).join("")}
+                </tbody>
+            </table>
+
+
+            ${handleOrderNote(order)}
+        
+
+        </div>
+    `;
+
+    await createHTMLforInvoiceStation(invoiceHTML, order.printer_name);
 }
 
 
@@ -311,10 +365,32 @@ function handleOrderType(order) {
         return `
             <div class="delivery-order">
                 <div class="delivery-info">
-                    <p><strong>نوع الطلب : </strong> <span> سفري</span></p>
-                    <p><strong>جوال : </strong> <span>${order.phone_num}</span></p>
+                    <p>
+                        <strong>نوع الطلب :</strong>
+                        <span>سفري</span>
+                    </p>
+
+                ${order.phone_num ?
+                    `
+                        <p>
+                            <strong>الزبون :</strong>
+                            <span>${order.phone_num}</span>
+                        </p>
+                    `
+                    : ''
+                }
+
+                ${order.address ?
+                    `
+                        <p>
+                            <strong>العنوان :</strong>
+                            <span>${order.address}</span>
+                        </p>
+                    `
+                    : ''
+                }
                 </div>
-                <p class="mt-1"><strong>العنوان : </strong> <span>${order.address}</span></p>
+
             </div>
         `
     }
@@ -322,7 +398,13 @@ function handleOrderType(order) {
 function handleOrderNote(order) {
     if (order.note !== '') {
         return `
-            <p><strong>ملاحظات : </strong> <span>${order.note}</span></p>
+            <p>
+                <strong>ملاحظات:</strong>
+            </p>
+
+            <p style="margin-top:5px;">
+                ${order.note}
+            </p>
         `
     }
     else {
@@ -408,24 +490,24 @@ function formatDateOnly(dateString) {
     return `${year}-${month}-${day}`;
 }
 function utcToPalestine(datetime) {
-  const date = new Date(datetime);
+    const date = new Date(datetime);
 
-  const formatter = new Intl.DateTimeFormat('sv-SE', {
-    timeZone: 'Asia/Hebron',
-    year: 'numeric',
-    month: '2-digit',
-    day: '2-digit',
-    hour: '2-digit',
-    minute: '2-digit',
-    second: '2-digit',
-    hour12: false,
-  });
+    const formatter = new Intl.DateTimeFormat('sv-SE', {
+        timeZone: 'Asia/Hebron',
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
+        hour12: false,
+    });
 
-  const parts = Object.fromEntries(
-    formatter.formatToParts(date).map(({ type, value }) => [type, value])
-  );
+    const parts = Object.fromEntries(
+        formatter.formatToParts(date).map(({ type, value }) => [type, value])
+    );
 
-  return `${parts.year}-${parts.month}-${parts.day} ${parts.hour}:${parts.minute}:${parts.second}`;
+    return `${parts.year}-${parts.month}-${parts.day} ${parts.hour}:${parts.minute}:${parts.second}`;
 }
 
 
@@ -465,6 +547,20 @@ async function createHTMLOrder(invoiceHTML) {
         <title>فاتورة</title>
 
         <style>
+            ${getStyleForInvoice()}
+        </style>
+      </head>
+
+      <body>
+        ${invoiceHTML}
+      </body>
+    </html>
+  `;
+    await print(htmlContent);
+}
+
+function getStyleForInvoice() {
+    return `
           body {
             display: flex;
             justify-content: center;
@@ -568,7 +664,8 @@ async function createHTMLOrder(invoiceHTML) {
 
             .delivery-info {
                 display: flex;
-                justify-content: space-between;
+                flex-direction: column;
+                gap: 7px;
             }
 
 
@@ -621,6 +718,19 @@ async function createHTMLOrder(invoiceHTML) {
                 print-color-adjust: exact;
             }
         }
+    `
+}
+
+async function createHTMLforInvoiceStation(invoiceHTML, printerName) {
+    const htmlContent = `
+    <!DOCTYPE html>
+    <html lang="ar" dir="rtl">
+      <head>
+        <meta charset="UTF-8">
+        <title>فاتورة</title>
+
+        <style>
+            ${getStyleForInvoice()}
         </style>
       </head>
 
@@ -629,8 +739,8 @@ async function createHTMLOrder(invoiceHTML) {
       </body>
     </html>
   `;
-   await print(htmlContent);
 }
+
 async function createHTMLCashSummary(cashHtml) {
 
     const htmlContent = `
@@ -723,7 +833,7 @@ async function createHTMLCashSummary(cashHtml) {
     </html>
   `;
 
-  await print(htmlContent);
+    await print(htmlContent);
 }
 async function createHTMLTransaction(transactionHTML) {
 
@@ -848,7 +958,7 @@ async function createHTMLTransaction(transactionHTML) {
     </html>
   `;
 
- await print(htmlContent);
+    await print(htmlContent);
 }
 
 
