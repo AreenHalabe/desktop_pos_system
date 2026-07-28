@@ -263,7 +263,7 @@ async function insertItems(orderId, items, transaction) {
         request.input(`order_id${index}`, sql.Int, orderId);
         request.input(`item_id${index}`, sql.Int, item.id);
         request.input(`quantity${index}`, sql.Int, item.qty);
-        request.input(`price${index}`, sql.Int, item.price);
+        request.input(`price${index}`,  sql.Decimal(10,2), item.price);
         request.input(`size_name${index}`, sql.NVarChar, item.sizeName || 'NaN');
     });
 

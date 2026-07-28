@@ -100,26 +100,7 @@
 
 
 
-            <!-- <div class="cart-section">
-                <div class="order-sidebar d-flex flex-column p-3">
-                    <h5 class="mb-3 text-center"><i class="fas fa-shopping-basket"></i> الطلب الحالي</h5>
-
-                    <div id="order-items-list">
-                        <p class="text-center text-muted mt-4">سلة الطلب فارغة</p>
-                    </div>
-
-                    <div class="mt-3 pt-3 border-top">
-                        <div class="d-flex justify-content-between mb-2">
-                            <span>المجموع الكلي:</span>
-                            <span class="text-success fw-bold" id="total-price">0 ₪</span>
-                        </div>
-                        <button class="btn btn-success w-100 mb-3 submit-order-btn">
-                            <i class="fas fa-check"></i> تأكيد الطلب
-                        </button>
-                    </div>
-                </div>
-            </div> -->
-
+            
             <div class="cart-section">
                 <div class="order-sidebar d-flex flex-column p-3">
 
@@ -129,28 +110,30 @@
 
                     <div class="mb-3">
                         <div class="input-group">
-                            <span class="input-group-text bg-white">
-                                <i class="fas fa-barcode text-secondary"></i>
-                            </span>
+                           
 
                             <input type="text" id="barcode-input" dir="ltr" class="form-control"
                                 placeholder="امسح أو أدخل الباركود..." autocomplete="off" spellcheck="false">
+
+                                 <span class="input-group-text bg-white">
+                                <i class="fas fa-barcode text-secondary"></i>
+                            </span>
                         </div>
                     </div>
 
-                    <div id="order-items-list">
-                        <p class="text-center text-muted mt-4">
+                    <div id="order-items-list" class="shadow">
+                        <p class="text-center text-muted fs-5 mt-2">
                             سلة الطلب فارغة
                         </p>
                     </div>
 
-                    <div class="mt-3 pt-3 border-top mt-auto">
-                        <div class="d-flex justify-content-between mb-2">
-                            <span>المجموع الكلي:</span>
-                            <span class="text-success fw-bold" id="total-price">0 ₪</span>
+                    <div class="border-top mt-auto">
+                        <div class="total-box mb-2" style="padding-left: 20px;">
+                                <span class="total-label fw-bold">المجموع الكلي :</span>
+                                <span class="total-value fw-bold text-success" id="total-price">0 ₪</span>
                         </div>
 
-                        <button class="btn btn-success w-100 mb-3 submit-order-btn">
+                        <button class="btn btn-success fw-bold d-block mx-auto mb-3 submit-order-btn">
                             <i class="fas fa-check"></i> تأكيد الطلب
                         </button>
                     </div>

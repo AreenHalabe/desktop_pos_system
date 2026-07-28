@@ -101,6 +101,7 @@ export const addItem = async (req, res) => {
       });
     }
 
+
     barcode = validated.data.barcode;
 
 
@@ -123,7 +124,7 @@ export const addItem = async (req, res) => {
       .request()
       .input("name", sql.NVarChar, validated.data.name)
       .input("category_id", sql.Int, validated.data.category_id)
-      .input("price", sql.Int, validated.data.price)
+      .input("price", sql.Decimal(10,2), validated.data.price)
       .input('barcode', sql.VarChar, barcode)
       .input("admin_id", sql.Int, adminId)
       .query(`
@@ -242,7 +243,7 @@ export const updateItem = async (req, res) => {
       .input("name", sql.NVarChar, validated.data.name)
       .input("barcode", sql.NVarChar, barcode)
       .input("category_id", sql.Int, validated.data.category_id)
-      .input("price", sql.Int, validated.data.price)
+      .input("price", sql.Decimal(10,2), validated.data.price)
       .input("id", sql.Int, itemId)
       .query(`
         UPDATE items
@@ -757,7 +758,6 @@ function buildProductSchema(hasVariants) {
           return Number(v);
         },
         z.number()
-          .int("السعر يجب أن يكون رقمًا صحيحًا")
           .positive("السعر يجب أن يكون رقمًا موجبًا")
           .nullable()
           .refine(v => v !== null, { message: "يجب إدخال سعر الصنف" })

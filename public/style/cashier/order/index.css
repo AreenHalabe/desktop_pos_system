@@ -176,6 +176,10 @@ hr {
     padding-left: 8px;
     padding-right: 8px;
     overflow-x: hidden;
+    border: 1px solid #dadada;
+    border-radius: 12px;
+    padding-top: 5px;
+    padding-bottom: 5px;
 }
 
 
@@ -188,17 +192,18 @@ hr {
     border-radius: 10px;
 }
 .right-section{
-    width: calc(100% - 380px - 15px);
+    width: calc(30% - 7px);
     box-sizing: border-box;
 }
 .cart-section {
-    width: 380px;
+    width: calc(100% - 30% - 8px);
     flex-shrink: 0;
     display: flex;
     align-items: center;
     height: 100vh;
     position: sticky;
     top: 1px;
+    box-sizing: border-box;
 }
 
 
@@ -247,34 +252,56 @@ hr {
   border-color: #0d6efd;
 }
 
-.order-item {
-    border-bottom: 1px solid #eee;
-    padding: 10px 0;
+
+
+.order-item{
+    display:flex;
+    align-items:center;
+    gap:12px;
+    padding:8px 10px;
+    /* border-bottom:1px solid #000000; */
+    min-height:48px;
 }
 
-.order-item .size-item{
-    font-size: 1rem;
-    color: #6c757d;
+.order-item .product-name{
+    flex:1;
+    overflow:hidden;
+    white-space:nowrap;
+    text-overflow:ellipsis;
 }
 
-.qty-btn {
-    width: 32px;
-    height: 32px;
-    padding: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+.order-item .item-price{
+    width:70px;
+    text-align:center;
+    font-size:.9rem;
 }
 
-/* #barcode-input {
-    height: 48px;
-    border-radius: 10px;
-    font-size: 15px;
-} */
+.order-item .item-total{
+    width:70px;
+    text-align:left;
+}
+
+.order-item .qty-control{
+    display:flex;
+    align-items:center;
+    gap:4px;
+}
+
+.order-item .qty{
+    width:28px;
+    text-align:center;
+    font-weight:bold;
+}
+
+.order-item .qty-control .btn{
+    width:30px;
+    height:30px;
+    padding:0;
+}
 
 .input-group-text {
     border-radius: 10px 0 0 10px;
-    border-left: none;
+    border-right: none;
 }
 
 #barcode-input:focus {
@@ -322,7 +349,7 @@ hr {
 /* شبكة المنتجات - wrap */
 .products-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
     gap: 12px;
 }
 
@@ -488,7 +515,43 @@ hr {
 .pointer:hover{
     cursor: pointer;
 }
+.submit-order-btn{
+    width: 100%;
+    max-width: 400px;
+}
 
+.total-box {
+    background: #f1f5f9;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    padding: 10px 16px;
+    /* margin: 8px 20px 0 20px; */
+
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    font-size: 18px;
+}
+
+.total-label {
+    color: #374151;
+    font-weight: 700;
+}
+/* 
+.total-value {
+    background: #198754;
+    color: white;
+
+    padding: 5px 14px;
+    border-radius: 6px;
+
+    font-size: 20px;
+    font-weight: bold;
+
+    min-width: 90px;
+    text-align: center;
+} */
 
 /* تنسيق المودل على الجوال */
 @media (max-width: 576px) {
@@ -553,14 +616,6 @@ hr {
 }
 
 @media (min-width: 768px) and (max-width: 991px) {
-    .cart-section {
-        width: 280px;
-    }
-
-    .right-section{
-        width: calc(100% - 280px);
-    }
-    
     .products-grid {
         grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
     }

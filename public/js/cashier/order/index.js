@@ -1,5 +1,5 @@
 import { setActiveNavLink, showAuthExpired, showError, hiddeError, bootboxSuccess, bootboxError, showPrintLoader, hidePrintLoader } from "../../../component/bootbox.js";
-import { url, urlServer} from "../../../api/urlEndPoint.js";
+import { url, urlServer } from "../../../api/urlEndPoint.js";
 import { getAuthToken, removeAuthToken } from "../../../component/auth.js";
 import { printInvoiceFromCashier } from "../../../component/invoices.js";
 import { bootboxLoginAsAdmin, closeSideBar, SwitchToAdmin } from "../Switch-user-functionality.js";
@@ -153,10 +153,10 @@ confirmOrderModal.addEventListener('hidden.bs.modal', () => {
 barcodeInput.addEventListener("keydown", (e) => {
     if (e.key === "Enter") {
         const product = searchItem(barcodeInput.value);
-        if(product){
-            addToOrder(product.id , 0);
-            resetBarcodeInput(); 
-        }else{
+        if (product) {
+            addToOrder(product.id, 0);
+            resetBarcodeInput();
+        } else {
             bootboxError("الباركود المدخل غير موجود");
             $(document).one("hidden.bs.modal", function () {
                 resetBarcodeInput();
@@ -166,12 +166,12 @@ barcodeInput.addEventListener("keydown", (e) => {
 });
 discountInput.addEventListener("input", updateFinalTotal);
 
-function resetBarcodeInput(){
+function resetBarcodeInput() {
     barcodeInput.value = "";
     barcodeInput.focus();
 }
 
-function searchItem(barcode){
+function searchItem(barcode) {
     const product = products.find(p => p.barcode === barcode);
     return product;
 }
@@ -286,7 +286,7 @@ document.addEventListener("click", async function (e) {
         if (sizeindex === 'hasOnePrice') {
             removeFromOrder(Number(id), sizeindex);
         }
-        else{
+        else {
             removeFromOrder(Number(id), Number(sizeindex));
         }
     }
@@ -320,7 +320,7 @@ document.addEventListener("click", async function (e) {
 
 
     if (e.target !== barcodeInput) {
-        if(!openModel){
+        if (!openModel) {
             resetBarcodeInput();
         }
     }
@@ -578,7 +578,7 @@ function updateOrderUI(addNewItem = false) {
     const totalEl = document.getElementById('total-price');
 
     if (currentOrder.length === 0) {
-        list.innerHTML = '<p class="text-center text-muted mt-5">سلة الطلب فارغة</p>';
+        list.innerHTML = '<p class="text-center text-muted fs-5 mt-2">سلة الطلب فارغة</p>';
         totalEl.innerText = '0 ₪';
         return;
     }
@@ -586,55 +586,64 @@ function updateOrderUI(addNewItem = false) {
     let html = '';
     let total = 0;
 
-    currentOrder.forEach(item => {
+    currentOrder.forEach((item , index) => {
         const itemTotal = item.price * item.qty;
         total += itemTotal;
 
-        html += `
-            <div class="order-item">
-                <div class="d-flex justify-content-between align-items-start mb-2">
-                    <div>
-                        <h6 class="mb-0">
-                            ${item.name}
-                            
-                            ${item.sizeName ? `<span class="size-item">- ${item.sizeName}</span>` : ''}
-                        </h6>
-                        <small class="text-muted" dir="ltr">
-                            ${item.price} ₪ × ${item.qty}
-                        </small>
-                    </div>
-                    <div class="text-end">
-                        <strong>${itemTotal} ₪</strong>
-                    </div>
+        html += 
+        `
+            <div class="order-item d-flex align-items-center" 
+                ${index != currentOrder.length - 1 ? 'style="border-bottom:1px solid #000000;"' : ''}>
+                
+
+                <button class="btn btn-sm btn-danger remove-item me-2"
+                    data-id="${item.id}"
+                    data-sizeindex="${item.sizeIndex ?? 'hasOnePrice'}">
+                    <i class="fas fa-trash"></i>
+                </button>
+
+                <div class="flex-grow-1 product-name">
+                    <strong>${item.name}</strong>
+                    ${item.sizeName ? `<small class="text-muted"> - ${item.sizeName}</small>` : ''}
                 </div>
-                <div class="d-flex justify-content-between align-items-center">
-                    <div class="btn-group" role="group">
-                        <button class="btn btn-sm btn-outline-secondary qty-btn qty-minus" 
-                                data-id="${item.id}" data-sizeindex="${item.sizeIndex ?? 'hasOnePrice'}">
-                            <i class="fas fa-minus"></i>
-                        </button>
-                        <span class="btn btn-sm btn-light text-dark fw-bold disabled ">${item.qty}</span>
-                        <button class="btn btn-sm btn-outline-secondary qty-btn qty-plus" 
-                                data-id="${item.id}" 
-                                data-sizeindex="${item.sizeIndex ?? 'hasOnePrice'}"
-                            >
-                            <i class="fas fa-plus"></i>
-                        </button>
-                    </div>
-                    <button class="btn btn-sm btn-danger remove-item" data-id="${item.id}" data-sizeindex="${item.sizeIndex ?? 'hasOnePrice'}">
-                        <i class="fas fa-trash"></i>
+
+                <div class="item-price">
+                    ${item.price} ₪
+                </div>
+
+                <div class="qty-control">
+
+                    <button class="btn btn-sm btn-outline-secondary qty-minus"
+                        data-id="${item.id}"
+                        data-sizeindex="${item.sizeIndex ?? 'hasOnePrice'}">
+                        <i class="fas fa-minus"></i>
                     </button>
+
+                    <span class="qty">${item.qty}</span>
+
+                    <button class="btn btn-sm btn-outline-secondary qty-plus"
+                        data-id="${item.id}"
+                        data-sizeindex="${item.sizeIndex ?? 'hasOnePrice'}">
+                        <i class="fas fa-plus"></i>
+                    </button>
+
                 </div>
+
+                <strong class="item-total">
+                    ${itemTotal} ₪
+                </strong>
+
             </div>
         `;
+
     });
     list.innerHTML = html;
     totalEl.innerText = total + ' ₪';
 
-    if(addNewItem){
+    if (addNewItem) {
         orderItemsList.scrollTop = orderItemsList.scrollHeight;
     }
-    
+
 }
 
 
@@ -775,7 +784,7 @@ async function fetchMenuDetails() {
 
             categoriesData = data.mainCategories;
             products = data.items;
-           
+
 
         }
         else {
@@ -890,7 +899,7 @@ function initHorizontalScroll({ container, leftArrow, rightArrow, step }) {
     function updateArrows() {
 
 
-        if (window.innerWidth < 992) {
+        if (window.innerWidth < 768) {
             leftArrow.classList.add("hidden");
             rightArrow.classList.add("hidden");
             return;
