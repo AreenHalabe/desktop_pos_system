@@ -171,15 +171,21 @@ hr {
     background: white;
     border-radius: 15px;
     box-shadow: 0 0 15px rgba(0,0,0,0.05);
-    height: calc(100vh - 100px);
+    height: calc(100vh - 10px);
     width: 100%;
     /* overflow-y: auto; */
 }
 #order-items-list{
     overflow-y: auto;
-    padding-left: 8px;
-    padding-right: 8px;
+    padding-left: 12px;
+    padding-right: 12px;
     overflow-x: hidden;
+
+    border: 1px solid #dadada;
+    border-radius: 12px;
+    padding-top: 5px;
+    padding-bottom: 5px;
+    scrollbar-width: thin;
 }
 
 .confirm-section{
@@ -188,20 +194,38 @@ hr {
 }
 
 
+
+/* Chrome / Edge */
 #order-items-list::-webkit-scrollbar {
-    width:8px;
+    width: 6px;
+}
+
+#order-items-list::-webkit-scrollbar-track {
+    background: transparent;
+    border-radius: 10px;
 }
 
 #order-items-list::-webkit-scrollbar-thumb {
-    background: rgba(0,0,0,0.15);
+    background: rgba(0,0,0,0.2);
     border-radius: 10px;
 }
+
+#order-items-list::-webkit-scrollbar-thumb:hover {
+    background: rgba(0,0,0,0.35);
+}
+
+
+
+
+
 .right-section{
-    width: calc(100% - 320px - 15px);
+    width: calc(100% - 30% - 15px);
     box-sizing: border-box;
 }
 .cart-section {
-    width: 320px;
+    width: 30%;
+    max-width: 500px;
+    /* max-width: 400px; */
     flex-shrink: 0;
     display: flex;
     align-items: center;
@@ -257,7 +281,6 @@ hr {
 }
 
 .order-item {
-    border-bottom: 1px solid #eee;
     padding: 10px 0;
 }
 
@@ -359,6 +382,17 @@ hr {
 /* تنسيق أيقونة النجاح */
 .success-icon {
     animation: successPulse 2s infinite;
+}
+
+.submit-order-btn {
+    font-weight: bolder;
+    width: 100%;
+    max-width: 350px;
+    transition: transform 0.2s ease;
+}
+
+.submit-order-btn:hover {
+    transform: translateY(-3px);
 }
 
 @keyframes successPulse {
@@ -475,6 +509,25 @@ hr {
 }
 
 
+.total-box {
+    background: #f1f5f9;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    padding: 10px 16px;
+    /* margin: 8px 20px 0 20px; */
+
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    font-size: 18px;
+}
+
+.total-label {
+    color: #374151;
+    font-weight: 700;
+}
+
 
 
 /* تنسيق المودل على الجوال */
@@ -503,11 +556,13 @@ hr {
     }
     .cart-section {
         width: 100%;
+        max-width: 100%;
         margin-top: 46px;
         order: -1;
         height: auto;
         max-height: 50vh;
         position: static; 
+        margin-inline-start: 0 !important;
     }
     .sticky-container {
         position: static;
@@ -540,14 +595,6 @@ hr {
 }
 
 @media (min-width: 768px) and (max-width: 991px) {
-    .cart-section {
-        width: 280px;
-    }
-
-    .right-section{
-        width: calc(100% - 280px);
-    }
-    
     .products-grid {
         grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
     }

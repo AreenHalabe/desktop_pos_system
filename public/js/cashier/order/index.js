@@ -573,7 +573,7 @@ function updateOrderUI(addNewItem = false) {
     const totalEl = document.getElementById('total-price');
 
     if (currentOrder.length === 0) {
-        list.innerHTML = '<p class="text-center text-muted mt-5">سلة الطلب فارغة</p>';
+        list.innerHTML = '<p class="text-center text-muted fs-5 mt-2">سلة الطلب فارغة</p>';
         totalEl.innerText = '0 ₪';
         return;
     }
@@ -581,12 +581,12 @@ function updateOrderUI(addNewItem = false) {
     let html = '';
     let total = 0;
 
-    currentOrder.forEach(item => {
+    currentOrder.forEach((item , index) => {
         const itemTotal = item.price * item.qty;
         total += itemTotal;
 
         html += `
-            <div class="order-item">
+            <div class="order-item"  ${index != currentOrder.length - 1 ? 'style="border-bottom:1px solid #000000;"' : ''}>
                 <div class="d-flex justify-content-between align-items-start mb-2">
                     <div>
                         <h6 class="mb-0">
