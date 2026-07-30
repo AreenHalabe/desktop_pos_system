@@ -219,12 +219,13 @@ hr {
 
 
 .right-section{
-    width: calc(100% - 30% - 15px);
+    flex: 1;
+    min-width: 0;
     box-sizing: border-box;
 }
 .cart-section {
     width: 30%;
-    max-width: 500px;
+    max-width: 450px;
     /* max-width: 400px; */
     flex-shrink: 0;
     display: flex;
@@ -595,6 +596,9 @@ hr {
 }
 
 @media (min-width: 768px) and (max-width: 991px) {
+     .cart-section {
+        width: 35%;
+    }
     .products-grid {
         grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
     }
