@@ -180,6 +180,7 @@ hr {
     border-radius: 12px;
     padding-top: 5px;
     padding-bottom: 5px;
+    scrollbar-width: thin;
 }
 
 
@@ -191,12 +192,36 @@ hr {
     background: rgba(0,0,0,0.15);
     border-radius: 10px;
 }
+
+/* Chrome / Edge */
+#order-items-list::-webkit-scrollbar {
+    width: 6px;
+}
+
+#order-items-list::-webkit-scrollbar-track {
+    background: transparent;
+    border-radius: 10px;
+}
+
+#order-items-list::-webkit-scrollbar-thumb {
+    background: rgba(0,0,0,0.2);
+    border-radius: 10px;
+}
+
+#order-items-list::-webkit-scrollbar-thumb:hover {
+    background: rgba(0,0,0,0.35);
+}
+
+
+
 .right-section{
     width: calc(30% - 7px);
+    max-width: 450px;
     box-sizing: border-box;
 }
 .cart-section {
-    width: calc(100% - 30% - 8px);
+    flex: 1;
+    min-width: 0;
     flex-shrink: 0;
     display: flex;
     align-items: center;
@@ -517,7 +542,7 @@ hr {
 }
 .submit-order-btn{
     width: 100%;
-    max-width: 400px;
+    max-width: 300px;
 }
 
 .total-box {
