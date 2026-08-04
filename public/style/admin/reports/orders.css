@@ -167,6 +167,20 @@
     max-width: 350px;
 }
 
+
+
+.status-badge {
+    padding: 5px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.status-completed {
+    background-color: #d4edda;
+    color: #155724;
+}
+
 @media (max-width: 768px) {
     .search-btn {
         display: block;

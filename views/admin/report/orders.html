@@ -1,389 +1,400 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Halabi_Services.ps</title>
-        
-        <!-- Bootstrap 5.3.2 RTL -->
-        <link href="../../../wroot/assets/bootstrap/css/bootstrap.rtl.min.css" rel="stylesheet">
-        <link href="../../../wroot/assets/bootstrap/css/bootstrap-icons.css" rel="stylesheet">
 
-        <!-- FontAwesome -->
-        <link href="../../../wroot/assets/fontawesome/css/all.min.css" rel="stylesheet">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Halabi_Services.ps</title>
 
-        <link rel="stylesheet" href="../../../public/style/admin/header.css"/>
-        <link rel="stylesheet" href="../../../public/style/admin/reports/orders.css">
-    </head>
-    <body>
+    <!-- Bootstrap 5.3.2 RTL -->
+    <link href="../../../wroot/assets/bootstrap/css/bootstrap.rtl.min.css" rel="stylesheet">
+    <link href="../../../wroot/assets/bootstrap/css/bootstrap-icons.css" rel="stylesheet">
 
-        <site-header></site-header>
+    <!-- FontAwesome -->
+    <link href="../../../wroot/assets/fontawesome/css/all.min.css" rel="stylesheet">
+
+    <link rel="stylesheet" href="../../../public/style/admin/header.css" />
+    <link rel="stylesheet" href="../../../public/style/admin/reports/orders.css">
+</head>
+
+<body>
+
+    <site-header></site-header>
 
 
-        <!-- محتوى الصفحة -->
-        <div style="padding: 20px;">
-            <div class="container-fluid p-0">
-                
-                <!-- ترويسة الصفحة -->
-                <div class="page-header">
-                    <div class="row align-items-center">
-                        <div class="col-12">
-                            <h3 class="mb-2">
-                                <i class="fas fa-file-invoice text-primary ms-2"></i>
-                                 التقرير التفصيلي للطلبات 
-                            </h3>
-                            <p class="text-muted mb-0">
-                             يعرض هذا التقرير جميع الطلبات ضمن الفترة المحددة مع تفاصيلها الكاملة مثل النوع، طريقة الدفع، والقيمة، لتوفير نظرة دقيقة على حركة الطلبات.
+    <!-- محتوى الصفحة -->
+    <div style="padding: 20px;">
+        <div class="container-fluid p-0">
+
+            <!-- ترويسة الصفحة -->
+            <div class="page-header">
+                <div class="row align-items-center">
+                    <div class="col-12">
+                        <h3 class="mb-2">
+                            <i class="fas fa-file-invoice text-primary ms-2"></i>
+                            التقرير التفصيلي للطلبات
+                        </h3>
+                        <p class="text-muted mb-0">
+                            يعرض هذا التقرير جميع الطلبات ضمن الفترة المحددة مع تفاصيلها الكاملة مثل النوع، طريقة الدفع،
+                            والقيمة، لتوفير نظرة دقيقة على حركة الطلبات.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- تحديد الفترة الزمنية -->
+            <div class="filter-section">
+                <h6 class="mb-4">
+                    <i class="fas fa-calendar-alt text-primary ms-2"></i>
+                    تحديد الفترة الزمنية
+                </h6>
+
+                <div class="row g-3">
+
+
+                    <div class="col-md-3">
+                        <label class="form-label">من تاريخ و وقت</label>
+                        <input type="datetime-local" class="form-control date-picker" id="startDate">
+                    </div>
+
+
+                    <div class="col-md-3">
+                        <label class="form-label">إلى تاريخ و وقت</label>
+                        <input type="datetime-local" class="form-control date-picker" id="endDate">
+                    </div>
+
+
+
+
+                    <div class="col-md-3 ms-auto">
+                        <label class="form-label">&nbsp;</label>
+                        <button class="btn btn-primary w-100 search-btn" id="searchBtn" disabled>
+                            <i class="fas fa-search ms-1"></i>
+                            تحديث التقرير
+                        </button>
+                    </div>
+
+
+                    <div class="row mt-3 d-none" id="filterDateRange">
+                        <div class="col-12 d-flex justify-content-center">
+                            <div class="header-container text-center" style="width: 50%;">
+                                <small class="text-muted d-block">
+                                    الفترة المدخلة حالياً لعرض البيانات.
+                                </small>
+                                <div class="date-range mt-1">
+                                    <span class="text-muted fw-bold">من</span>
+                                    <strong>
+                                        <span class="date nowrap-cell" id="filterDateStart" dir="ltr"></span>
+                                        <span class="time nowrap-cell" id="filterTimeStart" dir="ltr"></span>
+                                    </strong>
+                                    <span class="text-muted fw-bold">إلى</span>
+                                    <strong>
+                                        <span class="date nowrap-cell" id="filterDateEnd" dir="ltr"></span>
+                                        <span class="time nowrap-cell" id="filterTimeEnd" dir="ltr"></span>
+                                    </strong>
+                                </div>
+                                <small class="text-muted d-block">
+                                    قم بتعديلها لتحديث التقرير بناءً على فترة زمنية مختلفة.
+                                </small>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+            <div class="row d-none mb-3" id="error-dev">
+                <div class="col-12">
+                    <div class="card border-0 table-card p-3">
+                        <h6 class="text-danger">
+                            <i class="fas fa-exclamation-triangle text-danger ms-2"></i>
+                            حدث خطأ أثناء تحميل البيانات
+                        </h6>
+                        <div class="error col-12">
+                            <ul class="list-group" id="error-list">
+
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+
+            <div class="row g-4 mb-5 justify-content-center d-none reveal" id="headerSummeryCard">
+
+                <!-- الطلبات -->
+                <div class="col-md-6 col-lg-4 d-flex">
+                    <div class="stat-card card p-3 bg-white w-100">
+                        <div class="d-flex flex-column">
+                            <div>
+                                <p class="text-muted mb-1">إجمالي الطلبات</p>
+                            </div>
+
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h3 class="mb-2" id="totalOrder">
+                                        <!-- <div class="spinner-border spinner-border-sm text-primary" role="status"></div> -->
+                                        <!-- 0 -->
+                                    </h3>
+                                </div>
+
+                                <div class="stat-icon bg-primary bg-opacity-10 text-primary">
+                                    <i class="fas fa-shopping-bag"></i>
+                                </div>
+                            </div>
+                            <div class="d-flex justify-content-around mt-2">
+                                <div class="fw-semibold text-success" id="completedOrder">
+                                    <!-- <i class="fas fa-check-circle"></i>
+                                        110 مكتملة -->
+                                </div>
+
+                                <div class="fw-semibold text-danger" id="deletedOrder">
+                                    <!-- <i class="fas fa-times-circle"></i>
+                                        14 ملغية -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+
+                <!-- الإيرادات -->
+                <div class="col-md-6 col-lg-4 d-flex">
+                    <div class="stat-card card p-3 bg-white w-100">
+                        <div class="d-flex flex-column">
+                            <div>
+                                <p class="text-muted mb-1">الايرادات</p>
+                            </div>
+
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h3 class="mb-2" id="totalSales">
+
+                                        <!-- <div class="spinner-border spinner-border-sm text-primary" role="status"></div> -->
+                                        <!-- 8002  ₪ -->
+                                    </h3>
+                                </div>
+
+                                <div class="stat-icon bg-success bg-opacity-10 text-success">
+                                    <i class="fas fa-shekel-sign"></i>
+                                </div>
+                            </div>
+                            <div class="d-flex justify-content-around mt-2">
+                                <div class="fw-semibold text-success" id="cashSales">
+                                    <!-- <i class="fas fa-money-bill-wave"></i>
+                                        2,950 ₪ كاش -->
+                                </div>
+
+                                <div class="fw-semibold text-info" id="cardSales">
+                                    <!-- <i class="fas fa-credit-card"></i>
+                                        1,570 ₪ بطاقة -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- متوسط الطلب -->
+                <div class="col-md-6 col-lg-4 d-flex">
+                    <div class="stat-card card p-3 bg-white w-100">
+                        <div class="d-flex flex-column">
+                            <div>
+                                <p class="text-muted mb-1">متوسط الطلب</p>
+                            </div>
+
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h3 class="mb-2" id="averageDemand">
+
+                                    </h3>
+                                </div>
+
+                                <div class="stat-icon bg-warning bg-opacity-10 text-warning">
+                                    <i class="fas fa-receipt"></i>
+                                </div>
+                            </div>
+
+                            <div class="text-muted fw-semibold mt-2" id="averageDemandNote">
+                                <i class="fas fa-receipt"></i> متوسط قيمة الفاتورة
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- جدول الطلبات -->
+            <div class="row d-none reveal" id="ordersTable">
+                <div class="col-12">
+                    <div class="card border-0 table-card">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <h5 class="card-title">
+                                    <i class="fas fa-list ms-2 text-secondary"></i>
+                                    قائمة الطلبات
+                                </h5>
+                                <div class="btn-group position-relative">
+                                    <button class="btn btn-outline-secondary btn-sm dropdown-toggle"
+                                        data-bs-toggle="dropdown" data-bs-container="body">
+                                        فلترة
+                                    </button>
+                                    <ul class="dropdown-menu p-2">
+                                        <li><a class="dropdown-item rounded">المكتملة</a></li>
+                                        <li><a class="dropdown-item rounded">المحذوفة</a></li>
+                                    </ul>
+                                </div>
+                            </div>
+
+
+
+                            <div class="d-flex justify-content-center mb-1 " id="headerFilterType">
+                                <h5 id="title" class="mb-0">
+                                    <span class="d-flex align-items-center rounded">
+                                        <span class="badge badge-completed" id="typeText">
+                                            الطلبات المكتملة
+                                        </span>
+                                    </span>
+                                </h5>
+                            </div>
+
+
+                            <div class="table-responsive">
+                                <div>
+                                    <span class="badge bg-success" id="completedOrdersCount">0 طلبات مكتملة</span>
+                                    <span class="badge bg-danger ms-2 " id="deletedOrdersCount">0 تم حذفهم</span>
+                                </div>
+                                <table class="table table-hover mb-0">
+                                    <thead>
+                                        <tr>
+                                            <th>رقم الطلب</th>
+                                            <th>
+                                                نوع الطلب
+                                            </th>
+                                            <th>طريقة الدفع</th>
+                                            <th class="position-relative">
+                                                التاريخ
+                                                <div class="position-absolute bottom-0 text-muted opacity-75"
+                                                    style="font-size:12px;">
+                                                    يوم - شهر - سنة
+                                                </div>
+                                            </th>
+                                            <th>الوقت</th>
+                                            <th>المبلغ</th>
+                                            <th>الحالة</th>
+                                            <th>الإجراءات</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="ordersTableBody">
+
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            <div class="pagination-button mt-4" id="paginationBtn">
+                                <button class="btn btn-sm btn-outline-secondary prevBtn" disabled id="prevBtn">
+                                    <i class="fas fa-chevron-right"></i>
+                                </button>
+                                <span class="mx-2" id="pageInfo"> </span>
+                                <button class="btn btn-sm btn-outline-secondary nextBtn" disabled id="nextBtn">
+                                    <i class="fas fa-chevron-left"></i>
+                                </button>
+                                <div class="spinner-border spinner-border-sm text-primary mx-2 d-none" role="status"
+                                    id="paginationLoder"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+
+            <div class="row mt-5 d-none" id="loaderCard">
+                <div class="col-12">
+                    <div class="card border-0 table-card">
+                        <div class="card-body d-flex align-items-center justify-content-center" style="height: 100px;">
+                            <div class="spinner-border text-primary" role="status"> </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <div class="modal fade" id="orderItemsModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        <i class="fas fa-receipt ms-2"></i>
+                        تفاصيل الطلب
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <!-- معلومات الطلب -->
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <p><strong>رقم الطلب : </strong> <span id="modalOrderId"></span></p>
+                            <p><strong>الوقت : </strong> <span id="modaltime"></span></p>
+
+                        </div>
+                        <div class="col-md-6">
+                            <p><strong>الدفع : </strong> <span id="modalPayment"></span></p>
+                            <p><strong>التاريخ : </strong> <span id="modalDate"></span></p>
+                            <p class="d-none"><strong> نوع الطلب : </strong> <span id="modalOrderType" dir="ltr"></span>
                             </p>
                         </div>
                     </div>
-                </div>
 
-                <!-- تحديد الفترة الزمنية -->
-                <div class="filter-section">
-                    <h6 class="mb-4">
-                        <i class="fas fa-calendar-alt text-primary ms-2"></i>
-                        تحديد الفترة الزمنية
+                    <!-- أسباب الإلغاء -->
+                    <div class="alert alert-warning mb-4 d-none">
+                        <strong>سبب الإلغاء : </strong> <span id="modalCancelReason"></span>
+                    </div>
+
+                    <!-- جدول الأصناف -->
+                    <h6 class="mb-3">
+                        <i class="fas fa-list ms-2"></i>
+                        الأصناف المرتبطة
                     </h6>
-
-                    <div class="row g-3">
-
-
-                        <div class="col-md-3">
-                            <label class="form-label">من تاريخ و وقت</label>
-                            <input type="datetime-local" class="form-control date-picker" id="startDate">
-                        </div>
-
-
-                        <div class="col-md-3">
-                            <label class="form-label">إلى تاريخ و وقت</label>
-                            <input type="datetime-local" class="form-control date-picker" id="endDate">
-                        </div>
-
-                        
-
-
-                        <div class="col-md-3 ms-auto">
-                            <label class="form-label">&nbsp;</label>
-                            <button class="btn btn-primary w-100 search-btn" id="searchBtn" disabled>
-                                <i class="fas fa-search ms-1"></i>
-                                تحديث التقرير
-                            </button>
-                        </div>
-
-
-                        <div class="row mt-3 d-none" id="filterDateRange">
-                            <div class="col-12 d-flex justify-content-center">
-                                <div class="header-container text-center" style="width: 50%;">
-                                    <small class="text-muted d-block">
-                                        الفترة المدخلة حالياً لعرض البيانات.
-                                    </small>
-                                    <div class="date-range mt-1">
-                                       <span class="text-muted fw-bold">من</span>
-                                        <strong>
-                                            <span class="date nowrap-cell" id="filterDateStart" dir="ltr"></span>
-                                            <span class="time nowrap-cell" id="filterTimeStart" dir="ltr"></span>
-                                        </strong> 
-                                       <span class="text-muted fw-bold">إلى</span>
-                                        <strong>
-                                            <span class="date nowrap-cell" id="filterDateEnd" dir="ltr"></span>
-                                            <span class="time nowrap-cell" id="filterTimeEnd" dir="ltr"></span>
-                                        </strong>
-                                    </div>
-                                    <small class="text-muted d-block">
-                                         قم بتعديلها لتحديث التقرير بناءً على فترة زمنية مختلفة.
-                                    </small>
-                                </div>
-                            </div>
-                        </div>
-                        
+                    <div class="table-responsive">
+                        <table class="table table-sm table-bordered">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>الإسم</th>
+                                    <th>الكمية</th>
+                                    <th>سعر الوحدة</th>
+                                    <th>المجموع</th>
+                                </tr>
+                            </thead>
+                            <tbody id="modalItemsTable">
+                                <!-- سيتم ملؤه بالجافاسكريبت -->
+                            </tbody>
+                        </table>
                     </div>
+
+                    <!-- آخر تحديث -->
+                    <p class="text-muted small mt-3 hidden">
+                        <i class="fas fa-clock ms-1"></i>
+                        آخر تحديث: <span id="modalUpdated"></span>
+                    </p>
                 </div>
-
-                <div class="row d-none mb-3" id="error-dev">
-                    <div class="col-12">
-                        <div class="card border-0 table-card p-3">
-                            <h6 class="text-danger">
-                                <i class="fas fa-exclamation-triangle text-danger ms-2"></i>
-                                حدث خطأ أثناء تحميل البيانات
-                            </h6>
-                            <div class="error col-12">
-                                <ul class="list-group" id="error-list">
-                                    
-                                </ul>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-
-                <div class="row g-4 mb-5 justify-content-center d-none reveal" id="headerSummeryCard">
-                   
-                    <!-- الطلبات -->
-                    <div class="col-md-6 col-lg-4 d-flex">
-                        <div class="stat-card card p-3 bg-white w-100">
-                            <div class="d-flex flex-column">
-                                <div>
-                                    <p class="text-muted mb-1">إجمالي الطلبات</p>
-                                </div>
-
-                                <div class="d-flex justify-content-between align-items-center">
-                                    <div>
-                                        <h3 class="mb-2" id="totalOrder">
-                                            <!-- <div class="spinner-border spinner-border-sm text-primary" role="status"></div> -->
-                                            <!-- 0 -->
-                                        </h3>
-                                    </div>
-
-                                    <div class="stat-icon bg-primary bg-opacity-10 text-primary">
-                                        <i class="fas fa-shopping-bag"></i>
-                                    </div>
-                                </div>
-                                <div class="d-flex justify-content-around mt-2">
-                                    <div class="fw-semibold text-success" id="completedOrder">
-                                        <!-- <i class="fas fa-check-circle"></i>
-                                        110 مكتملة -->
-                                    </div>
-
-                                    <div class="fw-semibold text-danger" id="deletedOrder">
-                                        <!-- <i class="fas fa-times-circle"></i>
-                                        14 ملغية -->
-                                    </div> 
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    
-                    <!-- الإيرادات -->
-                    <div class="col-md-6 col-lg-4 d-flex">
-                        <div class="stat-card card p-3 bg-white w-100">
-                            <div class="d-flex flex-column">
-                                <div>
-                                    <p class="text-muted mb-1">الايرادات</p>
-                                </div>
-
-                                <div class="d-flex justify-content-between align-items-center">
-                                    <div>
-                                        <h3 class="mb-2" id="totalSales">
-
-                                            <!-- <div class="spinner-border spinner-border-sm text-primary" role="status"></div> -->
-                                            <!-- 8002  ₪ -->
-                                        </h3>
-                                    </div>
-
-                                    <div class="stat-icon bg-success bg-opacity-10 text-success">
-                                        <i class="fas fa-shekel-sign"></i>
-                                    </div>
-                                </div>
-                                <div class="d-flex justify-content-around mt-2">
-                                    <div class="fw-semibold text-success" id="cashSales">
-                                        <!-- <i class="fas fa-money-bill-wave"></i>
-                                        2,950 ₪ كاش -->
-                                    </div>
-
-                                    <div class="fw-semibold text-info" id="cardSales">
-                                        <!-- <i class="fas fa-credit-card"></i>
-                                        1,570 ₪ بطاقة -->
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- متوسط الطلب -->
-                    <div class="col-md-6 col-lg-4 d-flex">
-                        <div class="stat-card card p-3 bg-white w-100">
-                            <div class="d-flex flex-column">
-                                <div>
-                                    <p class="text-muted mb-1">متوسط الطلب</p>
-                                </div>
-
-                                <div class="d-flex justify-content-between align-items-center">
-                                    <div>
-                                        <h3 class="mb-2" id="averageDemand">
-                                            
-                                        </h3>
-                                    </div>
-
-                                    <div class="stat-icon bg-warning bg-opacity-10 text-warning">
-                                        <i class="fas fa-receipt"></i>
-                                    </div>
-                                </div>
-
-                                <div class="text-muted fw-semibold mt-2" id="averageDemandNote">
-                                    <i class="fas fa-receipt"></i> متوسط قيمة الفاتورة
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- جدول الطلبات -->
-                <div class="row d-none reveal" id="ordersTable">
-                    <div class="col-12">
-                        <div class="card border-0 table-card">
-                            <div class="card-body">
-                                <div class="d-flex justify-content-between align-items-center mb-3">
-                                    <h5 class="card-title">
-                                        <i class="fas fa-list ms-2 text-secondary"></i>
-                                    قائمة الطلبات 
-                                    </h5>
-                                    <div class="btn-group position-relative">
-                                        <button class="btn btn-outline-secondary btn-sm dropdown-toggle" data-bs-toggle="dropdown" data-bs-container="body">
-                                            فلترة
-                                        </button>
-                                        <ul class="dropdown-menu p-2">
-                                            <li><a class="dropdown-item rounded">المكتملة</a></li>
-                                            <li><a class="dropdown-item rounded">المحذوفة</a></li>
-                                        </ul>
-                                    </div>
-                                </div>
-
-                             
-
-                                <div class="d-flex justify-content-center mb-1 " id="headerFilterType">
-                                    <h5 id="title" class="mb-0">
-                                        <span class="d-flex align-items-center rounded">
-                                            <span class="badge badge-completed" id="typeText"> 
-                                                الطلبات المكتملة
-                                            </span>
-                                        </span>
-                                    </h5>
-                                </div>
-
-
-                                <div class="table-responsive">
-                                    <div>
-                                        <span class="badge bg-success" id="completedOrdersCount">0 طلبات مكتملة</span>
-                                        <span class="badge bg-danger ms-2 " id="deletedOrdersCount">0 تم حذفهم</span>
-                                    </div>
-                                    <table class="table table-hover mb-0">
-                                        <thead>
-                                            <tr>
-                                                <th>رقم الطلب</th>
-                                                <th>طريقة الدفع</th>
-                                                <th class="position-relative">
-                                                    التاريخ
-                                                    <div class="position-absolute bottom-0 text-muted opacity-75" style="font-size:12px;">
-                                                    يوم - شهر - سنة
-                                                    </div>
-                                                </th>
-                                                <th>الوقت</th>
-                                                <th>المبلغ</th>
-                                                <th>الحالة</th>
-                                                <th>الإجراءات</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody id="ordersTableBody">
-                                            
-                                        </tbody>
-                                    </table>
-                                </div>
-
-                                <div class="pagination-button mt-4" id="paginationBtn">
-                                    <button class="btn btn-sm btn-outline-secondary prevBtn" disabled id="prevBtn">
-                                        <i class="fas fa-chevron-right"></i>
-                                    </button>
-                                    <span class="mx-2" id="pageInfo">  </span>
-                                    <button class="btn btn-sm btn-outline-secondary nextBtn" disabled id="nextBtn">
-                                        <i class="fas fa-chevron-left"></i>
-                                    </button>
-                                    <div class="spinner-border spinner-border-sm text-primary mx-2 d-none" role="status" id="paginationLoder"></div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-            
-                <div class="row mt-5 d-none" id="loaderCard">
-                    <div class="col-12">
-                        <div class="card border-0 table-card">
-                            <div class="card-body d-flex align-items-center justify-content-center" style="height: 100px;">
-                                <div class="spinner-border text-primary" role="status"> </div>
-                            </div>
-                        </div>
-                    </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إغلاق</button>
                 </div>
             </div>
         </div>
-
-
-        <div class="modal fade" id="orderItemsModal" tabindex="-1">
-            <div class="modal-dialog modal-lg">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title">
-                            <i class="fas fa-receipt ms-2"></i>
-                            تفاصيل الطلب
-                        </h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                    </div>
-                    <div class="modal-body">
-                        <!-- معلومات الطلب -->
-                        <div class="row mb-4">
-                            <div class="col-md-6">
-                                <p><strong>رقم الطلب : </strong> <span id="modalOrderId"></span></p>
-                                <p><strong>الوقت : </strong> <span id="modaltime"></span></p>
-                                
-                            </div>
-                            <div class="col-md-6">
-                                <p><strong>الدفع : </strong> <span id="modalPayment"></span></p>
-                                <p><strong>التاريخ : </strong> <span id="modalDate"></span></p>
-                                <p class="d-none"><strong> نوع الطلب : </strong> <span id="modalOrderType" dir="ltr"></span></p>
-                            </div>
-                        </div>
-                        
-                        <!-- أسباب الإلغاء -->
-                        <div class="alert alert-warning mb-4 d-none">
-                            <strong>سبب الإلغاء : </strong> <span id="modalCancelReason"></span>
-                        </div>
-                        
-                        <!-- جدول الأصناف -->
-                        <h6 class="mb-3">
-                            <i class="fas fa-list ms-2"></i>
-                            الأصناف المرتبطة
-                        </h6>
-                        <div class="table-responsive">
-                            <table class="table table-sm table-bordered">
-                                <thead class="table-light">
-                                    <tr>
-                                        <th>الإسم</th>
-                                        <th>الكمية</th>
-                                        <th>سعر الوحدة</th>
-                                        <th>المجموع</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="modalItemsTable">
-                                    <!-- سيتم ملؤه بالجافاسكريبت -->
-                                </tbody>
-                            </table>
-                        </div>
-                        
-                        <!-- آخر تحديث -->
-                        <p class="text-muted small mt-3 hidden">
-                            <i class="fas fa-clock ms-1"></i>
-                            آخر تحديث: <span id="modalUpdated"></span>
-                        </p>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إغلاق</button>
-                    </div>
-                </div>
-            </div>
-        </div>
+    </div>
 
 
 
 
-        <script src="../../../wroot/assets/bootstrap/js/bootstrap.bundle.min.js"></script>
+    <script src="../../../wroot/assets/bootstrap/js/bootstrap.bundle.min.js"></script>
 
-        <script src="../../../wroot/assets/jquery/jquery-3.7.1.min.js"></script>
-        <script src="../../../wroot/assets/bootbox/bootbox.min.js"></script>
+    <script src="../../../wroot/assets/jquery/jquery-3.7.1.min.js"></script>
+    <script src="../../../wroot/assets/bootbox/bootbox.min.js"></script>
 
 
-        <script type="module" src="../../../public/js/admin/report/orders.js"></script>
+    <script type="module" src="../../../public/js/admin/report/orders.js"></script>
 
-    </body>
+</body>
+
 </html>

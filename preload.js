@@ -2,7 +2,8 @@
 const { contextBridge, ipcRenderer } = require("electron");
 contextBridge.exposeInMainWorld("electronAPI", {
     printInvoice: (html) => ipcRenderer.invoke('print-invoice', html),
-    getPort: () => ipcRenderer.invoke("get-port")
+    getPort: () => ipcRenderer.invoke("get-port"),
+    backupDatabase: () => ipcRenderer.invoke("backup-database")
 });
 
 

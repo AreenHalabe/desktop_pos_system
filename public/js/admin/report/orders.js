@@ -18,11 +18,14 @@ const ordersTableCard = document.getElementById('ordersTable');
 
 let currentPage;
 let totalPages;
-let limit = 10;
+let limit = 20;
 let cancelledOrdersCount = 0;
 let completedOrdersCount = 0;
 let ordersList = [];
 
+
+let currentDisplayedTotalOrderCount = 0;
+let orderCounter = 0;
 
 let isFilterCompletedOrder;
 
@@ -197,12 +200,15 @@ document.querySelector('.dropdown-menu').addEventListener('click', async (e) => 
     if (orderType == 'المكتملة') {
       isFilterCompletedOrder = true;
       setHeaderFilter(orderType);
+      setCurrentDisplayedTotalOrderCount(completedOrdersCount);
       await loadMoreOrders(completedOrdersCount, 'مكتمل', 1);
     }
     else {
       isFilterCompletedOrder = false;
       setHeaderFilter(orderType);
+      setCurrentDisplayedTotalOrderCount(cancelledOrdersCount);
       await loadMoreOrders(cancelledOrdersCount, 'ملغي', 1);
+      
     }
   }
 });
@@ -234,6 +240,7 @@ async function loadOrdersDetails() {
       currentPage = 1;
       totalPages = Math.ceil(completedOrdersCount / limit);
       setHeaderFilter('المكتملة');
+      setCurrentDisplayedTotalOrderCount(completedOrdersCount);
       renderOrdersTable();
     }
     else {
@@ -370,14 +377,26 @@ function renderOrdersTable() {
     displayContainer(ordersTableCard);
     return;
   }
-  ordersList.forEach(order => {
+
+  orderCounter = currentPage === 1 ? 0 : (currentPage - 1) * limit;
+
+
+
+
+  ordersList.forEach((order , index) => {
     let badgeClass = '';
     if (order.status === 'مكتمل') badgeClass = 'badge-completed';
     else badgeClass = 'badge-cancelled';
+
+
+    const paymentClass = order.payment_method === 'كاش' ? 'status-completed' :
+            order.payment_method === 'بطاقة' ? 'bg-info text-white' : 'status-pending';
     html += `
       <tr>
-        <td>${order.invoice_num}</td>
-        <td>${order.payment_method}</td>
+        <td>${getCurrentDisplayedTotalOrderCount() - orderCounter}</td>
+        
+        <td class='nowrap-cell'>${renderOrderType(order)}</td>
+        <td><span class='status-badge ${paymentClass}'>  ${order.payment_method}</span></td>
         <td class='nowrap-cell'>${formatDateOnly(utcToPalestine(order.created_at))}</td>
         <td class='nowrap-cell'>${formatTimeOnly(utcToPalestine(order.created_at))}</td>
         <td class='nowrap-cell'>${order.total_price} ₪</td>
@@ -394,6 +413,8 @@ function renderOrdersTable() {
         </td>
       </tr>
     `;
+    orderCounter++;
+
   });
 
   tbody.innerHTML = html;
@@ -401,6 +422,27 @@ function renderOrdersTable() {
 
   updatePagination();
   displayContainer(ordersTableCard);
+}
+
+function renderOrderType(order) {
+  if(order.type === "سفري") {
+    return `
+      <span class="badge text-secondary border border-secondary bg-transparent px-3 py-2">
+      <i class="fa-solid fa-box"></i>
+      سفري
+    </span>
+    `;
+  }
+
+  if(order.type === "طاولة") {
+    return `
+       <span class="badge text-primary border border-primary bg-transparent px-3 py-2">
+            <i class="bi bi-person-seat me-1"></i>
+            طاولة - ${order.table_num}
+        </span>
+    `;
+  }
+
 }
 
 function displayPaginationBtn() {
@@ -461,27 +503,9 @@ function hiddePaginationLoader() {
 }
 
 
-
-
-
-// function formatTimeOnly(dateString) {
-//     const safeDate = dateString.replace(' ', 'T');
-//     const date = new Date(safeDate);
-
-//     return date.toLocaleTimeString('en-PS', {
-//         timeZone: 'Asia/Jerusalem',
-//         hour: '2-digit',
-//         minute: '2-digit',
-//     });
-// }
-// function formatDateOnly(dateString) {
-
-//   const safeDate = dateString.replace(' ', 'T');
-//   const date = new Date(safeDate);
-
-//   const year = date.getFullYear();
-//   const month = String(date.getMonth() + 1).padStart(2, '0');
-//   const day = String(date.getDate()).padStart(2, '0');
-
-//   return `${year}-${month}-${day}`;
-// }
+function setCurrentDisplayedTotalOrderCount(count) {
+  currentDisplayedTotalOrderCount = count;
+}
+function getCurrentDisplayedTotalOrderCount() {
+  return currentDisplayedTotalOrderCount;
+}
