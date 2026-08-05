@@ -72,6 +72,56 @@ document.querySelectorAll(".reveal").forEach(el => {
 });
 
 
+document.addEventListener("click", async function (e) {
+
+  if (e.target.closest('.export-btn')) {
+    showOverLayLoder();
+    try {
+      const result = await window.electronAPI.backupDatabase();
+
+      if (result.canceled) {
+        return;
+      }
+
+      if (result.success) {
+        bootboxSuccess("تم إنشاء النسخة الاحتياطية بنجاح");
+      } else {
+        bootboxError("حدث خطأ أثناء إنشاء النسخة الاحتياطية");
+      }
+
+    } catch (e) {
+      bootboxError(e.message);
+    } finally {
+      hiddeOverLayLoder();
+    }
+  }
+});
+
+function showOverLayLoder() {
+  const btn = document.querySelector('.export-btn');
+  btn.disabled = true;
+
+  btn.innerHTML = `
+  <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+  جاري تصدير البيانات...
+  `;
+
+  document.getElementById('overlay_loader').style.display = 'flex';
+
+}
+function hiddeOverLayLoder() {
+  document.getElementById('overlay_loader').style.display = 'none';
+
+  const btn = document.querySelector('.export-btn');
+  btn.disabled = false;
+
+  btn.innerHTML = `
+  <i class="fas fa-database"></i> 
+  <span>تصدير البيانات</span> 
+  `;
+}
+
+
 async function loadAnalysisData(startDate, endDate) {
   try {
     const res = await fetch(urlServer + '/reports/home', {

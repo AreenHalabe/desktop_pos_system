@@ -1,5 +1,7 @@
 import { app, BrowserWindow, ipcMain, dialog, Menu } from "electron";
 import { fileURLToPath } from "url";
+import { sql, pool, poolConnect } from "./DataBaseConnections/dbconnection.js";
+import fs from "fs";
 import path from "path";
 import url from "url";
 
@@ -195,6 +197,83 @@ app.whenReady().then(async () => {
     }
 
     );
+
+
+
+
+    ipcMain.handle("backup-database", async () => {
+
+      const now = new Date();
+
+      const date = now.toLocaleDateString("en-CA");
+      const defaultFileName = `POS_Backup_${date}.bak`;
+
+      // 1. المستخدم يختار مكان حفظ النسخة
+      const result = await dialog.showSaveDialog({
+        title: "حفظ نسخة احتياطية",
+        defaultPath: defaultFileName,
+        filters: [
+          {
+            name: "SQL Server Backup",
+            extensions: ["bak"]
+          }
+        ]
+      });
+
+      if (result.canceled) {
+        return {
+          success: false,
+          canceled: true
+        };
+      }
+
+      const destinationPath = result.filePath;
+
+      // 2. مجلد مؤقت للـ backup
+      const tempDir = "C:\\POSBackups";
+      const tempPath = path.join(tempDir, "pos_backup.bak");
+
+      try {
+
+        // إنشاء المجلد إذا لم يكن موجودًا
+        if (!fs.existsSync(tempDir)) {
+          fs.mkdirSync(tempDir, { recursive: true });
+        }
+
+        // 3. انتظار اتصال SQL Server
+        await poolConnect;
+
+        // 4. SQL Server يعمل Backup
+        await pool.request().query(`
+            BACKUP DATABASE [restorant]
+            TO DISK = N'${tempPath.replace(/\\/g, "\\\\")}'
+            WITH INIT;
+        `);
+
+        // 5. نقل ملف الـ bak للمكان الذي اختاره المستخدم
+        fs.copyFileSync(
+          tempPath,
+          destinationPath
+        );
+
+        // 6. حذف الملف المؤقت
+        fs.unlinkSync(tempPath);
+
+        return {
+          success: true,
+          path: destinationPath
+        };
+
+      } catch (error) {
+
+        console.error("Backup error:", error);
+
+        return {
+          success: false,
+          error: error.message
+        };
+      }
+    });
 
     app.on("window-all-closed", () => {
       if (process.platform !== "darwin") {

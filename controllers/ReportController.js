@@ -186,7 +186,7 @@ export const getOrderAnalysis = async(req , res) => {
           orders
         ] = await Promise.all([
           getOrderDetails(from, to, adminId),
-          loadOrders(from, to, 'مكتمل', adminId, 10, 0)
+          loadOrders(from, to, 'مكتمل', adminId, 20, 0)
         ]);
 
         let mapItems = [];
@@ -225,7 +225,7 @@ export const loadMoreOrdersAnalysis = async(req , res) =>{
         const status     = body.status;
         const totalOrder = Number(body.totalOrder);
 
-        const limit      = 10;
+        const limit      = 20;
         const totalPage = Math.ceil(totalOrder / limit);
         const offset    = (currentPage - 1) * limit;
 
