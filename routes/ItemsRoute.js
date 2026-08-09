@@ -41,10 +41,3 @@ ItemRoute.get('/menu/details' , (req , res) => {
         getMenueTree(req , res);
     }
 )
-
-// ItemRoute.get('/test' , (req , res) => {
-//         return res.status(200).json({
-//             message: "Test route is working"
-//         });
-//     }
-// )

@@ -71,28 +71,28 @@
                             <div class="row g-3 mb-3">
 
 
-                                <div class="col-12 col-md-6">
+                                <div class="col-12 col-md-4">
 
                                     <div id="base_price_box">
                                         <label for="price" class="form-label fw-bold">السعر الأساسي</label>
                                         <input type="number" class="form-control bg-light" step="0.5" id="price" name="price"
                                             placeholder="السعر" required>
                                     </div>
-
-
-                                    <div class="form-check d-flex align-items-center mt-2">
-                                        <input type="checkbox" class="form-check-input" id="has_variants" name="has_variants" value="1"
-                                            style="cursor:pointer;">
-                                        <label for="has_variants" class="form-label ms-2 mb-0 fw-bold"
-                                            style="cursor:pointer;">
-                                            هذا المنتج له أحجام وأسعار مختلفة
-                                        </label>
-                                    </div>
-
-
                                 </div>
 
-                                <div class="col-12 col-md-6">
+                                
+
+
+                                <div class="col-12 col-md-4">
+                                    <label for="stock" class="form-label fw-bold">المخزون</label>
+
+                                    <input type="number" class="form-control bg-light" id="stock" name="stock"
+                                        placeholder="المخزون">
+                                </div>
+
+
+
+                                <div class="col-12 col-md-4">
                                     <label for="barcode" class="form-label fw-bold">الباركود</label>
 
                                     <input type="number" class="form-control bg-light" id="barcode" name="barcode"
@@ -107,36 +107,14 @@
                                     </div>
                                 </div>
 
-
+                        
 
                             </div>
 
-                            <!-- جدول الأحجام -->
-                            <div id="variants_box" style="display:none;">
-                                <label class="form-label fw-bold">الأحجام والأسعار</label>
-
-                                <div class="table-responsive">
-                                    <table class="table table-bordered text-center align-middle">
-                                        <thead class="table-light">
-                                            <tr>
-                                                <th style="width:40%">الحجم</th>
-                                                <th>السعر</th>
-                                                <th>حذف</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody id="variants_table"></tbody>
-                                    </table>
-                                </div>
-
-                                <button type="button" class="btn btn-success mb-3 col-12 col-sm-6 col-md-4 col-lg-2"
-                                    id="add_variant_btn">
-                                    <i class="bi bi-plus-square"></i> إضافة حجم
-                                </button>
-                            </div>
-
+                        
                             <!-- زر الإضافة -->
                             <div class="d-flex justify-content-center">
-                                <button type="submit" class="btn btn-primary col-12 col-sm-6 col-md-4 col-lg-3 mt-4">
+                                <button type="submit" class="btn btn-primary col-12 col-sm-6 col-md-4 col-lg-3 mt-4 fw-bold">
                                     <i class="bi bi-plus-square"></i> إضافة
                                 </button>
                             </div>

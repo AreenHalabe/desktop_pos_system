@@ -105,17 +105,17 @@ categoryFilter.addEventListener('change', function () {
     window.location.href = '../category/home.html';
     return;
   }
-  if(Number(this.value) === 0){
+  if (Number(this.value) === 0) {
     handelTotalPage(items.length);
     fetchProducts(Number(this.value));
   }
-  else{
+  else {
     filteredItems = items.filter(item => item.category_id === Number(this.value));
     handelTotalPage(filteredItems.length);
     fetchProducts(Number(this.value));
   }
 
-  
+
   searchInput.value = '';
 });
 
@@ -197,7 +197,14 @@ function renderItemIntable(product) {
           <td class="align-middle" data-label="الباركود">
               ${product?.barcode || '<span class="text-muted">بدون باركود</span>'}
           </td>
-           <td class="align-middle" data-label="الفئة">
+
+          <td class="align-middle" data-label="المخزون">
+            <span class="badge ${product.stock == 0 ? 'bg-danger' : 'bg-success'}"> 
+              ${product.stock}
+            </span>
+          </td>
+
+          <td class="align-middle" data-label="الفئة">
               ${categories.find(category => category.id === product.category_id).name}
           </td>
 
@@ -278,7 +285,7 @@ function handleTotalItems(numOfItems) {
   const totalItems = numOfItems;
   totalPages = Math.ceil(totalItems / itemsPerPage);
 
-  if(totalPages === 1){
+  if (totalPages === 1) {
     currentPage = 1;
   }
 }
@@ -355,6 +362,7 @@ async function loadItems() {
     }
     else if (res.status === 200) {
       items = data.items;
+      
     }
     else {
       showEmptyNotice(data.message);
@@ -387,14 +395,14 @@ async function deleteItem({ itemId, categoryId }) {
 
       await loadItems();
 
-      if(currentDisplayedCategoryId === 0){
+      if (currentDisplayedCategoryId === 0) {
         handleTotalItems(items.length);
       }
-      else{
+      else {
         filteredItems = items.filter(item => item.category_id === Number(currentDisplayedCategoryId));
         handleTotalItems(filteredItems.length);
       }
-      
+
       fetchProducts(Number(currentDisplayedCategoryId));
       return;
     }
@@ -458,6 +466,11 @@ function buildRow(product, counter) {
           <td class="align-middle" data-label="الباركود">
               ${product?.barcode || '<span class="text-muted">بدون باركود</span>'}
           </td>
+          <td class="align-middle" data-label="المخزون">
+              <span class="badge ${product.stock == 0 ? 'bg-danger' : 'bg-success'}"> 
+                ${product.stock}
+              </span>
+            </td>
 
           <td class="align-middle" data-label="الفئة">
               ${categories.find(category => category.id === product.category_id).name}
