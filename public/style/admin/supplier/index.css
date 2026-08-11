@@ -1,0 +1,242 @@
+  body {
+      background-color: #c8ced3;
+      min-height: 100vh;
+      padding: 0;
+      margin: 0;
+  }
+
+  .admin-container {
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+      overflow: hidden;
+      border: 1px solid rgba(0, 0, 0, .125);
+  }
+
+  .admin-header {
+      padding: 13px;
+      text-align: center;
+  }
+
+  .admin-header h1 {
+      font-weight: 700;
+      margin: 0;
+      /* font-size: 2.2rem; */
+  }
+
+  .admin-header p {
+      opacity: 0.9;
+      margin: 5px 0 0 0;
+  }
+
+  .table-container {
+      padding: 30px;
+  }
+
+  .table {
+      background: white;
+      border-radius: 8px;
+      overflow: hidden;
+      margin-bottom: 0;
+      border: 1px solid #dee2e6;
+
+  }
+
+  .table thead th {
+      background-color: #0d6efd;
+      color: white;
+      border: none;
+      font-weight: 600;
+      padding: 20px 15px;
+      font-size: 0.95rem;
+      border-bottom: 2px solid #0b5ed7;
+  }
+
+  .table tbody td {
+      padding: 20px 15px;
+      vertical-align: middle;
+      border-color: #dee2e6;
+  }
+
+  .table tbody tr {
+      transition: background-color 0.15s ease-in-out, border-color 0.15s ease-in-out;
+  }
+
+  .table tbody tr:hover {
+      background-color: rgba(0, 0, 0, 0.075);
+  }
+
+  .delete-account-form {
+      display: inline-block;
+      margin: 0;
+      width: 30%;
+  }
+
+  /* أزرار العمليات - Bootstrap Colors */
+  .btn-group {
+      display: flex;
+      gap: 5px;
+  }
+
+  .delete-btn {
+      background-color: #f8d7da;
+      border-color: #f5c6cb;
+      color: #dc3545;
+      border-radius: 6px;
+      padding: 6px 12px;
+      font-size: 0.875rem;
+      transition: all 0.15s ease-in-out;
+  }
+
+  .delete-btn:hover {
+      background-color: #f5c6cb;
+      border-color: #ebccd1;
+      color: #c82333;
+      transform: translateY(-1px);
+      box-shadow: 0 0.125rem 0.25rem rgba(220, 53, 69, 0.2);
+  }
+
+  .edit-btn {
+      background-color: #d1e7dd;
+      border-color: #badbcc;
+      color: #0f5132;
+      border-radius: 6px;
+      padding: 6px 12px;
+      font-size: 0.875rem;
+      transition: all 0.15s ease-in-out;
+  }
+
+  .edit-btn:hover {
+      background-color: #badbcc;
+      border-color: #a3cfbb;
+      color: #0f5132;
+      transform: translateY(-1px);
+      box-shadow: 0 0.125rem 0.25rem rgba(25, 135, 84, 0.25);
+  }
+
+  .view-btn {
+      background-color: #cff4fc;
+      border-color: #b6effb;
+      color: #055160;
+      border-radius: 6px;
+      padding: 6px 12px;
+      font-size: 0.875rem;
+      transition: all 0.15s ease-in-out;
+  }
+
+  .view-btn:hover {
+      background-color: #b6effb;
+      border-color: #86e5f8;
+      color: #055160;
+      transform: translateY(-1px);
+      box-shadow: 0 0.125rem 0.25rem rgba(13, 202, 240, 0.25);
+  }
+
+  .add-btn {
+      background-color: #0d6efd;
+      border-color: #0d6efd;
+      color: #fff;
+      border-radius: 8px;
+      padding: 12px 24px;
+      font-size: 1rem;
+      font-weight: 600;
+      transition: all 0.15s ease-in-out;
+      box-shadow: 0 0.125rem 0.25rem rgba(13, 110, 253, 0.25);
+  }
+
+  .add-btn:hover {
+      background-color: #0b5ed7;
+      border-color: #0a58ca;
+      color: #fff;
+      transform: translateY(-1px);
+      box-shadow: 0 0.25rem 0.5rem rgba(13, 110, 253, 0.35);
+  }
+
+  .status-active {
+      color: #198754;
+      font-weight: 600;
+      background-color: rgba(25, 135, 84, 0.1);
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 0.875rem;
+  }
+
+  .status-inactive {
+      color: #dc3545;
+      font-weight: 600;
+      background-color: rgba(220, 53, 69, 0.1);
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 0.875rem;
+  }
+
+
+
+  .avatar {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.875rem;
+      font-weight: 600;
+      color: white;
+  }
+
+  .empty-state {
+      text-align: center;
+      padding: 50px;
+      color: #6c757d;
+  }
+
+  .empty-state i {
+      font-size: 50px !important;
+      font-weight: 700;
+      margin-bottom: 15px;
+      opacity: 0.5;
+  }
+
+  .error-box {
+      background: #f8d7da;
+      padding: 10px;
+      border-radius: 6px;
+  }
+
+  .danger-box {
+      margin-top: 8px;
+      padding: 8px;
+      border: 1px solid #dc3545;
+      color: #dc3545;
+      background-color: #f8d7da;
+      border-radius: 4px;
+      font-weight: 600;
+      text-align: center;
+  }
+
+  .supplier-account-btn{
+        width: 100%;
+        max-width: 200px;
+        font-size: 1rem;
+        font-weight: bold;
+        margin-top: 20px;
+  }
+
+  @media (max-width: 768px) {
+      .btn-group {
+          flex-direction: column;
+          gap: 6px;
+      }
+
+      .delete-account-form {
+          width: 100%;
+      }
+
+      .table-responsive {
+          font-size: 0.9rem;
+      }
+
+      .table-container {
+          padding: 20px;
+      }
+  }

@@ -10,6 +10,7 @@ import { SessionRoute } from "./routes/SessionRoute.js";
 import { OrderRoute } from "./routes/OrderRoute.js";
 import { TransactionRoute } from "./routes/TransactionRoute.js";
 import { ReportRoute } from "./routes/ReportRoute.js";
+import { SupplierRoute } from "./routes/SupplierRoute.js";
 const app = express();
 
 
@@ -25,7 +26,7 @@ app.use(SessionRoute);
 app.use(OrderRoute);
 app.use(TransactionRoute);
 app.use(ReportRoute);
-
+app.use(SupplierRoute);
 
 let server_port;
 
