@@ -2,9 +2,11 @@ import { fetchCategories } from "../../../api/category.js";
 import { url } from "../../../api/urlEndPoint.js";
 import { showAuthExpired, bootboxSuccess } from "../../../component/bootbox.js";
 import { compressWithLibrary } from "../../../component/handlimage.js";
-import { getAuthToken } from "../../../component/auth.js";
+import { setActiveNavLink } from "../../../component/bootbox.js";
 
+import { getAuthToken , removeAuthToken } from "../../../component/auth.js";
 
+const header = document.querySelector("site-header");
 
 const autoBarcodeCheckbox = document.getElementById('auto_barcode');
 
@@ -16,6 +18,49 @@ let price = document.getElementById('price');
 let loader = document.getElementById("overlay_loader");
 const barcode = document.getElementById('barcode');
 
+
+class SiteHeader extends HTMLElement {
+  async connectedCallback() {
+
+    const res = await fetch('../component/header.html');
+    this.innerHTML = await res.text();
+
+    // 🔔 إعلان رسمي: الهيدر جاهز
+    this.dispatchEvent(
+      new CustomEvent("header:ready", {
+        bubbles: true
+      })
+    );
+  }
+}
+
+customElements.define("site-header", SiteHeader);
+
+header.addEventListener("header:ready", () => {
+  setActiveNavLink();
+  const logoutFrom = document.getElementById('logoutForm');
+  logoutFrom.addEventListener("submit", async function (e) {
+    e.preventDefault();
+    bootbox.confirm({
+      title: "تسجيل الخروج",
+      message: "هل أنت متأكد من تسجيل الخروج؟",
+      buttons: {
+        confirm: {
+          label: "نعم",
+        },
+        cancel: {
+          label: "إلغاء",
+        },
+      },
+      callback: function (result) {
+        if (!result) return;
+
+        removeAuthToken();
+        window.location.href = "../../mainWindow.html";
+      },
+    });
+  });
+});
 
 
 form.addEventListener("submit", async (e) => {
@@ -30,6 +75,7 @@ form.addEventListener("submit", async (e) => {
     const finalData = {
         name: formData.get("name"),
         category_id: formData.get('category_id'),
+        cost_price: formData.get('cost_price'),
         price: formData.get('price'),
         auto_generated_barcode : formData.get('auto_barcode'),
         barcode: formData.get('barcode'),

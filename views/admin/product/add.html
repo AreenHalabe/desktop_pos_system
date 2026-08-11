@@ -14,15 +14,12 @@
     <link href="../../../wroot/assets/fontawesome/css/all.min.css" rel="stylesheet">
 
     <link rel="stylesheet" href="../../../public/style/admin/product/add-edit-product.css" />
-    <style>
-        .box{
-            border: 1px solid black;
-        }
-    </style>
+    <link rel="stylesheet" href="../../../public/style/admin/header.css" />
 
 </head>
 
 <body>
+     <site-header></site-header>
     <div class="container content py-4">
         <div class="row">
             <div class="col-12">
@@ -32,9 +29,9 @@
                     <div class="card-header bg-white py-3">
                         <div class="row align-items-center gy-2">
                             <div class="col-12 col-md-6 text-center text-md-start">
-                                <h6 class="m-0 fs-5 fs-md-4 fw-normal">
+                                <h4 class="m-0">
                                     إنشاء صنف جديد
-                                </h6>
+                                </h4>
                             </div>
 
                             <div class="col-12 col-md-6 text-center text-md-end">
@@ -70,8 +67,15 @@
                             <!-- السعر الأساسي + checkbox -->
                             <div class="row g-3 mb-3">
 
+                                <div class="col-12 col-md-3">
+                                    <label for="cost_price" class="form-label fw-bold">سعر الشراء</label>
 
-                                <div class="col-12 col-md-4">
+                                    <input type="number" class="form-control bg-light" step="0.5" id="cost_price" name="cost_price"
+                                        placeholder="سعر الشراء">
+                                </div>
+
+
+                                <div class="col-12 col-md-3">
 
                                     <div id="base_price_box">
                                         <label for="price" class="form-label fw-bold">السعر الأساسي</label>
@@ -83,7 +87,7 @@
                                 
 
 
-                                <div class="col-12 col-md-4">
+                                <div class="col-12 col-md-3">
                                     <label for="stock" class="form-label fw-bold">المخزون</label>
 
                                     <input type="number" class="form-control bg-light" id="stock" name="stock"
@@ -92,7 +96,7 @@
 
 
 
-                                <div class="col-12 col-md-4">
+                                <div class="col-12 col-md-3">
                                     <label for="barcode" class="form-label fw-bold">الباركود</label>
 
                                     <input type="number" class="form-control bg-light" id="barcode" name="barcode"

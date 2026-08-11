@@ -64,6 +64,7 @@ export const addItem = async (req, res) => {
     const rawData = {
       name: body.name,
       category_id: body.category_id,
+      cost_price: body.cost_price,
       price: body.price || null,
       barcode: body.barcode,
       stock: Number(body.stock) || 0,
@@ -122,6 +123,10 @@ export const addItem = async (req, res) => {
     const itemId = result.recordset[0].id;
 
 
+    await batchStockForItem(itemId, validated.data.stock, validated.data.cost_price, transaction);
+    
+
+
     await transaction.commit();
 
 
@@ -168,7 +173,7 @@ export const updateItem = async (req, res) => {
     let barcode;
 
 
-    const schema = buildProductSchema();
+    const schema = buildProductSchema(false);
 
     const rawData = {
       name: body.name,
@@ -450,6 +455,22 @@ async function generateUniqueBarcode() {
   }
 }
 
+async function batchStockForItem(itemId, stock, cost_price, transaction) {
+  const currentTimeStamp = new Date();
+  await transaction.request()
+    .input("item_id", sql.Int, itemId)
+    .input("quantity", sql.Int, stock)
+    .input('cost_price', sql.Decimal(18, 3), cost_price)
+    .input("created_at", sql.DateTime2, currentTimeStamp)
+    .query(`
+      INSERT INTO stock_batches (item_id, quantity, remaining_qty, cost_price, created_at)
+      VALUES (@item_id, @quantity, @quantity, @cost_price, @created_at)
+    `);
+  
+}
+
+
+
 
 
 
@@ -526,7 +547,7 @@ function buildMenuTree(rows) {
 
 
 
-function buildProductSchema() {
+function buildProductSchema(AddNewItems = true) {
   return z.object({
     name: z
       .string()
@@ -579,10 +600,19 @@ function buildProductSchema() {
         },
         z.number()
           .positive("السعر يجب أن يكون رقمًا موجبًا")
-          .nullable()
           .refine(v => v !== null, { message: "يجب إدخال سعر الصنف" })
       ),
 
+    cost_price: AddNewItems
+      ? z.preprocess(
+        (v) => {
+          if (v === null || v === undefined || v === "") return null;
+          return Number(v);
+        },
+        z.number()
+          .positive("سعر الشراء يجب أن يكون رقمًا موجبًا")
+      )
+      : z.null().optional(),
   });
 }
 
