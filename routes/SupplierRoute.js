@@ -4,22 +4,10 @@ import { getSuppliers, addSupplier, updateSupplier, deleteSupplier } from "../co
 export const SupplierRoute = express.Router();
 
 
-SupplierRoute.get('/suppliers' , async(req , res) => {
-        getSuppliers(req , res);
-    }
-);
+SupplierRoute.get('/suppliers' , getSuppliers);
 
-SupplierRoute.post('/supplier/add' , async(req , res) => {
-        addSupplier(req , res);
-    }
-);
+SupplierRoute.post('/supplier/add' , addSupplier);
 
-SupplierRoute.put('/supplier/update' , async(req , res) => {
-        updateSupplier(req , res);
-    }
-);
+SupplierRoute.put('/supplier/update' , updateSupplier);
 
-SupplierRoute.delete('/supplier/delete' , async(req , res) => {
-        deleteSupplier(req , res);
-    }
-);
+SupplierRoute.delete('/supplier/delete' , deleteSupplier);

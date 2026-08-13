@@ -11,6 +11,8 @@ import { OrderRoute } from "./routes/OrderRoute.js";
 import { TransactionRoute } from "./routes/TransactionRoute.js";
 import { ReportRoute } from "./routes/ReportRoute.js";
 import { SupplierRoute } from "./routes/SupplierRoute.js";
+import { InvoiceRoute } from "./routes/InvoicesRoute.js";
+
 const app = express();
 
 
@@ -27,6 +29,8 @@ app.use(OrderRoute);
 app.use(TransactionRoute);
 app.use(ReportRoute);
 app.use(SupplierRoute);
+app.use(InvoiceRoute);
+
 
 let server_port;
 

@@ -4,29 +4,14 @@ import { getMainCategoryTree, addMainCategory, editMainCategor, updateMainCatego
 export const MainCategoryRoute = express.Router();
 
 
-MainCategoryRoute.get('/maincategory/list' , async(req , res) => {
-        getMainCategoryList(req , res);
-    }
-);
+MainCategoryRoute.get('/maincategory/list' , getMainCategoryList);
 
-MainCategoryRoute.get('/maincategory/details',async(req , res)=>{
-        getMainCategoryTree(req,res);
-    }
-);
+MainCategoryRoute.get('/maincategory/details' , getMainCategoryTree);
 
-MainCategoryRoute.post('/maincategory/add',async(req , res)=>{
-        addMainCategory(req,res);
-    }
-);
-MainCategoryRoute.get('/maincategory/edit',async(req , res)=>{
-        editMainCategor(req,res);
-    }
-);
-MainCategoryRoute.put('/maincategory/update',async(req , res)=>{
-        updateMainCategory(req,res);
-    }
-);
-MainCategoryRoute.delete('/maincategory/delete',async(req , res)=>{
-        deleteMainCategory(req,res);
-    }
-);
+MainCategoryRoute.post('/maincategory/add' , addMainCategory);
+
+MainCategoryRoute.get('/maincategory/edit' , editMainCategor);
+
+MainCategoryRoute.put('/maincategory/update' , updateMainCategory);
+
+MainCategoryRoute.delete('/maincategory/delete' , deleteMainCategory);

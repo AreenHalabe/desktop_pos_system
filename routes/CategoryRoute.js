@@ -4,22 +4,12 @@ import { addCategory, getCategoryList, updateCategory, deleteCategory } from "..
 export const CategoryRoute = express.Router();
 
 
-CategoryRoute.get('/category/list' , async(req , res) => {
-        getCategoryList(req , res);
-    }
-);
 
-CategoryRoute.post('/category/add' , async(req , res) => {
-        addCategory(req , res);
-    }
-);
+CategoryRoute.get('/category/list' , getCategoryList);
 
-CategoryRoute.put('/category/edit' , async(req , res) => {
-        updateCategory(req , res);
-    }
-);
+CategoryRoute.post('/category/add' , addCategory);
 
-CategoryRoute.delete('/category/delete' , async(req , res) =>{
-        deleteCategory(req , res);
-    }
-);
+
+CategoryRoute.put('/category/edit' , updateCategory);
+
+CategoryRoute.delete('/category/delete' , deleteCategory);

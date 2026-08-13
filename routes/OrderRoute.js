@@ -4,18 +4,9 @@ import { createOrder, deleteOrder, getDaliyOrders } from "../controllers/OrderCo
 export const OrderRoute = express.Router();
 
 
-OrderRoute.post('/creat/order' , (req , res) => {
-        createOrder(req , res);
-    }
-);
+OrderRoute.post('/creat/order' , createOrder);
 
-OrderRoute.put('/delete/order' , (req , res) =>{
-        deleteOrder(req , res);
-    }
-);
+OrderRoute.put('/delete/order' , deleteOrder);
 
-OrderRoute.get('/daily/completed/deleted/orders' , (req , res) =>{
-        getDaliyOrders(req , res);
-    }
-);
+OrderRoute.get('/daily/completed/deleted/orders' , getDaliyOrders);
 

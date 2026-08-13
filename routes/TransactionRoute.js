@@ -3,19 +3,10 @@ import { createTransaction, deleteTransaction, loadTransactions } from "../contr
 
 export const TransactionRoute = express.Router();
 
-TransactionRoute.get('/load-transaction/according-to-session' , (req , res) => {
-        loadTransactions(req , res);
-    }
-);
+TransactionRoute.get('/load-transaction/according-to-session' , loadTransactions);
 
 
-TransactionRoute.post('/creat-transaction' , (req , res) => {
-        createTransaction(req , res);
-    }
-);
+TransactionRoute.post('/creat-transaction' , createTransaction);
 
 
-TransactionRoute.delete('/delete-transaction' , (req , res) => {
-        deleteTransaction(req , res);
-    }
-);
+TransactionRoute.delete('/delete-transaction' , deleteTransaction);
