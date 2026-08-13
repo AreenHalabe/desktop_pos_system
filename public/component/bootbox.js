@@ -17,7 +17,7 @@ export function showAuthExpired(message) {
     },
     callback: function (result) {
       if (result) {
-        window.location.href = '/admin/login';
+        window.location.href = '../../mainWindow.html';
       }
     }
   });

@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Halabi_services</title>
+
+
+    <link href="../../../wroot/assets/bootstrap/css/bootstrap.rtl.min.css" rel="stylesheet">
+    <link href="../../../wroot/assets/bootstrap/css/bootstrap-icons.css" rel="stylesheet">
+
+    <!-- FontAwesome -->
+    <link href="../../../wroot/assets/fontawesome/css/all.min.css" rel="stylesheet">
+
+
+    <link rel="stylesheet" href="../../../public/style/cashier/header.css" />
+
+    <link rel="stylesheet" href="../../../public/style/cashier/supplier/index.css" />
+
+</head>
+
+<body class="body">
+    <div class="p-3">
+        
+    </div>
+    <div class="container-fluid">
+
+        <div class="page-header d-flex align-items-center">
+            <site-header></site-header>
+
+            <div class="mx-auto">
+                <h3 class="page-title mb-2">
+                    <i class="fa-solid fa-file-invoice me-1 text-primary"></i>
+                    إنشاء فاتورة مورد
+                </h3>
+                <p class="text-secondary mb-0">
+                    أدخل بيانات الطلبية والأصناف المستلمة من المورد
+                </p>
+            </div>
+
+
+        </div>
+
+    </div>
+    <div class="page-container">
+        <!-- الكارد الرئيسي -->
+        <div class="card shadow-sm border-0 invoice-card">
+
+            <div class="card-body p-4">
+
+                <!-- اختيار المورد -->
+                <div class="supplier-section mb-4">
+
+                    <label for="supplierSelect" class="form-label fs-5">
+                        <i class="fa-solid fa-truck-field me-1"></i>
+                        الموردين
+                    </label>
+
+                    <select id="supplierSelect" class="form-select">
+                        <option value="" selected disabled>--إختر المورد--</option>
+                    </select>
+
+                    <div class="form-text">
+                        اختر المورد الذي قمت باستلام الطلبية منه.
+                    </div>
+
+                </div>
+
+
+                <!-- زر إنشاء الفاتورة -->
+                <div id="createInvoiceSection" class="text-center">
+
+                    <button type="button" id="createInvoiceBtn" class="btn btn-primary px-4 open-inv-btn">
+                        <i class="fa-solid fa-plus me-1"></i>
+                        إنشاء فاتورة
+                    </button>
+
+                </div>
+
+
+                <!-- محتوى الفاتورة -->
+                <div id="invoiceSection" class="d-none mt-4">
+
+                    <hr class="mb-4">
+
+
+                    <!-- عنوان الأصناف -->
+                    <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
+
+                        <div>
+                            <h5 class="mb-1 fw-bold">
+                                <i class="fa-solid fa-boxes-stacked me-1"></i>
+                                أصناف الطلبية
+                            </h5>
+
+                            <small class="text-secondary">
+                                أضف الأصناف والكميات وأسعار الشراء
+                            </small>
+                        </div>
+
+                        <button type="button" id="addRowBtn" class="btn btn-outline-primary">
+                            <i class="fa-solid fa-plus me-1"></i>
+                            إضافة صنف
+                        </button>
+
+                    </div>
+
+
+                    <!-- الجدول -->
+                    <div class="table-container">
+
+                        <table class="table table-bordered table-hover invoice-table">
+
+                            <thead class="table-dark">
+
+                                <tr>
+                                    <th style="width: 30%;">
+                                        اسم الصنف
+                                    </th>
+
+                                    <th class="text-center" style="width: 15%;">
+                                        الكمية
+                                    </th>
+
+                                    <th class="text-center" style="width: 20%;">
+                                        سعر الشراء
+                                    </th>
+
+                                    <th class="text-center" style="width: 20%;">
+                                        الإجمالي
+                                    </th>
+
+                                    <th class="text-center" style="width: 15%;">
+                                        الإجراء
+                                    </th>
+                                </tr>
+
+                            </thead>
+
+                            <tbody id="itemsTableBody">
+                                <!-- الصفوف يتم إنشاؤها بالجافاسكربت -->
+                            </tbody>
+
+                        </table>
+
+                    </div>
+
+
+                    <!-- رسالة عند عدم وجود أصناف -->
+                    <div id="emptyMessage" class="empty-message text-center text-secondary py-3">
+                        لا يوجد أصناف في الفاتورة
+                    </div>
+
+                  
+                    <div class="mb-2 fw-bold text-secondary supplier-items-title" style="font-size: 0.9rem;">
+                        <i class="fas fa-boxes-stacked me-1"></i>
+                        أصناف تم شراؤها مسبقاً من
+                        <span class="supplier-name-badge" id="supplierName"></span>
+                    </div>
+
+
+
+                    <div class="supplier-items-container" id="supplierItemsContainer">
+
+                    </div>
+
+
+
+
+                    <!-- ملخص الفاتورة -->
+                    <div class="summary mt-4">
+
+                        <div class="card border">
+                            <div class="card-header bg-primary text-white fw-bold">
+
+                                <i class="fa-solid fa-calculator"></i>
+
+                                ملخص الفاتورة
+
+                            </div>
+
+
+                            <div class="card-body">
+
+
+
+                                <!-- المجموع -->
+                                <div class="summary-row">
+
+                                    <span class="text-secondary">
+                                        مجموع الأصناف
+                                    </span>
+
+                                    <strong>
+
+                                        <span id="subtotal">0.00</span>
+                                        <span>₪</span>
+                                    </strong>
+
+                                </div>
+
+
+                                <!-- الخصم -->
+                                <div class="summary-row align-items-center">
+
+                                    <label for="discount" class="text-secondary mb-0">
+                                        الخصم
+                                    </label>
+
+                                    <div class="input-group" style="max-width: 170px;">
+
+                                        <input type="number" id="discount" class="form-control text-center" value="0"
+                                            min="0" step="0.5">
+
+                                        <span class="input-group-text">
+                                             <i class="fa-solid fa-shekel-sign"></i>
+                                        </span>
+
+                                    </div>
+
+                                </div>
+
+
+                                <!-- النهائي -->
+                                <div class="summary-row total">
+
+                                    <span>
+                                        الإجمالي النهائي
+                                    </span>
+
+                                    <span class="text-primary">
+                                        <span id="finalTotal">0.00</span>
+                                        ₪
+                                    </span>
+
+                                </div>
+
+                                <!-- زر التأكيد -->
+                                <div class="text-center mt-4">
+
+                                    <button type="button" id="confirmBtn" class="btn btn-success confirm-btn px-5">
+                                        <i class="fa-solid fa-check me-1"></i>
+                                        تأكيد الطلبية
+                                    </button>
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+
+    <div id="overlay_loader" style="
+                display:none;
+                position: fixed;
+                inset: 0;
+                background: rgba(0,0,0,0.55);
+                backdrop-filter: blur(3px);
+                z-index: 9999;
+                justify-content: center;
+                align-items: center;
+            ">
+        <div class="text-center text-white">
+            <div class="spinner-border" role="status" style="width: 4rem; height: 4rem;">
+            </div>
+            <p class="mt-3 fs-5">جاري معالجة الطلب، يرجى الانتظار...</p>
+        </div>
+    </div>
+
+
+
+
+    <script src="../../../wroot/assets/bootstrap/js/bootstrap.bundle.min.js"></script>
+
+    <script src="../../../wroot/assets/jquery/jquery-3.7.1.min.js"></script>
+    <script src="../../../wroot/assets/bootbox/bootbox.min.js"></script>
+
+    <script type="module" src="../../../public/js/cashier/supplier/index.js"></script>
+
+</body>
+
+</html>

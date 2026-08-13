@@ -241,7 +241,7 @@ document.addEventListener("click", async function (e) {
         await SwitchToAdmin(url, input.value);
     }
 
-})
+});
 
 orderDetailsModal.addEventListener('show.bs.modal', function (event) {
 

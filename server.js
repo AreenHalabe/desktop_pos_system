@@ -11,6 +11,8 @@ import { OrderRoute } from "./routes/OrderRoute.js";
 import { TransactionRoute } from "./routes/TransactionRoute.js";
 import { ReportRoute } from "./routes/ReportRoute.js";
 import { TableRoute } from "./routes/TableRoute.js";
+import { SupplierRoute } from "./routes/SupplierRoute.js";
+import { InvoiceRoute } from "./routes/InvoiceRoute.js";
 const app = express();
 
 
@@ -27,31 +29,10 @@ app.use(OrderRoute);
 app.use(TransactionRoute);
 app.use(ReportRoute);
 app.use(TableRoute);
-
+app.use(SupplierRoute);
+app.use(InvoiceRoute);
 
 let server_port;
-
-
-
-// function startServer(port) {
-//   server_port = port;
-
-
-//   let server = app.listen(port)
-//     .on('listening', () => {
-//       console.log(`Server running at http://localhost:${port}`);
-//       return server;
-//     })
-//     .on('error', (err) => {
-//       if (err.code === 'EADDRINUSE') {
-//         console.log(`Port ${port} busy, trying ${port + 1}`);
-//         startServer(port + 1);
-//       } else {
-//         console.error("Server error:", err);
-//         process.exit(1);
-//       }
-//     });
-// }
 
 
 

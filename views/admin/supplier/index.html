@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Halabi_Services.ps</title>
+
+    <!-- Bootstrap 5.3.2 RTL -->
+    <link href="../../../wroot/assets/bootstrap/css/bootstrap.rtl.min.css" rel="stylesheet">
+    <link href="../../../wroot/assets/bootstrap/css/bootstrap-icons.css" rel="stylesheet">
+
+    <!-- FontAwesome -->
+    <link href="../../../wroot/assets/fontawesome/css/all.min.css" rel="stylesheet">
+
+    <link rel="stylesheet" href="../../../public/style/admin/header.css" />
+    <link rel="stylesheet" href="../../../public/style/admin/supplier/index.css" />
+
+
+</head>
+
+<body>
+
+    <site-header></site-header>
+    <div class="container mt-5">
+        <div class="row justify-content-center">
+            <div class="col-12 col-lg-11">
+                <div class="admin-container">
+                    <!-- Header -->
+                    <div class="admin-header border-bottom">
+                        <h3><i class="fas fa-users me-3"></i>حسابات الزبائين</h3>
+                        <p>إدارة حسابات الزبائن</p>
+                    </div>
+
+                    <!-- Controls -->
+                    <div class="table-container" id="tableContainer">
+                        <div class="d-flex align-items-center mb-4 flex-wrap gap-3">
+
+                            <div class="card border-0 table-card p-1 error-card d-none">
+                                <h6 class="text-danger error-box">
+                                    <i class="fas fa-exclamation-triangle text-danger ms-2"></i>
+                                    <span class="error-message">
+                                    </span>
+                                </h6>
+                            </div>
+
+                            <button class="btn add-btn ms-auto" data-bs-toggle="modal" data-bs-target="#createAccountModal
+                            ">
+                                <i class="fas fa-plus me-2"></i>
+                                حساب جديد
+                            </button>
+                        </div>
+
+                        <!-- Table -->
+                        <div class="table-responsive">
+                            <table class="table table-hover mb-0">
+                                <thead>
+                                    <tr>
+                                        <th class="text-center">#</th>
+                                        <th class="text-center">اسم المورد</th>
+                                        <th class="text-center">رقم الجوال</th>
+                                        <th class="text-center">الرصيد</th>
+                                        <th>الحالة</th>
+                                        <th class="text-center">العمليات</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="customersTableBody">
+
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- Create Account Modal -->
+    <div class="modal fade" id="createAccountModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 shadow">
+
+                <!-- Header -->
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title">
+                        <i class="fas fa-user-plus me-2"></i>
+                        إنشاء حساب جديد
+                    </h5>
+
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+
+                <!-- Body -->
+                <div class="modal-body p-4">
+
+                    <form id="createSupplierForm">
+
+                        <!-- اسم المورد -->
+                        <div class="mb-3">
+                            <label for="supplierName" class="form-label fw-semibold text-primary">
+                                اسم المورد
+                            </label>
+
+                            <input type="text" class="form-control border-primary" id="supplierName" name="name"
+                                placeholder="أدخل اسم المورد" required>
+                        </div>
+
+                        <!-- رقم الجوال -->
+                        <div class="mb-3">
+                            <label for="supplierPhone" class="form-label fw-semibold text-primary">
+                                رقم الجوال
+                            </label>
+
+                            <input type="tel" class="form-control border-primary" id="supplierPhone" name="phone"
+                                placeholder="أدخل رقم الجوال" inputmode="numeric">
+                        </div>
+
+                        <!-- رسالة الخطأ -->
+                        <div class="card border-0 table-card p-1 error-card d-none">
+                            <h6 class="text-danger error-box">
+                                <i class="fas fa-exclamation-triangle text-danger ms-2"></i>
+
+                                <span class="error-message">
+                                    حدث خطأ أثناء تحميل البيانات
+                                </span>
+                            </h6>
+                        </div>
+
+                        <!-- زر إنشاء الحساب -->
+                        <button type="submit" class="btn btn-primary d-block mx-auto supplier-account-btn" id="createAccountBtn">
+                            <i class="fas fa-plus me-2"></i>
+                            إنشاء الحساب
+                        </button>
+
+                    </form>
+
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="editAccountModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 shadow">
+
+                <!-- Header -->
+                <div class="modal-header bg-secondary text-white">
+                    <h5 class="modal-title">
+                        <i class="fas fa-pen-to-square me-2"></i>
+                        تعديل حساب
+                    </h5>
+
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+
+                <!-- Body -->
+                <div class="modal-body p-4">
+                    <form id="editSupplierForm">
+                        <!-- اسم المورد -->
+                        <div class="mb-3">
+                            <label for="editSupplierName" class="form-label fw-semibold text-primary">
+                                اسم المورد
+                            </label>
+
+                            <input type="text" class="form-control border-primary" id="editSupplierName" name="name"
+                                placeholder="أدخل اسم المورد" required>
+                        </div>
+
+                        <!-- رقم الجوال -->
+                        <div class="mb-3">
+                            <label for="editSupplierPhone" class="form-label fw-semibold text-primary">
+                                رقم الجوال
+                            </label>
+
+                            <input type="tel" class="form-control border-primary" id="editSupplierPhone" name="phone"
+                                placeholder="أدخل رقم الجوال" inputmode="numeric">
+                        </div>
+
+                        <!-- رسالة الخطأ -->
+                        <div class="card border-0 table-card p-1 error-card d-none">
+                            <h6 class="text-danger error-box">
+                                <i class="fas fa-exclamation-triangle text-danger ms-2"></i>
+
+                                <span class="error-message">
+                                    حدث خطأ أثناء تحميل البيانات
+                                </span>
+                            </h6>
+                        </div>
+
+                     
+                        <button type="submit" class="btn btn-success supplier-account-btn d-block mx-auto">
+                            <i class="fas fa-save me-2"></i>
+                            حفظ
+                        </button>
+
+                    </form>
+
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+
+    <div id="overlay_loader"
+        class="position-fixed top-0 start-0 w-100 h-100 d-flex justify-content-center align-items-center d-none"
+        style="background: rgba(0,0,0,0.55); backdrop-filter: blur(3px); z-index: 9999;">
+
+        <div class="text-center text-white">
+
+            <div class="spinner-border mb-3" role="status" style="width: 4rem; height: 4rem;">
+            </div>
+
+            <p class="fs-5 mb-0">
+                جاري معالجة الطلب، يرجى الانتظار...
+            </p>
+
+        </div>
+    </div>
+
+
+    <!-- Bootstrap JS -->
+    <script src="../../../wroot/assets/bootstrap/js/bootstrap.bundle.min.js"></script>
+
+    <script src="../../../wroot/assets/jquery/jquery-3.7.1.min.js"></script>
+    <script src="../../../wroot/assets/bootbox/bootbox.min.js"></script>
+
+    <script type="module" src="../../../public/js/admin/supplier/index.js"></script>
+
+</body>
+
+</html>
