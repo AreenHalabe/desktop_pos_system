@@ -405,6 +405,13 @@ async function loadItemsForSupplier(supplierId) {
 
 
 function setSuppliers() {
+    document.getElementById('selectSpinner').classList.add('d-none');
+    supplierSelect.innerHTML = "";
+
+    supplierSelect.innerHTML = `
+       <option value="" selected disabled>--إختر المورد--</option> -
+    `;
+    
     suppliers.forEach(supplier => {
 
         const option = document.createElement("option");

@@ -149,6 +149,16 @@ body {
 }
 
 
+.select-wrapper {
+    position: relative;
+}
+
+.select-spinner {
+    position: absolute;
+    left: 35px;
+    top: 30%;
+    pointer-events: none;
+}
 
 @media (max-width: 576px) {
     .page-container {

@@ -1,5 +1,5 @@
 import  express  from "express";
-import { getSuppliers, addSupplier, updateSupplier, deleteSupplier, getSuppliersItems } from "../controllers/SupplierController.js";
+import { getSuppliers, addSupplier, updateSupplier, deleteSupplier, getSuppliersItems, getInvoicesForSupplier } from "../controllers/SupplierController.js";
 
 export const SupplierRoute = express.Router();
 
@@ -13,3 +13,5 @@ SupplierRoute.post('/supplier/add' , addSupplier);
 SupplierRoute.put('/supplier/update' , updateSupplier);
 
 SupplierRoute.delete('/supplier/delete' , deleteSupplier);
+
+SupplierRoute.get('/supplier/invoices' , getInvoicesForSupplier);

@@ -65,8 +65,6 @@ export const createInvoiceFromSupplier = async (req, res) => {
     }
 }
 
-
-
 async function createPayInvoice(supplierId, parsedData, transaction) {
     const currentTimeStamp = new Date();
     const result = await transaction.request()

@@ -57,14 +57,22 @@
                         الموردين
                     </label>
 
-                    <select id="supplierSelect" class="form-select">
-                        <option value="" selected disabled>--إختر المورد--</option>
-                    </select>
+                    <div class="select-wrapper">
+
+                        <select id="supplierSelect" class="form-select">
+                            <option disabled selected value="">جاري تحميل الموردين...</option>
+
+                            
+                        </select>
+
+                        <div class="select-spinner spinner-border spinner-border-sm text-primary" id="selectSpinner">  </div>
+
+                    </div>
 
                     <div class="form-text">
                         اختر المورد الذي قمت باستلام الطلبية منه.
                     </div>
-
+                    
                 </div>
 
 
