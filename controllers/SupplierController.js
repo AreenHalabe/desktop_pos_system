@@ -3,7 +3,40 @@ import { checkToken, SystemError } from "../shared/functionality.js";
 import { z } from "zod";
 
 
-export const getSuppliers = async (req, res) => {
+
+export const getSupplier = async (req , res) =>{
+    const supplierId = Number(req.query.supplier_id);
+    try {
+        const token = req.headers.authorization;
+        if (!token) {
+            throw new SystemError("إنتهت صلاحية الجلسة , الرجاء تسجيل الدخول مرة أخرى", 401);
+        }
+        await checkToken(token);
+        const result = await pool.request()
+            .input('supplier_id', sql.Int, supplierId)
+            .query(`
+                SELECT *
+                FROM suppliers
+                WHERE id = @supplier_id    
+            `)
+        ;
+
+        const supplier = result.recordset[0];
+
+        return res.status(200).json({
+            success: true,
+            supplier: supplier,
+        });
+
+    } catch (e) {
+        return res.status(e.status || 500).json({
+            success: false,
+            message: e.message || "حدث خطأ غير معروف",
+        });
+    }
+}
+
+export const getAllSuppliers = async (req, res) => {
     try {
         const token = req.headers.authorization;
         if (!token) {
@@ -34,6 +67,7 @@ export const getSuppliers = async (req, res) => {
         });
     }
 }
+
 
 export const getSuppliersItems = async(req , res) =>{
     const supplierId = Number(req.query.supplier_id);
@@ -224,12 +258,13 @@ export const getInvoicesForSupplier = async (req , res) =>{
                 INNER JOIN invoice_items it
                     ON it.invoice_id = si.id
                 WHERE si.supplier_id = @supplier_id
+                ORDER BY si.id DESC
             `)
         ;
 
         const invoicesData = mapInvoicesDate(result.recordset);
 
-         return res.status(200).json({
+        return res.status(200).json({
             success: true,
             invoices : invoicesData
         });
@@ -243,32 +278,32 @@ export const getInvoicesForSupplier = async (req , res) =>{
 }
 
 
-function mapInvoicesDate(invoicesData){
-    if(invoicesData.length === 0) return;
-    const invoices = Object.values(
-        invoicesData.reduce((acc, row) => {
+function mapInvoicesDate(invoicesData) {
+    if (invoicesData.length === 0) return [];
 
-            if (!acc[row.id]) {
-                acc[row.id] = {
-                    id: row.id,
-                    total_price: row.total_price,
-                    paied: row.paied,
-                    remaining: row.remaining,
-                    created_at: row.created_at,
-                    discount: row.discount,
-                    items: []
-                };
-            }
+    const invoices = new Map();
 
-            acc[row.id].items.push({
-                name: row.name,
-                quantity: row.quantity,
-                cost_price: row.cost_price
+    for (const row of invoicesData) {
+        if (!invoices.has(row.id)) {
+            invoices.set(row.id, {
+                id: row.id,
+                total_price: row.total_price,
+                paied: row.paied,
+                remaining: row.remaining,
+                created_at: row.created_at,
+                discount: row.discount,
+                items: []
             });
+        }
 
-            return acc;
-        }, {})
-    );
+        invoices.get(row.id).items.push({
+            name: row.name,
+            quantity: row.quantity,
+            cost_price: row.cost_price
+        });
+    }
+
+    return [...invoices.values()];
 }
 
 

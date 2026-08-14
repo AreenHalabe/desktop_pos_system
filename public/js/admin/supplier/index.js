@@ -122,9 +122,9 @@ document.addEventListener("click", async function (e) {
         const btn = e.target.closest('.view-btn');
 
         const id = btn.dataset.id;
-        const name = btn.dataset.name;
+        
 
-        // window.location.href = `/admin/customer/depts.html?customer_id=${id}&customer_name=${name}`;
+        window.location.href = `./account.html?supplier_id=${id}`;
 
     }
 });

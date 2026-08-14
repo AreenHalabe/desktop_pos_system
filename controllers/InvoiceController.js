@@ -28,7 +28,7 @@ export const createInvoiceFromSupplier = async (req, res) => {
         const invoiceId = await createPayInvoice(supplierId, parsedData, transaction);
         
         await addInvoiceItems(invoiceId, parsedData.items, transaction);
-        await updateBalanceForSupplier(supplierId, parsedData.total_price, transaction);
+        await updateBalanceForSupplier(supplierId, parsedData.total_price, parsedData.discount, transaction);
         await insertItemsForSupplier(supplierId, parsedData.items, transaction);
        
 
@@ -66,12 +66,13 @@ export const createInvoiceFromSupplier = async (req, res) => {
 }
 
 async function createPayInvoice(supplierId, parsedData, transaction) {
+    const totalPrice = parsedData.total_price - parsedData.discount;
     const currentTimeStamp = new Date();
     const result = await transaction.request()
         .input("supplier_id", sql.Int, supplierId)
-        .input("total_price", sql.Decimal(18, 2), parsedData.total_price)
+        .input("total_price", sql.Decimal(18, 2), totalPrice)
         .input("paied", sql.Decimal(18, 2), 0)
-        .input("remaining", sql.Decimal(18, 2), parsedData.total_price)
+        .input("remaining", sql.Decimal(18, 2), totalPrice)
         .input("created_at", sql.DateTime, currentTimeStamp)
         .input("discount", sql.Decimal(9, 2), parsedData.discount)
         .query(`
@@ -112,7 +113,8 @@ async function addInvoiceItems(invoiceId, items, transaction) {
 
 }
 
-async function updateBalanceForSupplier(supplierId, totalPrice, transaction) {
+async function updateBalanceForSupplier(supplierId, price, discount, transaction) {
+    const totalPrice = price - discount ;
     await transaction.request()
         .input("supplier_id", sql.Int, supplierId)
         .input("total_price", sql.Decimal(18, 2), totalPrice)
