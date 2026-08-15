@@ -65,6 +65,63 @@ export const createInvoiceFromSupplier = async (req, res) => {
     }
 }
 
+export const payIncoice = async (req , res) =>{
+    const supplierId = Number(req.query.supplier_id);
+    const transaction = new sql.Transaction(pool);
+    let transactionStarted = false;
+    try {
+
+        const token = req.headers.authorization;
+        if (!token) {
+            throw new SystemError("إنتهت صلاحية الجلسة , الرجاء تسجيل الدخول مرة أخرى", 401);
+        }
+        await checkToken(token);
+
+        const paymentData = req.body;
+        const parsedData = paymentSchema.parse(paymentData);
+
+        
+
+
+        if (invData.discount > invData.total_price) {
+            throw new SystemError("قيمه الخصم اكبر من السعر الأساسي", 400);
+        }
+
+        await transaction.begin();
+        transactionStarted = true;
+     await transaction.commit();
+
+        return res.status(200).json({
+            success: true,
+            invoice_number: invoiceId,
+            message: "تم إنشاء الفاتورة",
+        });
+
+
+
+    } catch (e) {
+        if (transactionStarted) {
+            try {
+                await transaction.rollback();
+            } catch (err) {
+                console.error(err);
+            }
+        }
+        const validationErrors = e?.errors || e?.issues;
+
+        if (Array.isArray(validationErrors) && validationErrors.length > 0) {
+            return res.status(400).json({
+                success: false,
+                message: validationErrors[0].message
+            });
+        }
+        return res.status(e.status || 500).json({
+            success: false,
+            message: e.message || "حدث خطأ غير معروف",
+        });
+    }
+}
+
 async function createPayInvoice(supplierId, parsedData, transaction) {
     const totalPrice = parsedData.total_price - parsedData.discount;
     const currentTimeStamp = new Date();
@@ -151,6 +208,18 @@ async function insertItemsForSupplier(supplierId, items, transaction) {
     await request.query(query);
 }
 
+async function getSupplier(supplierId) {
+    const result = await pool.request()
+        .input('supplier_id', sql.Int, supplierId)
+        .query(`
+            SELECT * 
+            FROM suppliers
+            WHERE id = @supplier_id
+        `)
+    ;
+
+    return result.recordset[0];
+}
 
 
 
@@ -185,4 +254,18 @@ const invoiceSchema = z.object({
             ),
         })
     )
+});
+
+
+
+const paymentSchema = z.object({
+    amount: z.preprocess(
+        val => Number(val),  // يحول أي شيء إلى Number
+        z.number().positive("قيمة الدفع يجب أن تكون رقمًا موجبًا")
+    ),
+
+    payment_methode: z.enum(["نقدا", "حوالة بنكية", "شيك"], {
+        errorMap: () => ({ message: "يجب اختيار طريقة الدفع" })
+    }),
+
 });

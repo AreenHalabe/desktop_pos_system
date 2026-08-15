@@ -1,10 +1,11 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
- <title>Halabi_Services.ps</title>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Halabi_Services.ps</title>
 
     <!-- Bootstrap 5.3.2 RTL -->
     <link href="../../../wroot/assets/bootstrap/css/bootstrap.rtl.min.css" rel="stylesheet">
@@ -23,15 +24,20 @@
 
         <div class="customer-header">
 
-            <div class="avatar">A</div>
+            <div class="avatar" id="avatar">A</div>
 
             <div class="customer-info flex-grow-1">
                 <h4 id="customerName"></h4>
-                <small>رقم الزبون: #1024</small>
+
+                <small>
+                    <span>رقم الزبون : </span>
+                    <span id="supplierPhone">1024#</span>
+                </small>
+
             </div>
 
             <div>
-                <span class="badge bg-danger fs-6" id="customerStatus">مدين</span>
+                <span class="badge bg-danger fs-6" id="customerStatus">دائن</span>
             </div>
 
         </div>
@@ -41,17 +47,35 @@
                 <h6 class="text-danger error-box">
                     <i class="fas fa-exclamation-triangle text-danger ms-2"></i>
                     <span id="error-message">
-                            حدث خطأ أثناء تحميل البيانات
+                        حدث خطأ أثناء تحميل البيانات
                     </span>
                 </h6>
             </div>
-            
+
             <div class="d-flex justify-content-between align-items-center mb-3">
-                <h5 class="header-table">الديون المستحقة</h5>
+                
+
+                <h5 class="header-table mb-0">
+                    <i class="fas fa-file-invoice ms-2 invoice-icone"></i>
+                    فواتير المشتريات
+                </h5>
+
+                    
+                <nav class="supplier-nav shadow">
+                    <a href="#" class="supplier-nav-link invoice-active">
+                        <i class="fas fa-file-invoice ms-1"></i>
+                        المشتريات
+                    </a>
+
+                    <a href="#" class="supplier-nav-link payment-page-btn">
+                        <i class="fas fa-money-bill-wave ms-1"></i>
+                        الدفعات
+                    </a>
+                </nav>
 
                 <div class="debt-summary">
-                    <div class="label">إجمالي الديون</div>
-                    <div class="value" id="totalDepts">0 ₪</div>
+                    <div class="label mx-auto">إجمالي الرصيد</div>
+                    <div class="value mx-auto" id="totalDepts">0 ₪</div>
                 </div>
             </div>
 
@@ -70,7 +94,7 @@
                     </thead>
 
                     <tbody id="debtsTableBody">
-                        
+
                         <tr id="loading-row">
                             <td colspan="100%" class="text-center py-5">
                                 <div class="d-flex flex-column align-items-center gap-2">
@@ -82,7 +106,7 @@
                     </tbody>
                 </table>
             </div>
-            
+
 
         </div>
 
@@ -94,9 +118,7 @@
 
         <div class="text-center text-white">
 
-            <div class="spinner-border mb-3"
-                role="status"
-                style="width: 4rem; height: 4rem;">
+            <div class="spinner-border mb-3" role="status" style="width: 4rem; height: 4rem;">
             </div>
 
             <p class="fs-5 mb-0">
@@ -113,23 +135,23 @@
                 <div class="modal-header">
                     <h5 class="modal-title">
                         <i class="fas fa-receipt ms-2"></i>
-                       
-                            <span class="invoice-label">فاتورة رقم : </span>
-                            <span class="badge rounded-pill bg-secondary px-3 py-2 fs-6" id="invoiceNum"></span>
-                        
+
+                        <span class="invoice-label">فاتورة رقم : </span>
+                        <span class="badge rounded-pill bg-secondary px-3 py-2 fs-6" id="invoiceNum"></span>
+
                     </h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body">
                     <!-- جدول الأصناف -->
-                     
+
                     <h6 class="mb-3">
                         <i class="fas fa-list ms-2"></i>
                         الأصناف المرتبطة
                     </h6>
-                        
-                    
-                    
+
+
+
                     <div class="table-responsive">
                         <table class="table table-sm table-bordered">
                             <thead class="table-dark">
@@ -145,7 +167,7 @@
                             </tbody>
                         </table>
                     </div>
-                    
+
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إغلاق</button>
@@ -153,7 +175,7 @@
             </div>
         </div>
     </div>
-     <!-- Bootstrap JS -->
+    <!-- Bootstrap JS -->
     <script src="../../../wroot/assets/bootstrap/js/bootstrap.bundle.min.js"></script>
 
     <script src="../../../wroot/assets/jquery/jquery-3.7.1.min.js"></script>
@@ -161,4 +183,5 @@
 
     <script type="module" src="../../../public/js/admin/supplier/account.js"></script>
 </body>
+
 </html>

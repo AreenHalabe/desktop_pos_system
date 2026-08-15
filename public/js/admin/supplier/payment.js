@@ -7,7 +7,7 @@ const header             = document.querySelector("site-header");
 const modal  = document.getElementById('orderDetailsModal');
 const overlayLoader = document.getElementById('overlay_loader');
 
-let invoices = [];
+let payment = [];
 
 
 class SiteHeader extends HTMLElement {
@@ -57,8 +57,17 @@ header.addEventListener("header:ready", () => {
 document.addEventListener("DOMContentLoaded", async function () {
     await Promise.all([
         loadSupplierInfo(),
-        loadSupplierDepts()
+        loadSupplierPayment()
     ]);
+});
+
+document.addEventListener("click", async function (e) {
+
+    if (e.target.closest('.invoice-page-btn')) {
+        const supplierId = getSupplierId();
+
+        window.location.href = `./account.html?supplier_id=${supplierId}`;
+    }
 });
 
 
@@ -68,7 +77,7 @@ modal.addEventListener('show.bs.modal', function (event) {
     const invoiceNum = Number(button.getAttribute('data-invoice-num'));
 
     // البحث عن الطلب
-    const order = invoices.find(o => o.id === deptsId);
+    const order = payment.find(o => o.id === deptsId);
     
     // البحث عن أصناف الطلب
     const orderItems = order.items;
@@ -123,33 +132,13 @@ modal.addEventListener('show.bs.modal', function (event) {
 });
 
 
-document.addEventListener('submit', function (e) {
-  const form = e.target;
-
-    if(form.classList.contains('delete-account-form')){
-        const message = form.dataset.confirmMessage || 'هل أنت متأكد؟';
-        bootboxConfirm(e, {
-        message,
-        onConfirm: deleteDepts
-        });
-    } 
-});
 
 
-document.addEventListener("click", async function (e) {
 
-    if (e.target.closest('.payment-page-btn')) {
-        const supplierId = getSupplierId();
-
-        window.location.href = `./payment.html?supplier_id=${supplierId}`;
-    }
-});
-
-
-async function loadSupplierDepts(){
+async function loadSupplierPayment(){
     const id = getSupplierId();
     try{
-        const res = await fetch(url + `/supplier/invoices?supplier_id=${id}`, {
+        const res = await fetch(url + `/supplier/payment?supplier_id=${id}`, {
             method: "GET",
             headers: {
                 "Authorization": `${getAuthToken('auth')}`
@@ -162,8 +151,8 @@ async function loadSupplierDepts(){
             return;
         }
         else if(res.status === 200){
-            invoices = data.invoices;
-            renderDebtsTable(data.invoices);
+            payment = data.payment;
+            renderPaymentTable(data.payment);
         }
         else{
             displayError(data.message);
@@ -193,6 +182,7 @@ async function loadSupplierInfo() {
             const supplier = data.supplier;
             setSupplierInfo(supplier);
             setHeaderSummery(supplier.balance);
+            setSupplierStatus(supplier.balance);
         }
         else{
             displayError(data.message);
@@ -205,34 +195,6 @@ async function loadSupplierInfo() {
 
 
 
-async function deleteDepts({id}){
-    showLader(overlayLoader);
-    try{
-        const res = await fetch(urlServerCS + `/customer/debts/delete?deptsId=${id}` ,{
-            method: 'DELETE',
-            headers: {
-            "Authorization": `${getAuthToken('auth')}`
-            }
-        });
-        const data = await res.json();
-
-        if(res.status === 401){
-            showAuthExpired(data.message);
-            return ; 
-        }
-        else if(res.status === 200){
-            await loadSupplierDepts();
-            return;
-        }
-        else{
-            displayError(data.message);
-        }
-    }catch(err){
-        displayError(err.message);
-    }finally{
-        hiddeLoader(overlayLoader);
-    }
-}
 
 function displayError(message){
     const errorCard    = document.getElementById(`error-card`);
@@ -263,18 +225,17 @@ function getSupplierName(){
 }
 
 
-function renderDebtsTable(debts) {
+function renderPaymentTable(debts) {
     const tbody = document.getElementById("debtsTableBody");
     if(!debts?.length) {
         tbody.innerHTML = `
             <tr>
                 <td colspan="7" class="empty-state">
                     <i class="fas fa-inbox"></i>
-                    <p>لا يوجد فواتير شراء من هذا المورد</p>                
+                    <p>لم يتم تسجيل أي دفعات لهذا المورد حتى الآن.</p>                
                 </td>
             </tr>
         `;
-        setSupplierStatus();
         return;
     }
 
@@ -284,16 +245,6 @@ function renderDebtsTable(debts) {
     debts.forEach((debt, index) => {
         totalDepts += debt.remaining_amount;
 
-        let status = "مسددة";
-        let badgeClass = "bg-success";
-
-        if(debt.remaining - debt.discount === debt.total_price - debt.discount) {
-            status = "غير مدفوع";
-            badgeClass = "bg-danger";
-        } else if(debt.remaining - debt.discount < debt.total_price - debt.discount) {
-            status = "جزئي";
-            badgeClass = "bg-warning";
-        }
 
         const row = `
             <tr>
@@ -306,27 +257,15 @@ function renderDebtsTable(debts) {
 
                 <td class='nowrap-cell'>
                     <span class="amount-badge remaining-badge">
-                        ${debt.remaining - debt.discount} ₪
+                        ${debt.payment_methode}
                     </span>
                 </td>
 
                 <td class='nowrap-cell'>${formatDateOnly(utcToPalestine(debt.created_at))}</td>
                 <td class='nowrap-cell'>${formatTimeOnly(utcToPalestine(debt.created_at))}</td>
-                <td>
-                    <span class="badge ${badgeClass}">
-                        ${status}
-                    </span>
-                </td>
+
                 <td class="text-center">
                     <div class='btn-group'>
-                        <button class="view-btn"
-                            data-bs-toggle="modal"
-                            data-bs-target="#orderDetailsModal"
-                            data-id="${debt.id}"
-                            data-invoice-num="${index+1}"
-                        >
-                            <i class="fas fa-eye"></i>
-                        </button>
                         <form
                             class="delete-account-form"
                             data-confirm-message='
@@ -354,13 +293,16 @@ function renderDebtsTable(debts) {
 
 }
 
-function setSupplierStatus(){
-    const span = document.getElementById('customerStatus');
-    span.className='badge bg-success';
-    span.textContent = 'الحساب مسدد'
+function setSupplierStatus(balance){
+    if(balance > 0){
+        document.getElementById('paymentBtn').classList.remove('d-none');
+    }else{
+        document.getElementById('customerStatus').classList.remove('d-none');
+    }
 }
 function setHeaderSummery(balance){
     document.getElementById('totalDepts').textContent=`${balance} ₪`;
+    document.getElementById('balanceInModal').textContent = `${balance} ₪`;
 }
 function setSupplierInfo(supplier){
     document.getElementById('customerName').textContent = `${supplier.name}`;
@@ -375,4 +317,21 @@ function showLader(loader){
 }
 function hiddeLoader(loader){
     loader.classList.add('d-none');
+}
+
+
+function showErrors(modalElement, message) {
+  const errorList = modalElement.querySelector("#error_list");
+  const errorMessage = modalElement.querySelector("#errors");
+  // تفريغ الأخطاء القديمة
+  errorMessage.innerHTML = "";
+  errorMessage.innerHTML = `<li>${message}</li>`
+  errorList.style.display = "block";
+}
+
+function clearErrors(modalElement) {
+  const errorList = modalElement.querySelector("#error_list");
+  const errorMessage = modalElement.querySelector("#errors");
+  errorMessage.innerHTML = "";
+  errorList.style.display = "none";
 }

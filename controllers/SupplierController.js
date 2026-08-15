@@ -68,6 +68,39 @@ export const getAllSuppliers = async (req, res) => {
     }
 }
 
+export const getSupplierPayment = async (req , res) =>{
+    const supplierId = Number(req.query.supplier_id);
+    try {
+        const token = req.headers.authorization;
+        if (!token) {
+            throw new SystemError("إنتهت صلاحية الجلسة , الرجاء تسجيل الدخول مرة أخرى", 401);
+        }
+        await checkToken(token);
+
+        const result = await pool.request()
+            .input('supplier_id', sql.Int, supplierId)
+            .query(`
+                SELECT * 
+                FROM supplier_payments
+                WHERE supplier_id = @supplier_id
+                ORDER BY id DESC
+            `)
+        ;
+
+        const paymets = result.recordset;
+        
+        return res.status(200).json({
+            success: true,
+            paymets: paymets,
+        });
+
+    } catch (e) {
+        return res.status(e.status || 500).json({
+            success: false,
+            message: e.message || "حدث خطأ غير معروف",
+        });
+    }
+}
 
 export const getSuppliersItems = async(req , res) =>{
     const supplierId = Number(req.query.supplier_id);
