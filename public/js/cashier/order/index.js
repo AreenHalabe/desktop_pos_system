@@ -24,8 +24,9 @@ const confirmSendBtn = document.getElementById('confirmSendBtn');
 const confirmOrderModal = document.getElementById('confirmOrderModal');
 const successModelOrder = document.getElementById('successModal');
 
-
-
+const searchInput = document.getElementById("search-input");
+const searchResults = document.getElementById("search-results");
+let lastCategoryIdBySearchResults = 0;
 
 const discountInput = document.getElementById("discountAmount");
 const finalTotalPrice = document.getElementById("finalTotalPrice");
@@ -291,10 +292,64 @@ document.addEventListener("click", async function (e) {
         const input = document.getElementById('adminPassword');
         await SwitchToAdmin(url, input.value);
     }
+
+    else if(e.target.closest('.search-item')){
+        const itemEl = e.target.closest('.search-item');
+
+        const product = JSON.parse(itemEl.dataset.product);
+
+        searchInput.value = product.name;
+        searchResults.style.display = "none";
+        setCategoryIdForSearchResults(product.category_id);
+        fillterCategoriesByProduct(product.category_id);
+
+        requestAnimationFrame(() => {
+            fillterProducts(product);
+        });
+        
+    }
 });
 
 document.querySelectorAll('input[name="payment_status"]').forEach(input => {
     input.addEventListener("change", handlePaymentStatus);
+});
+
+
+
+searchInput.addEventListener("input", function () {
+
+    const value = this.value.trim();
+
+    if(value === ""){
+        searchResults.style.display = "none";
+        if(lastCategoryIdBySearchResults > 0){
+            renderProducts(lastCategoryIdBySearchResults);
+        }
+        return;
+    }
+
+    const filteredProducts = products
+        .filter(product => product.name.includes(value))
+        .slice(0, 10);
+
+    searchResults.innerHTML = "";
+
+    filteredProducts.forEach(product => {
+
+        searchResults.innerHTML += `
+            <div class="search-item" data-product='${JSON.stringify(product)}'>
+                ${product.name}
+            </div>
+        `;
+
+    });
+
+    if(filteredProducts.length > 0){
+        searchResults.style.display = "block";
+    }else{
+        searchResults.style.display = "none";
+    }
+
 });
 
 function handlePaymentStatus() {
@@ -953,6 +1008,90 @@ function handleSessionStatus() {
     sessionStatusDiv.classList.remove('d-none');
 }
 
+
+function setCategoryIdForSearchResults(categoryId){
+    lastCategoryIdBySearchResults = categoryId;
+}
+function fillterProducts(product){
+    const grid = document.getElementById('products-grid');
+    grid.innerHTML = '';
+
+    let prices ;
+    let minPrice ;
+    let maxPrice ;
+
+
+    if(product.sizes.length > 1){
+        prices = product.sizes.map(s => s.price);
+        minPrice = Math.min(...prices);
+        maxPrice = Math.max(...prices);
+    }
+    
+    
+    const card = document.createElement('div');
+
+    card.innerHTML = `
+        <div class="card product-card shadow-sm h-100" data-id="${product.id}">
+            <div class="card-body text-center p-2">
+                <h6 class="card-title fw-bold mb-1" style="font-size: 0.9rem;">${product.name}</h6>
+                <p class="text-muted mb-1" style="font-size: 0.85rem;">
+                    ${product.sizes.length > 1 
+                        ? `${minPrice}-${maxPrice} ₪` 
+                        : `${product.price} ₪`}
+                </p>
+                ${product.sizes.length > 1 
+                    ? '<small class="text-primary d-block mb-1" style="font-size: 0.7rem;"> <i class="fas fa-layer-group"></i> اختر الحجم</small>' 
+                    : ''}
+            </div>
+            <div class='p-2'>
+                <button class="btn btn-sm btn-primary w-100 py-1" style="font-size: 0.8rem;">
+                    <i class="fas fa-plus"></i> إضافة
+                </button>
+            </div>
+            
+            
+            
+        </div>
+    `;
+
+    grid.appendChild(card);
+
+}
+function fillterCategoriesByProduct(categoryId){
+    let result = null;
+    for (const main of categoriesData) {
+        const foundSub = main.categories.find(cat => cat.id === categoryId);
+
+        if (foundSub) {
+            result = {
+                mainCategoryName: main.name,
+                subCategoryName: foundSub.name
+            };
+            break;
+        }
+    }
+    activateCategoryButtons(result);
+}
+
+function activateCategoryButtons(mainAndSubCategoryForProduct){
+    const mainBtn = getMainCategoryBtn(mainAndSubCategoryForProduct.mainCategoryName);
+
+    mainBtn?.click();
+
+    requestAnimationFrame(() => {
+        const subBtn = getSubCategoryBtn(mainAndSubCategoryForProduct.subCategoryName);
+        subBtn?.click();
+    });
+}
+
+function getMainCategoryBtn(mainCategoryName){
+    return [...document.querySelectorAll(".main-category-btn")]
+    .find(btn => btn.innerText.trim() === mainCategoryName);
+}
+function getSubCategoryBtn(subCategoryName){
+    return [...document.querySelectorAll(".category-btn")]
+    .find(btn => btn.innerText.trim() === subCategoryName);
+}
 
 
 

@@ -55,10 +55,7 @@ header.addEventListener("header:ready", () => {
 
 
 document.addEventListener("DOMContentLoaded", async function () {
-    await Promise.all([
-        loadSupplierInfo(),
-        loadSupplierDepts()
-    ]);
+    await loadSupplierDetails();
 });
 
 
@@ -130,7 +127,7 @@ document.addEventListener('submit', function (e) {
         const message = form.dataset.confirmMessage || 'هل أنت متأكد؟';
         bootboxConfirm(e, {
         message,
-        onConfirm: deleteDepts
+        onConfirm: deleteInvoice
         });
     } 
 });
@@ -166,11 +163,11 @@ async function loadSupplierDepts(){
             renderDebtsTable(data.invoices);
         }
         else{
-            displayError(data.message);
+            bootboxError(data.message);
         }
 
     }catch(e){
-        displayError(e.message);
+        bootboxError(e.message);
     }
 }
 
@@ -195,20 +192,29 @@ async function loadSupplierInfo() {
             setHeaderSummery(supplier.balance);
         }
         else{
-            displayError(data.message);
+            bootboxError(data.message);
         }
 
     }catch(e){
-        displayError(e.message);
+        bootboxError(e.message);
     }
 }
 
 
+async function loadSupplierDetails() {
+    await Promise.all([
+        loadSupplierInfo(),
+        loadSupplierDepts()
+    ]);
+}
 
-async function deleteDepts({id}){
+
+
+
+async function deleteInvoice({id}){
     showLader(overlayLoader);
     try{
-        const res = await fetch(urlServerCS + `/customer/debts/delete?deptsId=${id}` ,{
+        const res = await fetch(url + `/invoice/delete?invoice_id=${id}` ,{
             method: 'DELETE',
             headers: {
             "Authorization": `${getAuthToken('auth')}`
@@ -221,33 +227,20 @@ async function deleteDepts({id}){
             return ; 
         }
         else if(res.status === 200){
-            await loadSupplierDepts();
+            await loadSupplierDetails();
             return;
         }
         else{
-            displayError(data.message);
+            bootboxError(data.message);
         }
     }catch(err){
-        displayError(err.message);
+        bootboxError(err.message);
     }finally{
         hiddeLoader(overlayLoader);
     }
 }
 
-function displayError(message){
-    const errorCard    = document.getElementById(`error-card`);
-    const errorMessage = document.getElementById(`error-message`);
 
-    errorCard.classList.remove('d-none');
-    errorMessage.textContent = message;
-}
-function hiddeError(){
-    const errorCard    = document.getElementById(`error-card`);
-    const errorMessage = document.getElementById(`error-message`);
-
-    errorCard.classList.add('d-none');
-    errorMessage.textContent = '';
-}
 
 function getSupplierId(){
     const params        = new URLSearchParams(window.location.search);
@@ -278,19 +271,17 @@ function renderDebtsTable(debts) {
         return;
     }
 
-    let totalDepts = 0;
     tbody.innerHTML = "";
 
     debts.forEach((debt, index) => {
-        totalDepts += debt.remaining_amount;
 
         let status = "مسددة";
         let badgeClass = "bg-success";
 
-        if(debt.remaining - debt.discount === debt.total_price - debt.discount) {
+        if(debt.remaining === debt.total_price) {
             status = "غير مدفوع";
             badgeClass = "bg-danger";
-        } else if(debt.remaining - debt.discount < debt.total_price - debt.discount) {
+        } else if(debt.remaining < debt.total_price && debt.remaining !== 0) {
             status = "جزئي";
             badgeClass = "bg-warning";
         }
@@ -300,13 +291,13 @@ function renderDebtsTable(debts) {
                 <td>${index + 1}</td>
                 <td class='nowrap-cell'>                    
                     <span class="amount-badge total-badge">
-                        ${debt.total_price - debt.discount} ₪
+                        ${debt.total_price} ₪
                     </span>
                 </td>
 
                 <td class='nowrap-cell'>
                     <span class="amount-badge remaining-badge">
-                        ${debt.remaining - debt.discount} ₪
+                        ${debt.remaining} ₪
                     </span>
                 </td>
 
@@ -330,9 +321,9 @@ function renderDebtsTable(debts) {
                         <form
                             class="delete-account-form"
                             data-confirm-message='
-                            هل أنت متأكد من حذف هذا الدين المستخق <strong>${debt.remaining_amount}</strong>؟
+                            هل أنت متأكد من حذف فاتورة رقم  <strong>${index+1}</strong>؟
                             <div class="danger-box">
-                                سيتم حذفه نهائيا من النظام !
+                                سيتم حذفها نهائيا من النظام !
                             </div>'
                         >
                             <button 

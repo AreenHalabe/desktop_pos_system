@@ -327,7 +327,7 @@ hr {
 /* شبكة المنتجات - wrap */
 .products-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
     gap: 12px;
 }
 
@@ -526,6 +526,65 @@ hr {
 }
 
 
+.search-input{
+    padding-right: 40px;
+    border-radius: 12px;
+    border: 1px solid #dcdcdc;
+    height: 45px;
+    font-size: 14px;
+    transition: 0.2s;
+    box-shadow: none !important;
+}
+
+.search-input:focus{
+    border-color: #8bc34a;
+}
+
+.search-icon{
+    position: absolute;
+    right: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #888;
+    font-size: 14px;
+}
+#search-input{
+    padding-right: 35px;
+}
+
+
+.search-wrapper{
+    position: relative;
+    width: 100%;
+    max-width: 320px;
+}
+
+.search-results{
+    position: absolute;
+    top: 100%;
+    right: 0;
+    width: 100%;
+    background: white;
+    border: 1px solid #ddd;
+    border-top: none;
+    border-radius: 0 0 12px 12px;
+    overflow: hidden;
+    display: none;
+    z-index: 1000;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+}
+
+.search-item{
+    padding: 12px;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.search-item:hover{
+    background: #f5f5f5;
+}
+
+
 
 /* تنسيق المودل على الجوال */
 @media (max-width: 576px) {
@@ -573,7 +632,7 @@ hr {
         top: 0;
     }  
     .products-grid {
-        grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+        grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
     }
     .header-menue {
         position: absolute; /* أو fixed */
@@ -596,6 +655,6 @@ hr {
         width: 35%;
     }
     .products-grid {
-        grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+        grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
     }
 }

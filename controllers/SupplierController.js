@@ -87,11 +87,11 @@ export const getSupplierPayment = async (req , res) =>{
             `)
         ;
 
-        const paymets = result.recordset;
+        const payments = result.recordset;
         
         return res.status(200).json({
             success: true,
-            paymets: paymets,
+            payments: payments,
         });
 
     } catch (e) {
@@ -248,13 +248,18 @@ export const deleteSupplier = async (req, res) => {
         }
         await checkToken(token);
 
+        const hasInvoices = await checkIfTheSupplerHasInvoices(supplierId);
+        if(hasInvoices){
+            throw new SystemError("لا يمكن حذف هذا المورد بسبب وجود فواتير مسجلة بحسابه", 400);
+        }
+
         const result = await pool.request()
             .input('id', sql.Int, supplierId)
             .query(`
                 DELETE FROM suppliers
                 WHERE id = @id
             `)
-            ;
+        ;
 
         return res.status(200).json({
             success: true,
@@ -311,6 +316,20 @@ export const getInvoicesForSupplier = async (req , res) =>{
 }
 
 
+
+async function checkIfTheSupplerHasInvoices(supplierId) {
+    const result = await pool.request()
+        .input('supplier_id', sql.Int, supplierId)
+        .query(`
+            SELECT TOP 1 id
+            FROM supplier_invoices
+            WHERE supplier_id = @supplier_id  
+        `)
+    ;
+
+    return result.recordset[0]?.id;
+}
+
 function mapInvoicesDate(invoicesData) {
     if (invoicesData.length === 0) return [];
 
@@ -338,6 +357,8 @@ function mapInvoicesDate(invoicesData) {
 
     return [...invoices.values()];
 }
+
+
 
 
 const supplierSchema = z.object({

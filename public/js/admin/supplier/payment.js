@@ -3,11 +3,11 @@ import { url, urlServer } from "../../../api/urlEndPoint.js";
 import { getAuthToken, removeAuthToken } from "../../../component/auth.js";
 import {formatTimeOnly, formatDateOnly, utcToPalestine} from "../report/shared-functionality.js"
 
-const header             = document.querySelector("site-header");
-const modal  = document.getElementById('orderDetailsModal');
+const header        = document.querySelector("site-header");
 const overlayLoader = document.getElementById('overlay_loader');
-
-let payment = [];
+const paymentForm   = document.getElementById('paymentForm');
+const paymentModal  = document.getElementById('paymentModal');
+const loader        = document.getElementById('overlay_loader');
 
 
 class SiteHeader extends HTMLElement {
@@ -55,10 +55,7 @@ header.addEventListener("header:ready", () => {
 
 
 document.addEventListener("DOMContentLoaded", async function () {
-    await Promise.all([
-        loadSupplierInfo(),
-        loadSupplierPayment()
-    ]);
+    await loadSupplierDetails();
 });
 
 document.addEventListener("click", async function (e) {
@@ -71,66 +68,65 @@ document.addEventListener("click", async function (e) {
 });
 
 
-modal.addEventListener('show.bs.modal', function (event) {
-    const button = event.relatedTarget; // العنصر اللي كبست عليه
-    const deptsId = Number(button.getAttribute('data-id')) ;
-    const invoiceNum = Number(button.getAttribute('data-invoice-num'));
 
-    // البحث عن الطلب
-    const order = payment.find(o => o.id === deptsId);
-    
-    // البحث عن أصناف الطلب
-    const orderItems = order.items;
-
-
-    document.getElementById('invoiceNum').textContent = `${invoiceNum}` ;
-    // بناء HTML الجدول
-    let itemsHtml = '';
-    orderItems.forEach(item => {
-        
-
-        itemsHtml += `
-            <tr>
-                <td>${item.name}</td>
-                <td>${item.quantity}</td>
-                <td>${item.cost_price} ₪</td>
-                <td>${item.quantity * item.cost_price} ₪</td>
-            </tr>
-        `;
-    });
-
-    itemsHtml += `
-        <tr>
-            <td colspan="3" class="text-end pe-3">
-                <strong>المجموع</strong>
-            </td>
-            <td>
-                <strong>${order.total_price + order.discount} ₪</strong>
-            </td>
-        </tr>
-
-        <tr>
-            <td colspan="3" class="text-end pe-3 text-danger">
-                <strong>الخصم</strong>
-            </td>
-            <td class="text-danger">
-                <strong>- ${order.discount} ₪</strong>
-            </td>
-        </tr>
-
-        <tr class="table-success">
-            <td colspan="3" class="text-end pe-3">
-                <strong>الإجمالي</strong>
-            </td>
-            <td>
-                <strong>${order.total_price} ₪</strong>
-            </td>
-        </tr>
-    `;
-    
-    document.getElementById('modalItemsTable').innerHTML = itemsHtml;
+paymentModal.addEventListener("hidden.bs.modal", () => {
+    paymentForm.reset();
+    clearErrors(paymentModal);
 });
 
+
+
+paymentForm.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    
+    loader.classList.remove('d-none');
+
+    clearErrors(paymentModal);
+
+    let formData      = new FormData(paymentForm);
+
+    const paymentData = {
+        amount: formData.get("amount"),
+        payment_methode : formData.get('paymentMethode')
+    }
+
+
+
+    try{
+        let res = await fetch(url + `/invoice/payment?supplier_id=${getSupplierId()}`, {
+            method: "POST",
+            body: JSON.stringify(paymentData),
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": `${getAuthToken('auth')}`
+            },
+        });
+        let data = await res.json();
+
+        if(res.status === 200){
+            bootboxSuccess(data.message);
+            const modal = bootstrap.Modal.getOrCreateInstance(paymentModal);
+            modal.hide();
+            showLoaderTable();
+            await loadSupplierDetails();
+            return;
+        }
+
+        else if(res.status === 401){
+            showAuthExpired(data.message);
+            return;
+        }
+
+        else{
+            showErrors(paymentModal , data.message);
+            return;
+        }
+    }catch(err){
+        showErrors(paymentModal , err.message);
+    }finally{
+        loader.classList.add('d-none');
+    }
+});
 
 
 
@@ -145,14 +141,14 @@ async function loadSupplierPayment(){
             }
         });
         const data = await res.json();
-
+        console.log(data);
         if(res.status === 401){
             showAuthExpired(data.message);
             return;
         }
         else if(res.status === 200){
-            payment = data.payment;
-            renderPaymentTable(data.payment);
+         
+            renderPaymentTable(data.payments);
         }
         else{
             displayError(data.message);
@@ -193,7 +189,12 @@ async function loadSupplierInfo() {
     }
 }
 
-
+async function loadSupplierDetails() {
+    await Promise.all([
+        loadSupplierInfo(),
+        loadSupplierPayment()
+    ]);
+}
 
 
 function displayError(message){
@@ -225,12 +226,12 @@ function getSupplierName(){
 }
 
 
-function renderPaymentTable(debts) {
-    const tbody = document.getElementById("debtsTableBody");
-    if(!debts?.length) {
+function renderPaymentTable(payments) {
+    const tbody = document.getElementById("paymentsTableBody");
+    if(!payments?.length) {
         tbody.innerHTML = `
             <tr>
-                <td colspan="7" class="empty-state">
+                <td colspan="5" class="empty-state">
                     <i class="fas fa-inbox"></i>
                     <p>لم يتم تسجيل أي دفعات لهذا المورد حتى الآن.</p>                
                 </td>
@@ -239,11 +240,9 @@ function renderPaymentTable(debts) {
         return;
     }
 
-    let totalDepts = 0;
     tbody.innerHTML = "";
 
-    debts.forEach((debt, index) => {
-        totalDepts += debt.remaining_amount;
+    payments.forEach((payment, index) => {
 
 
         const row = `
@@ -251,41 +250,18 @@ function renderPaymentTable(debts) {
                 <td>${index + 1}</td>
                 <td class='nowrap-cell'>                    
                     <span class="amount-badge total-badge">
-                        ${debt.total_price - debt.discount} ₪
+                        ${payment.amount} ₪
                     </span>
                 </td>
 
                 <td class='nowrap-cell'>
                     <span class="amount-badge remaining-badge">
-                        ${debt.payment_methode}
+                        ${payment.payment_methode}
                     </span>
                 </td>
 
-                <td class='nowrap-cell'>${formatDateOnly(utcToPalestine(debt.created_at))}</td>
-                <td class='nowrap-cell'>${formatTimeOnly(utcToPalestine(debt.created_at))}</td>
-
-                <td class="text-center">
-                    <div class='btn-group'>
-                        <form
-                            class="delete-account-form"
-                            data-confirm-message='
-                            هل أنت متأكد من حذف هذا الدين المستخق <strong>${debt.remaining_amount}</strong>؟
-                            <div class="danger-box">
-                                سيتم حذفه نهائيا من النظام !
-                            </div>'
-                        >
-                            <button 
-                                type="submit" 
-                                class="delete-btn"
-                                data-id="${debt.id}"
-                                title="حذف"
-                            >
-                                <i class="fas fa-trash"></i>
-                            </button>
-                        </form>
-                    </div>
-                   
-                </td>
+                <td class='nowrap-cell'>${formatDateOnly(utcToPalestine(payment.created_at))}</td>
+                <td class='nowrap-cell'>${formatTimeOnly(utcToPalestine(payment.created_at))}</td>
             </tr>
         `;
         tbody.innerHTML += row;
@@ -317,6 +293,20 @@ function showLader(loader){
 }
 function hiddeLoader(loader){
     loader.classList.add('d-none');
+}
+
+function showLoaderTable(){
+    const tbody = document.getElementById("paymentsTableBody");
+    tbody.innerHTML=`
+        <tr id="loading-row">
+            <td colspan="100%" class="text-center py-5">
+                <div class="d-flex flex-column align-items-center gap-2">
+                    <div class="spinner-border text-primary" role="status"></div>
+                    <span class="text-muted">جاري التحميل ...</span>
+                </div>
+            </td>
+        </tr>
+    `
 }
 
 

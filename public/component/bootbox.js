@@ -60,11 +60,11 @@ export function bootboxConfirm(e, options = {}) {
       if (!result) return;
 
       // تعطيل الزر وتغيير النص مع Spinner
-      btn.disabled = true;
-      btn.innerHTML = `
-            ${loadingText}
-            <span class="spinner-border spinner-border-sm ms-1"></span>
-        `;
+      // btn.disabled = true;
+      // btn.innerHTML = `
+      //       ${loadingText}
+      //       <span class="spinner-border spinner-border-sm ms-1"></span>
+      //   `;
 
       // استدعاء الفنكشن الممرر
       if (typeof onConfirm === 'function') {
