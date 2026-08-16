@@ -1,6 +1,7 @@
 import { setActiveNavLink, showAuthExpired, bootboxSuccess, bootboxError } from "../../../component/bootbox.js";
 import { url, urlServer } from "../../../api/urlEndPoint.js";
 import { closeSideBar } from "../Switch-user-functionality.js";
+import { handelInvoiceDataFroSupplier } from "../../../component/invoices.js";
 
 import { getAuthToken, removeAuthToken } from "../../../component/auth.js";
 
@@ -290,11 +291,12 @@ confirmBtn.addEventListener("click", () => {
 
     // الداتا النهائية التي سترسل للسيرفر
     const invoiceData = {
-
+        supplier_name:supplierSelect.options[supplierSelect.selectedIndex].text,
+        
         supplier_id: supplierId,
 
         total_price: totalPrice,
-
+        
         discount: Number(discount),
 
         items: items
@@ -352,7 +354,11 @@ async function createInvoice(invoiceData) {
         if(res.status === 200){
             bootboxSuccess(data.message);
             reSetTheValues();
-            loadItemsForSupplier(invoiceData.supplier_id);
+            
+            await Promise.all([
+                loadItemsForSupplier(invoiceData.supplier_id),
+                handelInvoiceDataFroSupplier(invoiceData)
+            ]);
             return;
         }
 

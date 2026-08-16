@@ -56,7 +56,6 @@ export async function handelOrderDatabeforPrinting(order) {
     await printInvoice(orderPrinting);
 }
 
-
 export async function printInvoice(order) {
 
 
@@ -148,6 +147,102 @@ export async function printInvoice(order) {
 
 
 }
+
+
+
+export async function handelInvoiceDataFroSupplier(invoiceData, isFromCashier = true) {
+    const totalPrice = 
+        isFromCashier ? invoiceData.total_price - invoiceData.discount 
+        : invoiceData.total_price 
+    ;
+    const order = {
+        totalPrice : totalPrice,
+        supplierName: invoiceData.supplier_name,
+        discount : invoiceData.discount,
+        time : invoiceData?.time || getCurrentTime(),
+        date : invoiceData?.date || getCurrentDate(),
+        items: invoiceData.items
+    };
+    await printInvoiceFroSupplier(order);
+    
+}
+
+
+async function printInvoiceFroSupplier(invoiceData) {
+    const invoiceHTML = `
+        <div id="invoice" class="invoice">
+            <div style="width: 100%; text-align: center;">
+                <h2 class="center">Coffee Corner</h2>
+                <p class="center">فاتورة شراء</p>
+            </div>
+
+            <hr>
+
+            <p class="inv-num" dir="rtl">
+                <strong>المورد :&nbsp;</strong> 
+                <span id="orderId"> ${invoiceData.supplierName} </span>
+            </p>
+
+            <div class="date-time-container">
+                <div class="date-time">
+                    <p>
+                        <strong>التاريخ :</strong> 
+                        <span id="date">${invoiceData.date}</span>
+                    </p>
+                    <p>
+                        <strong>الوقت :</strong> 
+                        <span id="time" dir="ltr">${invoiceData.time}</span>
+                    </p>
+                </div>
+            </div>
+            
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>الصنف</th>
+                        <th>سعر الشراء</th>
+                        <th>الكمية</th>
+                        <th>الإجمالي</th>
+                    </tr>
+                </thead>
+                <tbody id="items">
+                    ${invoiceData.items.map(item => `
+                        <tr>
+                            <td>${item.name}</td>
+                            <td>${item.cost_price} ₪</td>
+                            <td>${item.qty} </td>
+                            <td>${item.cost_price * item.qty} ₪</td>
+                        </tr>
+                    `).join("")}
+
+                    <tr>
+                        <td colspan="3" class="text-end">
+                            <strong>المجموع</strong>
+                        </td>
+                        <td>
+                            ${invoiceData.totalPrice + invoiceData.discount} ₪
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <div class="total-section">
+                <div style="font-size: 12px;">
+                    <span>الخصم : </span>
+                    <span>${invoiceData.discount} ₪</span>
+                </div>
+
+                <div class="total-amount">
+                    <p><strong>الإجمالي : </strong></p>
+                    <p><strong>${invoiceData.totalPrice} ₪</strong></p>
+                </div>
+            </div> 
+        </div>
+    `;
+    await createHTMLOrder(invoiceHTML);
+}
+
 
 export async function printCashSummery(session, isSessionClosed = true) {
     let closeDate = session?.closed_at
