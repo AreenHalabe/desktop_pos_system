@@ -300,13 +300,17 @@ export const LoadOrdersAccordingTables = async (req, res) => {
                     o.created_at,
                     o.discount,
                     o.type,
+                    o.cash_paid,
+                    o.card_paid,
 
                     io.id AS order_item_id,
                     io.order_id,
                     io.item_id,
                     io.quantity,
                     io.price,
-                    io.size_name, 
+                    io.size_name,
+                    io.discount_item,
+                    io.paid_quantity, 
 
                     i.name AS item_name
                         
@@ -374,6 +378,8 @@ function buildTreeOfOrdersAccordingTables(rows) {
                 discount: row.discount,
                 created_at: row.created_at,
                 status: row.status,
+                card_paid: row.card_paid,
+                cash_paid: row.cash_paid,
                 items: []
             };
         }
@@ -386,7 +392,9 @@ function buildTreeOfOrdersAccordingTables(rows) {
                 item_name: row.item_name,
                 quantity: row.quantity,
                 price: row.price,
-                size_name: row.size_name
+                size_name: row.size_name,
+                paid_quantity: row.paid_quantity,
+                discount_item: row.discount_item,
             });
         }
     }

@@ -1,0 +1,313 @@
+body {
+    background: #c8ced3;
+}
+
+.table-card {
+    cursor: pointer;
+    transition: 0.2s ease-in-out;
+}
+
+.table-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, .15);
+}
+
+.modal-loading-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    z-index: 1056;
+    border-radius: inherit;
+}
+
+.payment-box {
+    width: 100%;
+    max-width: 420px;
+}
+
+.discount-note {
+    font-size: 11px;
+}
+
+
+.table-wrapper {
+    width: 100%;
+    max-width: 700px;
+    /* عدّل الرقم حسب اللي بدك */
+    margin: auto;
+    /* اختياري لتوسيطه */
+}
+
+.item-payment{
+    width: 100%;
+    max-width: 500px;
+}
+
+.custom-box {
+    width: 80%;
+    margin: 0 auto;
+    /* توسيط */
+    border: 1px solid #ddd;
+    /* بوردر خفيف */
+    border-radius: 10px;
+    /* زوايا ناعمة */
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+    /* ظل خفيف */
+
+}
+
+
+.bootbox.modal {
+    z-index: 1070 !important;
+}
+
+.bootbox.modal+.modal-backdrop {
+    z-index: 1065 !important;
+    background-color: #000;
+    opacity: 0.6;
+}
+
+.bootbox.modal {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    height: 100vh;
+}
+
+.bootbox.modal .modal-dialog {
+    width: 100%;
+    max-width: 500px;
+    margin: 0 !important;
+}
+
+@keyframes successPulse {
+    0% {
+        transform: scale(1);
+        opacity: 1;
+    }
+
+    50% {
+        transform: scale(1.1);
+        opacity: 0.8;
+    }
+
+    100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+/* تحسينات المودل */
+#successModal .modal-content {
+    border-radius: 15px;
+    border: none;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+}
+
+#successModal .modal-body {
+    padding: 2rem;
+}
+
+/* تنسيق الأزرار */
+#successModal .btn {
+    padding: 10px 15px;
+    font-weight: 500;
+}
+
+#successModal .btn-primary {
+    background-color: #0d6efd;
+    border-color: #0d6efd;
+}
+
+#successModal .btn-primary:hover {
+    background-color: #0b5ed7;
+    border-color: #0a58ca;
+}
+
+#orderDetailsModal .modal-content {
+    background-color: #e0dddd;
+    /* أغمق شوي من الأبيض */
+    color: #333;
+}
+
+#orderDetailsModal .modal-header {
+    border-bottom: 1px solid rgba(0, 0, 0, 0.2);
+}
+
+#orderDetailsModal .modal-header,
+#orderDetailsModal .modal-body {
+    border-bottom: 2px solid rgba(0, 0, 0, 0.2);
+}
+
+.modal-backdrop.show {
+    opacity: 0.8;
+    /* زيد الرقم لغمق أكثر (0.5 - 0.9) */
+    background-color: #000;
+}
+
+
+.table-card {
+    height: 145px;
+
+    background: #fff;
+    border-radius: 12px;
+    border: 1px solid #dee2e6;
+    overflow: hidden;
+
+    text-align: center;
+
+    transition: 0.2s;
+
+    display: flex;
+    flex-direction: column;
+}
+
+.table-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+
+/* الجزء الرئيسي للطاولة */
+
+
+.table-main {
+    flex: 1;
+
+    min-height: 0;
+
+    padding: 8px 5px;
+
+    cursor: pointer;
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+/* أيقونة الطاولة */
+
+.table-icon {
+    font-size: 32px;
+    margin-bottom: 5px;
+}
+
+
+/* رقم الطاولة */
+
+.table-number {
+    font-size: 15px;
+    font-weight: 700;
+}
+
+
+/* حالة الطاولة */
+
+.table-status {
+    font-size: 12px;
+    margin-top: 2px;
+}
+
+
+/* =========================
+   الطاولة الفارغة
+========================= */
+
+.table-card.empty {
+    border-top: 4px solid #198754;
+}
+
+.table-card.empty .table-icon {
+    color: #198754;
+}
+
+.table-card.empty .table-status {
+    color: #198754;
+}
+
+
+/* =========================
+   الطاولة المشغولة
+========================= */
+
+.table-card.occupied {
+    border-top: 4px solid #dc3545;
+}
+
+.table-card.occupied .table-icon {
+    color: #dc3545;
+}
+
+.table-card.occupied .table-status {
+    color: #dc3545;
+}
+
+
+/* =========================
+   الأزرار
+========================= */
+
+.table-actions {
+    height: 42px;
+
+    flex-shrink: 0;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 6px;
+
+    padding: 5px;
+
+    border-top: 1px solid #eee;
+}
+
+
+
+
+
+.table-actions .btn {
+    width: 34px;
+    height: 30px;
+
+    padding: 0;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+
+/* =========================
+   الموبايل
+========================= */
+
+@media (max-width: 575px) {
+
+    .table-main {
+        padding: 10px 4px 8px;
+    }
+
+    .table-icon {
+        font-size: 28px;
+    }
+
+    .table-number {
+        font-size: 14px;
+    }
+
+    .table-status {
+        font-size: 11px;
+    }
+
+}
+
+

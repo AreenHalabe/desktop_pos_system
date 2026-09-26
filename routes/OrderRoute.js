@@ -1,35 +1,21 @@
 import  express  from "express";
-import { addNewItems, createOrder, deleteOrder, destroyOrderTable, getDaliyOrders, payOrder } from "../controllers/OrderController.js";
+import { addNewItems, createOrder, deleteOrder, destroyOrderTable, getDaliyOrders, payOrder, editItemsOrder, partialPayOrder } from "../controllers/OrderController.js";
 
 export const OrderRoute = express.Router();
 
 
-OrderRoute.post('/creat/order' , (req , res) => {
-        createOrder(req , res);
-    }
-);
+OrderRoute.post('/creat/order' , createOrder);
 
-OrderRoute.put('/delete/order' , (req , res) =>{
-        deleteOrder(req , res);
-    }
-);
+OrderRoute.put('/delete/order' , deleteOrder);
 
-OrderRoute.get('/daily/completed/deleted/orders' , (req , res) =>{
-        getDaliyOrders(req , res);
-    }
-)
+OrderRoute.get('/daily/completed/deleted/orders' , getDaliyOrders)
 
-OrderRoute.put('/order/add-items' , (req , res) =>{
-        addNewItems(req , res);
-    }
-);
+OrderRoute.put('/order/add-items' , addNewItems);
 
-OrderRoute.put('/order/pay' , (req , res) => {
-        payOrder(req , res);
-    }
-);
+OrderRoute.put('/order/edit-items' , editItemsOrder);
 
-OrderRoute.delete('/order/destroy-table' , (req , res) =>{
-        destroyOrderTable(req , res);
-    }
-);
+OrderRoute.put('/order/partial-pay' , partialPayOrder);
+
+OrderRoute.put('/order/pay' , payOrder);
+
+OrderRoute.delete('/order/destroy-table' , destroyOrderTable);

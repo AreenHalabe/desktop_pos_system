@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Halabi_services</title>
+    <title>Halabi_Technology.ps</title>
 
 
     <link href="../../../wroot/assets/bootstrap/css/bootstrap.rtl.min.css" rel="stylesheet">
@@ -14,173 +14,29 @@
     <link href="../../../wroot/assets/fontawesome/css/all.min.css" rel="stylesheet">
 
     <link rel="stylesheet" href="../../../public/style/cashier/header.css" />
+    <link rel="stylesheet" href="../../../public/style/cashier/order/table.css" />
 
-    <style>
-        body {
-            background: #c8ced3;
-        }
-
-        .table-card {
-            cursor: pointer;
-            transition: 0.2s ease-in-out;
-        }
-
-        .table-card:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, .15);
-        }
-
-        .modal-loading-overlay {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.5);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            z-index: 1056;
-            border-radius: inherit;
-        }
-
-        .payment-box {
-            width: 100%;
-            max-width: 420px;
-        }
-
-        .discount-note {
-            font-size: 11px;
-        }
-
-        /* تنسيق أيقونة النجاح */
-        .success-icon {
-            animation: successPulse 2s infinite;
-        }
-
-        .table-wrapper {
-            width: 100%;
-            max-width: 600px;
-            /* عدّل الرقم حسب اللي بدك */
-            margin: auto;
-            /* اختياري لتوسيطه */
-        }
-
-        .custom-box {
-            width: 80%;
-            margin: 0 auto;
-            /* توسيط */
-            border: 1px solid #ddd;
-            /* بوردر خفيف */
-            border-radius: 10px;
-            /* زوايا ناعمة */
-            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
-            /* ظل خفيف */
-
-        }
-
-
-        .bootbox.modal {
-            z-index: 1070 !important;
-        }
-
-        .bootbox.modal+.modal-backdrop {
-            z-index: 1065 !important;
-            background-color: #000;
-            opacity: 0.6;
-        }
-
-        .bootbox.modal {
-            display: flex !important;
-            align-items: center !important;  
-            justify-content: center !important; 
-            height: 100vh;
-        }
-        .bootbox.modal .modal-dialog {
-            width: 100%;
-            max-width: 500px;
-            margin: 0 !important;
-        }
-        @keyframes successPulse {
-            0% {
-                transform: scale(1);
-                opacity: 1;
-            }
-
-            50% {
-                transform: scale(1.1);
-                opacity: 0.8;
-            }
-
-            100% {
-                transform: scale(1);
-                opacity: 1;
-            }
-        }
-
-        /* تحسينات المودل */
-        #successModal .modal-content {
-            border-radius: 15px;
-            border: none;
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
-        }
-
-        #successModal .modal-body {
-            padding: 2rem;
-        }
-
-        /* تنسيق الأزرار */
-        #successModal .btn {
-            padding: 10px 15px;
-            font-weight: 500;
-        }
-
-        #successModal .btn-primary {
-            background-color: #0d6efd;
-            border-color: #0d6efd;
-        }
-
-        #successModal .btn-primary:hover {
-            background-color: #0b5ed7;
-            border-color: #0a58ca;
-        }
-
-        #orderDetailsModal .modal-content {
-            background-color: #e0dddd;
-            /* أغمق شوي من الأبيض */
-            color: #333;
-        }
-
-        #orderDetailsModal .modal-header {
-            border-bottom: 1px solid rgba(0, 0, 0, 0.2);
-        }
-
-        #orderDetailsModal .modal-header,
-        #orderDetailsModal .modal-body {
-            border-bottom: 2px solid rgba(0, 0, 0, 0.2);
-        }
-
-        .modal-backdrop.show {
-            opacity: 0.8;
-            /* زيد الرقم لغمق أكثر (0.5 - 0.9) */
-            background-color: #000;
-        }
-    </style>
 </head>
 
 <body>
 
     <div class="container-fluid">
 
-        <!-- Header -->
-        <div class="mt-3">
-            <div class="d-flex align-items-center p-3 bg-white shadow-sm rounded">
+
+        <div class="mt-2">
+             
+            <div class="d-flex align-items-center justify-content-between p-3 bg-white shadow-sm rounded">
                 <site-header></site-header>
-                <h4 class="mb-0 mx-auto">
+
+                <h4 class="mb-0">
                     <i class="fa-solid fa-table text-primary"></i>
                     الطلبات على الطاولات
                 </h4>
+
+                <button type="button" class="btn btn-success fw-bold re-fetch-btn">
+                    <i class="fa-solid fa-arrows-rotate me-1"></i>
+                    تحديث البيانات
+                </button>
             </div>
         </div>
 
@@ -205,7 +61,7 @@
     </div>
 
     <!-- Modal -->
-    <div class="modal fade" id="orderDetailsModal" tabindex="-1">
+    <div class="modal fade" id="orderDetailsModal" tabindex="-1" data-bs-backdrop="static">
         <div class="modal-dialog modal-lg">
             <div class="modal-content position-relative">
 
@@ -246,9 +102,9 @@
 
                         <div class="table-responsive">
                             <table class="table table-sm table-bordered items-table">
-                                <thead class="table-light">
+                                <thead class="table-dark">
                                     <tr>
-                                        <th>الإسم</th>
+                                        <th>الصنف</th>
                                         <th>الكمية</th>
                                         <th>سعر الوحدة</th>
                                         <th>المجموع</th>
@@ -260,6 +116,108 @@
                     </div>
 
 
+                    <div class="mt-1">
+
+                        <div class="fw-bold mb-2">
+                            <i class="fas fa-receipt me-1"></i>
+                            الأصناف التي تم تسديدها
+                        </div>
+
+                        <div class="table-responsive item-payment">
+                            <table class="table table-sm table-bordered text-center align-middle mb-0">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>الصنف</th>
+                                        <th>المدفوع</th>
+                                        <th>السعر</th>
+                                        <th>المجموع</th>
+                                        <th>الخصم</th>
+                                        <th>الإجمالي</th>
+                                    </tr>
+                                </thead>
+
+                                <tbody id="paidItemsBody">
+                                </tbody>
+                            </table>
+                        </div>
+
+                    </div>
+
+                    <hr>
+
+                    <button class="btn btn-primary btn-sm mb-3 fw-bold" id="partialPaymentBtn">
+                        <i class="fas fa-money-bill-wave ms-1"></i>
+                        تسديد جزئي
+                    </button>
+
+
+
+                    <div id="partialPaymentSection" class="d-none">
+                        <div class="card border">
+
+                            <div class="card-header bg-light fw-bold">
+                                <i class="fas fa-list-check ms-1"></i>
+                                اختر الأصناف المراد تسديدها
+                                <span class="text-muted fw-normal">— تسديد جزئي للطلب</span>
+                            </div>
+
+                            <div class="card-body">
+
+                                <!-- الجدول -->
+                                <div class="table-responsive">
+                                    <table class="table table-hover align-middle text-center mb-0"
+                                        style="max-width: 900px; margin: auto;">
+
+                                        <thead class="table-light">
+                                            <tr>
+                                                <th style="width: 60px;">دفع</th>
+                                                <th>الصنف</th>
+                                                <th>الكمية</th>
+                                                <th>سعر الوحدة</th>
+                                                <th>الخصم</th>
+                                                <th>المبلغ</th>
+                                            </tr>
+                                        </thead>
+
+                                        <tbody id="partialPaymentItems">
+                                            <!-- يتم تعبئتها بالـ JS -->
+                                        </tbody>
+
+                                    </table>
+                                </div>
+
+                            </div>
+
+                            <div class="card-footer">
+
+                                <!-- طريقة الدفع -->
+                                <div class="mb-3" style="max-width: 250px;">
+                                    <label for="paymentMethodPartial" class="form-label fw-bold mb-1">
+                                        طريقة الدفع
+                                    </label>
+
+                                    <select class="form-select" id="paymentMethodPartial" style="font-size: 16px;">
+                                        <option value="كاش">💵 كاش</option>
+                                        <option value="بطاقة">💳 بطاقة</option>
+                                    </select>
+                                </div>
+
+                                <!-- الزر أقصى اليسار -->
+                                <div class="d-flex justify-content-start">
+                                    <button type="button" class="btn btn-primary fw-bold px-4"
+                                        id="confirmPartialPaymentBtn">
+                                        <i class="fas fa-check ms-1"></i>
+                                        تأكيد التسديد
+                                    </button>
+                                </div>
+
+                            </div>
+
+                        </div>
+                    </div>
+
+
+
                     <hr>
 
                     <!-- إضافة صنف -->
@@ -267,6 +225,14 @@
                         <i class="fas fa-plus ms-1"></i>
                         إضافة صنف
                     </button>
+                    <button class="btn btn-success btn-sm mb-3 fw-bold" id="editItemsBtn">
+                        <i class="fas fa-edit ms-1"></i>
+                        تعديل الطلب
+                    </button>
+
+
+
+
 
                     <!-- SELECTOR -->
                     <div id="itemsSelector" class="d-none border rounded p-3 mb-3 bg-light">
@@ -283,9 +249,11 @@
 
                     <!-- CART -->
                     <div class="d-none bg-light p-2" id="cartSection">
-                        <hr>
 
-                        <h6 class="mb-2">السلة</h6>
+                        <h6 id="operation"></h6>
+
+                        <hr>
+                        <!-- <h6 class="mb-2">السلة</h6> -->
 
                         <div class="table-responsive">
                             <table class="table table-sm table-bordered items-table">
@@ -295,16 +263,12 @@
                                         <th class="text-center">الكمية</th>
                                         <th class="text-center">سعر الوحدة</th>
                                         <th class="text-center">المجموع</th>
-                                        <th class="text-center">حذف</th>
+                                        <th class="text-center">تعديل/حذف</th>
+                                        <th class="text-center">ملاحظة</th>
                                     </tr>
                                 </thead>
                                 <tbody id="cartTable"></tbody>
                             </table>
-                        </div>
-                        <div class="col-8">
-                            <label class="form-label fw-bold">ملاحظات</label>
-                            <textarea class="form-control" id="orderNotes" rows="2"
-                                placeholder="أي ملاحظات على الطلب (اختياري)"></textarea>
                         </div>
 
                         <h6 class="text-end">
@@ -316,78 +280,281 @@
                                 <i class="fas fa-check ms-1"></i>
                                 تأكيد الإضافة
                             </button>
+
+                            <button class="btn btn-info edit-items-btn" id="confirmUpdateOrderBtn">
+                                <i class="fas fa-pen-to-square ms-1"></i>
+                                تأكيد التعديل
+                            </button>
                         </div>
                     </div>
 
-                    <!-- 🔥 PAYMENT SECTION -->
-                    <div id="paymentSection" class="d-none  mt-3">
+                    <div id="paymentSection" class="d-none mt-3">
 
-                        <div class="border rounded p-3 mx-auto payment-box bg-light">
+                        <div class="border rounded-4 p-3 mx-auto payment-box bg-light shadow-sm">
 
-                            <h6 class="mb-3 text-warning text-center">
-                                <i class="fas fa-cash-register ms-1"></i>
-                                تسديد الفاتورة
-                            </h6>
-
-                            <!-- select -->
-                            <div class="mb-2">
-                                <label class="form-label fw-bold">طريقة الدفع</label>
-                                <select class="form-select form-select-sm" id="paymentMethod">
-                                    <option value="كاش">كاش</option>
-                                    <option value="بطاقة">بطاقة</option>
-                                </select>
-                            </div>
-
-                            <!-- discount -->
-                            <div class="mb-3">
-                                <label class="form-label fw-bold">
-                                    الخصم
-                                    <small class="text-muted discount-note">* بالشيكل</small>
-                                </label>
-                                <div class="input-group">
-                                    <input type="number" class="form-control" id="discountAmount" placeholder="0"
-                                        min="0">
-
-                                    <span class="input-group-text fw-bold"> <i
-                                            class="fas fa-shekel-sign ms-1 text-success"></i></span>
+                            <!-- العنوان -->
+                            <div class="text-center mb-4">
+                                <div class="d-inline-flex align-items-center justify-content-center 
+                        bg-warning-subtle rounded-circle p-3 mb-2">
+                                    <i class="fas fa-cash-register text-warning fs-4"></i>
                                 </div>
 
-                                <small class="text-muted d-block mt-1">
-                                    * اتركه فارغاً إذا لا يوجد خصم
+                                <h6 class="mb-0 fw-bold text-dark">
+                                    تسديد الفاتورة
+                                </h6>
+
+                                <small class="text-muted">
+                                    مراجعة المبلغ وإتمام عملية التسديد
                                 </small>
                             </div>
 
-                            <!-- totals -->
-                            <div class="d-flex justify-content-between">
-                                <span>المجموع قبل الخصم:</span>
-                                <strong id="beforeDiscountTotal">₪ 0</strong>
+
+                            <div id="paymentStatus" class="bg-white border rounded-3 p-3">
+
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <span class="text-muted">
+                                        إجمالي الطلب:
+                                    </span>
+
+                                    <strong id="totalAmount" class="text-dark">
+                                        ₪ 0
+                                    </strong>
+                                </div>
+
+
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <span class="text-danger">
+                                        خصم سابق:
+                                    </span>
+
+                                    <strong id="oldDescount" class="text-danger">
+                                        ₪ 0
+                                    </strong>
+                                </div>
+
+
+                                <div class="d-flex justify-content-between align-items-center mb-3">
+                                    <span class="text-muted">
+                                        المدفوع سابقاً:
+                                    </span>
+
+                                    <strong id="paidAmount" class="text-muted">
+                                        ₪ 0
+                                    </strong>
+                                </div>
+
+
+                                <!-- المتبقي -->
+                                <div class="d-flex justify-content-between align-items-center
+                                    border border-dark rounded-3 p-3 bg-light">
+
+                                    <div>
+                                        <div class="fw-bold text-dark">
+                                            المتبقي للدفع
+                                        </div>
+
+                                        <small class="text-muted">
+                                            المبلغ المطلوب تسديده الآن
+                                        </small>
+                                    </div>
+
+                                    <strong id="remainingAmount" class="fs-4 text-dark">
+                                        ₪ 0
+                                    </strong>
+
+                                </div>
+
                             </div>
 
-                            <div class="d-flex justify-content-between text-success">
-                                <span>المجموع بعد الخصم:</span>
-                                <strong id="afterDiscountTotal">₪ 0</strong>
+
+                            <hr class="my-4">
+
+                            <div class="mb-3">
+
+                                <label class="form-label fw-bold mb-2">
+                                    <i class="fas fa-credit-card ms-1 text-primary"></i>
+                                    طريقة الدفع
+                                </label>
+
+                                <select class="form-select" id="paymentMethod" style="font-size: 16px;">
+
+                                    <option value="كاش">💵 كاش</option>
+                                    <option value="بطاقة">💳 بطاقة</option>
+
+                                </select>
+
                             </div>
 
-                            <div class="d-flex justify-content-between text-danger mt-2 d-none" id="errorMessageDev">
-                                <spa id="errorMessage">خطأ : القيمة المدخلة اكبر من السعر الاساسي</span>
+
+        
+                            <div class="mb-3">
+
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+
+                                    <label class="form-label fw-bold mb-0">
+                                        <i class="fas fa-percent ms-1 text-danger"></i>
+                                        الخصم
+                                    </label>
+
+                                    <small class="text-muted discount-note">
+                                        * بالشيكل أو بالنسبة
+                                    </small>
+
+                                </div>
+
+
+                                <div class="row g-2">
+
+                                    <!-- الخصم بالشيكل -->
+                                    <div class="col-md-6">
+
+                                        <div class="bg-white border rounded-3 p-2">
+
+                                            <label class="small text-muted mb-1 d-block">
+                                                قيمة الخصم
+                                            </label>
+
+                                            <div class="input-group">
+
+                                                <input type="number" class="form-control" id="discountAmount"
+                                                    placeholder="0" min="0" step="0.01">
+
+                                                <span class="input-group-text fw-bold">
+                                                    <i class="fas fa-shekel-sign text-success"></i>
+                                                </span>
+
+                                            </div>
+
+                                        </div>
+
+                                    </div>
+
+
+                                    <!-- الخصم بالنسبة -->
+                                    <div class="col-md-6">
+
+                                        <div class="bg-white border rounded-3 p-2">
+
+                                            <label class="small text-muted mb-1 d-block">
+                                                نسبة الخصم
+                                            </label>
+
+                                            <div class="input-group">
+
+                                                <input type="number" class="form-control" id="discountPercentage"
+                                                    placeholder="0" min="0" max="100" step="0.01">
+
+                                                <span class="input-group-text fw-bold">
+                                                    %
+                                                </span>
+
+                                            </div>
+
+                                        </div>
+
+                                    </div>
+
+                                </div>
+
                             </div>
 
-                            <!-- button -->
-                            <button class="btn btn-success btn-sm w-100 mt-3 fs-6 fw-bold confirmPaymentBtn"
-                                id="confirmPaymentBtn">
+
+                            <div class="border rounded-3 bg-white overflow-hidden mt-3">
+
+                                <!-- قبل الخصم -->
+                                <div class="d-flex justify-content-between align-items-center
+                                    px-3 py-2 border-bottom">
+
+                                    <span class="text-muted">
+                                        المتبقي قبل الخصم
+                                    </span>
+
+                                    <strong id="beforeDiscountTotal">
+                                        ₪ 0
+                                    </strong>
+
+                                </div>
+
+
+                                <!-- نسبة الخصم -->
+                                <div class="d-flex justify-content-between align-items-center
+                                    px-3 py-2 border-bottom">
+
+                                    <span class="text-muted">
+                                        نسبة الخصم
+                                    </span>
+
+                                    <strong id="newDiscount" class="text-danger">
+                                        %0
+                                    </strong>
+
+                                </div>
+
+
+                                <!-- بعد الخصم -->
+                                <div class="d-flex justify-content-between align-items-center
+                                        px-3 py-3 bg-success-subtle">
+
+                                    <div>
+                                        <span class="fw-bold text-success">
+                                            المبلغ النهائي
+                                        </span>
+
+                                        <small class="d-block text-muted">
+                                            المتبقي بعد الخصم
+                                        </small>
+                                    </div>
+
+                                    <strong id="afterDiscountTotal" class="fs-4 text-success">
+                                        ₪ 0
+                                    </strong>
+
+
+
+                                </div>
+
+
+                                
+            
+                            </div>
+
+
+                            <div class="d-flex align-items-center gap-2 text-danger
+                                mt-2 d-none" id="errorMessageDev">
+
+                                <i class="fas fa-circle-exclamation"></i>
+
+                                <span id="errorMessage">
+                                    خطأ : القيمة المدخلة اكبر من السعر المتبقي
+                                </span>
+
+                            </div>
+
+
+            
+                            <button class="btn btn-success w-100 mt-3
+                                fw-bold rounded-3
+                                confirmPaymentBtn" id="confirmPaymentBtn">
+
                                 <i class="fas fa-money-check-dollar ms-1"></i>
+
                                 تسديد و إغلاق الطاولة
+
                             </button>
 
                         </div>
                     </div>
-
                 </div>
 
                 <!-- FOOTER -->
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
                         إلغاء
+                    </button>
+
+                    <button type="button" class="btn btn-primary printBtn">
+                        <i class="fas fa-print ms-1"></i>
+                        طباعة
                     </button>
 
                     <!-- زر التسديد -->
@@ -405,33 +572,6 @@
                     </div>
                 </div>
 
-            </div>
-        </div>
-    </div>
-
-
-    <div class="modal fade" id="successModal" tabindex="-1" data-bs-backdrop="static" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered modal-sm">
-            <div class="modal-content text-center">
-                <div class="modal-body p-4">
-                    <!-- أيقونة النجاح -->
-                    <div class="success-icon mb-3">
-                        <i class="fas fa-check-circle text-success" style="font-size: 4rem;"></i>
-                    </div>
-
-                    <!-- عنوان النجاح -->
-                    <h4 class="text-success mb-2">تم تسديد الطلب!</h4>
-
-                    <!-- أزرار الإجراءات -->
-                    <div class="d-flex gap-2">
-                        <button class="btn btn-primary flex-fill print-invoice-btn">
-                            <i class="fas fa-print"></i> طباعة الفاتورة
-                        </button>
-                        <button class="btn btn-secondary flex-fill close-success-modal">
-                            <i class="fas fa-times"></i> إلغاء
-                        </button>
-                    </div>
-                </div>
             </div>
         </div>
     </div>
@@ -461,6 +601,7 @@
     <script src="../../../wroot/assets/bootbox/bootbox.min.js"></script>
 
 
+    <!-- <script src="../../../public/js/cashier/order/testtable.js" type="module"> </script> -->
     <script src="../../../public/js/cashier/order/table.js" type="module"> </script>
 
 </body>

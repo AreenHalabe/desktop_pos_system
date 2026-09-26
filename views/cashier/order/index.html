@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!-- <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 
 <head>
@@ -10,7 +10,6 @@
     <link href="../../../wroot/assets/bootstrap/css/bootstrap.rtl.min.css" rel="stylesheet">
     <link href="../../../wroot/assets/bootstrap/css/bootstrap-icons.css" rel="stylesheet">
 
-    <!-- FontAwesome -->
     <link href="../../../wroot/assets/fontawesome/css/all.min.css" rel="stylesheet">
 
 
@@ -151,7 +150,6 @@
                         aria-label="Close"></button>
                 </div>
                 <div class="modal-body" id="sizesContainer">
-                    <!-- سيتم ملؤه بالجافاسكريبت -->
                 </div>
             </div>
         </div>
@@ -168,13 +166,11 @@
                         aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
-                    <!-- تفاصيل الطلب -->
                     <div class="card mb-3">
                         <div class="card-header bg-light py-2">
                             <h6 class="mb-0"><i class="fas fa-utensils"></i> تفاصيل الطلب</h6>
                         </div>
                         <div class="card-body" id="order-details-list">
-                            <!-- سيتم ملؤه بالجافاسكريبت -->
                         </div>
                         <div class="card-footer modal-footer-custom">
                             <div class="d-flex justify-content-between fw-bold fs-5">
@@ -184,9 +180,7 @@
                         </div>
                     </div>
 
-                    <!-- خيارات الطلب -->
                     <div class="row g-3">
-                        <!-- نوع الطلب -->
                         <div class="col-md-6">
                             <label class="form-label fw-bold">نوع الطلب <span class="text-danger">*</span></label>
                             <select class="form-select" id="orderType">
@@ -195,13 +189,11 @@
                             </select>
                         </div>
 
-                        <!-- رقم الطاولة -->
                         <div class="col-md-6" id="tableNumberDiv">
                             <label class="form-label fw-bold">رقم الطاولة <span class="text-danger">*</span></label>
                             <input type="number" class="form-control" id="tableNumber" placeholder="أدخل رقم الطاولة">
                         </div>
 
-                        <!-- طريقة الدفع -->
 
                         <div class="col-12 d-flex">
 
@@ -236,13 +228,11 @@
                         </div>
 
 
-                        <!-- رقم الزبون -->
                         <div class="col-md-6" id="customerPhoneDiv" style="display: none;">
                             <label class="form-label fw-bold">الزبون</label>
                             <input type="tel" class="form-control" id="customerPhone" placeholder="إسم أو رقم الزبون (إختياري)">
                         </div>
 
-                        <!-- العنوان -->
                         <div class="col-md-6" id="customerAddressDiv" style="display: none;">
                             <label class="form-label fw-bold">العنوان</label>
                             <textarea class="form-control" id="customerAddress" rows="2"
@@ -250,13 +240,11 @@
                         </div>
 
 
-                        <!-- ملاحظات -->
                         <div class="col-12">
                             <label class="form-label fw-bold">ملاحظات</label>
                             <textarea class="form-control" id="orderNotes" rows="2"
                                 placeholder="أي ملاحظات على الطلب (اختياري)"></textarea>
                         </div>
-                        <!-- الخصم -->
                         <div class="col-md-6">
                             <label class="form-label fw-bold">
                                 الخصم
@@ -276,7 +264,6 @@
                             </small>
                         </div>
 
-                        <!-- المجموع بعد الخصم -->
                         <div class="col-md-6">
                             <label class="form-label fw-bold">المجموع بعد الخصم</label>
 
@@ -285,6 +272,508 @@
                             </div>
                         </div>
 
+
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إلغاء</button>
+                    <button type="button" class="btn btn-success send-order-btn" id="confirmSendBtn">
+                        <i class="fas fa-paper-plane"></i> إرسال الطلب
+                    </button>
+                </div>
+
+                <div id="modal-loading-overlay" class="modal-loading-overlay hidden">
+                    <div class="spinner-border text-light" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <div class="modal fade" id="successModal" tabindex="-1" data-bs-backdrop="static" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-sm">
+            <div class="modal-content text-center">
+                <div class="modal-body p-4">
+                    <div class="success-icon mb-3">
+                        <i class="fas fa-check-circle text-success" style="font-size: 4rem;"></i>
+                    </div>
+
+                    <h4 class="text-success mb-2">تم بنجاح!</h4>
+
+                    <div class="d-flex gap-2">
+                        <button class="btn btn-primary flex-fill print-invoice-btn">
+                            <i class="fas fa-print"></i> طباعة الفاتورة
+                        </button>
+                        <button class="btn btn-secondary flex-fill close-success-modal">
+                            <i class="fas fa-times"></i> إلغاء
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+
+
+    <script src="../../../wroot/assets/bootstrap/js/bootstrap.bundle.min.js"></script>
+
+    <script src="../../../wroot/assets/jquery/jquery-3.7.1.min.js"></script>
+    <script src="../../../wroot/assets/bootbox/bootbox.min.js"></script>
+
+    <script type="module" src="../../../public/js/cashier/order/index.js"></script>
+
+</body>
+
+</html> -->
+
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Halabi_Technology.ps</title>
+
+
+    <link href="../../../wroot/assets/bootstrap/css/bootstrap.rtl.min.css" rel="stylesheet">
+    <link href="../../../wroot/assets/bootstrap/css/bootstrap-icons.css" rel="stylesheet">
+
+    <!-- FontAwesome -->
+    <link href="../../../wroot/assets/fontawesome/css/all.min.css" rel="stylesheet">
+
+
+    <link rel="stylesheet" href="../../../public/style/cashier/header.css" />
+    <link rel="stylesheet" href="../../../public/style/cashier/order/index.css" />
+
+
+</head>
+
+<body class="body">
+
+
+
+    <div class="container-fluid px-3">
+
+        <div class="main-container">
+            <div class="d-flex flex-column right-section">
+
+                <div class="products-section">
+
+                    <div class="sticky-container">
+                        <div class="p-1 header-menue d-flex">
+                            <site-header></site-header>
+                            <div class="employee-welcome ms-auto">
+                                <div class="employee-info">
+                                    <span class="employee-name" id="employeeName"></span>
+                                </div>
+                                <div class="employee-icon">
+                                    <i class="fas fa-user"></i>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="main-categories" id="mainCategoriesContainer">
+                            <div class="main-categories-wrapper">
+
+                                <div class="scroll-arrow left" id="scrollLeft">
+                                    <i class="bi bi-chevron-left"></i>
+                                </div>
+
+                                <div class="scroll-arrow right" id="scrollRight">
+                                    <i class="bi bi-chevron-right"></i>
+                                </div>
+                                <div class="categories-inner scroll-bar d-flex gap-2 p-1" id="mainCategories">
+
+                                </div>
+
+
+                            </div>
+
+                            <div id="error-box" class="error-box fs-5 hidden"></div>
+                        </div>
+
+                        <hr id="categoryDivider">
+
+                        <div class="sub-category-wraper">
+                            <div class="scroll-arrow left" id="subScrollLeft">
+                                <i class="bi bi-chevron-left"></i>
+                            </div>
+
+                            <div class="scroll-arrow right" id="subScrollRight">
+                                <i class="bi bi-chevron-right"></i>
+                            </div>
+                            <div class="d-flex gap-2 sub-category scroll-bar p-1" id="categoryContainer">
+
+                            </div>
+
+                        </div>
+
+
+
+
+                    </div>
+
+
+
+
+                    <div class="d-flex flex-column align-items-center justify-content-center gap-2" id="spinnerLoad">
+                        <div class="spinner-border text-primary" role="status"></div>
+                        <span class="text-muted">جاري تحميل...</span>
+                    </div>
+                    <div class="d-flex flex-column align-items-center justify-content-center gap-2 d-none"
+                        id="sessionStatus">
+                        <span class="fs-3">لا يوجد صندوق مفتوح</span>
+                    </div>
+
+
+                    <div class="d-flex">
+
+                        <div class="search-wrapper ms-auto">
+                            <i class="bi bi-search search-icon"></i>
+
+                            <input type="text" id="search-input" class="form-control" placeholder="ابحث عن منتج...">
+
+                            <div id="search-results" class="search-results"></div>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="products-grid mt-3" id="products-grid">
+
+                    </div>
+                </div>
+            </div>
+
+
+
+            <div class="cart-section ms-auto">
+                <div class="order-sidebar d-flex flex-column p-2">
+                    <h5 class="mb-3 p-3 text-center border-bottom"><i class="fas fa-shopping-basket"></i> الطلب الحالي
+                    </h5>
+
+                    <div id="order-items-list" class="shadow">
+                        <p class="text-center text-muted fs-5 mt-2">سلة الطلب فارغة</p>
+                    </div>
+
+
+                    <div class="confirm-section mt-auto">
+                        <div class="total-box mb-2 mt-2" style="padding-left: 20px;">
+                            <span class="total-label fw-bold">المجموع الكلي :</span>
+                            <span class="total-value fw-bold text-success" id="total-price">0 ₪</span>
+                        </div>
+
+                        <button class="btn btn-success d-block mx-auto submit-order-btn mb-2 mt-2">
+                            <i class="fas fa-check"></i> تأكيد الطلب
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <div class="modal fade" id="sizeModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title" id="modalProductName">اختر الحجم</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
+                        aria-label="Close"></button>
+                </div>
+                <div class="modal-body" id="sizesContainer">
+                    <!-- سيتم ملؤه بالجافاسكريبت -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="confirmOrderModal" tabindex="-1" aria-hidden="true" data-bs-backdrop="static">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content">
+                <div class="modal-header bg-success text-white">
+                    <h5 class="modal-title">
+                        <i class="fas fa-clipboard-check"></i> تأكيد الطلب
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
+                        aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <!-- تفاصيل الطلب -->
+                    <div class="card mb-3">
+                        <div class="card-header bg-light py-2">
+                            <h6 class="mb-0"><i class="fas fa-utensils"></i> تفاصيل الطلب</h6>
+                        </div>
+                        <div class="card-body" id="order-details-list">
+                            <!-- سيتم ملؤه بالجافاسكريبت -->
+                        </div>
+
+                        
+                        <div class="card-footer modal-footer-custom">
+                            <div class="d-flex justify-content-between fw-bold fs-5">
+                                <span>المجموع الكلي:</span>
+                                <span class="text-success" id="modal-total-price">0 ₪</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- خيارات الطلب -->
+                    <div class="row g-3">
+                        <!-- نوع الطلب -->
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold">نوع الطلب <span class="text-danger">*</span></label>
+                            <select class="form-select" id="orderType">
+                                <option value="سفري">سفري</option>
+                                <option value="طاولة">طاولة</option>
+                            </select>
+                        </div>
+
+                        <!-- رقم الطاولة -->
+                        <div class="col-md-6" id="tableNumberDiv" style="display: none;">
+                            <label class="form-label fw-bold">رقم الطاولة <span class="text-danger">*</span></label>
+                            <input type="number" class="form-control" id="tableNumber" placeholder="أدخل رقم الطاولة">
+                        </div>
+
+                        <!-- طريقة الدفع -->
+                        <hr class="order-divider">
+
+                        <div class="col-12 d-flex">
+
+
+                            <div class="col-12" id="paymentStatusDiv" style="display: none;">
+                                <h6 class="mb-3 fw-bold">
+                                    <i class="bi bi-credit-card"></i>
+                                    حالة الدفع
+                                </h6>
+
+                                <div class="d-flex justify-content-around">
+                                    <div class="form-check mb-2">
+                                        <input class="form-check-input pointer" type="radio" name="payment_status"
+                                            id="pay_later" value="unpaid" checked>
+
+                                        <label class="form-check-label pointer" for="pay_later">
+                                            <i class="fa-solid fa-table me-1 text-primary"></i>
+                                            سيبقى الطلب مفتوحًا حتى يتم تسديده من صفحة الطاولات , عند إغلاق الطاولة.
+                                        </label>
+                                    </div>
+                                </div>
+
+                            </div>
+
+                            <div class="col-md-6 col-12" id="paymentMethodDiv">
+                                <label class="form-label fw-bold">طريقة الدفع <span class="text-danger">*</span></label>
+                                <select class="form-select" id="paymentMethod">
+                                    <option value="كاش">كاش</option>
+                                    <option value="بطاقة">بطاقة</option>
+                                </select>
+                            </div>
+                        </div>
+
+
+                        <!-- العملة -->
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold">العملة <span class="text-danger">*</span></label>
+
+                            <select class="form-select" id="orderCurrency">
+                                <option value="ILS" selected>شيكل ₪</option>
+                                <option value="USD">دولار $</option>
+                                <option value="JOD">دينار أردني د.أ</option>
+                                <option value="EUR">يورو €</option>
+                            </select>
+                        </div>
+                        
+                        <div class="col-12">
+                            <div class="row g-3 align-items-end">
+
+                                <!-- المبلغ المستلم -->
+                                <div class="col-md-4">
+                                    <label class="form-label fw-bold">
+                                        المبلغ المستلم
+                                    </label>
+
+                                    <div class="input-group">
+                                        <input type="number" class="form-control" id="foreignCurrencyAmount"
+                                            placeholder="أدخل المبلغ" min="0" step="0.01">
+
+                                        <span class="input-group-text" id="foreignCurrencySymbol">₪</span>
+                                    </div>
+                                </div>
+                                <div class="col-md-8" id="foreignCurrencyDiv" style="display: none;">
+                                    <div class="row align-items-end">
+                                        <!-- سعر الصرف -->
+                                        <div class="col-md-6">
+                                            <label class="form-label fw-bold">
+                                                سعر صرف العملة لليوم الحالي
+                                            </label>
+
+                                            <div class="form-control bg-light" id="selectedCurrencyRate">
+                                                0
+                                            </div>
+                                        </div>
+
+                                        <!-- القيمة بالشيكل -->
+                                        <div class="col-md-6">
+                                            <label class="form-label fw-bold">
+                                                القيمة بالشيكل
+                                            </label>
+
+                                            <div class="form-control bg-light text-success fw-bold d-flex align-items-center justify-content-center"
+                                                id="convertedCurrencyAmount">
+                                                0 ₪
+                                            </div>
+                                        </div>
+
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+
+                        <hr class="order-divider">
+                        <div class="col-12" id="discountDev">
+                            <div class="row">
+                                <div class="col-12 mb-3">
+                                    <label class="form-label fw-bold"> نوع الخصم </label>
+                                    <select class="form-select" id="discountType">
+                                        <option value="total" selected>خصم كلي على مجموع الطلب</option>
+                                        <option value="partial">خصم جزئي على أصناف محددة</option>
+                                    </select>
+                                </div>
+
+                                <!-- الخصم -->
+                                <div class="col-12" id="totalDiscountSection">
+                                    <div class="row">
+
+                                        <div class="col-md-8">
+                                            <label class="form-label fw-bold">
+                                                الخصم
+                                                <small class="text-muted fw-normal" style="font-size: 12px;">*بالشيكل أو
+                                                    النسبة
+                                                    المئوية</small>
+                                            </label>
+
+                                            <div class="row g-2">
+
+                                                <!-- الخصم بالشيكل -->
+                                                <div class="col-6">
+                                                    <div class="input-group">
+                                                        <input type="number" class="form-control" id="discountAmount"
+                                                            placeholder="الخصم بالشيكل" min="0" step="0.01">
+
+                                                        <span class="input-group-text text-success">
+                                                            <i class="fa-solid fa-shekel-sign"></i>
+                                                        </span>
+                                                    </div>
+                                                </div>
+
+                                                <!-- الخصم بالنسبة -->
+                                                <div class="col-6">
+                                                    <div class="input-group">
+                                                        <input type="number" class="form-control"
+                                                            id="discountPercentage" placeholder="النسبة" min="0"
+                                                            max="100" step="0.01">
+
+                                                        <span class="input-group-text text-primary">
+                                                            %
+                                                        </span>
+                                                    </div>
+                                                </div>
+
+                                            </div>
+
+                                            <small class="text-muted">
+                                                أدخل الخصم بالشيكل أو بالنسبة المئوية
+                                            </small>
+                                        </div>
+                                        <!-- المجموع بعد الخصم -->
+                                        <div class="col-md-4">
+                                            <label class="form-label fw-bold">المجموع بعد الخصم</label>
+
+                                            <div class="form-control bg-light fw-bold text-success"
+                                                id="finalTotalPrice">
+                                                0 ₪
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                </div>
+
+
+                                <div class="col-12 d-none" id="partialDiscountSection">
+                                    <label class="form-label fw-bold">
+                                        الأصناف والخصم الجزئي </label>
+                                    <div class="table-responsive">
+                                        <table class="table table-bordered table-hover align-middle text-center">
+                                            <thead class="table-light">
+                                                <tr>
+                                                    <th>الصنف</th>
+                                                    <th>الكمية</th>
+                                                    <th>السعر</th>
+                                                    <th>المجموع</th>
+                                                    <th>الخصم %</th>
+                                                    <th>السعر بعد الخصم</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody id="partialDiscountItems"> <!-- مثال مؤقت -->
+
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+
+                            </div>
+                        </div>
+
+
+                        <!-- ملخص الدفع -->
+                        <div class="col-12 mt-3">
+                            <div class="row g-3">
+
+                                <!-- المبلغ المستلم -->
+                                <div class="col-md-4">
+                                    <div class="border rounded-3 p-3 bg-light d-flex justify-content-between align-items-center">
+                                        <span class="fw-bold">
+                                            المبلغ المستلم:
+                                        </span>
+
+                                        <span class="fw-bold fs-5 text-primary" id="receivedAmountSummary">
+                                            0 ₪
+                                        </span>
+                                    </div>
+                                </div>
+
+                                <!-- المجموع بعد الخصم -->
+                                <div class="col-md-4">
+                                    <div class="border rounded-3 p-3 bg-light d-flex justify-content-between align-items-center">
+                                        <span class="fw-bold">
+                                            المطلوب دفعه:
+                                        </span>
+
+                                        <span class="fw-bold fs-5 text-dark" id="paymentTotalSummary">
+                                            0 ₪
+                                        </span>
+                                    </div>
+                                </div>
+
+                                <!-- الترجيع -->
+                                <div class="col-md-4">
+                                    <div class="border border-success rounded-3 p-3 bg-light d-flex justify-content-between align-items-center">
+                                        <span class="fw-bold">
+                                            الترجيع:
+                                        </span>
+
+                                        <span class="fw-bold fs-5 text-success" id="changeAmountSummary">
+                                            0 ₪
+                                        </span>
+                                    </div>
+                                </div>
+
+                            </div>
+                        </div>
 
                     </div>
                 </div>
@@ -323,7 +812,7 @@
                             <i class="fas fa-print"></i> طباعة الفاتورة
                         </button>
                         <button class="btn btn-secondary flex-fill close-success-modal">
-                            <i class="fas fa-times"></i> إلغاء
+                            <i class="fas fa-times"></i> إغلاق
                         </button>
                     </div>
                 </div>
