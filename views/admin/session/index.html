@@ -240,11 +240,12 @@
                                     <thead>
                                         <tr>
                                             <th>رقم الطلب</th>
-                                            <th>طريقة الدفع</th>
                                             <th class="position-relative">
                                               نوع الطلب
                                             </th>
+                                            
                                             <th>الوقت</th>
+                                            <th>طريقة الدفع</th>
                                             <th>المبلغ</th>
                                             <th>الحالة</th>
                                             <th>الإجراءات</th>
@@ -352,24 +353,27 @@
                 </div>
                 <div class="modal-body">
                     <!-- معلومات الطلب -->
-                    <div class="row mb-2">
-                        <div class="col-md-6">
+                    <div
+                        class="d-flex justify-content-around align-items-center p-2 mb-3 border rounded shadow-sm custom-box bg-light">
+
+                        <div class="mt-2">
                             <p><strong>رقم الطلب : </strong> <span id="modalOrderId"></span></p>
-                            <p><strong>الوقت : </strong> <span id="modaltime"></span></p>
-                            
+                            <p><strong>الوقت : </strong> <span id="modaltime" dir="ltr"></span></p>
+
                         </div>
-                        <div class="col-md-6">
+                        <div>
                             <p><strong>الدفع : </strong> <span id="modalPayment"></span></p>
                             <p><strong>التاريخ : </strong> <span id="modalDate"></span></p>
                             <p class="d-none"><strong>نوع الطلب : </strong> <span id="modalOrderType"></span></p>
                         </div>
+
                     </div>
-                    
+
                     <!-- أسباب الإلغاء -->
                     <div class="alert alert-warning mb-4 hidden">
                         <strong>سبب الإلغاء : </strong> <span id="modalCancelReason"></span>
                     </div>
-                    
+
                     <!-- جدول الأصناف -->
                     <h6 class="mb-3">
                         <i class="fas fa-list ms-2"></i>
@@ -377,9 +381,10 @@
                     </h6>
                     <div class="table-responsive">
                         <table class="table table-sm table-bordered">
-                            <thead class="table-light">
+                            <thead class="table-dark">
                                 <tr>
-                                    <th>الإسم</th>
+                                    <th>الصنف</th>
+                                    <th>خصم الصنف</th>
                                     <th>الكمية</th>
                                     <th>سعر الوحدة</th>
                                     <th>المجموع</th>
@@ -390,7 +395,7 @@
                             </tbody>
                         </table>
                     </div>
-                    
+
                     <!-- آخر تحديث -->
                     <p class="text-muted small mt-3 hidden">
                         <i class="fas fa-clock ms-1"></i>
@@ -399,134 +404,395 @@
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إغلاق</button>
-                    <button type="button" class="btn btn-primary printBtn">طباعة الفاتورة</button>
                 </div>
             </div>
         </div>
     </div>
 
-    <div class="modal fade" id="closeCashModal" tabindex="-1">
+
+    <div class="modal fade" id="closeCashModal" data-bs-backdrop="static" tabindex="-1">
         <div class="modal-dialog modal-dialog-centered modal-lg">
             <div class="modal-content">
 
+                <!-- Header -->
                 <div class="modal-header bg-danger text-white">
-                    <h5 class="modal-title">
-                    <i class="bi bi-cash-coin"></i>
-                    إغلاق اليوم المحاسبي
-                    </h5>
+                    <div>
+                        <h5 class="modal-title mb-1">
+                            <i class="bi bi-cash-coin me-1"></i>
+                            إغلاق الصندوق
+                        </h5>
+
+                        <small class="opacity-75">
+                            <i class="bi bi-person-fill me-1"></i>
+                            الكاشير:
+                            <strong id="cashierNameModal">غير محدد</strong>
+                        </small>
+                    </div>
                 </div>
 
+                <!-- Body -->
                 <div class="modal-body">
 
-                    <!-- إدخال الكاش الفعلي -->
-                    <div class="mb-4">
-                        <label class="form-label fw-bold">الكاش الفعلي في الصندوق</label>
-                        <input 
-                            type="number"
-                            id="actualCash"
-                            class="form-control  fs-5"
-                            placeholder="أدخل قيمة الكاش"
-                            min="0"
-                            step="0.01"
-                        >
-                    </div>
+                    <!-- أسعار الصرف -->
+                    <div class="card border-0 shadow-sm mb-3 d-none">
+                        <div class="card-body py-3">
 
-                    <!-- ملخص الإغلاق -->
-                    <div class="card border-0 shadow-sm">
-                        <div class="card-header bg-light fw-bold">
-                            ملخص الإغلاق
-                        </div>
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <div class="fw-bold">
+                                    <i class="bi bi-currency-exchange me-1"></i>
+                                    أسعار الصرف
+                                </div>
 
-                        <div class="card-body">
+                                <small class="text-muted">
+                                    مقابل الشيكل ₪
+                                </small>
+                            </div>
 
-                            <div class="row text-center g-3">
+                            <div class="row g-2 text-center">
 
-                                <div class="col-md-3">
-                                    <small class="text-muted">مبيعات كاش</small>
-                                    <div class="fw-bold text-success" id="cashSalesModal">
-                                        0 ₪
+                                <div class="col-4">
+                                    <div class="border rounded p-2">
+                                        <div class="text-muted small">الدولار</div>
+                                        <div class="fw-bold" id="usdRateModal">
+                                            
+                                        </div>
                                     </div>
                                 </div>
 
-                                <div class="col-md-3">
-                                    <small class="text-muted">مبيعات بطاقة</small>
-                                    <div class="fw-bold text-info" id="cardSalesModal">
-                                        0 ₪
+                                <div class="col-4">
+                                    <div class="border rounded p-2">
+                                        <div class="text-muted small">الدينار</div>
+                                        <div class="fw-bold" id="jodRateModal">
+                                            
+                                        </div>
                                     </div>
                                 </div>
 
-                                <div class="col-md-3">
-                                    <small class="text-muted">المصروفات</small>
-                                    <div class="fw-bold text-danger" id="cashOutModal">
-                                        0 ₪
-                                    </div>
-                                </div>
-
-                                <div class="col-md-3">
-                                    <small class="text-muted">إضافة كاش</small>
-                                    <div class="fw-bold text-success" id="cashInModal" style="opacity: 0.8;">
-                                     0 ₪
+                                <div class="col-4">
+                                    <div class="border rounded p-2">
+                                        <div class="text-muted small">اليورو</div>
+                                        <div class="fw-bold" id="eurRateModal">
+                                          
+                                        </div>
                                     </div>
                                 </div>
 
                             </div>
-                            
-                            <hr>
 
-                            <div class="row g-3 text-center">
+                        </div>
+                    </div>
 
-                                <div class="col-md-4">
-                                    <div class="border rounded p-3">
-                                        <small class="text-muted">الكاش الإفتتاحي</small>
-                                        <div class="fs-5 fw-bold text" id="openingCashModal">
-                                            0 ₪
-                                        </div>
-                                    </div>
+
+                    <!-- ملخص الصندوق -->
+                    <div class="card border-0 shadow-sm mb-3">
+
+                        <div class="card-header bg-light border-0 py-2">
+                            <div class="fw-bold">
+                                <i class="bi bi-calculator me-1"></i>
+                                ملخص الصندوق
+                            </div>
+                        </div>
+
+                        <div class="card-body py-2">
+
+                            <!-- الكاش الافتتاحي -->
+                            <div class="d-flex justify-content-between align-items-center py-2">
+
+                                <div>
+                                    <span class="fw-semibold">
+                                        الكاش الافتتاحي
+                                    </span>
+                                    <small class="text-muted d-block">
+                                        عند فتح الصندوق
+                                    </small>
                                 </div>
 
-                                <div class="col-md-4">
-                                    <div class="border rounded p-3">
-                                        <small class="text-muted">الكاش المتوقع</small>
-                                        <div class="fs-5 fw-bold text-primary" id="expectedCashModal">
-                                            0 ₪
-                                        </div>
-                                    </div>
+                                <div class="fw-bold" id="openingCashModal">
+                                    0 ₪
                                 </div>
 
-                                <div class="col-md-4">
-                                    <div class="border rounded p-3">
-                                        <small class="text-muted">الفرق</small>
+                            </div>
+
+
+                            <!-- مبيعات الكاش -->
+                            <div class="d-flex justify-content-between align-items-center py-2 border-top">
+
+                                <div>
+                                    <span class="fw-semibold text-success">
+                                        <i class="bi bi-plus-circle me-1"></i>
+                                        مبيعات كاش
+                                    </span>
+                                </div>
+
+                                <div class="fw-bold text-success" id="cashSalesModal">
+                                    0 ₪
+                                </div>
+
+                            </div>
+
+
+                            <!-- إضافة كاش -->
+                            <div class="d-flex justify-content-between align-items-center py-2 border-top">
+
+                                <div>
+                                    <span class="fw-semibold text-success">
+                                        <i class="bi bi-plus-circle me-1"></i>
+                                        إضافة كاش
+                                    </span>
+                                </div>
+
+                                <div class="fw-bold text-success" id="cashInModal">
+                                    0 ₪
+                                </div>
+
+                            </div>
+
+
+                            <!-- المصروفات -->
+                            <div class="d-flex justify-content-between align-items-center py-2 border-top">
+
+                                <div>
+                                    <span class="fw-semibold text-danger">
+                                        <i class="bi bi-dash-circle me-1"></i>
+                                        المصروفات
+                                    </span>
+                                </div>
+
+                                <div class="fw-bold text-danger" id="cashOutModal">
+                                    0 ₪
+                                </div>
+
+                            </div>
+
+                        </div>
+                    </div>
+
+                    <div class="mt-3 p-3 rounded bg-light">
+
+                        <div class="text-center text-muted small mb-2">
+                            معادلة الكاش المتوقع
+                        </div>
+
+                        <div class="text-center fw-semibold">
+
+                            <span>
+                                الكاش الافتتاحي
+                            </span>
+
+                            <span class="mx-1 text-success">
+                                +
+                            </span>
+
+                            <span>
+                                مبيعات الكاش
+                            </span>
+
+                            <span class="mx-1 text-success">
+                                +
+                            </span>
+
+                            <span>
+                                الإضافات
+                            </span>
+
+                            <span class="mx-1 text-danger">
+                                −
+                            </span>
+
+                            <span>
+                                المصروفات
+                            </span>
+
+                        </div>
+
+                    </div>
+
+                    <!-- مبيعات البطاقة -->
+                    <div class="card border-0 shadow-sm mb-3">
+
+                        <div class="card-body py-3">
+
+                            <div class="d-flex justify-content-between align-items-center">
+
+                                <div>
+                                    <div class="fw-bold text-info">
+                                        <i class="bi bi-credit-card me-1"></i>
+                                        مبيعات البطاقة
+                                    </div>
+
+                                    <small class="text-muted">
+                                        لا تدخل ضمن الكاش
+                                    </small>
+                                </div>
+
+                                <div class="fs-5 fw-bold text-info" id="cardSalesModal">
+                                    0 ₪
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                    <!-- الكاش المتوقع + الكاش الفعلي -->
+                    <div class="row g-3 mb-3 mt-3">
+
+                        <!-- الكاش المتوقع -->
+                        <div class="col-md-6">
+
+                            <div class="card border-primary h-100 shadow-sm">
+
+                                <div class="card-body text-center">
+
+                                    <div class="text-primary fw-bold mb-2">
+                                        <i class="bi bi-calculator me-1"></i>
+                                        الكاش المتوقع
+                                    </div>
+
+                                    <div class="fs-3 fw-bold text-primary" id="expectedCashModal">
+                                        0 ₪
+                                    </div>
+
+                                    <small class="text-muted">
+                                        المبلغ المفترض وجوده
+                                    </small>
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+
+                        <!-- الكاش الفعلي -->
+                        <div class="col-md-6">
+
+                            <div class="card border-danger h-100 shadow-sm">
+
+                                <div class="card-body">
+
+                                    <label class="form-label fw-bold mb-2">
+                                        <i class="bi bi-wallet2 me-1 text-danger"></i>
+                                        الكاش الفعلي
+                                    </label>
+
+                                    <div class="input-group input-group-lg">
+
+                                        <input
+                                            type="number"
+                                            id="actualCash"
+                                            class="form-control fs-5 text-center"
+                                            placeholder="0.00"
+                                            min="0"
+                                            step="0.01"
+                                        >
+
+                                        <span class="input-group-text">
+                                            ₪
+                                        </span>
+
+                                    </div>
+
+                                    <small class="text-danger fw-bold d-block mt-2 text-center">
+                                        أدخل المبلغ الموجود فعلياً
+                                    </small>
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+                    
+
+
+                    <!-- نتيجة الإغلاق -->
+                    <div class="card border-0 shadow-sm">
+
+                        <div class="card-header bg-light border-0 py-2">
+                            <div class="fw-bold">
+                                <i class="bi bi-clipboard-check me-1"></i>
+                                نتيجة الإغلاق
+                            </div>
+                        </div>
+
+                        <div class="card-body py-3">
+
+                            <div class="row g-3">
+
+                                
+                                <!-- الفرق -->
+                                <div class="col-12">
+
+                                    <div class="border rounded p-3 text-center h-100">
+
+                                        <small class="text-muted d-block mb-1">
+                                            الفرق
+                                        </small>
+
                                         <div class="fs-5 fw-bold" id="cashDifference">
-                                            <span id="differenceValue">0 ₪</span>
 
-                                            <div id="differenceSpinner" class="spinner-border spinner-border-sm text-secondary d-none"></div>
+                                            <span id="differenceValue">
+                                                0 ₪
+                                            </span>
+
+                                            <div
+                                                id="differenceSpinner"
+                                                class="spinner-border spinner-border-sm text-secondary d-none">
+                                            </div>
 
                                             <i id="differenceIcon"></i>
+
                                         </div>
+
                                     </div>
+
                                 </div>
 
                             </div>
+
                         </div>
+
                     </div>
 
                 </div>
 
+
+                <!-- Footer -->
                 <div class="modal-footer">
-                    <button class="btn btn-secondary" data-bs-dismiss="modal">
-                    إلغاء
+
+                    <button
+                        class="btn btn-secondary"
+                        data-bs-dismiss="modal">
+                        إلغاء
                     </button>
 
-                    <button class="btn btn-danger confirm-close-cash-btn" id="confirmCloseCash" disabled>
-                        <i class="bi bi-lock"></i>
+                    <button
+                        class="btn btn-danger confirm-close-cash-btn"
+                        id="confirmCloseCash"
+                        disabled>
+
+                        <i class="bi bi-lock me-1"></i>
                         إغلاق الصندوق
+
                     </button>
+
                 </div>
 
+
+                <!-- Loading Overlay -->
                 <div id="modal-loading-overlay" class="modal-loading-overlay hidden">
+
                     <div class="spinner-border text-light" role="status">
-                        <span class="visually-hidden">Loading...</span>
+                        <span class="visually-hidden">
+                            Loading...
+                        </span>
                     </div>
+
                 </div>
 
             </div>

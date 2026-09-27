@@ -54,6 +54,8 @@ export function buildTreeOfOrders(rows) {
         created_at: row.created_at,
         updated_at: row.updated_at,
         table_num: row.table_num,
+        card_paid : row.card_paid,
+        cash_paid : row.cash_paid,
         items: []
       };
 
@@ -80,7 +82,8 @@ export function buildTreeOfOrders(rows) {
         item_name: row.item_name,
         quantity: row.quantity,
         price: row.price,
-        size_name: row.size_name
+        size_name: row.size_name,
+        discount_item: row.discount_item
       });
     }
   }

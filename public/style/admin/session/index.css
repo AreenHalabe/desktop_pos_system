@@ -49,22 +49,16 @@ body {
 }
 
 .table thead th {
-    background: #f8f9fa;
     border-bottom: 2px solid #dee2e6;
-    padding: 15px;
+    padding: 7px;
     font-weight: 600;
 }
 
-/* Badge الحالات */
-.badge-completed {
-    background: #d4edda;
-    color: #155724;
+.table tbody td {
+    vertical-align: middle;
 }
 
-.badge-cancelled {
-    background: #f8d7da;
-    color: #721c24;
-}
+
 
 /* ترويسة الصفحة */
 .page-header {
@@ -167,8 +161,24 @@ body {
     background-color: #d4edda;
     color: #155724;
 }
+.status-cancelled {
+    background-color: #f8d7da;
+    color: #721c24;
+}
 
 
+.custom-box {
+    width: 80%;
+    margin: 0 auto;
+    /* توسيط */
+    border: 1px solid #ddd;
+    /* بوردر خفيف */
+    border-radius: 10px;
+    /* زوايا ناعمة */
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+    /* ظل خفيف */
+
+}
 
 
 
@@ -181,43 +191,3 @@ body {
 
 
 
-@media (min-width: 992px) and (max-width: 1320px) {
-
-    .row.g-4.mb-4.align-items-stretch {
-        display: grid;
-        margin-left: auto;
-        width: 80%;      
-        margin: 0 auto;  
-        grid-template-columns: repeat(4, 1fr);
-        justify-content: center !important;
-    }
-
-    .row.g-4.mb-4.align-items-stretch > div {
-        width: 100% !important;
-
-    }
-
-    /* الإيرادات */
-    .row.g-4.mb-4.align-items-stretch > div:nth-child(2) {
-        grid-column: span 2;
-        grid-row: 1;
-    }
-
-    /* متوسط الطلب */
-    .row.g-4.mb-4.align-items-stretch > div:nth-child(3) {
-        grid-column: span 2;
-        grid-row: 1;
-    }
-
-    /* إجمالي الطلبات */
-    .row.g-4.mb-4.align-items-stretch > div:nth-child(1) {
-        grid-column: span 2;
-        grid-row: 2;
-    }
-
-    /* الصندوق */
-    .row.g-4.mb-4.align-items-stretch > div:nth-child(4) {
-        grid-column: span 2;
-        grid-row: 2;
-    }
-}

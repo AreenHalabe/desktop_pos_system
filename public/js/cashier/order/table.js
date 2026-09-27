@@ -1560,18 +1560,7 @@ document.addEventListener("click", async function (e) {
 
         const table = getCurrentTable();
 
-        // let total = 0; 
-
-        // table.order.items.forEach(item =>{
-        //     total += item.quantity * item.price;
-        // });
-
-
-        
         const total = Number(table.order.total_price);
-
-        // const currentPaid = calculatePaidAmount(table.order.items);
-
 
         const currentPaid = Number((Number(table.order.cash_paid) + Number(table.order.card_paid)).toFixed(2));
 

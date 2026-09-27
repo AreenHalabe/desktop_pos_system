@@ -1248,7 +1248,6 @@ header.addEventListener("header:ready", () => {
 
 
 document.addEventListener("DOMContentLoaded", async function () {
-    document.getElementById('employeeName').textContent = 'كاشير';
     displaySpinner();
     const hasOpeningSession = await checkSession();
     if (hasOpeningSession) {

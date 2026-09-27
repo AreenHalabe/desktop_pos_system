@@ -1,8 +1,8 @@
 import { showAuthExpired, showError, hiddeError, setActiveNavLink, showPrintLoader, hidePrintLoader, bootboxError } from "../../../component/bootbox.js";
-import { url, urlServer } from "../../../api/urlEndPoint.js";
+import { urlServer } from "../../../api/urlEndPoint.js";
 import { getAuthToken, removeAuthToken } from "../../../component/auth.js";
 import { handelOrderDatabeforPrinting } from "../../../component/invoices.js";
-import { bootboxLoginAsAdmin, closeSideBar, SwitchToAdmin } from "../Switch-user-functionality.js";
+import { closeSideBar } from "../Switch-user-functionality.js";
 import { formatDateOnly, formatTimeOnly, utcToPalestine } from "../../admin/report/shared-functionality.js";
 
 const header = document.querySelector("site-header");
@@ -68,7 +68,6 @@ header.addEventListener("header:ready", () => {
 });
 
 document.addEventListener('DOMContentLoaded', async function () {
-
     const hasOpenSession = await checkSession();
     if (hasOpenSession) {
         await getAllCompletedDeletedDailyOrders();
@@ -150,18 +149,15 @@ document.addEventListener("click", async function (e) {
         order.date = formatDateOnly(utcToPalestine(order.created_at));
 
         try {
-           await handelOrderDatabeforPrinting(order);
+            await handelOrderDatabeforPrinting(order, 'cashier_printer');
         } catch (e) {
+            hidePrintLoader();
             bootboxError(e.message);
-        }finally{
+        } finally {
             hidePrintLoader();
         }
     }
 
-    else if (e.target.closest('.switch-admin-btn')) {
-        const input = document.getElementById('adminPassword');
-        await SwitchToAdmin(url, input.value);
-    }
 
 });
 
@@ -239,7 +235,7 @@ function renderOrdersTable() {
     if (allOrders.length === 0) {
         tableBody.innerHTML = `
             <tr>
-                <td colspan="7" class="empty-state">
+                <td colspan="8" class="empty-state">
                     <i class="fas fa-inbox"></i>
                     <p>لا توجد طلبات لعرضها</p>
                 </td>
@@ -252,17 +248,12 @@ function renderOrdersTable() {
     const end = start + itemsPerPage;
     const pageOrders = allOrders.slice(start, end);
 
-
     tableBody.innerHTML = '';
-
-
-
-    const firstIsCanceled = pageOrders[0]?.status === 'ملغي';
 
 
     pageOrders.forEach((order) => {
         const statusClass = order.status === 'مكتمل' ? 'status-completed' :
-            order.status === 'معدل' ? 'status-pending' : 'status-cancelled';
+            order.status === 'مدفوع جزئي' ? 'status-pending' : 'status-cancelled';
 
         const paymentClass = order.payment_method === 'كاش' ? 'status-completed' :
             order.payment_method === 'بطاقة' ? 'bg-info text-white' : 'status-pending'
@@ -270,19 +261,47 @@ function renderOrdersTable() {
 
         const row = `
             <tr>
-                <td data-label = 'رقم الطلب'>${order.invoice_num}</td>
-               
-                <td data-label = 'طريقة الدفع' class="payment-cell">
+                <td data-label = 'رقم الطلب'>
+                    ${order.invoice_num
+                        ? order.invoice_num.split('-')[1]
+                        : '<span class="text-muted">—</span>'
+                    }
+                </td>
                 
-                    <span class='status-badge ${paymentClass}' >  ${order.payment_method}</span>
+               
+                <td data-label="طريقة الدفع" class="payment-cell">
+                    ${
+                        (Number(order.cash_paid) > 0 && Number(order.card_paid) > 0) || order.status === 'مدفوع جزئي'
+
+                        ? `
+                            <span class="status-badge bg-success text-white fw-bold d-inline-block mb-1"
+                                style="font-size: 13px; padding: 4px 8px;">
+                                كاش: ${Number(order.cash_paid)} ₪
+                            </span>
+
+                            <br>
+
+                            <span class="status-badge bg-primary text-white fw-bold d-inline-block"
+                                style="font-size: 13px; padding: 4px 8px;">
+                                بطاقة: ${Number(order.card_paid)} ₪
+                            </span>
+                        `
+
+                        : `
+                            <span class="status-badge ${paymentClass}">
+                                ${order.payment_method}
+                            </span>
+                        `
+                    }
                 </td>
 
 
                 <td data-label = 'التاريخ' class='nowrap-cell'>${renderOrderType(order)}</td>
                 <td data-label = 'الوقت' class='nowrap-cell'>${formatTimeOnly(utcToPalestine(order.created_at))}</td>
-                <td data-label = 'المبلغ' class='nowrap-cell'>${order.total_price} ₪</td>
+                <td data-label = 'المبلغ' class='nowrap-cell fw-bold'>${Number(order.total_price)} ₪</td>
                 <td data-label = 'الحالة'><span class="status-badge ${statusClass}">${order.status}</span></td>
-
+                
+                
                 <td data-label = 'الإجراءات' class='content-action-btn'>
                     <div class='content-action-btn-group'>
                         ${getOrderActions(order)}
@@ -326,23 +345,23 @@ function getOrderActions(order) {
 }
 
 function renderOrderType(order) {
-  if(order.type === "سفري") {
-    return `
+    if (order.type === "سفري") {
+        return `
       <span class="badge text-secondary border border-secondary bg-transparent px-3 py-2">
       <i class="fa-solid fa-box"></i>
       سفري
     </span>
     `;
-  }
+    }
 
-  if(order.type === "طاولة") {
-    return `
+    if (order.type === "طاولة") {
+        return `
        <span class="badge text-primary border border-primary bg-transparent px-3 py-2">
             <i class="bi bi-person-seat me-1"></i>
             طاولة - ${order.table_num}
         </span>
     `;
-  }
+    }
 
 }
 
@@ -463,7 +482,6 @@ async function deleteOrder(id, cancel_reason) {
             body: JSON.stringify({
                 cancel_reason: cancel_reason
             }),
-            credentials: 'include',
         });
         const data = await res.json();
         if (res.status === 200) {
@@ -573,6 +591,7 @@ function viewOrder(orderId) {
         itemsHtml += `
             <tr>
                 <td>${displayName}</td>
+                <td class='text-danger'>${item.discount_item} ₪</td>
                 <td>${item.quantity}</td>
                 <td>${item.price} ₪</td>
                 <td>${item.quantity * item.price} ₪</td>
@@ -582,33 +601,35 @@ function viewOrder(orderId) {
 
     itemsHtml += `
         <tr>
-            <td colspan="3" class="text-end pe-3">
+            <td colspan="4" class="text-end pe-3">
                 <strong>المجموع</strong>
             </td>
             <td>
-                <strong>${order.total_price + order.discount} ₪</strong>
+               <strong>${Number(order.total_price) + Number(order.discount)} ₪</strong>
             </td>
         </tr>
 
         <tr>
-            <td colspan="3" class="text-end pe-3 text-danger">
+            <td colspan="4" class="text-end pe-3 text-danger">
                 <strong>الخصم</strong>
             </td>
+
             <td class="text-danger">
-                <strong>${order.discount} ₪</strong>
+                <strong>
+                    - ${Number(order.discount)} ₪
+                </strong>
             </td>
         </tr>
 
         <tr class="table-success">
-            <td colspan="3" class="text-end pe-3">
+            <td colspan="4" class="text-end pe-3">
                 <strong>الإجمالي</strong>
             </td>
             <td>
-                <strong>${order.total_price} ₪</strong>
+                <strong>${Number(order.total_price)} ₪</strong>
             </td>
         </tr>
     `;
-
     // تحديث محتوى المودل
     document.getElementById('modalOrderId').textContent = order.invoice_num;
     document.getElementById('modaltime').textContent = formatTimeOnly(utcToPalestine(order.created_at));
@@ -753,9 +774,23 @@ function tooglePaymentMethod(orderId) {
 
 }
 
-function closeModale(){
+function closeModale() {
     const modalEl = document.getElementById('orderDetailsModal');
     const modal = bootstrap.Modal.getInstance(modalEl);
 
     modal.hide();
+}
+function formatPalestineTime(utcTime) {
+    if (!utcTime) return 'غير محدد';
+    const [hours, minutes, seconds] = utcTime.split(":").map(Number);
+
+    const date = new Date();
+    date.setUTCHours(hours, minutes, seconds || 0, 0);
+
+    return new Intl.DateTimeFormat("en-US", {
+        timeZone: "Asia/Gaza",
+        hour: "numeric",
+        minute: "2-digit",
+        hour12: true
+    }).format(date).toLowerCase();
 }

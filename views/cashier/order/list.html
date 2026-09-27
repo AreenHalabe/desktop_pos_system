@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Halabi_services</title>
+    <title>Halabi_Technology.ps</title>
 
     <!-- Bootstrap CSS -->
     <link href="../../../wroot/assets/bootstrap/css/bootstrap.rtl.min.css" rel="stylesheet">
@@ -23,7 +23,7 @@
     
 
     <div class="container-fluid">
-        <div class="mt-3">
+        <div class="d-flex mt-3">
             <site-header></site-header>
         </div>
         
@@ -117,20 +117,23 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body">
-                    <!-- معلومات الطلب -->
-                    <div class="row mb-2">
-                        <div class="col-md-6">
-                            <p><strong>رقم الطلب : </strong> <span id="modalOrderId"></span></p>
+
+                    <div
+                        class="d-flex justify-content-around align-items-center p-2 mb-3 border rounded shadow-sm custom-box bg-light">
+
+                        <div class="mt-2">
+                            <p><strong>رقم الفاتورة : </strong> <span id="modalOrderId"></span></p>
                             <p><strong>الوقت : </strong> <span id="modaltime" dir="ltr"></span></p>
                             
                         </div>
-                        <div class="col-md-6">
+                        <div>
                             <p><strong>الدفع : </strong> <span id="modalPayment"></span></p>
                             <p><strong>التاريخ : </strong> <span id="modalDate"></span></p>
                             <p class="d-none"><strong>نوع الطلب : </strong> <span id="modalOrderType"></span></p>
                         </div>
+
                     </div>
-                    
+
                     <!-- أسباب الإلغاء -->
                     <div class="alert alert-warning mb-4 hidden">
                         <strong>سبب الإلغاء : </strong> <span id="modalCancelReason"></span>
@@ -143,9 +146,10 @@
                     </h6>
                     <div class="table-responsive">
                         <table class="table table-sm table-bordered">
-                            <thead class="table-light">
+                            <thead class="table-dark">
                                 <tr>
-                                    <th>الإسم</th>
+                                    <th>الصنف</th>
+                                    <th>خصم الصنف</th>
                                     <th>الكمية</th>
                                     <th>سعر الوحدة</th>
                                     <th>المجموع</th>

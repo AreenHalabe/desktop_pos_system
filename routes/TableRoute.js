@@ -1,5 +1,5 @@
 import  express  from "express";
-import { addNewTable, deleteTable, destroyTables, getAllTable, LoadOrdersAccordingTables, moveOrder } from "../controllers/TableController.js";
+import { addNewTable, deleteTable, destroyTables, getAllTable, LoadOrdersAccordingTables, moveOrder, mergeTable } from "../controllers/TableController.js";
 
 export const TableRoute = express.Router();
 
@@ -31,5 +31,10 @@ TableRoute.get('/table/orders' , (req , res) => {
 
 TableRoute.put('/table/move' , (req , res)=>{
         moveOrder(req , res);
+    }
+);
+
+TableRoute.put('/table/merge' , (req , res)=>{
+        mergeTable(req , res);
     }
 );

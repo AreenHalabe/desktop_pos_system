@@ -186,6 +186,7 @@ async function loadTransaction() {
       disableModalBtn(data.has_open_session);
 
       if (data.has_open_session) {
+        console.log(data);
         sessionId = data.session_id;
         cashSummery = data.cash_summery;
         transactionsData = data.transactions;

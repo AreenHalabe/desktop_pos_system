@@ -344,10 +344,333 @@ export const LoadOrdersAccordingTables = async (req, res) => {
 }
 
 
+export const mergeTable = async (req, res) => {
+    const transaction = new sql.Transaction(pool);
+    let transactionStarted = false;
+    try {
+        const token = req.headers.authorization;
+        if (!token) {
+            throw new SystemError("إنتهت صلاحية الجلسة , الرجاء تسجيل الدخول مرة أخرى", 401);
+        }
+        await checkToken(token);
+
+        const body = req.body;
+
+        const currentTable  = body.current;
+        const targetTable   = body.target;
+
+        const { currentOrder, targetOrder } = await getOrdersForBothTables(currentTable, targetTable);
+
+        if (!currentOrder) {
+            throw new SystemError("لا يوجد طلب على الطاولة الحالية", 400);
+        }
+
+        if (!targetOrder) {
+            throw new SystemError("لا يوجد طلب على الطاولة المراد الدمج معها", 400);
+        }
+
+       const { currentItems, targetItems } = await getOrderItemsForBothOrder(currentOrder.order_id, targetOrder.order_id);
+
+        
+        await transaction.begin();
+        transactionStarted = true;
+
+
+        await moverOrderItems(currentItems, targetItems, targetOrder.order_id, transaction);
+        
+        await updateTotalPrice(currentOrder.order_id, targetOrder.order_id, transaction);
+        
+        await mergeOrderPayments(targetOrder.order_id, currentOrder.order_id, transaction);
+        
+        await deleteOrder(currentOrder.order_id, transaction);
+        
+        
+        await transaction.commit();
+
+        return res.status(200).json({
+            message : 'تم دمج الطاولات بنجاح' 
+        });
+
+    } catch (e) {
+        if (transactionStarted) {
+            try {
+                await transaction.rollback();
+            } catch (e) {
+                console.log(e.message);
+            }
+        }
+        return res.status(e.status || 500).json({
+            success: false,
+            message: e.message || "حدث خطأ غير معروف",
+        });
+
+    }
+}
 
 
 
+async function getOrdersForBothTables(currentTable, targetTable) {
 
+    const result = await pool.request()
+        .input('currentTable', sql.Int, currentTable)
+        .input('targetTable', sql.Int, targetTable)
+        .query(`
+            SELECT
+                order_id,
+                table_id
+            FROM table_order
+            WHERE table_id IN (@currentTable, @targetTable)
+        `);
+
+    const rows = result.recordset;
+
+    let currentOrder;
+    let targetOrder;
+
+    for (const row of rows) {
+
+        if (Number(row.table_id) === Number(currentTable)) {
+            currentOrder = row;
+
+        } else if (Number(row.table_id) === Number(targetTable)) {
+            targetOrder = row;
+        }
+    }
+
+    return {
+        currentOrder,
+        targetOrder
+    };
+}
+
+async function getOrderItemsForBothOrder(currentOrderId, targetOrderId) {
+
+    const result = await pool.request()
+        .input('current_order_id', sql.Int, currentOrderId)
+        .input('target_order_id', sql.Int, targetOrderId)
+        .query(`
+            SELECT
+                id,
+                order_id,
+                item_id,
+                quantity,
+                size_name,
+                paid_quantity,
+                discount_item
+            FROM order_items
+            WHERE order_id IN (@current_order_id, @target_order_id)
+        `);
+
+    const items = result.recordset;
+
+    const currentItems = [];
+    const targetItems = [];
+
+    for (const item of items) {
+
+        if (Number(item.order_id) === Number(currentOrderId)) {
+            currentItems.push(item);
+
+        } else if (Number(item.order_id) === Number(targetOrderId)) {
+            targetItems.push(item);
+        }
+    }
+
+    return {
+        currentItems,
+        targetItems
+    };
+}
+
+
+async function moverOrderItems(currentItems, targetItems, targetOrderId, transaction) {
+    const updates = [];
+    const itemsToMove = [];
+
+    for (const currentItem of currentItems) {
+
+        const targetItem = targetItems.find(
+            item =>
+                Number(item.item_id) === Number(currentItem.item_id) &&
+                item.size_name === currentItem.size_name
+        );
+
+        if (targetItem) {
+            updates.push({
+                id: targetItem.id,
+                quantity: Number(currentItem.quantity),
+                paid_quantity: Number(currentItem.paid_quantity),
+                discount_item: Number(currentItem.discount_item)
+            });
+        } else {
+            itemsToMove.push(currentItem.id);
+        }
+    }
+    await updateMergedOrderItems(updates, transaction);
+    await moveOrderItems(itemsToMove, targetOrderId, transaction);
+}
+async function updateMergedOrderItems(updates, transaction) {
+
+    if (updates.length === 0) {
+        return;
+    }
+
+    const quantityCases = updates
+        .map((_, index) => `
+            WHEN id = @id${index} 
+            THEN quantity + @quantity${index}
+        `)
+        .join(" ");
+
+    const paidQuantityCases = updates
+        .map((_, index) => `
+            WHEN id = @id${index} 
+            THEN paid_quantity + @paid_quantity${index}
+        `)
+        .join(" ");
+
+    const discountCases = updates
+        .map((_, index) => `
+            WHEN id = @id${index} 
+            THEN discount_item + @discount_item${index}
+        `)
+        .join(" ");
+
+    const ids = updates
+        .map((_, index) => `@id${index}`)
+        .join(", ");
+
+
+    const request = transaction.request();
+
+    updates.forEach((update, index) => {
+
+        request.input(`id${index}`, sql.Int, update.id);
+
+        request.input(
+            `quantity${index}`,
+            sql.Int,
+            update.quantity
+        );
+
+        request.input(
+            `paid_quantity${index}`,
+            sql.Int,
+            update.paid_quantity
+        );
+
+        request.input(
+            `discount_item${index}`,
+            sql.Int,
+            update.discount_item
+        );
+    });
+
+
+    await request.query(`
+        UPDATE order_items
+        SET
+            quantity = CASE
+                ${quantityCases}
+                ELSE quantity
+            END,
+
+            paid_quantity = CASE
+                ${paidQuantityCases}
+                ELSE paid_quantity
+            END,
+
+            discount_item = CASE
+                ${discountCases}
+                ELSE discount_item
+            END
+
+        WHERE id IN (${ids})
+    `);
+}
+async function moveOrderItems(itemsToMove, targetOrderId, transaction) {
+
+    if (itemsToMove.length === 0) {
+        return;
+    }
+
+    const request = transaction.request();
+
+    request.input('target_order_id', sql.Int, targetOrderId);
+
+    const placeholders = itemsToMove
+        .map((_, index) => {
+            request.input(`item_id${index}`, sql.Int, itemsToMove[index]);
+            return `@item_id${index}`;
+        })
+        .join(", ");
+
+    await request.query(`
+        UPDATE order_items
+        SET order_id = @target_order_id
+        WHERE id IN (${placeholders})
+    `);
+}
+
+async function updateTotalPrice(currentOrderId, targetOrderId, transaction) {
+
+    const request = transaction.request();
+
+    request.input('current_order_id', sql.Int, currentOrderId);
+    request.input('target_order_id', sql.Int, targetOrderId);
+
+    await request.query(`
+        UPDATE target
+        SET
+            target.total_price =
+                COALESCE(target.total_price, 0) + COALESCE(currentOrder.total_price, 0),
+
+            target.discount =
+                COALESCE(target.discount, 0) + COALESCE(currentOrder.discount, 0),
+
+            target.cash_paid =
+                COALESCE(target.cash_paid, 0) + COALESCE(currentOrder.cash_paid, 0),
+
+            target.card_paid =
+                COALESCE(target.card_paid, 0) + COALESCE(currentOrder.card_paid, 0),
+
+            target.status = CASE
+                WHEN target.status = N'مدفوع جزئي'
+                    OR currentOrder.status = N'مدفوع جزئي'
+                THEN N'مدفوع جزئي'
+
+                ELSE N'غير مدفوع'
+            END
+
+        FROM orders AS target
+        INNER JOIN orders AS currentOrder
+            ON currentOrder.id = @current_order_id
+
+        WHERE target.id = @target_order_id
+    `);
+}
+
+
+async function mergeOrderPayments(orderId_merged, deleted_orderID, transaction) {
+    await transaction.request()
+        .input('orderId_merged', sql.Int, orderId_merged)
+        .input('deleted_orderID', sql.Int, deleted_orderID)
+        .query(`
+            UPDATE order_payments
+            SET order_id = @orderId_merged
+            WHERE order_id = @deleted_orderID
+        `);
+}
+
+async function deleteOrder(orderId, transaction) {
+
+    await transaction.request()
+        .input('order_id', sql.Int, orderId)
+        .query(`
+            DELETE FROM orders
+            WHERE id = @order_id
+        `);
+}
 
 function buildTreeOfOrdersAccordingTables(rows) {
     if (!rows || rows.length === 0) {

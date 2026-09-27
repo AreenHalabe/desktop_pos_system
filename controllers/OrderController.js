@@ -153,6 +153,8 @@ export const deleteOrder = async (req, res) => {
             `);
         ;
 
+        await deleteOrderPayment(orderId, transaction);
+        
         if (order.type === 'طاولة') {
             await closeTable(orderId, transaction);
         }
@@ -1027,6 +1029,16 @@ async function updateOrderItemsQuantities(orderId, oldItems, newItems, transacti
     }
 
     return totalPrice;
+}
+
+async function deleteOrderPayment(orderId, transaction) {
+
+    await transaction.request()
+        .input('order_id', sql.Int, orderId)
+        .query(`
+            DELETE FROM order_payments
+            WHERE order_id = @order_id
+        `);
 }
 
 function validatePaidQuantities(oldItems, newItems) {

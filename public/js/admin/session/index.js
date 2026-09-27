@@ -321,21 +321,49 @@ function renderOrdersTable() {
     
 
     pageOrders.forEach(order => {
-        let badgeClass = '';
-        if (order.status === 'مكتمل') badgeClass = 'badge-completed';
-        else if (order.status === 'ملغي') badgeClass = 'badge-cancelled';
-        else badgeClass = 'badge-cancelled';
+        let badgeClass =order.status === 'مكتمل' ? 'status-completed' :
+            order.status === 'مدفوع جزئي' ? 'status-pending' : 'status-cancelled';
 
         const paymentClass = order.payment_method === 'كاش' ? 'status-completed' :
             order.payment_method === 'بطاقة' ? 'bg-info text-white' : 'status-pending';
         
         html += `
             <tr>
-                <td>${order.invoice_num}</td>
-                <td><span class='status-badge ${paymentClass}'>  ${order.payment_method}</span></td>
+                <td>
+                    ${order.invoice_num
+                        ? order.invoice_num.split('-')[1]
+                        : '<span class="text-muted">—</span>'
+                    }
+                </td>
                 <td class='nowrap-cell'>${renderOrderType(order)}</td>
                 <td class='nowrap-cell'>${formatTimeOnly(utcToPalestine(order.created_at))}</td>
-                <td class='nowrap-cell'>${order.total_price} ₪</td>
+
+                <td class="payment-cell">
+                    ${
+                        (Number(order.cash_paid) > 0 && Number(order.card_paid) > 0) || order.status === 'مدفوع جزئي'
+                        ? `
+                            <span class="status-badge bg-success text-white fw-bold d-inline-block mb-1"
+                                style="font-size: 13px; padding: 4px 8px;">
+                                كاش: ${Number(order.cash_paid)} ₪
+                            </span>
+
+                            <br>
+
+                            <span class="status-badge bg-primary text-white fw-bold d-inline-block"
+                                style="font-size: 13px; padding: 4px 8px;">
+                                بطاقة: ${Number(order.card_paid)} ₪
+                            </span>
+                        `
+
+                        : `
+                            <span class="status-badge ${paymentClass}">
+                                ${order.payment_method}
+                            </span>
+                        `
+                    }
+                </td>
+
+                <td class='nowrap-cell fw-bold'>${order.total_price} ₪</td>
                 <td><span class="badge ${badgeClass}">${order.status}</span></td>
                 <td>
                     <button class="btn btn-sm btn-light viewOrder" data-id="${order.id}">
@@ -566,6 +594,7 @@ function viewOrder(orderId) {
         itemsHtml += `
             <tr>
                 <td>${displayName}</td>
+                <td class='text-danger'>${item.discount_item} ₪</td>
                 <td>${item.quantity}</td>
                 <td>${item.price} ₪</td>
                 <td>${item.quantity * item.price} ₪</td>
@@ -575,7 +604,7 @@ function viewOrder(orderId) {
 
     itemsHtml += `
         <tr>
-            <td colspan="3" class="text-end pe-3">
+            <td colspan="4" class="text-end pe-3">
                 <strong>المجموع</strong>
             </td>
             <td>
@@ -584,16 +613,16 @@ function viewOrder(orderId) {
         </tr>
 
         <tr>
-            <td colspan="3" class="text-end pe-3 text-danger">
+            <td colspan="4" class="text-end pe-3 text-danger">
                 <strong>الخصم</strong>
             </td>
             <td class="text-danger">
-                <strong>${order.discount} ₪</strong>
+                <strong> - ${order.discount} ₪</strong>
             </td>
         </tr>
 
         <tr class="table-success">
-            <td colspan="3" class="text-end pe-3">
+            <td colspan="4" class="text-end pe-3">
                 <strong>الإجمالي</strong>
             </td>
             <td>
@@ -603,14 +632,13 @@ function viewOrder(orderId) {
     `;
     
     // تحديث محتوى المودل
-    document.getElementById('modalOrderId').textContent = order.invoice_num;
+    document.getElementById('modalOrderId').textContent = order.invoice_num || '—';
     document.getElementById('modaltime').textContent = formatTimeOnly(utcToPalestine(order.created_at));
     document.getElementById('modalDate').textContent = formatDateOnly(utcToPalestine(order.created_at));
     document.getElementById('modalPayment').textContent = order.payment_method;
     document.getElementById('modalOrderType').textContent = order.type ;
     document.getElementById('modalItemsTable').innerHTML = itemsHtml;
     // تخزين id داخل زر الطباعة
-    document.querySelector('.printBtn').dataset.orderId = orderId;
 
     if(order.cancel_reason != null){
         displayCanselResonAndTimeUpdated();
