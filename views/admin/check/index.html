@@ -1,0 +1,742 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>الشيكات</title>
+
+
+
+    <!-- Bootstrap 5.3.2 RTL -->
+    <link href="../../../wroot/assets/bootstrap/css/bootstrap.rtl.min.css" rel="stylesheet">
+    <link href="../../../wroot/assets/bootstrap/css/bootstrap-icons.css" rel="stylesheet">
+
+    <!-- FontAwesome -->
+    <link href="../../../wroot/assets/fontawesome/css/all.min.css" rel="stylesheet">
+
+    <link rel="stylesheet" href="../../../public/style/admin/header.css" />
+    <link rel="stylesheet" href="../../../public/style/admin/check/index.css" />
+</head>
+
+<body>
+
+    <site-header></site-header>
+
+
+    <div class="container-fluid py-3">
+
+        <!-- Page Header -->
+        <div class="card shadow-sm border-0 mb-4">
+            <div class="card-body">
+
+                <div class="d-flex align-items-center justify-content-between">
+
+                    <div>
+                        <h3 class="fw-bold">
+                            <i class="fa-solid fa-money-check-dollar text-primary me-2"></i>
+                            الشيكات
+                        </h3>
+
+                        <div class="text-secondary small">
+                            إدارة ومتابعة الشيكات
+                        </div>
+                    </div>
+
+                    <button type="button" class="btn btn-outline-primary" id="addCheckBtn" data-bs-toggle="modal"
+                        data-bs-target="#addCheckModal">
+                        <i class="fa-solid fa-plus me-1"></i>
+                        <i class="fa-solid fa-money-check-dollar me-1"></i>
+                        إضافة شيك
+                    </button>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+
+        <!-- Filters Card -->
+        <div class="card shadow-sm border-0 mb-4">
+
+            <div class="card-body">
+
+                <!-- Period -->
+                <div class="mb-4">
+
+                    <label class="form-label fw-semibold">
+                        <i class="fa-regular fa-calendar me-1"></i>
+                        الفترة
+                    </label>
+
+                    <div class="d-flex flex-wrap gap-2">
+
+                        <button type="button" class="btn btn-primary check-period-btn active" data-period="recently_added">
+                            المدخلة مؤخراً
+                        </button>
+
+                        <button type="button" class="btn btn-outline-primary check-period-btn" data-period="this_month">
+                            هذا الشهر
+                        </button>
+
+                        <button type="button" class="btn btn-outline-primary check-period-btn" data-period="next_month">
+                            الشهر القادم
+                        </button>
+
+                        <button type="button" class="btn btn-outline-primary check-period-btn"
+                            data-period="previous_month">
+                            الشهر السابق
+                        </button>
+
+                        <button type="button" class="btn btn-outline-secondary check-period-btn" data-period="custom">
+                            <i class="fa-solid fa-calendar-days"></i>
+                            تحديد فترة
+                        </button>
+
+                    </div>
+
+                </div>
+
+
+                <!-- Custom Date Range -->
+                <div id="customDateContainer" class="row g-3 mb-4 d-none">
+
+                    <div class="col-12 col-md-5 col-lg-4">
+
+                        <label for="fromDate" class="form-label">
+                            من تاريخ
+                        </label>
+
+                        <input type="date" id="fromDate" class="form-control">
+
+                    </div>
+
+                    <div class="col-12 col-md-5 col-lg-4">
+
+                        <label for="toDate" class="form-label">
+                            إلى تاريخ
+                        </label>
+
+                        <input type="date" id="toDate" class="form-control">
+
+                    </div>
+
+                    <div class="col-12 col-md-2 d-flex align-items-end">
+
+                        <button type="button" class="btn btn-primary w-100" id="applyDateBtn">
+                            <i class="fa-solid fa-filter"></i>
+                            تطبيق
+                        </button>
+
+                    </div>
+
+                </div>
+
+
+                <hr>
+
+                <div class="row g-3 d-none" id="filterDev">
+                    <!-- Select Filters -->
+                    <div class="row g-3 mt-1">
+
+                        <!-- Supplier -->
+                        <div class="col-12 col-md-6 col-lg-3">
+
+                            <label for="supplierFilter" class="form-label fw-semibold">
+                                المورد
+                            </label>
+
+                            <select id="supplierFilter" class="form-select">
+                                <option value="all">الكل</option>
+
+                                <option value="loading" disabled>
+                                    جاري تحميل الموردين...
+                                </option>
+
+
+                            </select>
+
+                        </div>
+
+
+                        <!-- Status -->
+                        <div class="col-12 col-md-6 col-lg-3">
+
+                            <label for="statusFilter" class="form-label fw-semibold">
+                                الحالة
+                            </label>
+
+                            <select id="statusFilter" class="form-select">
+                                <option value="all">جميع الحالات</option>
+                                <option value="pending">جاري</option>
+                                <option value="paid">مكتمل</option>
+                            </select>
+
+                        </div>
+
+
+                        <!-- Type -->
+                        <div class="col-12 col-md-6 col-lg-3">
+
+                            <label for="typeFilter" class="form-label fw-semibold">
+                                النوع
+                            </label>
+
+                            <select id="typeFilter" class="form-select">
+                                <option value="all">الكل</option>
+                                <option value="incoming">وارد</option>
+                                <option value="outgoing">صادر</option>
+                            </select>
+
+                        </div>
+
+
+                        <!-- Account -->
+                        <div class="col-12 col-md-6 col-lg-3">
+
+                            <label for="accountFilter" class="form-label fw-semibold">
+                                الحساب
+                            </label>
+
+                            <select id="accountFilter" class="form-select">
+                                <option value="all">جميع الحسابات</option>
+
+                                <option value="حسني">حسني</option>
+                                <option value="وسيم">وسيم</option>
+                                <option value="أُخرى">أُخرى</option>
+
+                                <!-- Accounts will be loaded here -->
+
+                            </select>
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- Check Number Search -->
+                    <div class="row mt-3">
+
+                        <div class="col-12 col-lg-6">
+
+                            <label for="checkNumberSearch" class="form-label fw-semibold">
+                                رقم الشيك
+                            </label>
+
+                            <div class="input-group">
+
+                                <span class="input-group-text">
+                                    <i class="fa-solid fa-magnifying-glass"></i>
+                                </span>
+
+                                <input type="text" id="checkNumberSearch" class="form-control"
+                                    placeholder="ابحث برقم الشيك...">
+
+                                <button type="button" class="btn btn-primary check-search-btn">
+                                    بحث
+                                </button>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- Reset -->
+                    <div class="d-flex justify-content-end mt-3 gap-4">
+
+                        <button type="button" class="btn btn-outline-secondary" id="resetChecksFiltersBtn">
+                            <i class="fa-solid fa-filter-circle-xmark"></i>
+                            إعادة ضبط الفلاتر
+                        </button>
+
+                        <button class="btn btn-outline-success print-invoice-btn">
+                            <i class="fas fa-print"></i> طباعة الشكات المعروضة
+                        </button>
+                    </div>
+                </div>
+
+
+
+
+            </div>
+
+        </div>
+
+
+        <!-- Summary -->
+        <div class="row g-3 mb-4">
+
+
+
+            <!-- إجمالي الشيكات حسب العملة -->
+            <div class="col-12 col-lg-6">
+                <div class="card border-0 shadow-sm summary-card h-100">
+
+                    <div class="card-body d-flex flex-column justify-content-center">
+
+                        <div class="text-secondary small mb-3">
+                            إجمالي الشيكات المتبقية التي يجب تسديدها خلال الفترة ـ حسب العملة
+                        </div>
+
+                        <div class="row g-2">
+
+                            <!-- دولار -->
+                            <div class="col-6 col-md-3">
+                                <div class="border rounded-3 p-2 text-center h-100">
+                                    <div class="text-secondary small">
+                                        دولار
+                                    </div>
+
+                                    <div class="fw-bold fs-5">
+                                        <span id="totalUSD">0.00</span>
+                                        <small class="text-muted">$</small>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- دينار -->
+                            <div class="col-6 col-md-3">
+                                <div class="border rounded-3 p-2 text-center h-100">
+                                    <div class="text-secondary small">
+                                        دينار
+                                    </div>
+
+                                    <div class="fw-bold fs-5">
+                                        <span id="totalJOD">0.00</span>
+                                        <small class="text-muted">د.أ</small>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- شيكل -->
+                            <div class="col-6 col-md-3">
+                                <div class="border rounded-3 p-2 text-center h-100">
+                                    <div class="text-secondary small">
+                                        شيكل
+                                    </div>
+
+                                    <div class="fw-bold fs-5">
+                                        <span id="totalILS">0.00</span>
+                                        <small class="text-muted">₪</small>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- يورو -->
+                            <div class="col-6 col-md-3">
+                                <div class="border rounded-3 p-2 text-center h-100">
+                                    <div class="text-secondary small">
+                                        يورو
+                                    </div>
+
+                                    <div class="fw-bold fs-5">
+                                        <span id="totalEUR">0.00</span>
+                                        <small class="text-muted">€</small>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+            </div>
+
+
+            <div class="col-12 col-sm-6 col-lg-3">
+                <div class="card border-0 shadow-sm summary-card h-100">
+
+                    <div class="card-body d-flex flex-column justify-content-center">
+
+                        <div class="text-secondary small mb-3">
+                            شيكات جارية
+                        </div>
+
+                        <div class="d-flex justify-content-between align-items-center w-100">
+
+                            <div>
+                                <div id="pendingChecks" class="fs-4 fw-bold">
+                                    0
+                                </div>
+                            </div>
+
+                            <div class="summary-icon bg-warning-subtle text-warning">
+                                <i class="fa-solid fa-clock"></i>
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+            </div>
+
+
+            <div class="col-12 col-sm-6 col-lg-3">
+                <div class="card border-0 shadow-sm summary-card h-100">
+
+                    <div class="card-body d-flex flex-column justify-content-center">
+
+                        <div class="text-secondary small mb-3">
+                            شيكات مكتملة
+                        </div>
+
+                        <div class="d-flex justify-content-between align-items-center w-100">
+
+                            <div>
+                                <div id="paidChecks" class="fs-4 fw-bold">
+                                    0
+                                </div>
+                            </div>
+
+                            <div class="summary-icon bg-info-subtle text-info">
+                                <i class="fa-solid fa-circle-check"></i>
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+            </div>
+
+
+        </div>
+
+
+        <!-- Checks Table -->
+        <div class="card border-0 shadow-sm">
+
+            <div class="card-body p-0">
+
+                <div class="table-responsive">
+
+                    <table class="table table-hover align-middle mb-0">
+
+                        <thead class="table-light">
+
+                            <tr>
+
+                                <th>رقم الشيك</th>
+                                <th>البنك</th>
+                                <th>المستفيد</th>
+                                <th>المبلغ</th>
+                                <th>العملة</th>
+                                <th>تاريخ الاستحقاق</th>
+                                <th>النوع</th>
+                                <th>الحالة</th>
+                                <th>الحساب</th>
+                                <th>ملاحظة</th>
+                                <th>الإجراء</th>
+                                <th>العمليات</th>
+                            </tr>
+
+                        </thead>
+
+                        <tbody id="checksTableBody">
+
+                            <!-- Data will be loaded here -->
+
+                            <tr id="checksLoadingRow">
+
+                                <td colspan="13" class="text-center py-5">
+
+                                    <div class="spinner-border text-primary" role="status"></div>
+
+                                    <div class="text-secondary mt-2">
+                                        جاري تحميل الشيكات...
+                                    </div>
+
+                                </td>
+
+                            </tr>
+
+                        </tbody>
+
+                    </table>
+
+                </div>
+
+            </div>
+
+
+            <!-- Empty State -->
+            <div id="checksEmptyState" class="text-center py-5 d-none">
+
+                <i class="fa-solid fa-money-check-dollar fa-3x text-secondary mb-3"></i>
+
+                <h5>
+                    لا توجد شيكات
+                </h5>
+
+                <p class="text-secondary mb-0">
+                    لا توجد شيكات مطابقة للفلاتر المحددة
+                </p>
+
+            </div>
+
+
+            <!-- Pagination -->
+            <div id="checksPaginationContainer" class="card-footer bg-white border-0">
+
+                <div class="d-flex align-items-center justify-content-between flex-wrap gap-3">
+
+                    <div id="paginationInfo" class="text-secondary small">
+                        عرض 1 من 1
+                    </div>
+
+                    <nav>
+
+                        <ul id="checksPagination" class="pagination mb-0">
+                        </ul>
+
+                    </nav>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <div class="modal fade" id="addCheckModal" tabindex="-1" aria-hidden="true" data-bs-backdrop="static">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content">
+
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title">
+                        <i class="fas fa-money-bill-transfer ms-2"></i>
+                        إضافة شيك
+                    </h5>
+
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
+                        aria-label="إغلاق"></button>
+                </div>
+
+                <div class="modal-body">
+
+                    <!-- الرصيد المستحق -->
+
+
+                    <form id="checkForm">
+
+                        <!-- بيانات الشيك -->
+                        <div id="checkFields" class="check-fields">
+
+                            <div class="check-fields-title">
+                                <i class="fas fa-money-check-dollar ms-2"></i>
+                                بيانات الشيك
+                            </div>
+
+                            <!-- الحساب المُصدر -->
+                            <div class="row">
+
+                                <div class="col-md-6 mb-3">
+                                    <label for="accountName" class="form-label">
+                                        اسم الحساب المُصدر للشيك *
+                                    </label>
+
+                                    <select id="accountName" name="accountName" class="form-select" required>
+                                        <option value="" selected disabled>
+                                            إختر الحساب
+                                        </option>
+
+                                        <option value="حسني">
+                                            حسني
+                                        </option>
+
+                                        <option value="وسيم">
+                                            وسيم
+                                        </option>
+
+                                        <option value="أخرى">
+                                            أٌخرى
+                                        </option>
+                                    </select>
+                                </div>
+
+
+                                <div class="col-md-6 mb-3">
+                                    <label for="payeeName" class="form-label">
+                                        اسم المستفيد *
+                                    </label>
+
+                                    <input type="text" id="payeeName" name="payeeName" class="form-control"
+                                        placeholder="أدخل اسم المستفيد" required>
+                                </div>
+                            </div>
+
+                            <hr>
+
+                            <div class="row">
+
+                                <!-- رقم الشيك -->
+                                <div class="col-md-6 mb-3">
+                                    <label for="checkNumber" class="form-label">
+                                        رقم الشيك *
+                                    </label>
+
+                                    <input type="text" id="checkNumber" name="checkNumber" class="form-control"
+                                        placeholder="أدخل رقم الشيك" inputmode="numeric" required>
+                                </div>
+
+                                <!-- اسم البنك -->
+                                <div class="col-md-6 mb-3">
+                                    <label for="bankName" class="form-label">
+                                        اسم البنك *
+                                    </label>
+
+                                    <input type="text" id="bankName" name="bankName" class="form-control"
+                                        placeholder="أدخل اسم البنك" required>
+                                </div>
+
+
+                                <!-- قيمة الشيك -->
+                                <div class="col-md-6 mb-3">
+                                    <label for="amount" class="form-label">
+                                        قيمة الشيك *
+                                    </label>
+
+                                    <input type="number" id="amount" name="amount" class="form-control"
+                                        placeholder="أدخل قيمة الشيك" min="0.01" step="0.01" required>
+                                </div>
+
+                                <div class="col-md-6 mb-3">
+                                    <label for="currency" class="form-label">
+                                        عملة الشيك *
+                                    </label>
+
+                                    <select id="currency" name="currency" class="form-select" required>
+                                        <option value="" selected disabled>
+                                            اختر العملة
+                                        </option>
+
+                                        <option value="ILS">شيكل</option>
+                                        <option value="USD">دولار</option>
+                                        <option value="JOD">دينار</option>
+                                        <option value="EUR">يورو</option>
+                                    </select>
+                                </div>
+
+                                <!-- تاريخ الاستحقاق -->
+                                <div class="col-md-6 mb-3">
+                                    <label for="dueDate" class="form-label">
+                                        تاريخ الاستحقاق *
+                                    </label>
+
+                                    <input type="date" id="dueDate" name="dueDate" class="form-control" required>
+                                </div>
+
+                                <!-- نوع الشيك -->
+                                <div class="col-md-6 mb-3">
+                                    <label for="type" class="form-label">
+                                        نوع الشيك *
+                                    </label>
+
+                                    <select id="type" name="type" class="form-select" required>
+                                        <option value="" selected disabled>
+                                            اختر نوع الشيك
+                                        </option>
+
+                                        <option value="incoming">
+                                            وارد
+                                        </option>
+
+                                        <option value="outgoing">
+                                            صادر
+                                        </option>
+                                    </select>
+                                </div>
+
+                                <!-- حالة الشيك -->
+                                <div class="col-md-6 mb-3">
+                                    <label for="status" class="form-label">
+                                        حالة الشيك *
+                                    </label>
+
+                                    <select id="status" name="status" class="form-select" required>
+                                        <option value="" selected disabled>
+                                            اختر حالة الشيك
+                                        </option>
+
+                                        <option value="pending">
+                                            جاري
+                                        </option>
+
+                                        <option value="paid">
+                                            مكتمل
+                                        </option>
+                                    </select>
+                                </div>
+
+                                <!-- الملاحظات -->
+                                <div class="col-12 mb-3">
+                                    <label for="notes" class="form-label">
+                                        ملاحظات
+                                    </label>
+
+                                    <textarea id="notes" name="notes" class="form-control" rows="3"
+                                        placeholder="أدخل أي ملاحظات عن الشيك..."></textarea>
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                    </form>
+
+                </div>
+
+                <div class="modal-footer">
+
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        إلغاء
+                    </button>
+
+
+                    <button type="submit" form="checkForm" class="add-check-btn" id="confirmAddBtn">
+                        <i class="fas fa-money-check-dollar ms-1"></i>
+                        إضافة الشيك
+                    </button>
+
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+
+    <div id="overlay_loader"
+        class="position-fixed top-0 start-0 w-100 h-100 d-flex justify-content-center align-items-center d-none"
+        style="background: rgba(0,0,0,0.55); backdrop-filter: blur(3px); z-index: 9999;">
+
+        <div class="text-center text-white">
+
+            <div class="spinner-border mb-3" role="status" style="width: 4rem; height: 4rem;">
+            </div>
+
+            <p class="fs-5 mb-0">
+                جاري معالجة الطلب، يرجى الانتظار...
+            </p>
+
+        </div>
+    </div>
+
+
+    <script src="../../../wroot/assets/bootstrap/js/bootstrap.bundle.min.js"></script>
+
+    <script src="../../../wroot/assets/jquery/jquery-3.7.1.min.js"></script>
+    <script src="../../../wroot/assets/bootbox/bootbox.min.js"></script>
+
+    <script type="module" src="../../../public/js/admin/check/index.js"></script>
+
+</body>
+
+</html>

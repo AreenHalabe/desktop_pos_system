@@ -3,7 +3,7 @@ import { checkToken, SystemError } from "../shared/functionality.js";
 import { z } from "zod";
 
 
-export const createOrder = async (req, res) => {
+export const createCheck = async (req, res) => {
 
     try {
         const token = req.headers.authorization;
@@ -25,7 +25,6 @@ export const createOrder = async (req, res) => {
             payeeName,
             amount,
             currency,
-            issueDate,
             dueDate,
             type,
             status,
@@ -40,7 +39,6 @@ export const createOrder = async (req, res) => {
             .input('payee_name', sql.NVarChar(150), payeeName)
             .input('amount', sql.Decimal(18, 2), amount)
             .input('currency', sql.NVarChar(3), currency)
-            .input('issue_date', sql.Date, issueDate)
             .input('due_date', sql.Date, dueDate)
             .input('type', sql.NVarChar(10), type)
             .input('status', sql.NVarChar(10), status)
@@ -53,7 +51,6 @@ export const createOrder = async (req, res) => {
                     payee_name,
                     amount,
                     currency,
-                    issue_date,
                     due_date,
                     type,
                     status,
@@ -66,7 +63,6 @@ export const createOrder = async (req, res) => {
                     @payee_name,
                     @amount,
                     @currency,
-                    @issue_date,
                     @due_date,
                     @type,
                     @status,
@@ -151,6 +147,52 @@ export const getChecksHandler = async (req, res) => {
     } 
 }
 
+export const getChecksRecentAdded = async (req, res) => {
+    try {
+        const token = req.headers.authorization;
+        if (!token) {
+            throw new SystemError("إنتهت صلاحية الجلسة , الرجاء تسجيل الدخول مرة أخرى", 401);
+        }
+
+        await checkToken(token);
+
+        const result = await pool
+        .request()
+        .query(`
+            SELECT
+                id,
+                check_number,
+                bank_name,
+                payee_name,
+                amount,
+                currency,
+
+                CONVERT(VARCHAR(10), due_date, 23) AS due_date,
+
+                type,
+                status,
+                account_name,
+                notes
+            FROM checks
+            WHERE created_at = CAST(GETDATE() AS DATE)
+            ORDER BY id DESC
+        `);
+
+        return res.status(200).json({
+            success: true,
+            checks : result.recordset
+        });
+
+    } catch (e) {
+
+        return res.status(e.status || 500).json({
+            success: false,
+            message: e.message || "حدث خطأ غير معروف",
+        });
+
+    } 
+}
+
 
 
 export const updateCheckStatus = async (req, res) => {
@@ -164,7 +206,7 @@ export const updateCheckStatus = async (req, res) => {
 
         const checkId = Number(req.query.id);
         
-        const { status } = req.body;
+        const body = req.body;
         
         if (!checkId) {
             throw new SystemError(
@@ -172,35 +214,53 @@ export const updateCheckStatus = async (req, res) => {
                 400
             );
         }
-        
-        if (!status) {
-            throw new SystemError(
-                "حالة الشيك مطلوبة",
-                400
-            );
-        }
-        
-        if (!["pending", "paid", "cancelled"].includes(status)) {
-            throw new SystemError(
-                "حالة الشيك غير صحيحة",
-                400
-            );
-        }
-        
+
+        const parsedData = checkSchema.parse(body);
+
+        const {
+            checkNumber,
+            bankName,
+            payeeName,
+            amount,
+            currency,
+            dueDate,
+            type,
+            status,
+            notes,
+            accountName
+        } = parsedData;
+
         await pool
             .request()
-            .input('status', sql.NVarChar(10), status)
             .input('check_id', sql.Int, checkId)
+            .input('check_number', sql.NVarChar(50), checkNumber)
+            .input('bank_name', sql.NVarChar(100), bankName)
+            .input('payee_name', sql.NVarChar(150), payeeName)
+            .input('amount', sql.Decimal(18, 2), amount)
+            .input('currency', sql.NVarChar(3), currency)
+            .input('due_date', sql.Date, dueDate)
+            .input('type', sql.NVarChar(10), type)
+            .input('status', sql.NVarChar(10), status)
+            .input('notes', sql.NVarChar(sql.MAX), notes || null)
+            .input('account_name', sql.NVarChar(100), accountName)
             .query(`
                 UPDATE checks
-                SET status = @status
+                SET
+                    check_number = @check_number,
+                    bank_name = @bank_name,
+                    payee_name = @payee_name,
+                    amount = @amount,
+                    currency = @currency,
+                    due_date = @due_date,
+                    type = @type,
+                    status = @status,
+                    notes = @notes,
+                    account_name = @account_name
                 WHERE id = @check_id
-            `)
-        ;
-        
+            `);
         return res.status(200).json({
             success: true,
-            message: "تم تعديل حالة الشيك بنجاح"
+            message: "تم تعديل بيانات الشيك"
         });
 
     } catch (e) {
@@ -283,7 +343,7 @@ async function getChecks({
     checkNumber,
     page = 1,
     limit = 50
-}, pool, sql) {
+}, pool) {
 
     const conditions = [];
 
@@ -394,7 +454,6 @@ async function getChecks({
                 amount,
                 currency,
 
-                CONVERT(VARCHAR(10), issue_date, 23) AS issue_date,
                 CONVERT(VARCHAR(10), due_date, 23) AS due_date,
 
                 type,
@@ -654,15 +713,6 @@ const checkSchema = z.object({
         errorMap: () => ({ message: "يجب اختيار عملة الشيك" })
     }),
 
-
-    issueDate: z.string()
-        .trim()
-        .min(1, "تاريخ إصدار الشيك مطلوب")
-        .regex(
-            /^\d{4}-\d{2}-\d{2}$/,
-            "تاريخ إصدار الشيك غير صحيح"
-        ),
-
     dueDate: z.string()
         .trim()
         .min(1, "تاريخ استحقاق الشيك مطلوب")
@@ -688,10 +738,4 @@ const checkSchema = z.object({
         .regex(/^[\u0600-\u06FFa-zA-Z\s]+$/, "اسم الحساب يجب أن يحتوي على أحرف فقط")
         .min(2, "اسم الحساب مطلوب")
 
-}).refine(
-    data => data.dueDate >= data.issueDate,
-    {
-        message: "تاريخ الاستحقاق يجب أن يكون بعد أو يساوي تاريخ الإصدار",
-        path: ["dueDate"]
-    }
-);
+});
