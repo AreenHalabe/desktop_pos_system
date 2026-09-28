@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Halabi_Services.ps</title>
+    <title>Halabi_Technology.ps</title>
 
     <!-- Bootstrap 5.3.2 RTL -->
     <link href="../../../wroot/assets/bootstrap/css/bootstrap.rtl.min.css" rel="stylesheet">
@@ -28,8 +28,8 @@
                 <div class="admin-container">
                     <!-- Header -->
                     <div class="admin-header border-bottom">
-                        <h3><i class="fas fa-users me-3 text-primary"></i>حسابات الزبائين</h3>
-                        <p>إدارة حسابات الزبائن</p>
+                        <h3><i class="fas fa-users me-3 text-primary"></i>حسابات الموردين</h3>
+                        <p>إدارة حسابات الموردين</p>
                     </div>
 
                     <!-- Controls -->
@@ -44,7 +44,8 @@
                                 </h6>
                             </div>
 
-                            <button class="btn add-btn ms-auto btn-outline-primary" data-bs-toggle="modal" data-bs-target="#createAccountModal
+                            <button class="btn add-btn ms-auto btn-outline-primary" data-bs-toggle="modal"
+                                data-bs-target="#createAccountModal
                             ">
                                 <i class="fas fa-plus me-2"></i>
                                 حساب جديد
@@ -116,6 +117,15 @@
                                 placeholder="أدخل رقم الجوال" inputmode="numeric">
                         </div>
 
+                        <div class="mb-3">
+                            <label for="supplierNote" class="form-label fw-semibold text-primary">
+                                ملاحظة
+                            </label>
+
+                            <textarea class="form-control border-primary" id="supplierNote" name="note" rows="3"
+                                placeholder="أدخل ملاحظة على المورد"></textarea>
+                        </div>
+
                         <!-- رسالة الخطأ -->
                         <div class="card border-0 table-card p-1 error-card d-none">
                             <h6 class="text-danger error-box">
@@ -128,7 +138,8 @@
                         </div>
 
                         <!-- زر إنشاء الحساب -->
-                        <button type="submit" class="btn btn-primary d-block mx-auto supplier-account-btn" id="createAccountBtn">
+                        <button type="submit" class="btn btn-primary d-block mx-auto supplier-account-btn"
+                            id="createAccountBtn">
                             <i class="fas fa-plus me-2"></i>
                             إنشاء الحساب
                         </button>
@@ -178,6 +189,15 @@
                                 placeholder="أدخل رقم الجوال" inputmode="numeric">
                         </div>
 
+                        <div class="mb-3">
+                            <label for="supplierNote" class="form-label fw-semibold text-primary">
+                                ملاحظة
+                            </label>
+
+                            <textarea class="form-control border-primary" id="editSupplierNote" name="note" rows="3"
+                                placeholder="أدخل ملاحظة على المورد"></textarea>
+                        </div>
+
                         <!-- رسالة الخطأ -->
                         <div class="card border-0 table-card p-1 error-card d-none">
                             <h6 class="text-danger error-box">
@@ -189,7 +209,7 @@
                             </h6>
                         </div>
 
-                     
+
                         <button type="submit" class="btn btn-success supplier-account-btn d-block mx-auto">
                             <i class="fas fa-save me-2"></i>
                             حفظ

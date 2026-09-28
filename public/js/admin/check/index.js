@@ -18,7 +18,7 @@ const addCheckModal = document.getElementById('addCheckModal');
 const confirmAddBtn = document.getElementById('confirmAddBtn');
 
 const filterDev     = document.getElementById('filterDev');
-
+const customDateContainer = document.getElementById("customDateContainer");
 const currencyNames = {
     ILS: "شيكل",
     USD: "دولار",
@@ -108,9 +108,11 @@ document.addEventListener("click", async function (e) {
 
         if(period === 'recently_added'){
             renderChecks(recentlyAdded, false);
+            renderSummary(null);
             renderPagination(null);
 
             filterDev.classList.add('d-none');
+            customDateContainer.classList.add("d-none");
             return;
         }
 
@@ -123,8 +125,7 @@ document.addEventListener("click", async function (e) {
         periodBtn.classList.add("btn-primary", "active");
 
 
-        const customDateContainer =
-            document.getElementById("customDateContainer");
+        
 
 
         if (period === "custom") {
@@ -487,13 +488,13 @@ async function loadChecksRecentlyAdded(needToRenderTable = true) {
         let data = await res.json();
 
         if (res.status === 200) {
-            // renderSummary(data.summary);
 
 
             recentlyAdded = data.checks;
 
             if(needToRenderTable){
                 renderChecks(recentlyAdded, false);
+                renderSummary(null);
                 renderPagination(null);
             }
 
@@ -996,23 +997,23 @@ function renderPagination(pagination) {
 function renderSummary(summary) {
 
     document.getElementById("totalUSD").textContent =
-        summary.totalUSD;
+        summary?.totalUSD ?? 0;
 
     document.getElementById("totalJOD").textContent =
-        summary.totalJOD;
+        summary?.totalJOD ?? 0;
 
     document.getElementById("totalILS").textContent =
-        summary.totalILS;
+        summary?.totalILS ?? 0;
 
     document.getElementById("totalEUR").textContent =
-        summary.totalEUR;
+        summary?.totalEUR ?? 0;
 
 
     document.getElementById("pendingChecks").textContent =
-        summary.pendingChecks;
+        summary?.pendingChecks ?? 0;
 
     document.getElementById("paidChecks").textContent =
-        summary.paidChecks;
+        summary?.paidChecks ?? 0;
 }
 
 
@@ -1369,6 +1370,16 @@ function openCheckStatusModal(check) {
             }
         }
     });
+
+    // 👇 حطها هون
+    dialog.on("hide.bs.modal", function () {
+
+        if (this.contains(document.activeElement)) {
+            document.activeElement.blur();
+        }
+
+    });
+
 
     dialog.find(".modal-header")
     .addClass("bg-success text-white");

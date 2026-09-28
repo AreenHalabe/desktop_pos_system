@@ -19,7 +19,7 @@ body {
 
 .page-container {
     width: 100%;
-    max-width: 1100px;
+    max-width: 1500px;
     margin: 0 auto;
     padding: 0px 12px;
 }
@@ -31,7 +31,7 @@ body {
 
 .invoice-card {
     width: 100%;
-    max-width: 1100px;
+    max-width: 1500px;
     margin: 0 auto;
 }
 
@@ -52,7 +52,7 @@ body {
 }
 
 .invoice-table {
-    min-width: 700px;
+    min-width: 1000px;
     vertical-align: middle;
 }
 
@@ -159,6 +159,33 @@ body {
     top: 30%;
     pointer-events: none;
 }
+
+.success-icon {
+    animation: successPulse 2s infinite;
+}
+
+.avatar {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: #0d6efd;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 22px;
+            font-weight: bold;
+        }
+
+        .customer-info h4 {
+            margin: 0;
+            font-size: 25px;
+            font-weight: 700;
+        }
+
+        .customer-info small {
+            color: #6c757d;
+        }
 
 @media (max-width: 576px) {
     .page-container {

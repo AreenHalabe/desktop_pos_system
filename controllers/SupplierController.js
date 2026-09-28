@@ -68,30 +68,66 @@ export const getAllSuppliers = async (req, res) => {
     }
 }
 
-export const getSupplierPayment = async (req , res) =>{
+export const getSupplierPayment = async (req, res) => {
     const supplierId = Number(req.query.supplier_id);
+
+    const page = Math.max(Number(req.query.page) || 1, 1);
+    const limit = 30;
+    const offset = (page - 1) * limit;
+
     try {
         const token = req.headers.authorization;
+
         if (!token) {
-            throw new SystemError("إنتهت صلاحية الجلسة , الرجاء تسجيل الدخول مرة أخرى", 401);
+            throw new SystemError(
+                "إنتهت صلاحية الجلسة , الرجاء تسجيل الدخول مرة أخرى",
+                401
+            );
         }
+
         await checkToken(token);
 
-        const result = await pool.request()
-            .input('supplier_id', sql.Int, supplierId)
-            .query(`
-                SELECT * 
-                FROM supplier_payments
-                WHERE supplier_id = @supplier_id
-                ORDER BY id DESC
-            `)
-        ;
+        const [paymentsResult, countResult] = await Promise.all([
+            pool
+                .request()
+                .input('supplier_id', sql.Int, supplierId)
+                .input('offset', sql.Int, offset)
+                .input('limit', sql.Int, limit)
+                .query(`
+                    SELECT *
+                    FROM supplier_payments
+                    WHERE supplier_id = @supplier_id
+                    ORDER BY id DESC
+                    OFFSET @offset ROWS
+                    FETCH NEXT @limit ROWS ONLY
+                `),
 
-        const payments = result.recordset;
-        
+            pool
+                .request()
+                .input('supplier_id', sql.Int, supplierId)
+                .query(`
+                    SELECT COUNT(*) AS total
+                    FROM supplier_payments
+                    WHERE supplier_id = @supplier_id
+                `)
+        ]);
+
+        const payments = paymentsResult.recordset;
+        const total = Number(countResult.recordset[0].total);
+
+        const totalPages = Math.ceil(total / limit);
+
         return res.status(200).json({
             success: true,
-            payments: payments,
+            payments,
+            pagination: {
+                page,
+                limit,
+                total,
+                totalPages,
+                hasNextPage: page < totalPages,
+                hasPreviousPage: page > 1
+            }
         });
 
     } catch (e) {
@@ -100,7 +136,7 @@ export const getSupplierPayment = async (req , res) =>{
             message: e.message || "حدث خطأ غير معروف",
         });
     }
-}
+};
 
 export const getSuppliersItems = async(req , res) =>{
     const supplierId = Number(req.query.supplier_id);
@@ -124,7 +160,7 @@ export const getSuppliersItems = async(req , res) =>{
 
         return res.status(200).json({
             success: true,
-            susupplier_items: items,
+            supplier_items: items,
         });
 
     } catch (e) {
@@ -275,45 +311,97 @@ export const deleteSupplier = async (req, res) => {
 }
 
 
-export const getInvoicesForSupplier = async (req , res) =>{
+
+
+export const getInvoicesForSupplier = async (req, res) => {
+
     const supplierId = Number(req.query.supplier_id);
-    try{
+
+    const page = Math.max(Number(req.query.page) || 1, 1);
+    const limit = 30;
+    const offset = (page - 1) * limit;
+
+    try {
+
         const token = req.headers.authorization;
+
         if (!token) {
-            throw new SystemError("إنتهت صلاحية الجلسة , الرجاء تسجيل الدخول مرة أخرى", 401);
+            throw new SystemError(
+                "إنتهت صلاحية الجلسة , الرجاء تسجيل الدخول مرة أخرى",
+                401
+            );
         }
+
         await checkToken(token);
 
-        const result = await pool.request()
-            .input('supplier_id', sql.Int, supplierId)
-            .query(`
-                SELECT 
-                    si.*,
-                    it.name,
-                    it.quantity,
-                    it.cost_price
-                FROM supplier_invoices si
-                INNER JOIN invoice_items it
-                    ON it.invoice_id = si.id
-                WHERE si.supplier_id = @supplier_id
-                ORDER BY si.id DESC
-            `)
-        ;
+        const [invoicesResult, countResult] = await Promise.all([
 
-        const invoicesData = mapInvoicesDate(result.recordset);
+            pool
+                .request()
+                .input('supplier_id', sql.Int, supplierId)
+                .input('offset', sql.Int, offset)
+                .input('limit', sql.Int, limit)
+                .query(`
+                    SELECT
+                        si.*,
+                        it.name,
+                        it.unit,
+                        it.quantity,
+                        it.cost_price
+                    FROM (
+                        SELECT *
+                        FROM supplier_invoices
+                        WHERE supplier_id = @supplier_id
+                        ORDER BY id DESC
+                        OFFSET @offset ROWS
+                        FETCH NEXT @limit ROWS ONLY
+                    ) si
+                    INNER JOIN invoice_items it
+                        ON it.invoice_id = si.id
+                    ORDER BY si.id DESC
+                `),
+
+            pool
+                .request()
+                .input('supplier_id', sql.Int, supplierId)
+                .query(`
+                    SELECT COUNT(*) AS total
+                    FROM supplier_invoices
+                    WHERE supplier_id = @supplier_id
+                `)
+
+        ]);
+
+        const rows = invoicesResult.recordset;
+        const countRows = countResult.recordset;
+
+        const invoicesData = mapInvoicesDate(rows);
+
+        const total = Number(countRows[0].total);
+        const totalPages = Math.ceil(total / limit);
 
         return res.status(200).json({
             success: true,
-            invoices : invoicesData
+            invoices: invoicesData,
+            pagination: {
+                page,
+                limit,
+                total,
+                totalPages,
+                hasNextPage: page < totalPages,
+                hasPreviousPage: page > 1
+            }
         });
 
-    }catch(e){
+    } catch (e) {
+
         return res.status(e.status || 500).json({
             success: false,
             message: e.message || "حدث خطأ غير معروف",
         });
+
     }
-}
+};
 
 
 

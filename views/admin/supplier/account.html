@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <title>Halabi_Services.ps</title>
+    <title>Halabi_Technology.ps</title>
 
     <!-- Bootstrap 5.3.2 RTL -->
     <link href="../../../wroot/assets/bootstrap/css/bootstrap.rtl.min.css" rel="stylesheet">
@@ -30,7 +30,7 @@
                 <h4 id="customerName"></h4>
 
                 <small>
-                    <span>رقم الزبون : </span>
+                    <span>رقم المورد : </span>
                     <span id="supplierPhone">1024#</span>
                 </small>
 
@@ -38,6 +38,10 @@
 
             <div>
                 <span class="badge bg-danger fs-6" id="customerStatus">دائن</span>
+                <button class="btn add-btn ms-auto btn-outline-primary invoice-page-btn" >
+                    <i class="fas fa-plus ms-2"></i>
+                     فاتورة جديدة
+                </button>
             </div>
 
         </div>
@@ -105,6 +109,7 @@
                         </tr>
                     </tbody>
                 </table>
+                <div id="paymentPagination"></div>
             </div>
 
 
@@ -157,8 +162,9 @@
                             <thead class="table-dark">
                                 <tr>
                                     <th>الصنف</th>
+                                    <th>الوحدة</th>
                                     <th>الكمية</th>
-                                    <th>سعر الشراء</th>
+                                    <th>سعر الوحدة</th>
                                     <th>المجموع</th>
                                 </tr>
                             </thead>
@@ -170,7 +176,11 @@
 
                 </div>
                 <div class="modal-footer">
+                    
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إغلاق</button>
+                    <button type="button" class="btn btn-primary printBtn">
+                        <i class="fas fa-print"></i> طباعة الفاتورة
+                    </button>
                 </div>
             </div>
         </div>

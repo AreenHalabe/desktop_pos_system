@@ -19,8 +19,6 @@ const createAccountForm = document.getElementById('createSupplierForm');
 const editAccountForm = document.getElementById('editSupplierForm');
 
 
-const editCustomerName = document.getElementById('editCustomerName');
-const editAccountBtn = document.getElementById('editAccountBtn');
 
 const overlayLoader = document.getElementById('overlay_loader');
 const tableBody = document.getElementById('customersTableBody');
@@ -92,6 +90,7 @@ createAccountForm.addEventListener("submit", async (e) => {
     const data = {
         name: formData.get("name"),
         phone: formData.get('phone') || null,
+        note: formData.get("note") || null,
     }
     // console.log(data);
     await createSupplierAccount(data);
@@ -105,13 +104,11 @@ editAccountForm.addEventListener("submit", async (e) => {
     const data = {
         name: formData.get("name"),
         phone: formData.get('phone') || null,
+        note: formData.get("note") || null,
     }
     // console.log(data);
 
     await editSupplierAccount(supplierId, data);
-
-
-  
 });
 
 
@@ -120,12 +117,8 @@ editAccountForm.addEventListener("submit", async (e) => {
 document.addEventListener("click", async function (e) {
     if (e.target.closest('.view-btn')) {
         const btn = e.target.closest('.view-btn');
-
         const id = btn.dataset.id;
-        
-
         window.location.href = `./account.html?supplier_id=${id}`;
-
     }
 });
 
@@ -155,11 +148,11 @@ editAccountModal.addEventListener('show.bs.modal', async function (event) {
     supplierId = Number(button.getAttribute('data-id'));
     const supplierName = button.getAttribute('data-name');
     const supplierPhone = button.getAttribute('data-phone');
-
+    const supplierNote  = button.getAttribute('data-note');
     document.getElementById('editSupplierName').value = supplierName;
     document.getElementById('editSupplierPhone').value = supplierPhone || '';
 
-    
+    document.getElementById('editSupplierNote').value  = supplierNote || '';
 
 });
 
@@ -240,7 +233,7 @@ function renderSuppliersTable() {
                     </div>
                 </td>
                 <td class="text-center">${supplier?.phone || 'غير متوفر'}</td>
-                <td class="text-center fw-bold">${supplier.balance}</td>
+                <td class="text-center fw-bold">${Number(supplier.balance)}</td>
                 <td>
                     ${supplier.balance > 0
                         ? `
@@ -286,6 +279,7 @@ function renderSuppliersTable() {
                             data-id   ="${supplier.id}"
                             data-name = '${supplier.name}'
                             data-phone = '${supplier?.phone || ''}'
+                            data-note = '${supplier?.note || ''}'
                             title="تعديل"
                         >
                             <i class="fas fa-pen-to-square"></i>

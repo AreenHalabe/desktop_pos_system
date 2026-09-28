@@ -74,8 +74,9 @@
 
                     <div class="d-flex flex-wrap gap-2">
 
-                        <button type="button" class="btn btn-primary check-period-btn active" data-period="recently_added">
-                            المدخلة مؤخراً
+                        <button type="button" class="btn btn-primary check-period-btn active"
+                            data-period="recently_added">
+                            المُدخلة مُؤخراً
                         </button>
 
                         <button type="button" class="btn btn-outline-primary check-period-btn" data-period="this_month">
@@ -100,41 +101,44 @@
 
                 </div>
 
-
-                <!-- Custom Date Range -->
                 <div id="customDateContainer" class="row g-3 mb-4 d-none">
 
-                    <div class="col-12 col-md-5 col-lg-4">
+                    <!-- توضيح -->
+                    <div class="col-12">
+                        <div class="alert alert-info py-2 mb-0">
+                            <i class="fa-solid fa-calendar-check me-1"></i>
+                            <strong>البحث حسب تاريخ الاستحقاق</strong>
+                            <span class="text-muted">
+                                — يعرض جميع الشيكات التي يكون تاريخ استحقاقها في الفترة المحددة، بما في ذلك تاريخ
+                                البداية والنهاية.
+                            </span>
+                        </div>
+                    </div>
 
-                        <label for="fromDate" class="form-label">
-                            من تاريخ
+                    <div class="col-12 col-md-5 col-lg-4">
+                        <label for="fromDate" class="form-label fw-semibold">
+                            تاريخ الاستحقاق من
                         </label>
 
                         <input type="date" id="fromDate" class="form-control">
-
                     </div>
 
                     <div class="col-12 col-md-5 col-lg-4">
-
-                        <label for="toDate" class="form-label">
-                            إلى تاريخ
+                        <label for="toDate" class="form-label fw-semibold">
+                            تاريخ الاستحقاق إلى
                         </label>
 
                         <input type="date" id="toDate" class="form-control">
-
                     </div>
 
                     <div class="col-12 col-md-2 d-flex align-items-end">
-
                         <button type="button" class="btn btn-primary w-100" id="applyDateBtn">
                             <i class="fa-solid fa-filter"></i>
                             تطبيق
                         </button>
-
                     </div>
 
                 </div>
-
 
                 <hr>
 
