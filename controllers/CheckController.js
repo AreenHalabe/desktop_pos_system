@@ -144,7 +144,7 @@ export const getChecksHandler = async (req, res) => {
             message: e.message || "حدث خطأ غير معروف",
         });
 
-    } 
+    }
 }
 
 export const getChecksRecentAdded = async (req, res) => {
@@ -157,30 +157,42 @@ export const getChecksRecentAdded = async (req, res) => {
         await checkToken(token);
 
         const result = await pool
-        .request()
-        .query(`
+            .request()
+            .query(`
             SELECT
-                id,
-                check_number,
-                bank_name,
-                payee_name,
-                amount,
-                currency,
+                ch.id,
+                ch.check_number,
+                ch.bank_name,
+                ch.payee_name,
+                ch.amount,
+                ch.currency,
 
-                CONVERT(VARCHAR(10), due_date, 23) AS due_date,
+                CONVERT(VARCHAR(10), ch.due_date, 23) AS due_date,
 
-                type,
-                status,
-                account_name,
-                notes
-            FROM checks
-            WHERE created_at = CAST(GETDATE() AS DATE)
-            ORDER BY id DESC
+                ch.type,
+                ch.status,
+                ch.account_name,
+                ch.notes,
+
+                CASE 
+                    WHEN EXISTS (
+                        SELECT 1
+                        FROM supplier_payments sp
+                        WHERE sp.check_id = ch.id
+                    )
+                    THEN 1
+                    ELSE 0
+                END AS is_for_invoice
+            FROM checks ch
+
+            WHERE ch.created_at >= DATEADD(DAY, -1, CAST(GETDATE() AS DATE))
+                AND ch.created_at < DATEADD(DAY, 1, CAST(GETDATE() AS DATE))
+            ORDER BY ch.id DESC
         `);
 
         return res.status(200).json({
             success: true,
-            checks : result.recordset
+            checks: result.recordset
         });
 
     } catch (e) {
@@ -190,7 +202,7 @@ export const getChecksRecentAdded = async (req, res) => {
             message: e.message || "حدث خطأ غير معروف",
         });
 
-    } 
+    }
 }
 
 
@@ -205,9 +217,9 @@ export const updateCheckStatus = async (req, res) => {
         await checkToken(token);
 
         const checkId = Number(req.query.id);
-        
+
         const body = req.body;
-        
+
         if (!checkId) {
             throw new SystemError(
                 "رقم الشيك مطلوب",
@@ -215,7 +227,19 @@ export const updateCheckStatus = async (req, res) => {
             );
         }
 
-        const parsedData = checkSchema.parse(body);
+        const supplierPaymentId = await getSupplierPaymentIdByCheckId(checkId);
+
+        const checkUpdateSchema = checkSchema.omit({
+            amount: true,
+            currency: true,
+            type: true,
+            payeeName: true
+        });
+
+        const parsedData = supplierPaymentId
+            ? checkUpdateSchema.parse(body)
+            : checkSchema.parse(body)
+        ;
 
         const {
             checkNumber,
@@ -230,20 +254,40 @@ export const updateCheckStatus = async (req, res) => {
             accountName
         } = parsedData;
 
-        await pool
+
+
+        const request = pool
             .request()
             .input('check_id', sql.Int, checkId)
             .input('check_number', sql.NVarChar(50), checkNumber)
             .input('bank_name', sql.NVarChar(100), bankName)
-            .input('payee_name', sql.NVarChar(150), payeeName)
-            .input('amount', sql.Decimal(18, 2), amount)
-            .input('currency', sql.NVarChar(3), currency)
             .input('due_date', sql.Date, dueDate)
-            .input('type', sql.NVarChar(10), type)
             .input('status', sql.NVarChar(10), status)
             .input('notes', sql.NVarChar(sql.MAX), notes || null)
-            .input('account_name', sql.NVarChar(100), accountName)
-            .query(`
+            .input('account_name', sql.NVarChar(100), accountName);
+
+
+        if (supplierPaymentId) {
+            
+            await request.query(`
+                UPDATE checks
+                SET
+                    check_number = @check_number,
+                    bank_name = @bank_name,
+                    due_date = @due_date,
+                    status = @status,
+                    notes = @notes,
+                    account_name = @account_name
+                WHERE id = @check_id
+            `);
+
+        } else {
+            request
+                .input('amount', sql.Decimal(18, 2), amount)
+                .input('currency', sql.NVarChar(3), currency)
+                .input('type', sql.NVarChar(10), type)
+                .input('payee_name', sql.NVarChar(150), payeeName);
+            await request.query(`
                 UPDATE checks
                 SET
                     check_number = @check_number,
@@ -258,6 +302,7 @@ export const updateCheckStatus = async (req, res) => {
                     account_name = @account_name
                 WHERE id = @check_id
             `);
+        }
         return res.status(200).json({
             success: true,
             message: "تم تعديل بيانات الشيك"
@@ -270,7 +315,7 @@ export const updateCheckStatus = async (req, res) => {
             message: e.message || "حدث خطأ غير معروف",
         });
 
-    } 
+    }
 }
 
 
@@ -279,25 +324,25 @@ export const deleteCheck = async (req, res) => {
 
     const transaction = new sql.Transaction(pool);
     let transactionStarted = false;
-    
+
     try {
         const token = req.headers.authorization;
         if (!token) {
             throw new SystemError("إنتهت صلاحية الجلسة , الرجاء تسجيل الدخول مرة أخرى", 401);
         }
         await checkToken(token);
-        
+
         const payment = await getPayment(checkId);
-        
+
         await transaction.begin();
         transactionStarted = true;
-        
-        
-        if(payment){
+
+
+        if (payment) {
             await restorePayment(payment.supplier_id, payment.amount, transaction);
             await updateBalanceForSupplier(payment.supplier_id, payment.amount, true, transaction);
         }
-        
+
         await transaction
             .request()
             .input('checkId', sql.Int, checkId)
@@ -305,20 +350,20 @@ export const deleteCheck = async (req, res) => {
                 DELETE FROM checks
                 WHERE id = @checkId
             `)
-        ;
-        
+            ;
+
         await transaction.commit();
 
-        
-        
-        
+
+
+
         return res.status(200).json({
             success: true,
             message: "تم تعديل حالة الشيك بنجاح"
         });
 
     } catch (e) {
-        if(transactionStarted) {
+        if (transactionStarted) {
             try {
                 await transaction.rollback();
             } catch (err) {
@@ -355,31 +400,31 @@ async function getChecks({
 
     // بناء شروط البحث
     if (from) {
-        conditions.push("due_date >= @from");
+        conditions.push("ch.due_date >= @from");
     }
 
     if (to) {
-        conditions.push("due_date <= @to");
+        conditions.push("ch.due_date <= @to");
     }
 
     if (supplier) {
-        conditions.push("payee_name = @supplier");
+        conditions.push("ch.payee_name = @supplier");
     }
 
     if (status) {
-        conditions.push("status = @status");
+        conditions.push("ch.status = @status");
     }
 
     if (type) {
-        conditions.push("type = @type");
+        conditions.push("ch.type = @type");
     }
 
     if (account) {
-        conditions.push("account_name = @account");
+        conditions.push("ch.account_name = @account");
     }
 
     if (checkNumber) {
-        conditions.push("check_number LIKE @checkNumber");
+        conditions.push("ch.check_number LIKE @checkNumber");
     }
 
     const whereClause = conditions.length
@@ -447,106 +492,115 @@ async function getChecks({
         // جلب الشيكات
         dataRequest.query(`
             SELECT
-                id,
-                check_number,
-                bank_name,
-                payee_name,
-                amount,
-                currency,
+                ch.id,
+                ch.check_number,
+                ch.bank_name,
+                ch.payee_name,
+                ch.amount,
+                ch.currency,
 
-                CONVERT(VARCHAR(10), due_date, 23) AS due_date,
+                CONVERT(VARCHAR(10), ch.due_date, 23) AS due_date,
 
-                type,
-                status,
-                account_name,
-                notes
+                ch.type,
+                ch.status,
+                ch.account_name,
+                ch.notes,
+                CASE 
+                    WHEN EXISTS (
+                        SELECT 1
+                        FROM supplier_payments sp
+                        WHERE sp.check_id = ch.id
+                    )
+                    THEN 1
+                    ELSE 0
+                END AS is_for_invoice
 
-            FROM checks
+            FROM checks ch
 
             ${whereClause}
 
-            ORDER BY due_date ASC
+            ORDER BY ch.due_date ASC
 
             OFFSET @offset ROWS
             FETCH NEXT @limit ROWS ONLY
         `),
 
         // Summary
-        summaryRequest.query(`
-            SELECT
-                COUNT(*) AS totalChecks,
+        summaryRequest.query(` 
+            SELECT 
+                COUNT(*) AS totalChecks, 
 
-                COALESCE(
-                    SUM(
-                        CASE
-                            WHEN currency = 'USD'
-                            AND status = 'pending'
-                            THEN amount
-                            ELSE 0
-                        END
-                    ),
-                    0
-                ) AS totalUSD,
+                COALESCE( 
+                    SUM( 
+                        CASE 
+                            WHEN ch.currency = 'USD'
+                            AND ch.status = 'pending'
+                            THEN ch.amount 
+                            ELSE 0 
+                        END 
+                    ), 
+                    0 
+                ) AS totalUSD, 
 
-                COALESCE(
-                    SUM(
-                        CASE
-                            WHEN currency = 'JOD'
-                            AND status = 'pending'
-                            THEN amount
-                            ELSE 0
-                        END
-                    ),
-                    0
-                ) AS totalJOD,
+                COALESCE( 
+                    SUM( 
+                        CASE 
+                            WHEN ch.currency = 'JOD'
+                            AND ch.status = 'pending'
+                            THEN ch.amount 
+                            ELSE 0 
+                        END 
+                    ), 
+                    0 
+                ) AS totalJOD, 
 
-                COALESCE(
-                    SUM(
-                        CASE
-                            WHEN currency = 'ILS'
-                            AND status = 'pending'
-                            THEN amount
-                            ELSE 0
-                        END
-                    ),
-                    0
-                ) AS totalILS,
+                COALESCE( 
+                    SUM( 
+                        CASE 
+                            WHEN ch.currency = 'ILS'
+                            AND ch.status = 'pending'
+                            THEN ch.amount 
+                            ELSE 0 
+                        END 
+                    ), 
+                    0 
+                ) AS totalILS, 
 
-                COALESCE(
-                    SUM(
-                        CASE
-                            WHEN currency = 'EUR'
-                            AND status = 'pending'
-                            THEN amount
-                            ELSE 0
-                        END
-                    ),
-                    0
-                ) AS totalEUR,
+                COALESCE( 
+                    SUM( 
+                        CASE 
+                            WHEN ch.currency = 'EUR'
+                            AND ch.status = 'pending'
+                            THEN ch.amount 
+                            ELSE 0 
+                        END 
+                    ), 
+                    0 
+                ) AS totalEUR, 
 
-                COALESCE(
-                    SUM(
-                        CASE
-                            WHEN status = 'pending'
-                            THEN 1
-                            ELSE 0
-                        END
-                    ),
-                    0
-                ) AS pendingChecks,
+                COALESCE( 
+                    SUM( 
+                        CASE 
+                            WHEN ch.status = 'pending'
+                            THEN 1 
+                            ELSE 0 
+                        END 
+                    ), 
+                    0 
+                ) AS pendingChecks, 
 
-                COALESCE(
-                    SUM(
-                        CASE
-                            WHEN status = 'paid'
-                            THEN 1
-                            ELSE 0
-                        END
-                    ),
-                    0
-                ) AS paidChecks
+                COALESCE( 
+                    SUM( 
+                        CASE 
+                            WHEN ch.status = 'paid'
+                            THEN 1 
+                            ELSE 0 
+                        END 
+                    ), 
+                    0 
+                ) AS paidChecks 
 
-            FROM checks
+            FROM checks ch
 
             ${whereClause}
         `)
@@ -676,6 +730,21 @@ async function updateBalanceForSupplier(supplierId, totalPrice, isAdd, transacti
                 END
             WHERE id = @supplierId
         `);
+}
+
+
+async function getSupplierPaymentIdByCheckId(checkId) {
+
+    const result = await pool
+        .request()
+        .input("check_id", sql.Int, checkId)
+        .query(`
+            SELECT TOP 1 id
+            FROM supplier_payments
+            WHERE check_id = @check_id
+        `);
+
+    return result.recordset[0]?.id ?? null;
 }
 
 const checkSchema = z.object({

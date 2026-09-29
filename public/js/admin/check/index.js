@@ -443,6 +443,7 @@ async function loadChecks() {
         if (res.status === 200) {
             renderSummary(data.summary);
             checks = data.data;
+
             renderChecks(checks);
             renderPagination(data.pagination);
 
@@ -491,7 +492,6 @@ async function loadChecksRecentlyAdded(needToRenderTable = true) {
 
 
             recentlyAdded = data.checks;
-
             if(needToRenderTable){
                 renderChecks(recentlyAdded, false);
                 renderSummary(null);
@@ -1037,7 +1037,7 @@ function allowActionBtn() {
 
 
 function openCheckStatusModal(check) {
-
+     const isForInvoice = Number(check.is_for_invoice) === 1;
     const checkForm = `
         <form id="checkEditForm">
 
@@ -1087,26 +1087,37 @@ function openCheckStatusModal(check) {
                         name="payeeName"
                         value="${check.payee_name ?? ""}"
                         required
+                        ${isForInvoice ? "disabled" : ""}
                     >
                 </div>
 
 
-                <!-- المبلغ -->
+                 <!-- تاريخ الاستحقاق -->
                 <div class="col-md-6">
                     <label class="form-label fw-bold">
-                        المبلغ
+                        تاريخ الاستحقاق
                     </label>
 
                     <input
-                        type="number"
+                        type="date"
                         class="form-control"
-                        name="amount"
-                        value="${check.amount ?? ""}"
-                        min="0"
-                        step="0.01"
+                        name="dueDate"
+                        value="${check.due_date ?? ""}"
                         required
                     >
                 </div>
+                ${
+                    isForInvoice
+                    ? `
+                        <div class="col-12">
+                            <div class="text-danger">
+                                <i class="fa-solid fa-circle-info me-1"></i>
+                                هذا الشيك مرتبط بفاتورة شراء للمورد، لذلك لا يمكن تعديل المبلغ أو العملة أو النوع.
+                            </div>
+                        </div>
+                    `
+                    : ""
+                }
 
 
                 <!-- العملة -->
@@ -1119,6 +1130,7 @@ function openCheckStatusModal(check) {
                         class="form-select"
                         name="currency"
                         required
+                        ${isForInvoice ? "disabled" : ""}
                     >
                         <option value="ILS"
                             ${check.currency === "ILS" ? "selected" : ""}>
@@ -1142,21 +1154,26 @@ function openCheckStatusModal(check) {
                     </select>
                 </div>
 
-
-                <!-- تاريخ الاستحقاق -->
+                <!-- المبلغ -->
                 <div class="col-md-6">
                     <label class="form-label fw-bold">
-                        تاريخ الاستحقاق
+                        المبلغ
                     </label>
 
                     <input
-                        type="date"
+                        type="number"
                         class="form-control"
-                        name="dueDate"
-                        value="${check.due_date ?? ""}"
+                        name="amount"
+                        value="${check.amount ?? ""}"
+                        min="0"
+                        step="0.5"
                         required
+                        ${isForInvoice ? "disabled" : ""}
                     >
                 </div>
+
+
+               
 
 
                 <!-- النوع -->
@@ -1169,6 +1186,7 @@ function openCheckStatusModal(check) {
                         class="form-select"
                         name="type"
                         required
+                        ${isForInvoice ? "disabled" : ""}
                     >
                         <option
                             value="outgoing"
@@ -1389,6 +1407,7 @@ function openCheckStatusModal(check) {
 
 async function updateCheckStatus(id, checkFormData, dialog) {
     overlayLoader.classList.remove('d-none');
+
     try {
 
         const response = await fetch(url + `/check/status?id=${id}`, {
