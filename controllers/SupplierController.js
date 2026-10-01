@@ -439,7 +439,8 @@ function mapInvoicesDate(invoicesData) {
         invoices.get(row.id).items.push({
             name: row.name,
             quantity: row.quantity,
-            cost_price: row.cost_price
+            cost_price: row.cost_price,
+            unit: row.unit
         });
     }
 
