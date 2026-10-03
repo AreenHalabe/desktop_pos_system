@@ -68,7 +68,7 @@ export const createTransaction = async(req , res) => {
             .request()
             .input("session_id", sql.Int, sessionId)
             .input("admin_id", sql.Int, adminId)
-            .input("amount", sql.Decimal(10, 2), parsedData.amount)
+            .input("amount", sql.Decimal(18, 2), parsedData.amount)
             .input("type", sql.NVarChar, parsedData.type)
             .input("note", sql.NVarChar, parsedData.note)
             .input("created_at", sql.DateTime2, currentTimeStamp)

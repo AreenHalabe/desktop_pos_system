@@ -393,10 +393,10 @@ async function createPayInvoice(supplierId, parsedData, totalPrice, date, transa
     const result = await transaction
         .request()
         .input('supplier_id', sql.Int, supplierId)
-        .input('total_price', sql.Decimal(12, 2), totalPrice)
-        .input('remaining', sql.Decimal(12, 2), totalPrice)
+        .input('total_price', sql.Decimal(18, 2), totalPrice)
+        .input('remaining', sql.Decimal(18, 2), totalPrice)
         .input('created_at', sql.DateTime, date)
-        .input('discount', sql.Decimal(12, 2), parsedData.discount)
+        .input('discount', sql.Decimal(15, 2), parsedData.discount)
         .query(`
             INSERT INTO supplier_invoices
             (
@@ -437,8 +437,8 @@ async function addInvoiceItems(invoiceId, items, transaction) {
         request.input(`invoice_id_${index}`, sql.Int, invoiceId);
         request.input(`name_${index}`, sql.NVarChar(255), item.name);
         request.input(`unit_${index}`, sql.NVarChar(50), item.unit);
-        request.input(`quantity_${index}`, sql.Decimal(12, 3), item.qty);
-        request.input(`cost_price_${index}`, sql.Decimal(12, 2), item.cost_price);
+        request.input(`quantity_${index}`, sql.Decimal(15, 2), item.qty);
+        request.input(`cost_price_${index}`, sql.Decimal(15, 2), item.cost_price);
     });
 
     await request.query(`
@@ -804,7 +804,7 @@ const invoiceSchema = z.object({
 
             qty: z.preprocess(
                 val => Number(val),
-                z.number().int().positive("الكمية يجب أن تكون رقمًا صحيحًا أكبر من صفر")
+                z.number().positive("الكمية يجب أن تكون رقمًا صحيحًا أكبر من صفر")
             ),
         })
     )

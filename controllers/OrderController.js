@@ -851,15 +851,15 @@ async function insertOrder(adminId, sessionId, invoiceNum, mainPrice, discount, 
         .input('admin_id', sql.Int, adminId)
         .input('session_id', sql.Int, sessionId)
         .input('invoice_num', sql.NVarChar, invoiceNum)
-        .input('total_price', sql.Decimal(10, 2), totalPrice)
-        .input('discount', sql.Decimal(10, 2), discount)
+        .input('total_price', sql.Decimal(18, 2), totalPrice)
+        .input('discount', sql.Decimal(15, 2), discount)
         .input('payment_method', sql.NVarChar, paymentMethod)
         .input('status', sql.NVarChar, status)
         .input('type', sql.NVarChar, orderType)
         .input("created_at", sql.DateTime2, currentTimeStamp)
         .input('table_num', tableNum)
-        .input('cash_paid', sql.Decimal(9, 2), cashPaid)
-        .input('card_paid', sql.Decimal(9, 2), cardPaid)
+        .input('cash_paid', sql.Decimal(18, 2), cashPaid)
+        .input('card_paid', sql.Decimal(18, 2), cardPaid)
         .query(`
             INSERT INTO orders (admin_id, session_id, invoice_num, total_price, discount, payment_method, status, type, created_at, table_num, cash_paid, card_paid)
             OUTPUT INSERTED.id
@@ -886,9 +886,9 @@ async function insertItems(orderId, items, transaction) {
         request.input(`order_id${index}`, sql.Int, orderId);
         request.input(`item_id${index}`, sql.Int, item.id);
         request.input(`quantity${index}`, sql.Int, item.qty);
-        request.input(`price${index}`, sql.Int, item.price);
+        request.input(`price${index}`, sql.Decimal(15, 2), item.price);
         request.input(`size_name${index}`, sql.NVarChar, item.sizeName || 'NaN');
-        request.input(`discount_item${index}`, sql.Int, item.discount_item || 0);
+        request.input(`discount_item${index}`, sql.Decimal(15, 2), item.discount_item || 0);
     });
 
     const query = `
@@ -937,7 +937,7 @@ async function addOrderPayment(orderId, sessionId, amount, paymentMethod, transa
     await transaction.request()
         .input('order_id', sql.Int, orderId)
         .input('session_id', sql.Int, sessionId)
-        .input('amount', sql.Decimal(9, 2), amount)
+        .input('amount', sql.Decimal(18, 2), amount)
         .input(`pay_method`, sql.NVarChar, paymentMethod)
 
         .query(`

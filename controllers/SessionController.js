@@ -68,7 +68,7 @@ export const openNewSession = async (req , res) =>{
         const result = await pool
             .request()
             .input("open_at", sql.DateTime2, currentTimeStamp)
-            .input("opening_cash", sql.Decimal(10, 2), openingCash)
+            .input("opening_cash", sql.Decimal(18, 2), openingCash)
             .input("admin_id", sql.Int, adminId)
             .query(`
                 INSERT INTO cash_sessions (admin_id, open_at, opening_cash)
@@ -132,8 +132,8 @@ export const closeSession = async (req , res) =>{
         const currentTimeStamp = new Date();
 
         await pool.request()
-            .input("expected_cash", sql.Decimal(10, 2), expectedCash)
-            .input("actual_cash", sql.Decimal(10, 2), actualCash)
+            .input("expected_cash", sql.Decimal(18, 2), expectedCash)
+            .input("actual_cash", sql.Decimal(18, 2), actualCash)
             .input("difference", sql.Int, difference)
             .input("closed_at", sql.DateTime2, currentTimeStamp)
             .input("id", sql.Int, sessionId)
