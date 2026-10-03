@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Halabi_Services.ps</title>
+    <title>Halabi_Technology.ps</title>
 
     <!-- Bootstrap RTL -->
     <link href="../../../wroot/assets/bootstrap/css/bootstrap.rtl.min.css" rel="stylesheet">
@@ -13,126 +13,818 @@
     <!-- FontAwesome -->
     <link href="../../../wroot/assets/fontawesome/css/all.min.css" rel="stylesheet">
 
-    <link rel="stylesheet" href="../../../public/style/admin/product/add-edit-product.css" />
+    <!-- <link rel="stylesheet" href="../../../public/style/admin/product/add-edit-product.css" /> -->
     <link rel="stylesheet" href="../../../public/style/admin/header.css" />
 
+    <style>
+        body {
+            background: #f5f6f8;
+            font-family: "Tahoma", sans-serif;
+            background-color: #c8ced3;
+        }
+
+        .page-wrapper {
+            max-width: 1100px;
+            margin: 40px auto;
+        }
+
+        .card {
+            border: 0;
+            border-radius: 14px;
+            box-shadow: 0 3px 15px rgba(0, 0, 0, 0.06);
+        }
+
+        .card-header {
+            background: #fff;
+            border-bottom: 1px solid #eee;
+            padding: 20px 24px;
+            border-radius: 14px 14px 0 0 !important;
+        }
+
+        .section-title {
+            font-size: 17px;
+            font-weight: 700;
+            margin-bottom: 18px;
+            color: #343a40;
+        }
+
+        .form-label {
+            font-weight: 600;
+        }
+
+        .form-text {
+            font-size: 14px;
+            color: #6c757d;
+        }
+
+        .base-unit-box {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 10px;
+            padding: 15px;
+        }
+
+        .unit-builder {
+            border: 1px dashed #adb5bd;
+            background: #fafbfc;
+            border-radius: 12px;
+            padding: 20px;
+        }
+
+        .unit-builder-title {
+            font-weight: 700;
+            margin-bottom: 15px;
+        }
+
+        .unit-table th {
+            background: #f8f9fa;
+            white-space: nowrap;
+        }
+
+        .unit-table td {
+            vertical-align: middle;
+        }
+
+        .unit-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            padding: 5px 10px;
+            background: #eef5ff;
+            color: #0d6efd;
+            border-radius: 20px;
+            font-size: 13px;
+        }
+
+        .base-badge {
+            background: #e8f7ee;
+            color: #198754;
+        }
+
+        .empty-state {
+            padding: 35px 20px;
+            text-align: center;
+            color: #6c757d;
+        }
+
+        .empty-state i {
+            font-size: 35px;
+            margin-bottom: 12px;
+            opacity: 0.5;
+        }
+
+        .price-input {
+            direction: ltr;
+            text-align: right;
+        }
+
+        .action-buttons {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 10px;
+            margin-top: 25px;
+        }
+
+        .required {
+            color: #dc3545;
+        }
+
+        .example-box {
+            background: #fff8e1;
+            border: 1px solid #ffe69c;
+            border-radius: 10px;
+            padding: 12px 15px;
+            font-size: 13px;
+            color: #664d03;
+        }
+
+        .usage-checkboxes {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .unit-name-cell {
+            font-weight: 600;
+        }
+
+        .purchase-box {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 10px;
+            padding: 20px;
+        }
+
+        .stock-result {
+            background: #e8f7ee;
+            border: 1px solid #badbcc;
+            border-radius: 10px;
+            padding: 12px 15px;
+            color: #146c43;
+            font-size: 13px;
+        }
+
+        .stock-result strong {
+            font-size: 15px;
+        }
+
+        @media (max-width: 768px) {
+            .page-wrapper {
+                margin: 20px 10px;
+            }
+
+            .action-buttons {
+                flex-direction: column-reverse;
+                align-items: stretch;
+            }
+
+            .action-buttons button {
+                width: 100%;
+            }
+        }
+    </style>
+
 </head>
+<site-header></site-header>
 
 <body>
-     <site-header></site-header>
-    <div class="container content py-4">
-        <div class="row">
-            <div class="col-12">
 
-                <!-- العنوان -->
-                <div class="card shadow mb-4">
-                    <div class="card-header bg-white py-3">
-                        <div class="row align-items-center gy-2">
-                            <div class="col-12 col-md-6 text-center text-md-start">
-                                <h4 class="m-0">
-                                    إنشاء صنف جديد
-                                </h4>
-                            </div>
+    <div class="page-wrapper">
 
-                            <div class="col-12 col-md-6 text-center text-md-end">
-                                <a href="./home.html" class="fs-5 fs-md-4 text-decoration-none">
-                                    رجوع <i class="bi bi-arrow-left"></i>
-                                </a>
-                            </div>
-                        </div>
+        <form id="productForm">
+
+            <!-- =========================
+             بيانات المنتج
+        ========================== -->
+            <div class="card mb-4">
+
+                <div class="card-header">
+
+                    <h5 class="mb-1">
+                        <i class="fa-solid fa-box text-primary ms-2"></i>
+                        إضافة منتج جديد
+                    </h5>
+
+                    <div class="text-muted small">
+                        أدخل معلومات المنتج والوحدات التي يباع ويشترى بها.
                     </div>
+
                 </div>
 
-                <!-- الفورم -->
-                <div class="card shadow">
-                    <div class="card-body">
+                <div class="card-body p-4">
 
-                        <form id="product_form" method="POST" enctype="multipart/form-data">
-                            <div class="row g-3 mb-3">
-                                <div class="col-12 col-md-6">
-                                    <label for="name" class="form-label fw-bold">إسم الصنف</label>
-                                    <input type="text" class="form-control bg-light" id="name" name="name"
-                                        placeholder="إسم الصنف" required>
-                                </div>
+                    <div class="section-title">
+                        <i class="fa-solid fa-circle-info ms-1"></i>
+                        معلومات المنتج
+                    </div>
 
-                                <div class="col-12 col-md-6">
-                                    <label for="category_id" class="form-label fw-bold">الفئة</label>
-                                    <select class="form-select bg-light" id="category_id" name="category_id" required>
-                                        <option value="" selected disabled>-- إختر الفئة --</option>
-                                    </select>
-                                </div>
-                            </div>
+                    <div class="row g-3">
 
+                        <!-- اسم المنتج -->
+                        <div class="col-md-6">
 
-                            <!-- السعر الأساسي + checkbox -->
-                            <div class="row g-3 mb-3">
+                            <label class="form-label">
+                                اسم المنتج
+                                <span class="required">*</span>
+                            </label>
 
-                                <div class="col-12 col-md-3">
-                                    <label for="cost_price" class="form-label fw-bold">سعر الشراء</label>
+                            <input type="text" class="form-control" id="productName" placeholder="مثال: سجائر مارلبورو"
+                                required>
 
-                                    <input type="number" class="form-control bg-light" step="0.5" id="cost_price" name="cost_price"
-                                        placeholder="سعر الشراء" required>
-                                </div>
+                        </div>
 
 
-                                <div class="col-12 col-md-3">
+                        <!-- التصنيف -->
+                        <div class="col-md-6">
 
-                                    <div id="base_price_box">
-                                        <label for="price" class="form-label fw-bold">السعر الأساسي</label>
-                                        <input type="number" class="form-control bg-light" step="0.5" id="price" name="price"
-                                            placeholder="السعر" required>
-                                    </div>
-                                </div>
+                            <label class="form-label">
+                                التصنيف
+                                <span class="required">*</span>
+                            </label>
 
-                                
+                            <select class="form-select" id="productCategory" required>
 
+                                <option value="" selected disabled>
+                                    اختر التصنيف
+                                </option>
 
-                                <div class="col-12 col-md-3">
-                                    <label for="stock" class="form-label fw-bold">المخزون</label>
+                                <option value="1">مشروبات</option>
+                                <option value="2">مواد غذائية</option>
+                                <option value="3">سجائر</option>
+                                <option value="4">مخبوزات</option>
+                                <option value="5">أخرى</option>
 
-                                    <input type="number" class="form-control bg-light" id="stock" name="stock"
-                                        placeholder="المخزون">
-                                </div>
+                            </select>
 
-
-
-                                <div class="col-12 col-md-3">
-                                    <label for="barcode" class="form-label fw-bold">الباركود</label>
-
-                                    <input type="number" class="form-control bg-light" id="barcode" name="barcode"
-                                        placeholder="باركود">
-
-                                    <div class="form-check mt-2">
-                                        <input class="form-check-input" name="auto_barcode" type="checkbox" id="auto_barcode" value="1" style="cursor:pointer;">
-                                        <label class="form-check-label fw-bold" for="auto_barcode"
-                                            style="cursor:pointer;">
-                                            توليد باركود تلقائيًا
-                                        </label>
-                                    </div>
-                                </div>
-
-                        
-
-                            </div>
-
-                        
-                            <!-- زر الإضافة -->
-                            <div class="d-flex justify-content-center">
-                                <button type="submit" class="btn btn-primary col-12 col-sm-6 col-md-4 col-lg-3 mt-4 fw-bold">
-                                    <i class="bi bi-plus-square"></i> إضافة
-                                </button>
-                            </div>
-                        </form>
-
-                        <div id="error_list" class="alert alert-danger p-2 mt-3 hidden">
-                            <ul id="errors" class="mb-0 ps-3 text-danger"></ul>
                         </div>
 
                     </div>
+
+                </div>
+            </div>
+
+
+            <!-- =========================
+             الوحدة الأساسية
+        ========================== -->
+            <div class="card mb-4">
+
+                <div class="card-header">
+
+                    <div class="section-title mb-0">
+
+                        <i class="fa-solid fa-cube text-success ms-1"></i>
+
+                        الوحدة الأساسية
+
+                    </div>
+
+                </div>
+
+
+                <div class="card-body p-4">
+
+                    <div class="base-unit-box">
+
+                        <div class="row g-3">
+
+                            <!-- اسم الوحدة -->
+                            <div class="col-md-4">
+
+                                <label class="form-label">
+
+                                    اسم الوِحدة الأساسية
+
+                                    <span class="required">*</span>
+
+                                </label>
+
+                                <!-- <input
+                                type="text"
+                                class="form-control"
+                                id="baseUnitName"
+                                placeholder="مثال: سيجارة"
+                                required
+                            > -->
+
+                                <select class="form-select" id="baseUnitName" name="base_unit" required>
+                                    <option value="" selected disabled> اختر الوِحدة </option>
+                                    <option value="حبة">حبة</option>
+                                    <option value="قطعة">قطعة</option>
+                                    <option value="سيجارة">سيجارة</option>
+                                    <option value="رغيف">رغيف</option>
+                                    <option value="علبة">علبة</option>
+                                    <option value="كيلو">كيلو</option>
+                                    <option value="غرام">غرام</option>
+                                    <option value="لتر">لتر</option>
+                                    <option value="مل">مل</option>
+                                </select>
+
+                                <div class="form-text d-flex flex-column gap-1">
+                                    <div>
+                                        <span class="text-danger">مهم جدًا:</span> أصغر وِحدة يمكن بيع المنتج بها، مثل: سيجارة، قطعة، رغيف، كيلو، حبة، إلخ.
+                                    </div>
+                                    <div>
+                                        <span class="text-danger">ملاحظة:</span> * هذه الوِحدة التي سيُحسب المخزون عليها.
+                                    </div>
+                                </div>
+
+                            </div>
+
+
+                            <!-- باركود -->
+                            <div class="col-md-4">
+
+                                <label class="form-label">
+                                    الباركود
+                                </label>
+
+                                <input type="text" class="form-control" id="baseBarcode" placeholder="باركود الوحدة">
+
+                                <div class="form-check mt-2">
+                                    <input class="form-check-input" name="auto_barcode" type="checkbox" id="auto_barcode" value="1" style="cursor:pointer;">
+                                    <label class="form-check-label" for="auto_barcode"
+                                        style="cursor:pointer;">
+                                        توليد باركود تلقائيًا
+                                    </label>
+                                </div>
+
+                            </div>
+
+
+                            <!-- سعر البيع -->
+                            <div class="col-md-4">
+
+                                <label class="form-label">
+                                    سعر البيع
+                                </label>
+
+                                <div class="input-group">
+
+                                    <input type="number" class="form-control price-input" id="baseSellingPrice" min="0"
+                                        step="0.01" placeholder="0.00">
+
+                                    <span class="input-group-text">
+                                        ₪
+                                    </span>
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+
+                        <div class="mt-3 d-none">
+
+                            <div class="usage-checkboxes">
+
+                                <div class="form-check">
+
+                                    <input class="form-check-input" type="checkbox" id="baseForSale" checked>
+
+                                    <label class="form-check-label" for="baseForSale">
+                                        يمكن البيع بهذه الوحدة
+                                    </label>
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
                 </div>
 
             </div>
-        </div>
+
+
+            <!-- =========================
+             وحدات المنتج
+        ========================== -->
+            <div class="card mb-4">
+
+                <div class="card-header">
+
+                    <div class="section-title mb-1">
+
+                        <i class="fa-solid fa-layer-group text-primary ms-1"></i>
+
+                        وحدات المنتج
+
+                    </div>
+
+                    <div class="text-muted small">
+
+                        أضف الوحدات التي يمكن بيع المنتج بها.
+
+                    </div>
+
+                </div>
+
+
+                <div class="card-body p-4">
+
+                    <!-- مثال -->
+                    <div class="example-box mb-4 d-none">
+
+                        <div class="fw-bold mb-1">
+
+                            <i class="fa-solid fa-lightbulb ms-1"></i>
+
+                            مثال
+
+                        </div>
+
+                        إذا كانت الوحدة الأساسية هي
+                        <strong>سيجارة</strong>:
+
+                        <br>
+
+                        الباكيت يحتوي على
+                        <strong>20 سيجارة</strong>.
+
+                        <br>
+
+                        والكرتونة تحتوي على
+                        <strong>10 باكيت</strong>.
+
+                        <br>
+
+                        النظام سيحسب تلقائيًا أن الكرتونة =
+                        <strong>200 سيجارة</strong>.
+
+                    </div>
+
+
+                    <!-- إضافة وحدة -->
+                    <div class="unit-builder mb-4">
+
+                        <div class="unit-builder-title">
+
+                            <i class="fa-solid fa-plus-circle text-primary ms-1"></i>
+
+                            إضافة وحدة
+
+                        </div>
+
+
+                        <div class="row g-3">
+
+                            <!-- اسم الوحدة -->
+                            <div class="col-md-3">
+
+                                <label class="form-label">
+
+                                    اسم الوحدة
+
+                                    <span class="required">*</span>
+
+                                </label>
+
+                                <input type="text" class="form-control" id="newUnitName" placeholder="مثال: باكيت">
+
+                            </div>
+
+
+                            <!-- الكمية -->
+                            <div class="col-md-3">
+
+                                <label class="form-label">
+
+                                    تحتوي على
+
+                                    <span class="required">*</span>
+
+                                </label>
+
+                                <input type="number" class="form-control" id="newUnitQuantity" min="1" step="1"
+                                    placeholder="20">
+
+                            </div>
+
+
+                            <!-- الوحدة المحتواة -->
+                            <div class="col-md-3">
+
+                                <label class="form-label">
+
+                                    من وحدة
+
+                                    <span class="required">*</span>
+
+                                </label>
+
+                                <select class="form-select" id="newUnitContains">
+
+                                    <option value="">
+                                        اختر الوحدة
+                                    </option>
+
+                                </select>
+
+                            </div>
+
+
+                            <!-- سعر البيع -->
+                            <div class="col-md-3">
+
+                                <label class="form-label">
+                                    سعر البيع
+                                </label>
+
+                                <div class="input-group">
+
+                                    <input type="number" class="form-control price-input" id="newUnitPrice" min="0"
+                                        step="0.01" placeholder="0.00">
+
+                                    <span class="input-group-text">
+                                        ₪
+                                    </span>
+
+                                </div>
+
+                            </div>
+
+
+                            <!-- الباركود -->
+                            <div class="col-md-6">
+
+                                <label class="form-label">
+                                    الباركود
+                                </label>
+
+                                <input type="text" class="form-control" id="newUnitBarcode" placeholder="باركود الوحدة">
+
+                                <div class="form-check mt-2">
+                                    <input class="form-check-input" name="auto_barcode_unit" type="checkbox" id="auto_barcode_unit" value="1" style="cursor:pointer;">
+                                    <label class="form-check-label" for="auto_barcode_unit"
+                                        style="cursor:pointer;">
+                                        توليد باركود تلقائيًا
+                                    </label>
+                                </div>
+
+                            </div>
+
+
+                            <!-- يمكن البيع -->
+                            <div class="col-md-4">
+
+                                <label class="form-label">
+                                    الاستخدام
+                                </label>
+
+                                <div class="usage-checkboxes mt-2">
+
+                                    <div class="form-check">
+
+                                        <input class="form-check-input" type="checkbox" id="newUnitForSale" checked>
+
+                                        <label class="form-check-label" for="newUnitForSale">
+                                            يمكن البيع بهذه الوحدة
+                                        </label>
+
+                                    </div>
+
+                                </div>
+
+                            </div>
+
+
+                            <!-- زر الإضافة -->
+                            <div class="col-md-2 d-flex align-items-end">
+
+                                <button type="button" class="btn btn-primary w-100" id="addUnitBtn">
+
+                                    <i class="fa-solid fa-plus ms-1"></i>
+
+                                    إضافة
+
+                                </button>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- جدول الوحدات -->
+                    <div class="table-responsive">
+
+                        <table class="table table-bordered unit-table mb-0">
+
+                            <thead>
+
+                                <tr>
+
+                                    <th>
+                                        الوحدة
+                                    </th>
+
+                                    <th>
+                                        تحتوي على
+                                    </th>
+
+                                    <th>
+                                        التحويل للمخزون
+                                    </th>
+
+                                    <th>
+                                        الباركود
+                                    </th>
+
+                                    <th>
+                                        سعر البيع
+                                    </th>
+
+                                    <th>
+                                        الاستخدام
+                                    </th>
+
+                                    <th width="60">
+                                        #
+                                    </th>
+
+                                </tr>
+
+                            </thead>
+
+                            <tbody id="unitsTableBody">
+
+                            </tbody>
+
+                        </table>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- =========================
+             بيانات الشراء والمخزون
+        ========================== -->
+            <div class="card mb-4">
+
+                <div class="card-header">
+
+                    <div class="section-title mb-1">
+
+                        <i class="fa-solid fa-cart-shopping text-warning ms-1"></i>
+
+                        بيانات الشراء والمخزون
+
+                    </div>
+
+                    <div class="text-muted small">
+
+                        اختر الوحدة التي يتم شراء المنتج بها وأدخل سعر الشراء والمخزون الحالي.
+
+                    </div>
+
+                </div>
+
+
+                <div class="card-body p-4">
+
+                    <div class="purchase-box">
+
+                        <div class="row g-3">
+
+                            <!-- وحدة الشراء -->
+                            <div class="col-md-4">
+
+                                <label class="form-label">
+
+                                    وحدة الشراء
+
+                                    <span class="required">*</span>
+
+                                </label>
+
+                                <select class="form-select" id="purchaseUnit" required>
+
+                                    <option value="">
+                                        اختر وحدة الشراء
+                                    </option>
+
+                                </select>
+
+                                <div class="form-text">
+
+                                    اختر وحدة واحدة فقط يتم شراء المنتج بها.
+
+                                </div>
+
+                            </div>
+
+
+                            <!-- سعر الشراء -->
+                            <div class="col-md-4">
+
+                                <label class="form-label">
+
+                                    سعر الشراء للوحدة الواحدة
+
+                                    <span class="required">*</span>
+
+                                </label>
+
+                                <div class="input-group">
+
+                                    <input type="number" class="form-control price-input" id="purchasePrice" min="0"
+                                        step="0.01" placeholder="0.00" required>
+
+                                    <span class="input-group-text">
+                                        ₪
+                                    </span>
+
+                                </div>
+
+                                <div class="form-text">
+
+                                    سعر شراء وحدة الشراء.
+
+                                </div>
+
+                            </div>
+
+
+                            <!-- المخزون الحالي -->
+                            <div class="col-md-4">
+
+                                <label class="form-label">
+
+                                    المخزون الحالي
+
+                                    <span class="required">*</span>
+
+                                </label>
+
+                                <input type="number" class="form-control" id="currentStock" min="0" step="1"
+                                    placeholder="0" required>
+
+                                <div class="form-text">
+
+                                    الكمية الحالية من وحدة الشراء.
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+
+                        <!-- نتيجة التحويل -->
+                        <div class="stock-result mt-4" id="stockResult" style="display: none;">
+
+                            <i class="fa-solid fa-boxes-stacked ms-1"></i>
+
+                            المخزون يعادل:
+
+                            <strong id="stockEquivalent">
+                                0
+                            </strong>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- =========================
+             الأزرار
+        ========================== -->
+            <div class="action-buttons">
+
+                <button type="button" class="btn btn-outline-secondary" id="resetBtn">
+
+                    <i class="fa-solid fa-rotate-right ms-1"></i>
+
+                    إعادة تعيين
+
+                </button>
+
+
+                <button type="submit" class="btn btn-success px-5">
+
+                    <i class="fa-solid fa-check ms-1"></i>
+
+                    حفظ المنتج
+
+                </button>
+
+            </div>
+
+        </form>
+
     </div>
 
 

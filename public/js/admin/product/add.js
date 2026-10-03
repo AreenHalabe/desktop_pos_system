@@ -1,10 +1,10 @@
 import { fetchCategories } from "../../../api/category.js";
 import { url } from "../../../api/urlEndPoint.js";
-import { showAuthExpired, bootboxSuccess } from "../../../component/bootbox.js";
+import { showAuthExpired, bootboxSuccess, bootboxError } from "../../../component/bootbox.js";
 import { compressWithLibrary } from "../../../component/handlimage.js";
 import { setActiveNavLink } from "../../../component/bootbox.js";
 
-import { getAuthToken , removeAuthToken } from "../../../component/auth.js";
+import { getAuthToken, removeAuthToken } from "../../../component/auth.js";
 
 const header = document.querySelector("site-header");
 
@@ -12,159 +12,132 @@ const autoBarcodeCheckbox = document.getElementById('auto_barcode');
 
 const categoryFilter = document.getElementById('category_id');
 let errorMessage = document.getElementById("errors");
-let form = document.getElementById("product_form");
+// let form = document.getElementById("product_form");
 let errorList = document.getElementById("error_list");
-let price = document.getElementById('price');
+// let price = document.getElementById('price');
 let loader = document.getElementById("overlay_loader");
-const barcode = document.getElementById('barcode');
+// const barcode = document.getElementById('barcode');
+
+const baseUnitBarcodeInput = document.getElementById("baseBarcode");
+
+
+
+const unitBarcodeInput = document.getElementById("newUnitBarcode");
+const autoUnitBarcodeCheckbox = document.getElementById('auto_barcode_unit');
+
 
 
 class SiteHeader extends HTMLElement {
-  async connectedCallback() {
+    async connectedCallback() {
 
-    const res = await fetch('../component/header.html');
-    this.innerHTML = await res.text();
+        const res = await fetch('../component/header.html');
+        this.innerHTML = await res.text();
 
-    // 🔔 إعلان رسمي: الهيدر جاهز
-    this.dispatchEvent(
-      new CustomEvent("header:ready", {
-        bubbles: true
-      })
-    );
-  }
+        // 🔔 إعلان رسمي: الهيدر جاهز
+        this.dispatchEvent(
+            new CustomEvent("header:ready", {
+                bubbles: true
+            })
+        );
+    }
 }
 
 customElements.define("site-header", SiteHeader);
 
 header.addEventListener("header:ready", () => {
-  setActiveNavLink();
-  const logoutFrom = document.getElementById('logoutForm');
-  logoutFrom.addEventListener("submit", async function (e) {
-    e.preventDefault();
-    bootbox.confirm({
-      title: "تسجيل الخروج",
-      message: "هل أنت متأكد من تسجيل الخروج؟",
-      buttons: {
-        confirm: {
-          label: "نعم",
-        },
-        cancel: {
-          label: "إلغاء",
-        },
-      },
-      callback: function (result) {
-        if (!result) return;
+    setActiveNavLink();
+    const logoutFrom = document.getElementById('logoutForm');
+    logoutFrom.addEventListener("submit", async function (e) {
+        e.preventDefault();
+        bootbox.confirm({
+            title: "تسجيل الخروج",
+            message: "هل أنت متأكد من تسجيل الخروج؟",
+            buttons: {
+                confirm: {
+                    label: "نعم",
+                },
+                cancel: {
+                    label: "إلغاء",
+                },
+            },
+            callback: function (result) {
+                if (!result) return;
 
-        removeAuthToken();
-        window.location.href = "../../mainWindow.html";
-      },
-    });
-  });
-});
-
-
-form.addEventListener("submit", async (e) => {
-    e.preventDefault();
-    loader.style.display = 'flex';
-    errorMessage.innerHTML = "";
-
-    hideError();
-
-    let formData = new FormData(form);
-
-    const finalData = {
-        name: formData.get("name"),
-        category_id: formData.get('category_id'),
-        cost_price: formData.get('cost_price'),
-        price: formData.get('price'),
-        auto_generated_barcode : formData.get('auto_barcode'),
-        barcode: formData.get('barcode'),
-        stock: formData.get('stock') || 0,
-    }
-
-
-    try {
-        let res = await fetch(url + '/item/add', {
-            method: "POST",
-            body: JSON.stringify(finalData),
-            headers: {
-                "Content-Type": "application/json",
-                "Authorization": `${getAuthToken('auth')}`
+                removeAuthToken();
+                window.location.href = "../../mainWindow.html";
             },
         });
-        let data = await res.json();
-        if (res.status === 200) {
-            bootboxSuccess(data.message);
-            resetProductForm();
-            return;
-        }
-        else if (res.status === 400) {
-            showError();
-            errorMessage.innerHTML =
-                data.errors.map(err => `<li>${err.message}</li>`).join("");
-            return;
-        }
-
-        else if (res.status === 401) {
-            showAuthExpired(data.message);
-            return;
-        }
-
-        else if (res.status === 409) {
-            showError();
-            errorMessage.innerHTML = `<li>${data.message}</li>`;
-            return;
-        }
-
-        else {
-            showError();
-            errorMessage.innerHTML = `<li>${data.message}</li>`;
-            return;
-        }
-    } catch (err) {
-        console.error(err.message);
-        showError();
-        errorMessage.innerHTML = `<li> ${err.message} </li>`;
-        return;
-    } finally {
-        loader.style.display = 'none';
-    }
-});
-
-
-document.addEventListener('DOMContentLoaded', async function () {
-    await buildSelectCategory();
-    
-    document.addEventListener('click', function (e) {
-        if (e.target.classList.contains('delete-row') || e.target.closest('.delete-row')) {
-            e.target.closest('tr').remove();
-        }
     });
-
-
-    categoryFilter.addEventListener('change', function () {
-        if (this.value === 'goToPage') {
-            window.location.href = '../category/home.html';
-            return;
-        }
-    });
-
 });
 
 
-autoBarcodeCheckbox.addEventListener('change', function () {
-    if (this.checked) {
-        barcode.value = '';
-        barcode.disabled = true;
-        barcode.placeholder = 'سيتم توليد باركود تلقائياً';
-        barcode.style.cursor = 'not-allowed';
-    } else {
-        barcode.disabled = false;
-        barcode.placeholder = 'الباركود';
-        barcode.style.cursor = 'text';
+// form.addEventListener("submit", async (e) => {
+//     e.preventDefault();
+//     loader.style.display = 'flex';
+//     errorMessage.innerHTML = "";
 
-    }
-});
+//     hideError();
+
+//     let formData = new FormData(form);
+
+//     const finalData = {
+//         name: formData.get("name"),
+//         category_id: formData.get('category_id'),
+//         cost_price: formData.get('cost_price'),
+//         price: formData.get('price'),
+//         auto_generated_barcode : formData.get('auto_barcode'),
+//         barcode: formData.get('barcode'),
+//         stock: formData.get('stock') || 0,
+//     }
+
+
+//     try {
+//         let res = await fetch(url + '/item/add', {
+//             method: "POST",
+//             body: JSON.stringify(finalData),
+//             headers: {
+//                 "Content-Type": "application/json",
+//                 "Authorization": `${getAuthToken('auth')}`
+//             },
+//         });
+//         let data = await res.json();
+//         if (res.status === 200) {
+//             bootboxSuccess(data.message);
+//             resetProductForm();
+//             return;
+//         }
+//         else if (res.status === 400) {
+//             showError();
+//             errorMessage.innerHTML =
+//                 data.errors.map(err => `<li>${err.message}</li>`).join("");
+//             return;
+//         }
+
+//         else if (res.status === 401) {
+//             showAuthExpired(data.message);
+//             return;
+//         }
+
+//         else if (res.status === 409) {
+//             showError();
+//             errorMessage.innerHTML = `<li>${data.message}</li>`;
+//             return;
+//         }
+
+//         else {
+//             showError();
+//             errorMessage.innerHTML = `<li>${data.message}</li>`;
+//             return;
+//         }
+//     } catch (err) {
+//         console.error(err.message);
+//         showError();
+//         errorMessage.innerHTML = `<li> ${err.message} </li>`;
+//         return;
+//     } finally {
+//         loader.style.display = 'none';
+//     }
+// });
 
 function resetProductForm() {
 
@@ -181,6 +154,57 @@ function resetProductForm() {
     price.value = '';
     price.placeholder = 'السعر';
 
+}
+
+
+// document.addEventListener('DOMContentLoaded', async function () {
+//     await buildSelectCategory();
+
+//     document.addEventListener('click', function (e) {
+//         if (e.target.classList.contains('delete-row') || e.target.closest('.delete-row')) {
+//             e.target.closest('tr').remove();
+//         }
+//     });
+
+
+//     categoryFilter.addEventListener('change', function () {
+//         if (this.value === 'goToPage') {
+//             window.location.href = '../category/home.html';
+//             return;
+//         }
+//     });
+
+// });
+
+
+autoBarcodeCheckbox.addEventListener('change', function () {
+    if (this.checked) {
+        baseUnitBarcodeInput.value = '';
+        baseUnitBarcodeInput.disabled = true;
+        baseUnitBarcodeInput.placeholder = 'سيتم توليد باركود تلقائياً';
+        baseUnitBarcodeInput.style.cursor = 'not-allowed';
+    } else {
+        baseUnitBarcodeInput.disabled = false;
+        baseUnitBarcodeInput.placeholder = 'الباركود';
+        baseUnitBarcodeInput.style.cursor = 'text';
+
+    }
+    renderUnits();
+});
+
+autoUnitBarcodeCheckbox.addEventListener('change', updateUnitBarcodeState);
+
+function updateUnitBarcodeState() {
+    if (autoUnitBarcodeCheckbox.checked) {
+        unitBarcodeInput.value = '';
+        unitBarcodeInput.disabled = true;
+        unitBarcodeInput.placeholder = 'سيتم توليد باركود تلقائياً';
+        unitBarcodeInput.style.cursor = 'not-allowed';
+    } else {
+        unitBarcodeInput.disabled = false;
+        unitBarcodeInput.placeholder = 'الباركود';
+        unitBarcodeInput.style.cursor = 'text';
+    }
 }
 
 
@@ -211,12 +235,1593 @@ async function buildSelectCategory() {
 
 
 
-function showError() {
-    errorList.classList.remove('hidden');
+
+/*
+|--------------------------------------------------------------------------
+| State
+|--------------------------------------------------------------------------
+*/
+
+let units = [];
+
+
+/*
+|--------------------------------------------------------------------------
+| Helpers
+|--------------------------------------------------------------------------
+*/
+
+function getBaseUnitName() {
+
+    return document
+        .getElementById("baseUnitName")
+        .value
+        .trim();
+
 }
 
-function hideError() {
-    errorList.classList.add('hidden');
+
+function normalizeNumber(value) {
+
+    const number = Number(value);
+
+    return Number.isFinite(number)
+        ? number
+        : 0;
+
 }
 
 
+/*
+|--------------------------------------------------------------------------
+| تحديث قائمة الوحدات التي يمكن اختيارها
+|--------------------------------------------------------------------------
+*/
+
+function updateContainsUnitOptions() {
+
+    const select =
+        document.getElementById("newUnitContains");
+
+    const currentValue =
+        select.value;
+
+
+    select.innerHTML = `
+            <option value="">
+                اختر الوحدة
+            </option>
+        `;
+
+
+    const baseUnitName =
+        getBaseUnitName();
+
+
+    if (baseUnitName) {
+
+        select.insertAdjacentHTML(
+            "beforeend",
+            `
+                <option value="base">
+                    ${escapeHtml(baseUnitName)}
+                </option>
+                `
+        );
+
+    }
+
+
+    units.forEach(unit => {
+
+        select.insertAdjacentHTML(
+            "beforeend",
+            `
+                <option value="${unit.id}">
+                    ${escapeHtml(unit.unit_name)}
+                </option>
+                `
+        );
+
+    });
+
+
+    if (
+        [...select.options].some(
+            option =>
+                option.value === currentValue
+        )
+    ) {
+
+        select.value = currentValue;
+
+    }
+
+}
+
+
+/*
+|--------------------------------------------------------------------------
+| تحديث قائمة وحدة الشراء
+|--------------------------------------------------------------------------
+*/
+
+function updatePurchaseUnitOptions() {
+
+    const select =
+        document.getElementById("purchaseUnit");
+
+    const currentValue =
+        select.value;
+
+
+    select.innerHTML = `
+            <option value="">
+                اختر وحدة الشراء
+            </option>
+        `;
+
+
+    /*
+    | الوحدة الأساسية
+    */
+
+    const baseUnitName =
+        getBaseUnitName();
+
+
+    if (baseUnitName) {
+
+        select.insertAdjacentHTML(
+            "beforeend",
+            `
+                <option value="base">
+                    ${escapeHtml(baseUnitName)}
+                </option>
+                `
+        );
+
+    }
+
+
+    /*
+    | الوحدات الأخرى
+    */
+
+    units.forEach(unit => {
+
+        select.insertAdjacentHTML(
+            "beforeend",
+            `
+                <option value="${unit.id}">
+                    ${escapeHtml(unit.unit_name)}
+                </option>
+                `
+        );
+
+    });
+
+
+    /*
+    | الاحتفاظ بالاختيار السابق
+    */
+
+    if (
+        [...select.options].some(
+            option =>
+                option.value === currentValue
+        )
+    ) {
+
+        select.value = currentValue;
+
+    }
+
+
+    updateStockEquivalent();
+
+}
+
+
+/*
+|--------------------------------------------------------------------------
+| حساب conversion factor
+|--------------------------------------------------------------------------
+*/
+
+function getParentConversionFactor(parentId) {
+
+    if (parentId === "base") {
+
+        return 1;
+
+    }
+
+
+    const parentUnit =
+        units.find(
+            unit =>
+                String(unit.id) ===
+                String(parentId)
+        );
+
+
+    if (!parentUnit) {
+
+        return null;
+
+    }
+
+
+    return parentUnit.conversion_factor;
+
+}
+
+
+/*
+|--------------------------------------------------------------------------
+| الحصول على وحدة محددة
+|--------------------------------------------------------------------------
+*/
+
+function getSelectedPurchaseUnit() {
+
+    const selectedId =
+        document
+            .getElementById("purchaseUnit")
+            .value;
+
+
+    if (!selectedId) {
+
+        return null;
+
+    }
+
+
+    if (selectedId === "base") {
+
+        return {
+
+            id: "base",
+
+            unit_name: getBaseUnitName(),
+
+            conversion_factor: 1
+
+        };
+
+    }
+
+
+    return units.find(
+        unit =>
+            String(unit.id) ===
+            String(selectedId)
+    ) || null;
+
+}
+
+
+/*
+|--------------------------------------------------------------------------
+| تحديث نتيجة المخزون
+|--------------------------------------------------------------------------
+*/
+
+function updateStockEquivalent() {
+
+    const result =
+        document.getElementById("stockResult");
+
+    const equivalent =
+        document.getElementById("stockEquivalent");
+
+    const stock =
+        normalizeNumber(
+            document.getElementById("currentStock").value
+        );
+
+
+    const purchaseUnit =
+        getSelectedPurchaseUnit();
+
+
+    if (!purchaseUnit || stock < 0) {
+
+        result.style.display = "none";
+
+        return;
+
+    }
+
+
+    const baseUnitName =
+        getBaseUnitName();
+
+
+    const totalBaseQuantity =
+        stock *
+        purchaseUnit.conversion_factor;
+
+
+    equivalent.textContent =
+        `${formatNumber(totalBaseQuantity)} ${baseUnitName}`;
+
+
+    result.style.display =
+        "block";
+
+}
+
+
+/*
+|--------------------------------------------------------------------------
+| إضافة وحدة
+|--------------------------------------------------------------------------
+*/
+
+function addUnit() {
+
+    const unitName =
+        document
+            .getElementById("newUnitName")
+            .value
+            .trim();
+
+
+    const quantity =
+        normalizeNumber(
+            document
+                .getElementById("newUnitQuantity")
+                .value
+        );
+
+
+    const containsUnit =
+        document
+            .getElementById("newUnitContains")
+            .value;
+
+
+    const barcode = unitBarcodeInput.value.trim();
+
+
+    const sellingPrice =
+        normalizeNumber(
+            document
+                .getElementById("newUnitPrice")
+                .value
+        );
+
+
+    const forSale =
+        document
+            .getElementById("newUnitForSale")
+            .checked;
+
+
+    /*
+    | Validation
+    */
+
+    if (!unitName) {
+
+        bootboxError(
+            "يرجى إدخال اسم الوحدة."
+        );
+
+        document
+            .getElementById("newUnitName")
+            .focus();
+
+        return;
+
+    }
+
+
+    if (quantity <= 0) {
+
+        bootboxError(
+            "يرجى إدخال كمية صحيحة."
+        );
+
+        document
+            .getElementById("newUnitQuantity")
+            .focus();
+
+        return;
+
+    }
+
+
+    if (!containsUnit) {
+
+        bootboxError(
+            "يرجى اختيار الوحدة التي تحتوي عليها هذه الوحدة."
+        );
+
+        document
+            .getElementById("newUnitContains")
+            .focus();
+
+        return;
+
+    }
+
+
+    /*
+    | عدم تكرار الوحدة الأساسية
+    */
+
+    const baseUnitName = getBaseUnitName();
+
+
+    if ( unitName.toLowerCase() === baseUnitName.toLowerCase()) {
+        bootboxError(
+            "اسم الوحدة مستخدم كالوحدة الأساسية."
+        );
+
+        return;
+
+    }
+
+
+    /*
+    | عدم تكرار الوحدات
+    */
+
+    const duplicated =
+        units.some(
+            unit =>
+                unit.unit_name.toLowerCase() ===
+                unitName.toLowerCase()
+        );
+
+
+    if (duplicated) {
+
+        bootboxError(
+            "هذه الوحدة مضافة مسبقًا."
+        );
+
+        return;
+
+    }
+
+
+
+    const parentConversion =
+        getParentConversionFactor(
+            containsUnit
+        );
+
+
+    if (parentConversion === null) {
+
+        bootboxError(
+            "تعذر حساب تحويل الوحدة."
+        );
+
+        return;
+
+    }
+
+
+    const conversionFactor =
+        quantity *
+        parentConversion;
+
+
+    let containsUnitName =
+        baseUnitName;
+
+
+    if (containsUnit !== "base") {
+
+        const parentUnit =
+            units.find(
+                unit =>
+                    String(unit.id) ===
+                    String(containsUnit)
+            );
+
+
+        if (parentUnit) {
+
+            containsUnitName =
+                parentUnit.unit_name;
+
+        }
+
+    }
+
+
+
+    const newUnit = {
+
+        id: crypto.randomUUID(),
+
+        unit_name: unitName,
+
+        contains_quantity: quantity,
+
+        contains_unit_id: containsUnit,
+
+        contains_unit_name: containsUnitName,
+
+        conversion_factor: conversionFactor,
+
+        barcode: autoUnitBarcodeCheckbox.checked ? 'سيتم توليده تلقائياً' 
+            : barcode || null
+        ,
+
+        selling_price: sellingPrice,
+
+        for_sale: forSale
+
+    };
+
+
+    units.push(newUnit);
+
+
+
+    renderUnits();
+
+    updateContainsUnitOptions();
+
+    updatePurchaseUnitOptions();
+
+
+
+    document
+        .getElementById("newUnitName")
+        .value = "";
+
+
+    document
+        .getElementById("newUnitQuantity")
+        .value = "";
+
+
+    document
+        .getElementById("newUnitContains")
+        .value = "";
+
+
+    unitBarcodeInput.value = "";
+    autoUnitBarcodeCheckbox.checked = false;
+    updateUnitBarcodeState();
+
+    document
+        .getElementById("newUnitPrice")
+        .value = "";
+
+
+    document
+        .getElementById("newUnitForSale")
+        .checked = true;
+
+
+    document
+        .getElementById("newUnitName")
+        .focus();
+
+}
+
+
+/*
+|--------------------------------------------------------------------------
+| رسم جدول الوحدات
+|--------------------------------------------------------------------------
+*/
+
+function renderUnits() {
+
+    const tbody =
+        document.getElementById(
+            "unitsTableBody"
+        );
+
+
+    const baseUnitName =
+        getBaseUnitName();
+
+
+    if (!baseUnitName) {
+
+        tbody.innerHTML = `
+                <tr>
+
+                    <td colspan="7">
+
+                        <div class="empty-state">
+
+                            <i class="fa-solid fa-box-open d-block"></i>
+
+                            أدخل الوحدة الأساسية أولاً.
+
+                        </div>
+
+                    </td>
+
+                </tr>
+            `;
+
+        return;
+
+    }
+
+
+    let html = "";
+
+
+    /*
+    | الوحدة الأساسية
+    */
+
+    const baseBarcode = baseUnitBarcodeInput.value.trim();
+
+
+    const basePrice =
+        normalizeNumber(
+            document
+                .getElementById("baseSellingPrice")
+                .value
+        );
+
+
+    const baseForSale =
+        document
+            .getElementById("baseForSale")
+            .checked;
+
+
+    html += `
+            <tr>
+
+                <td class="unit-name-cell">
+
+                    <span class="unit-badge base-badge">
+
+                        <i class="fa-solid fa-star"></i>
+
+                        ${escapeHtml(baseUnitName)}
+
+                    </span>
+
+                </td>
+
+
+                <td>
+
+                    <span class="text-muted">
+                        الوحدة الأساسية
+                    </span>
+
+                </td>
+
+
+                <td>
+
+                    <strong>
+                        1
+                    </strong>
+
+                    ${escapeHtml(baseUnitName)}
+
+                </td>
+
+
+                <td>
+
+                    ${ baseBarcode
+                        ? escapeHtml(baseBarcode)
+                        :  autoBarcodeCheckbox.checked ? '<span class="text-muted">سيتم توليده تلقائياً</span>' : '<span class="text-muted">—</span>'
+                    }
+
+                </td>
+
+
+                <td>
+
+                    ${formatPrice(basePrice)}
+
+                </td>
+
+
+                <td>
+
+                    ${renderUsage(baseForSale)}
+
+                </td>
+
+
+                <td>
+
+                    <span class="text-muted">
+                        —
+                    </span>
+
+                </td>
+
+            </tr>
+        `;
+
+
+    /*
+    | الوحدات الإضافية
+    */
+
+    units.forEach(
+        (unit, index) => {
+
+            html += `
+                    <tr>
+
+                        <td class="unit-name-cell">
+
+                            <span class="unit-badge">
+
+                                <i class="fa-solid fa-box"></i>
+
+                                ${escapeHtml(unit.unit_name)}
+
+                            </span>
+
+                        </td>
+
+
+                        <td>
+
+                            <strong>
+                                ${formatNumber(unit.contains_quantity)}
+                            </strong>
+
+                            ${escapeHtml(unit.contains_unit_name)}
+
+                        </td>
+
+
+                        <td>
+
+                            <strong>
+                                ${formatNumber(unit.conversion_factor)}
+                            </strong>
+
+                            ${escapeHtml(baseUnitName)}
+
+                        </td>
+
+
+                        <td>
+
+                            ${unit.barcode
+                                ? escapeHtml(unit.barcode)
+                                :  '<span class="text-muted">—</span>'
+                            }
+
+                        </td>
+
+
+                        <td>
+
+                            ${formatPrice(unit.selling_price)}
+
+                        </td>
+
+
+                        <td>
+
+                            ${renderUsage(unit.for_sale)}
+
+                        </td>
+
+
+                        <td>
+
+                            <button
+                                type="button"
+                                class="btn btn-sm btn-outline-danger delete-unit-btn"
+                                data-index="${index}"
+                                title="حذف"
+                            >
+
+                                <i class="fa-solid fa-trash"></i>
+
+                            </button>
+
+                        </td>
+
+                    </tr>
+                `;
+
+        }
+    );
+
+
+    tbody.innerHTML =
+        html;
+
+}
+
+
+/*
+|--------------------------------------------------------------------------
+| الاستخدام
+|--------------------------------------------------------------------------
+*/
+
+function renderUsage(forSale) {
+
+    if (!forSale) {
+
+        return `
+                <span class="badge text-bg-secondary">
+                    لا
+                </span>
+            `;
+
+    }
+
+
+    return `
+            <span class="badge text-bg-success">
+                بيع
+            </span>
+        `;
+
+}
+
+
+/*
+|--------------------------------------------------------------------------
+| حذف وحدة
+|--------------------------------------------------------------------------
+*/
+
+function deleteUnit(index) {
+
+    const unit =
+        units[index];
+
+
+    if (!unit) {
+
+        return;
+
+    }
+
+
+    const isParent =
+        units.some(
+            child =>
+                String(
+                    child.contains_unit_id
+                ) ===
+                String(unit.id)
+        );
+
+
+    if (isParent) {
+
+        bootboxError(
+            `لا يمكن حذف "${unit.unit_name}" لأنها مستخدمة داخل وحدة أخرى.`
+        );
+
+        return;
+
+    }
+
+
+    /*
+    | إذا كانت الوحدة المحذوفة هي وحدة الشراء
+    */
+
+    const purchaseUnit = document.getElementById("purchaseUnit").value;
+
+
+    if (
+        String(purchaseUnit) ===
+        String(unit.id)
+    ) {
+
+        document
+            .getElementById("purchaseUnit")
+            .value = "";
+
+        updateStockEquivalent();
+
+    }
+
+
+    // const confirmed =
+    //     confirm(
+    //         `هل تريد حذف وحدة "${unit.unit_name}"؟`
+    //     );
+
+
+    // if (!confirmed) {
+
+    //     return;
+
+    // }
+
+    bootbox.confirm({
+        message: `هل تريد حذف وحدة "${unit.unit_name}"؟`,
+        buttons: {
+            confirm: {
+                label: 'حذف',
+                className: 'btn-danger'
+            },
+            cancel: {
+                label: 'إلغاء',
+                className: 'btn-secondary'
+            }
+        },
+        callback: function (confirmed) {
+            if (confirmed) {
+                units.splice(index, 1);
+
+
+                renderUnits();
+
+                updateContainsUnitOptions();
+
+                updatePurchaseUnitOptions();
+            }
+        }
+    });
+
+
+    // units.splice(index, 1);
+
+
+    // renderUnits();
+
+    // updateContainsUnitOptions();
+
+    // updatePurchaseUnitOptions();
+
+}
+
+
+/*
+|--------------------------------------------------------------------------
+| Reset
+|--------------------------------------------------------------------------
+*/
+
+function resetForm() {
+
+    const confirmed =
+        confirm(
+            "هل تريد إعادة تعيين جميع البيانات؟"
+        );
+
+
+    if (!confirmed) {
+
+        return;
+
+    }
+
+
+    document
+        .getElementById("productForm")
+        .reset();
+
+
+    units = [];
+
+
+    renderUnits();
+
+    updateContainsUnitOptions();
+
+    updatePurchaseUnitOptions();
+
+    document
+        .getElementById("stockResult")
+        .style.display = "none";
+
+}
+
+
+/*
+|--------------------------------------------------------------------------
+| Submit
+|--------------------------------------------------------------------------
+*/
+
+async function submitProduct() {
+
+    const productName =
+        document
+            .getElementById("productName")
+            .value
+            .trim();
+
+
+    const categoryId =
+        document
+            .getElementById("productCategory")
+            .value;
+
+
+    const baseUnitName =
+        document
+            .getElementById("baseUnitName")
+            .value
+            .trim();
+
+
+    const baseBarcode = baseUnitBarcodeInput.value.trim();
+
+
+    const baseSellingPrice =
+        normalizeNumber(
+            document
+                .getElementById("baseSellingPrice")
+                .value
+        );
+
+
+    const baseForSale =
+        document
+            .getElementById("baseForSale")
+            .checked;
+
+
+    const purchaseUnitId =
+        document
+            .getElementById("purchaseUnit")
+            .value;
+
+
+    const purchasePrice =
+        normalizeNumber(
+            document
+                .getElementById("purchasePrice")
+                .value
+        );
+
+
+    const currentStock =
+        normalizeNumber(
+            document
+                .getElementById("currentStock")
+                .value
+        );
+
+
+    /*
+    | Validation
+    */
+
+    if (!productName) {
+
+        bootboxError(
+            "يرجى إدخال اسم المنتج."
+        );
+
+        return;
+
+    }
+
+
+    if (!categoryId) {
+
+        bootboxError(
+            "يرجى اختيار التصنيف."
+        );
+
+        return;
+
+    }
+
+
+    if (!baseUnitName) {
+
+        bootboxError(
+            "يرجى إدخال الوحدة الأساسية."
+        );
+
+        return;
+
+    }
+
+
+    if (!purchaseUnitId) {
+
+        bootboxError(
+            "يرجى اختيار وحدة الشراء."
+        );
+
+        return;
+
+    }
+
+
+    if (purchasePrice < 0) {
+
+        bootboxError(
+            "يرجى إدخال سعر شراء صحيح."
+        );
+
+        return;
+
+    }
+
+
+    if (currentStock < 0) {
+
+        bootboxError(
+            "يرجى إدخال مخزون صحيح."
+        );
+
+        return;
+
+    }
+
+
+    /*
+    | الحصول على وحدة الشراء
+    */
+
+    const purchaseUnit =
+        getSelectedPurchaseUnit();
+
+
+    if (!purchaseUnit) {
+
+        bootboxError(
+            "تعذر تحديد وحدة الشراء."
+        );
+
+        return;
+
+    }
+
+
+    /*
+    | تحويل المخزون للوحدة الأساسية
+    */
+
+    const stockInBaseUnit =
+        currentStock *
+        purchaseUnit.conversion_factor;
+
+
+    /*
+    | البيانات النهائية
+    */
+
+    const data = {
+
+        product: {
+
+            name: productName,
+
+            category_id: Number(
+                categoryId
+            ),
+
+            /*
+            | المخزون النهائي بالوحدة الأساسية
+            */
+
+            stock_quantity:
+                stockInBaseUnit
+
+        },
+
+
+        purchase: {
+
+            /*
+            | وحدة الشراء
+            */
+
+            unit_id:
+                purchaseUnitId,
+
+            unit_name:
+                purchaseUnit.unit_name,
+
+            /*
+            | سعر شراء الوحدة
+            */
+
+            price:
+                purchasePrice,
+
+            /*
+            | المخزون كما أدخله المستخدم
+            */
+
+            quantity:
+                currentStock,
+
+            /*
+            | المخزون بعد التحويل
+            */
+
+            base_quantity:
+                stockInBaseUnit
+
+        },
+
+
+        units: [
+
+            /*
+            | الوحدة الأساسية
+            */
+
+            {
+
+                id: "base",
+
+                unit_name:
+                    baseUnitName,
+
+                contains_quantity:
+                    null,
+
+                contains_unit_id:
+                    null,
+
+                contains_unit_name:
+                    null,
+
+                conversion_factor:
+                    1,
+
+                barcode:
+                    baseBarcode || null,
+
+                selling_price:
+                    baseSellingPrice,
+
+                for_sale:
+                    baseForSale,
+
+                is_base_unit:
+                    true
+
+            },
+
+
+            /*
+            | الوحدات الإضافية
+            */
+
+            ...units.map(
+                unit => ({
+
+                    ...unit,
+
+                    is_base_unit:
+                        false
+
+                })
+            )
+
+        ]
+
+    };
+   await submitProductData(data);
+
+    /*
+    |--------------------------------------------------------------------------
+    | طباعة البيانات
+    |--------------------------------------------------------------------------
+    */
+
+    // console.log(
+    //     "================================="
+    // );
+
+    // console.log(
+    //     "PRODUCT DATA"
+    // );
+
+    // console.log(
+    //     data
+    // );
+
+    // console.log(
+    //     JSON.stringify(
+    //         data,
+    //         null,
+    //         4
+    //     )
+    // );
+
+    // console.log(
+    //     "================================="
+    // );
+
+
+    // bootboxError(
+    //     "تم تجهيز بيانات المنتج.\n\nافتح Console لمشاهدة البيانات."
+    // );
+
+}
+
+
+/*
+|--------------------------------------------------------------------------
+| Format
+|--------------------------------------------------------------------------
+*/
+
+function formatNumber(value) {
+
+    return Number(value).toLocaleString(
+        "en-US",
+        {
+            maximumFractionDigits: 4
+        }
+    );
+
+}
+
+
+function formatPrice(value) {
+
+    return `
+            <strong>
+                ${Number(value).toFixed(2)}
+            </strong>
+
+            <span class="text-muted">
+                ₪
+            </span>
+        `;
+
+}
+
+
+/*
+|--------------------------------------------------------------------------
+| Escape HTML
+|--------------------------------------------------------------------------
+*/
+
+function escapeHtml(value) {
+
+    return String(value)
+        .replaceAll(
+            "&",
+            "&amp;"
+        )
+        .replaceAll(
+            "<",
+            "&lt;"
+        )
+        .replaceAll(
+            ">",
+            "&gt;"
+        )
+        .replaceAll(
+            '"',
+            "&quot;"
+        )
+        .replaceAll(
+            "'",
+            "&#039;"
+        );
+
+}
+
+
+/*
+|--------------------------------------------------------------------------
+| Event Delegation
+|--------------------------------------------------------------------------
+*/
+
+document.addEventListener("click", function (e) {
+
+        const addButton =
+            e.target.closest(
+                "#addUnitBtn"
+            );
+
+
+        if (addButton) {
+
+            addUnit();
+
+            return;
+
+        }
+
+
+        /*
+        | حذف وحدة
+        */
+
+        const deleteButton =e.target.closest(".delete-unit-btn");
+
+
+        if (deleteButton) {
+
+            const index =
+                Number(
+                    deleteButton.dataset.index
+                );
+
+
+            deleteUnit(index);
+
+            return;
+
+        }
+
+
+        /*
+        | إعادة تعيين
+        */
+
+        const resetButton =
+            e.target.closest(
+                "#resetBtn"
+            );
+
+
+        if (resetButton) {
+
+            resetForm();
+
+            return;
+
+        }
+
+    }
+);
+
+
+/*
+|--------------------------------------------------------------------------
+| Submit
+|--------------------------------------------------------------------------
+*/
+
+document.getElementById("productForm").addEventListener("submit",async function (e) { 
+            e.preventDefault();
+            await submitProduct();
+
+        }
+    );
+
+
+/*
+|--------------------------------------------------------------------------
+| Input Events
+|--------------------------------------------------------------------------
+*/
+
+document.addEventListener("input",function (e) {
+        if (
+            e.target.id ===
+            "baseUnitName" ||
+
+            e.target.id ===
+            "baseBarcode" ||
+
+            e.target.id ===
+            "baseSellingPrice"
+        ) {
+
+            renderUnits();
+
+            updateContainsUnitOptions();
+
+            updatePurchaseUnitOptions();
+
+        }
+
+
+        /*
+        | المخزون الحالي
+        */
+
+        if (
+            e.target.id ===
+            "currentStock"
+        ) {
+
+            updateStockEquivalent();
+
+        }
+
+    }
+);
+
+
+/*
+|--------------------------------------------------------------------------
+| Change Events
+|--------------------------------------------------------------------------
+*/
+
+document.addEventListener("change", function (e) {
+
+        if (e.target.id === "baseForSale") {
+            renderUnits();
+        }
+
+        if (
+            e.target.id ===
+            "purchaseUnit"
+        ) {
+
+            updateStockEquivalent();
+
+        }
+
+    }
+);
+
+
+/*
+|--------------------------------------------------------------------------
+| Initial
+|--------------------------------------------------------------------------
+*/
+
+updateContainsUnitOptions();
+
+updatePurchaseUnitOptions();
+
+renderUnits();
+
+
+
+
+
+async function submitProductData(finalData) {
+    console.log("Submitting product data:", finalData);
+    try {
+        let res = await fetch(url + '/item/add', {
+            method: "POST",
+            body: JSON.stringify(finalData),
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": `${getAuthToken('auth')}`
+            },
+        });
+        let data = await res.json();
+        if (res.status === 200) {
+            bootboxSuccess(data.message);
+            return;
+        }
+        else if (res.status === 400) {
+            console.error(data.message);
+            return;
+        }
+
+        else if (res.status === 401) {
+            showAuthExpired(data.message);
+            return;
+        }
+
+        else if (res.status === 409) {
+            console.error(data.message);
+            return;
+        }
+
+        else {
+            console.error(data.message);
+        }
+    } catch (err) {
+        console.error(err.message);
+        return;
+    } finally {
+        loader.style.display = 'none';
+    }
+}
