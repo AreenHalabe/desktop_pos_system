@@ -388,10 +388,10 @@ export const payOrder = async (req, res) => {
                 request
                     .input('session_id', sql.Int, session.id)
                     .input('invoice_num', sql.NVarChar, invoiceNum)
-                    .input('discount', sql.Decimal(9, 2), discount)
+                    .input('discount', sql.Decimal(15, 2), discount)
                     .input('payment_method', sql.NVarChar, paymentMethod)
                     .input('status', sql.NVarChar, 'مكتمل')
-                    .input('payment_amount', sql.Decimal(10, 2), paymentAmount)
+                    .input('payment_amount', sql.Decimal(18, 2), paymentAmount)
                     .input('order_id', sql.Int, orderId);
 
                 await request.query(`
@@ -417,10 +417,10 @@ export const payOrder = async (req, res) => {
                 request
                     .input('session_id', sql.Int, session.id)
                     .input('invoice_num', sql.NVarChar, invoiceNum)
-                    .input('discount', sql.Decimal(9, 2), discount)
+                    .input('discount', sql.Decimal(15, 2), discount)
                     .input('payment_method', sql.NVarChar, paymentMethod)
                     .input('status', sql.NVarChar, 'مكتمل')
-                    .input('payment_amount', sql.Decimal(10, 2), paymentAmount)
+                    .input('payment_amount', sql.Decimal(18, 2), paymentAmount)
                     .input('order_id', sql.Int, orderId);
 
                 await request.query(`
@@ -532,8 +532,8 @@ export const partialPayOrder = async (req, res) => {
 
                 const request = transaction.request();
 
-                request.input('discountTotal', sql.Decimal(10, 2), discountTotal);
-                request.input('partialPrice', sql.Decimal(10, 2), partialPrice);
+                request.input('discountTotal', sql.Decimal(15, 2), discountTotal);
+                request.input('partialPrice', sql.Decimal(18, 2), partialPrice);
                 request.input('status', sql.NVarChar, 'مدفوع جزئي');
                 request.input('orderId', sql.Int, orderId);
 
@@ -560,8 +560,8 @@ export const partialPayOrder = async (req, res) => {
 
                 const request = transaction.request();
 
-                request.input('discountTotal', sql.Decimal(10, 2), discountTotal);
-                request.input('partialPrice', sql.Decimal(10, 2), partialPrice);
+                request.input('discountTotal', sql.Decimal(15, 2), discountTotal);
+                request.input('partialPrice', sql.Decimal(18, 2), partialPrice);
                 request.input('status', sql.NVarChar, 'مدفوع جزئي');
                 request.input('orderId', sql.Int, orderId);
 

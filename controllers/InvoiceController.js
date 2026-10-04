@@ -611,7 +611,7 @@ async function addNewCheck(accountName, checkNumber, bankName, payeeName, amount
         .input('check_number', sql.NVarChar(50), checkNumber)
         .input('bank_name', sql.NVarChar(100), bankName)
         .input('payee_name', sql.NVarChar(150), payeeName)
-        .input('amount', sql.Decimal(12, 2), amount)
+        .input('amount', sql.Decimal(18, 2), amount)
         .input('currency', sql.NVarChar(3), currency)
         .input('due_date', sql.Date, dueDate)
         .input('type', sql.NVarChar(10), type)
