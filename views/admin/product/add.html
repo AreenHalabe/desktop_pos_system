@@ -113,11 +113,7 @@
             opacity: 0.5;
         }
 
-        .price-input {
-            direction: ltr;
-            text-align: right;
-        }
-
+ 
         .action-buttons {
             display: flex;
             justify-content: space-between;
@@ -168,6 +164,191 @@
         .stock-result strong {
             font-size: 15px;
         }
+
+
+
+/* Purchase Card */
+.purchase-card .card-header {
+    background: #fff;
+    border-bottom: 1px solid #e9ecef;
+}
+
+.purchase-box {
+    max-width: 900px;
+    margin: 0 auto;
+}
+
+
+/* كل خطوة */
+.purchase-step {
+    display: flex;
+    gap: 16px;
+    align-items: flex-start;
+}
+
+
+/* رقم الخطوة */
+.step-number {
+    width: 34px;
+    height: 34px;
+    min-width: 34px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 50%;
+
+    background: #f8f9fa;
+    border: 1px solid #dee2e6;
+
+    color: #495057;
+    font-weight: 700;
+    font-size: 14px;
+}
+
+
+/* محتوى الخطوة */
+.step-content {
+    flex: 1;
+    min-width: 0;
+}
+
+.step-content .form-label {
+    font-weight: 600;
+    margin-bottom: 4px;
+}
+
+
+/* وصف الخطوة */
+.step-description {
+    color: #6c757d;
+    font-size: 13px;
+    margin-bottom: 12px;
+}
+
+
+/* الخط الفاصل بين الخطوات */
+.step-divider {
+    height: 1px;
+    background: #e9ecef;
+    margin: 24px 0;
+}
+
+
+/* المعلومة الصغيرة أسفل الوحدة */
+.selected-unit-hint {
+    margin-top: 8px;
+    font-size: 13px;
+    color: #6c757d;
+}
+
+.selected-unit-hint i {
+    color: #0d6efd;
+}
+
+
+/* كمية المخزون + اسم الوحدة */
+.stock-input-wrapper {
+    display: flex;
+    align-items: stretch;
+}
+
+.stock-input-wrapper .stock-input {
+    border-top-left-radius: 0;
+    border-bottom-left-radius: 0;
+}
+
+.stock-unit {
+    min-width: 85px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    padding: 0 14px;
+
+    background: #f8f9fa;
+    border: 1px solid #ced4da;
+    border-right: 0;
+
+    border-radius: 0.375rem 0 0 0.375rem;
+
+    font-weight: 600;
+    color: #495057;
+
+    transition: all 0.2s ease;
+}
+
+
+/* عندما يتم اختيار الوحدة */
+.stock-unit.active {
+    background: #fff8e1;
+    color: #856404;
+    border-color: #ffc107;
+}
+
+
+/* الحقول المعطلة */
+.form-control:disabled {
+    background-color: #f8f9fa;
+    cursor: not-allowed;
+}
+
+
+.base-unit-help {
+    font-size: 13px;
+    font-weight: 400;
+    color: #6c757d;
+    margin-top: 4px;
+    line-height: 1.6;
+}
+
+.purchase-price-help {
+    margin-top: 10px;
+    padding: 9px 12px;
+
+    background-color: #fff8e1;
+    border: 1px solid #ffe082;
+    border-radius: 6px;
+
+    font-size: 14px;
+    font-weight: 500;
+    color: #664d03;
+
+    line-height: 1.6;
+}
+
+/* الموبايل */
+@media (max-width: 576px) {
+
+    .purchase-card .card-body {
+        padding: 1rem !important;
+    }
+
+    .purchase-step {
+        gap: 10px;
+    }
+
+    .step-number {
+        width: 30px;
+        height: 30px;
+        min-width: 30px;
+        font-size: 13px;
+    }
+
+    .stock-unit {
+        min-width: 70px;
+        padding: 0 8px;
+    }
+
+}
+
+
+
+
+
+
 
         @media (max-width: 768px) {
             .page-wrapper {
@@ -278,6 +459,11 @@
 
                         الوحدة الأساسية
 
+                        <div class="base-unit-help">
+                            <span class="form-text text-danger">مهم جدًا:</span>
+                            أصغر وِحدة يمكن بيع المنتج بها، مثل:
+                            سيجارة، قطعة، رغيف، كيلو، حبة، إلخ.
+                        </div>
                     </div>
 
                 </div>
@@ -322,10 +508,6 @@
                                 </select>
 
                                 <div class="form-text d-flex flex-column gap-1">
-                                    <div>
-                                        <span class="text-danger">مهم جدًا:</span> أصغر وِحدة يمكن بيع المنتج بها، مثل:
-                                        سيجارة، قطعة، رغيف، كيلو، حبة، إلخ.
-                                    </div>
                                     <div>
                                         <span class="text-danger">ملاحظة:</span> * هذه الوِحدة التي سيُحسب المخزون
                                         عليها.
@@ -377,24 +559,6 @@
 
                         </div>
 
-
-                        <!-- <div class="mt-3 d-none">
-
-                            <div class="usage-checkboxes">
-
-                                <div class="form-check">
-
-                                    <input class="form-check-input" type="checkbox" id="baseForSale" checked>
-
-                                    <label class="form-check-label" for="baseForSale">
-                                        يمكن البيع بهذه الوحدة
-                                    </label>
-
-                                </div>
-
-                            </div>
-
-                        </div> -->
                         <hr>
                         <div>
 
@@ -730,138 +894,179 @@
             </div>
 
 
-            <!-- =========================
-             بيانات الشراء والمخزون
-        ========================== -->
-            <div class="card mb-4">
+        
+            
+<div class="card mb-4 purchase-card">
 
-                <div class="card-header">
+    <div class="card-header">
 
-                    <div class="section-title mb-1">
+        <div class="section-title mb-1">
+            <i class="fa-solid fa-cart-shopping text-warning ms-1"></i>
+            بيانات سعر الشراء والمخزون
+        </div>
 
-                        <i class="fa-solid fa-cart-shopping text-warning ms-1"></i>
+        <div class="text-muted small">
+            حدّد الوحدة التي ستسجّل بها المخزون، ثم أدخل الكمية وسعر شراء الوحدة نفسها.
+        </div>
 
-                        بيانات الشراء والمخزون
+    </div>
 
-                    </div>
 
-                    <div class="text-muted small">
+    <div class="card-body p-4">
 
-                        اختر الوحدة التي يتم شراء المنتج بها وأدخل سعر الشراء والمخزون الحالي.
+        <div class="purchase-box">
 
-                    </div>
+            <!-- الخطوة الأولى -->
+            <div class="purchase-step">
 
+                <div class="step-number">
+                    1
                 </div>
 
+                <div class="step-content">
 
-                <div class="card-body p-4">
+                    <label class="form-label">
+                        وحدة المخزون
+                        <span class="required">*</span>
+                    </label>
 
-                    <div class="purchase-box">
+                    <div class="step-description">
+                        اختر الوحدة التي تريد تسجيل المخزون الحالي بها.
+                    </div>
 
-                        <div class="row g-3">
+                    <select class="form-select" id="purchaseUnit" required>
+                        <option value="">
+                            اختر وحدة المخزون
+                        </option>
+                    </select>
 
-                            <!-- وحدة الشراء -->
-                            <div class="col-md-4">
-
-                                <label class="form-label">
-
-                                    وحدة الشراء
-
-                                    <span class="required">*</span>
-
-                                </label>
-
-                                <select class="form-select" id="purchaseUnit" required>
-
-                                    <option value="">
-                                        اختر وحدة الشراء
-                                    </option>
-
-                                </select>
-
-                                <div class="form-text">
-
-                                    اختر وحدة واحدة فقط يتم شراء المنتج بها.
-
-                                </div>
-
-                            </div>
-
-
-                            <!-- سعر الشراء -->
-                            <div class="col-md-4">
-
-                                <label class="form-label">
-
-                                    سعر الشراء للوحدة الواحدة
-
-                                    <span class="required">*</span>
-
-                                </label>
-
-                                <div class="input-group">
-
-                                    <input type="number" class="form-control price-input" id="purchasePrice" min="0"
-                                        step="0.01" placeholder="0.00" required>
-
-                                    <span class="input-group-text">
-                                        ₪
-                                    </span>
-
-                                </div>
-
-                                <div class="form-text">
-
-                                    سعر شراء وحدة الشراء.
-
-                                </div>
-
-                            </div>
-
-
-                            <!-- المخزون الحالي -->
-                            <div class="col-md-4">
-
-                                <label class="form-label">
-
-                                    المخزون الحالي
-
-                                    <span class="required">*</span>
-
-                                </label>
-
-                                <input type="number" class="form-control" id="currentStock" min="0" step="1"
-                                    placeholder="0" required>
-
-                                <div class="form-text">
-
-                                    الكمية الحالية من وحدة الشراء.
-
-                                </div>
-
-                            </div>
-
-                        </div>
-
-
-                        <!-- نتيجة التحويل -->
-                        <div class="stock-result mt-4" id="stockResult" style="display: none;">
-
-                            <i class="fa-solid fa-boxes-stacked ms-1"></i>
-
-                            المخزون يعادل:
-
-                            <strong id="stockEquivalent">
-                                0
-                            </strong>
-
-                        </div>
-
+                    <div class="selected-unit-hint" id="selectedUnitHint">
+                        <i class="fa-solid fa-circle-info ms-1"></i>
+                        مثال: حبة، علبة، دزينة، مشتاح...
                     </div>
 
                 </div>
 
             </div>
+
+
+            <div class="step-divider"></div>
+
+
+            <!-- الخطوة الثانية -->
+            <div class="purchase-step">
+
+                <div class="step-number">
+                    2
+                </div>
+
+                <div class="step-content">
+
+                    <label class="form-label">
+                        كمية المخزون الحالية
+                        <span class="required">*</span>
+                    </label>
+
+                    <div class="step-description">
+                        أدخل كمية المخزون الموجودة حاليًا من الوحدة التي اخترتها.
+                    </div>
+
+                    <div class="stock-input-wrapper">
+
+                        <input type="number"
+                            class="form-control stock-input"
+                            id="currentStock"
+                            min="0"
+                            step="1"
+                            placeholder="0"
+                            required
+                            disabled>
+
+                        <span class="stock-unit" id="stockUnit">
+                            الوحدة
+                        </span>
+
+                    </div>
+
+                    <div class="form-text" id="stockUnitHelp">
+                        اختر وحدة المخزون أولًا.
+                    </div>
+
+                </div>
+
+            </div>
+
+            <!-- نتيجة التحويل -->
+            <div class="stock-result mt-4" id="stockResult" style="display: none;">
+
+                <i class="fa-solid fa-boxes-stacked ms-1"></i>
+
+                المخزون يعادل:
+
+                <strong id="stockEquivalent">
+                    0
+                </strong>
+
+            </div>
+
+            <div class="step-divider"></div>
+
+
+            <!-- الخطوة الثالثة -->
+            <div class="purchase-step">
+
+                <div class="step-number">
+                    3
+                </div>
+
+                <div class="step-content">
+
+                    <label class="form-label">
+                        سعر شراء الوحدة
+                        <span class="required">*</span>
+                    </label>
+
+                    <div class="step-description">
+                        أدخل السعر الذي دفعتَه لشراء وحدة واحدة من الوحدة التي اخترتها.
+                    </div>
+
+                    <div class="input-group">
+
+                        <input type="number"
+                            class="form-control price-input"
+                            id="purchasePrice"
+                            min="0"
+                            step="0.01"
+                            placeholder="0.00"
+                            required
+                            disabled>
+
+                        <span class="input-group-text">
+                            ₪
+                        </span>
+
+                    </div>
+
+                    <div class="purchase-price-help" id="purchasePriceHelp">
+                        مثال: إذا اخترت "علبة"، أدخل سعر شراء العلبة الواحدة.
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            
+
+        </div>
+
+    </div>
+
+</div>
+
+
+
+
 
 
             <!-- =========================

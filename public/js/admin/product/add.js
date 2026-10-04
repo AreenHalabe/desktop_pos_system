@@ -1273,26 +1273,13 @@ async function submitProduct() {
     const baseForPurchase = document.getElementById("baseForPurchase").checked;
 
 
-    const purchaseUnitId =
-        document
-            .getElementById("purchaseUnit")
-            .value;
+    const purchaseUnitId = document.getElementById("purchaseUnit").value;
 
 
-    const purchasePrice =
-        normalizeNumber(
-            document
-                .getElementById("purchasePrice")
-                .value
-        );
+    const purchasePrice =normalizeNumber(document.getElementById("purchasePrice").value);
 
 
-    const currentStock =
-        normalizeNumber(
-            document
-                .getElementById("currentStock")
-                .value
-        );
+    const currentStock =normalizeNumber(document.getElementById("currentStock").value);
 
 
     if (!productName) {
@@ -1361,8 +1348,7 @@ async function submitProduct() {
     }
 
 
-    const purchaseUnit =
-        getSelectedPurchaseUnit();
+    const purchaseUnit = getSelectedPurchaseUnit();
 
 
     if (!purchaseUnit) {
@@ -1755,3 +1741,67 @@ async function submitProductData(finalData) {
     //     loader.style.display = 'none';
     // }
 }
+
+
+
+const purchaseUnit = document.getElementById('purchaseUnit');
+const currentStock = document.getElementById('currentStock');
+const purchasePrice = document.getElementById('purchasePrice');
+
+const stockUnit = document.getElementById('stockUnit');
+const selectedUnitHint = document.getElementById('selectedUnitHint');
+const stockUnitHelp = document.getElementById('stockUnitHelp');
+const purchasePriceHelp = document.getElementById('purchasePriceHelp');
+
+
+purchaseUnit.addEventListener('change', function () {
+
+    const selectedOption = this.options[this.selectedIndex];
+
+    if (!this.value) {
+
+        currentStock.disabled = true;
+        purchasePrice.disabled = true;
+
+        stockUnit.textContent = 'الوحدة';
+        stockUnit.classList.remove('active');
+
+        selectedUnitHint.innerHTML = `
+            <i class="fa-solid fa-circle-info ms-1"></i>
+            مثال: حبة، علبة، دزينة، مشتاح...
+        `;
+
+        stockUnitHelp.textContent = 'اختر وحدة المخزون أولًا.';
+
+        purchasePriceHelp.textContent =
+            'اختر وحدة المخزون أولًا.';
+
+        return;
+    }
+
+
+    const unitName = selectedOption.textContent.trim();
+
+
+    // تفعيل الحقول
+    currentStock.disabled = false;
+    purchasePrice.disabled = false;
+
+
+    // إظهار اسم الوحدة بجانب كمية المخزون
+    stockUnit.textContent = unitName;
+    stockUnit.classList.add('active');
+
+
+    // تحديث النصوص حسب الوحدة المختارة
+    selectedUnitHint.innerHTML = `
+        <i class="fa-solid fa-circle-check ms-1 text-success"></i>
+        سيتم تسجيل المخزون بوحدة <strong>${unitName}</strong>.
+    `;
+
+    stockUnitHelp.textContent =
+        `أدخل كمية المخزون الحالية من ${unitName}.`;
+
+    purchasePriceHelp.textContent =
+        `أدخل سعر شراء ال  ${unitName} الواحد/ة.`;
+});
