@@ -595,11 +595,9 @@ function addUnit() {
         );
 
 
-    const forSale =
-        document
-            .getElementById("newUnitForSale")
-            .checked;
-
+    const forSale = document.getElementById("newUnitForSale").checked;
+    
+    const forPurchase = document.getElementById("newUnitForPurchase").checked;
 
     /*
     | Validation
@@ -657,7 +655,7 @@ function addUnit() {
     const baseUnitName = getBaseUnitName();
 
 
-    if ( unitName.toLowerCase() === baseUnitName.toLowerCase()) {
+    if (unitName.toLowerCase() === baseUnitName.toLowerCase()) {
         bootboxError(
             "اسم الوحدة مستخدم كالوحدة الأساسية."
         );
@@ -752,13 +750,14 @@ function addUnit() {
 
         conversion_factor: conversionFactor,
 
-        barcode: autoUnitBarcodeCheckbox.checked ? 'سيتم توليده تلقائياً' 
+        barcode: autoUnitBarcodeCheckbox.checked ? 'سيتم توليده تلقائياً'
             : barcode || null
         ,
 
         selling_price: sellingPrice,
 
-        for_sale: forSale
+        for_sale: forSale,
+        for_purchase: forPurchase
 
     };
 
@@ -794,19 +793,13 @@ function addUnit() {
     autoUnitBarcodeCheckbox.checked = false;
     updateUnitBarcodeState();
 
-    document
-        .getElementById("newUnitPrice")
-        .value = "";
+    document.getElementById("newUnitPrice").value = "";
 
 
-    document
-        .getElementById("newUnitForSale")
-        .checked = true;
+    document.getElementById("newUnitForSale").checked = true;
+    document.getElementById("newUnitForPurchase").checked = false;
 
-
-    document
-        .getElementById("newUnitName")
-        .focus();
+    document.getElementById("newUnitName").focus();
 
 }
 
@@ -819,10 +812,7 @@ function addUnit() {
 
 function renderUnits() {
 
-    const tbody =
-        document.getElementById(
-            "unitsTableBody"
-        );
+    const tbody =document.getElementById("unitsTableBody");
 
 
     const baseUnitName =
@@ -872,11 +862,9 @@ function renderUnits() {
         );
 
 
-    const baseForSale =
-        document
-            .getElementById("baseForSale")
-            .checked;
-
+    const baseForSale = document.getElementById("baseForSale").checked;
+    
+    const baseForPurchase = document.getElementById("baseForPurchase").checked;
 
     html += `
             <tr>
@@ -916,10 +904,10 @@ function renderUnits() {
 
                 <td>
 
-                    ${ baseBarcode
-                        ? escapeHtml(baseBarcode)
-                        :  autoBarcodeCheckbox.checked ? '<span class="text-muted">سيتم توليده تلقائياً</span>' : '<span class="text-muted">—</span>'
-                    }
+                    ${baseBarcode
+            ? escapeHtml(baseBarcode)
+            : autoBarcodeCheckbox.checked ? '<span class="text-muted">سيتم توليده تلقائياً</span>' : '<span class="text-muted">—</span>'
+        }
 
                 </td>
 
@@ -933,7 +921,7 @@ function renderUnits() {
 
                 <td>
 
-                    ${renderUsage(baseForSale)}
+                    ${renderUsage(baseForPurchase, baseForSale)}
 
                 </td>
 
@@ -998,9 +986,9 @@ function renderUnits() {
                         <td>
 
                             ${unit.barcode
-                                ? escapeHtml(unit.barcode)
-                                :  '<span class="text-muted">—</span>'
-                            }
+                    ? escapeHtml(unit.barcode)
+                    : '<span class="text-muted">—</span>'
+                }
 
                         </td>
 
@@ -1014,7 +1002,7 @@ function renderUnits() {
 
                         <td>
 
-                            ${renderUsage(unit.for_sale)}
+                            ${renderUsage(unit.for_purchase, unit.for_sale)}
 
                         </td>
 
@@ -1053,27 +1041,39 @@ function renderUnits() {
 |--------------------------------------------------------------------------
 */
 
-function renderUsage(forSale) {
+function renderUsage(forPurchase, forSale) {
 
-    if (!forSale) {
+    const values = [];
+
+
+    if (forPurchase) {
+        values.push(
+            `<span class="badge text-bg-primary">شراء</span>`
+        );
+    }
+
+
+    if (forSale) {
+        values.push(
+            `<span class="badge text-bg-success">بيع</span>`
+        );
+    }
+
+
+    if (!values.length) {
 
         return `
                 <span class="badge text-bg-secondary">
-                    لا
+                    بدون استخدام
                 </span>
             `;
 
     }
 
 
-    return `
-            <span class="badge text-bg-success">
-                بيع
-            </span>
-        `;
+    return values.join(" ");
 
 }
-
 
 /*
 |--------------------------------------------------------------------------
@@ -1268,10 +1268,9 @@ async function submitProduct() {
         );
 
 
-    const baseForSale =
-        document
-            .getElementById("baseForSale")
-            .checked;
+    const baseForSale =document.getElementById("baseForSale").checked;
+
+    const baseForPurchase = document.getElementById("baseForPurchase").checked;
 
 
     const purchaseUnitId =
@@ -1295,10 +1294,6 @@ async function submitProduct() {
                 .value
         );
 
-
-    /*
-    | Validation
-    */
 
     if (!productName) {
 
@@ -1366,10 +1361,6 @@ async function submitProduct() {
     }
 
 
-    /*
-    | الحصول على وحدة الشراء
-    */
-
     const purchaseUnit =
         getSelectedPurchaseUnit();
 
@@ -1385,18 +1376,8 @@ async function submitProduct() {
     }
 
 
-    /*
-    | تحويل المخزون للوحدة الأساسية
-    */
+    const stockInBaseUnit = currentStock *purchaseUnit.conversion_factor;
 
-    const stockInBaseUnit =
-        currentStock *
-        purchaseUnit.conversion_factor;
-
-
-    /*
-    | البيانات النهائية
-    */
 
     const data = {
 
@@ -1408,10 +1389,6 @@ async function submitProduct() {
                 categoryId
             ),
 
-            /*
-            | المخزون النهائي بالوحدة الأساسية
-            */
-
             stock_quantity:
                 stockInBaseUnit
 
@@ -1419,84 +1396,40 @@ async function submitProduct() {
 
 
         purchase: {
-
-            /*
-            | وحدة الشراء
-            */
-
-            unit_id:
-                purchaseUnitId,
-
-            unit_name:
-                purchaseUnit.unit_name,
-
-            /*
-            | سعر شراء الوحدة
-            */
-
-            price:
-                purchasePrice,
-
-            /*
-            | المخزون كما أدخله المستخدم
-            */
-
-            quantity:
-                currentStock,
-
-            /*
-            | المخزون بعد التحويل
-            */
-
-            base_quantity:
-                stockInBaseUnit
-
+            unit_id: purchaseUnitId,
+            unit_name: purchaseUnit.unit_name,
+            price: purchasePrice,
+            quantity: currentStock,
+            base_quantity: stockInBaseUnit
         },
 
 
         units: [
-
-            /*
-            | الوحدة الأساسية
-            */
-
             {
 
                 id: "base",
 
-                unit_name:
-                    baseUnitName,
+                unit_name:baseUnitName,
 
-                contains_quantity:
-                    null,
+                contains_quantity:null,
 
-                contains_unit_id:
-                    null,
+                contains_unit_id:null,
 
-                contains_unit_name:
-                    null,
+                contains_unit_name:null,
 
-                conversion_factor:
-                    1,
+                conversion_factor:1,
 
-                barcode:
-                    baseBarcode || null,
+                barcode:baseBarcode || null,
 
-                selling_price:
-                    baseSellingPrice,
+                selling_price: baseSellingPrice,
 
-                for_sale:
-                    baseForSale,
+                for_sale: baseForSale,
 
-                is_base_unit:
-                    true
+                for_purchase: baseForPurchase,
+
+                is_base_unit: true
 
             },
-
-
-            /*
-            | الوحدات الإضافية
-            */
 
             ...units.map(
                 unit => ({
@@ -1512,7 +1445,7 @@ async function submitProduct() {
         ]
 
     };
-   await submitProductData(data);
+    await submitProductData(data);
 
     /*
     |--------------------------------------------------------------------------
@@ -1626,62 +1559,62 @@ function escapeHtml(value) {
 
 document.addEventListener("click", function (e) {
 
-        const addButton =
-            e.target.closest(
-                "#addUnitBtn"
-            );
+    const addButton =
+        e.target.closest(
+            "#addUnitBtn"
+        );
 
 
-        if (addButton) {
+    if (addButton) {
 
-            addUnit();
+        addUnit();
 
-            return;
-
-        }
-
-
-        /*
-        | حذف وحدة
-        */
-
-        const deleteButton =e.target.closest(".delete-unit-btn");
-
-
-        if (deleteButton) {
-
-            const index =
-                Number(
-                    deleteButton.dataset.index
-                );
-
-
-            deleteUnit(index);
-
-            return;
-
-        }
-
-
-        /*
-        | إعادة تعيين
-        */
-
-        const resetButton =
-            e.target.closest(
-                "#resetBtn"
-            );
-
-
-        if (resetButton) {
-
-            resetForm();
-
-            return;
-
-        }
+        return;
 
     }
+
+
+    /*
+    | حذف وحدة
+    */
+
+    const deleteButton = e.target.closest(".delete-unit-btn");
+
+
+    if (deleteButton) {
+
+        const index =
+            Number(
+                deleteButton.dataset.index
+            );
+
+
+        deleteUnit(index);
+
+        return;
+
+    }
+
+
+    /*
+    | إعادة تعيين
+    */
+
+    const resetButton =
+        e.target.closest(
+            "#resetBtn"
+        );
+
+
+    if (resetButton) {
+
+        resetForm();
+
+        return;
+
+    }
+
+}
 );
 
 
@@ -1691,12 +1624,12 @@ document.addEventListener("click", function (e) {
 |--------------------------------------------------------------------------
 */
 
-document.getElementById("productForm").addEventListener("submit",async function (e) { 
-            e.preventDefault();
-            await submitProduct();
+document.getElementById("productForm").addEventListener("submit", async function (e) {
+    e.preventDefault();
+    await submitProduct();
 
-        }
-    );
+}
+);
 
 
 /*
@@ -1705,41 +1638,41 @@ document.getElementById("productForm").addEventListener("submit",async function 
 |--------------------------------------------------------------------------
 */
 
-document.addEventListener("input",function (e) {
-        if (
-            e.target.id ===
-            "baseUnitName" ||
+document.addEventListener("input", function (e) {
+    if (
+        e.target.id ===
+        "baseUnitName" ||
 
-            e.target.id ===
-            "baseBarcode" ||
+        e.target.id ===
+        "baseBarcode" ||
 
-            e.target.id ===
-            "baseSellingPrice"
-        ) {
+        e.target.id ===
+        "baseSellingPrice"
+    ) {
 
-            renderUnits();
+        renderUnits();
 
-            updateContainsUnitOptions();
+        updateContainsUnitOptions();
 
-            updatePurchaseUnitOptions();
-
-        }
-
-
-        /*
-        | المخزون الحالي
-        */
-
-        if (
-            e.target.id ===
-            "currentStock"
-        ) {
-
-            updateStockEquivalent();
-
-        }
+        updatePurchaseUnitOptions();
 
     }
+
+
+    /*
+    | المخزون الحالي
+    */
+
+    if (
+        e.target.id ===
+        "currentStock"
+    ) {
+
+        updateStockEquivalent();
+
+    }
+
+}
 );
 
 
@@ -1751,20 +1684,17 @@ document.addEventListener("input",function (e) {
 
 document.addEventListener("change", function (e) {
 
-        if (e.target.id === "baseForSale") {
-            renderUnits();
-        }
+    if (e.target.id === "baseForPurchase" || e.target.id === "baseForSale") {
+        renderUnits();
+    }
 
-        if (
-            e.target.id ===
-            "purchaseUnit"
-        ) {
+    if (e.target.id === "purchaseUnit") {
 
-            updateStockEquivalent();
-
-        }
+        updateStockEquivalent();
 
     }
+
+}
 );
 
 
@@ -1786,42 +1716,42 @@ renderUnits();
 
 async function submitProductData(finalData) {
     console.log("Submitting product data:", finalData);
-    try {
-        let res = await fetch(url + '/item/add', {
-            method: "POST",
-            body: JSON.stringify(finalData),
-            headers: {
-                "Content-Type": "application/json",
-                "Authorization": `${getAuthToken('auth')}`
-            },
-        });
-        let data = await res.json();
-        if (res.status === 200) {
-            bootboxSuccess(data.message);
-            return;
-        }
-        else if (res.status === 400) {
-            console.error(data.message);
-            return;
-        }
+    // try {
+    //     let res = await fetch(url + '/item/add', {
+    //         method: "POST",
+    //         body: JSON.stringify(finalData),
+    //         headers: {
+    //             "Content-Type": "application/json",
+    //             "Authorization": `${getAuthToken('auth')}`
+    //         },
+    //     });
+    //     let data = await res.json();
+    //     if (res.status === 200) {
+    //         bootboxSuccess(data.message);
+    //         return;
+    //     }
+    //     else if (res.status === 400) {
+    //         console.error(data.message);
+    //         return;
+    //     }
 
-        else if (res.status === 401) {
-            showAuthExpired(data.message);
-            return;
-        }
+    //     else if (res.status === 401) {
+    //         showAuthExpired(data.message);
+    //         return;
+    //     }
 
-        else if (res.status === 409) {
-            console.error(data.message);
-            return;
-        }
+    //     else if (res.status === 409) {
+    //         console.error(data.message);
+    //         return;
+    //     }
 
-        else {
-            console.error(data.message);
-        }
-    } catch (err) {
-        console.error(err.message);
-        return;
-    } finally {
-        loader.style.display = 'none';
-    }
+    //     else {
+    //         console.error(data.message);
+    //     }
+    // } catch (err) {
+    //     console.error(err.message);
+    //     return;
+    // } finally {
+    //     loader.style.display = 'none';
+    // }
 }

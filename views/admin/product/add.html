@@ -323,10 +323,12 @@
 
                                 <div class="form-text d-flex flex-column gap-1">
                                     <div>
-                                        <span class="text-danger">مهم جدًا:</span> أصغر وِحدة يمكن بيع المنتج بها، مثل: سيجارة، قطعة، رغيف، كيلو، حبة، إلخ.
+                                        <span class="text-danger">مهم جدًا:</span> أصغر وِحدة يمكن بيع المنتج بها، مثل:
+                                        سيجارة، قطعة، رغيف، كيلو، حبة، إلخ.
                                     </div>
                                     <div>
-                                        <span class="text-danger">ملاحظة:</span> * هذه الوِحدة التي سيُحسب المخزون عليها.
+                                        <span class="text-danger">ملاحظة:</span> * هذه الوِحدة التي سيُحسب المخزون
+                                        عليها.
                                     </div>
                                 </div>
 
@@ -343,9 +345,9 @@
                                 <input type="text" class="form-control" id="baseBarcode" placeholder="باركود الوحدة">
 
                                 <div class="form-check mt-2">
-                                    <input class="form-check-input" name="auto_barcode" type="checkbox" id="auto_barcode" value="1" style="cursor:pointer;">
-                                    <label class="form-check-label" for="auto_barcode"
-                                        style="cursor:pointer;">
+                                    <input class="form-check-input" name="auto_barcode" type="checkbox"
+                                        id="auto_barcode" value="1" style="cursor:pointer;">
+                                    <label class="form-check-label" for="auto_barcode" style="cursor:pointer;">
                                         توليد باركود تلقائيًا
                                     </label>
                                 </div>
@@ -376,7 +378,7 @@
                         </div>
 
 
-                        <div class="mt-3 d-none">
+                        <!-- <div class="mt-3 d-none">
 
                             <div class="usage-checkboxes">
 
@@ -392,7 +394,38 @@
 
                             </div>
 
+                        </div> -->
+                        <hr>
+                        <div>
+
+                            <div class="usage-checkboxes">
+                                <label class="form-label">
+                                    الاستخدام
+                                </label>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="baseForPurchase">
+
+                                    <label class="form-check-label" for="baseForPurchase">
+                                        يمكن الشراء بهذه الوحدة
+                                    </label>
+                                </div>
+
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="baseForSale" checked disabled>
+
+                                    <label class="form-check-label" for="baseForSale">
+                                        يمكن البيع بهذه الوحدة
+                                    </label>
+                                </div>
+
+                            </div>
+
                         </div>
+
+
+
+
+
 
                     </div>
 
@@ -559,9 +592,9 @@
                                 <input type="text" class="form-control" id="newUnitBarcode" placeholder="باركود الوحدة">
 
                                 <div class="form-check mt-2">
-                                    <input class="form-check-input" name="auto_barcode_unit" type="checkbox" id="auto_barcode_unit" value="1" style="cursor:pointer;">
-                                    <label class="form-check-label" for="auto_barcode_unit"
-                                        style="cursor:pointer;">
+                                    <input class="form-check-input" name="auto_barcode_unit" type="checkbox"
+                                        id="auto_barcode_unit" value="1" style="cursor:pointer;">
+                                    <label class="form-check-label" for="auto_barcode_unit" style="cursor:pointer;">
                                         توليد باركود تلقائيًا
                                     </label>
                                 </div>
@@ -570,7 +603,7 @@
 
 
                             <!-- يمكن البيع -->
-                            <div class="col-md-4">
+                            <!-- <div class="col-md-4">
 
                                 <label class="form-label">
                                     الاستخدام
@@ -584,6 +617,38 @@
 
                                         <label class="form-check-label" for="newUnitForSale">
                                             يمكن البيع بهذه الوحدة
+                                        </label>
+
+                                    </div>
+
+                                </div>
+
+                            </div> -->
+
+                            <div class="col-md-4">
+
+                                <label class="form-label">
+                                    الاستخدام
+                                </label>
+
+                                <div class="usage-checkboxes mt-2">
+
+                                    <div class="form-check">
+
+                                        <input class="form-check-input" type="checkbox" id="newUnitForPurchase">
+
+                                        <label class="form-check-label" for="newUnitForPurchase">
+                                             يمكن الشراء بهذه الوحدة
+                                        </label>
+
+                                    </div>
+
+                                    <div class="form-check">
+
+                                        <input class="form-check-input" type="checkbox" id="newUnitForSale" checked>
+
+                                        <label class="form-check-label" for="newUnitForSale">
+                                             يمكن البيع بهذه الوحدة
                                         </label>
 
                                     </div>
