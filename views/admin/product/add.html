@@ -113,7 +113,7 @@
             opacity: 0.5;
         }
 
- 
+
         .action-buttons {
             display: flex;
             justify-content: space-between;
@@ -167,182 +167,219 @@
 
 
 
-/* Purchase Card */
-.purchase-card .card-header {
-    background: #fff;
-    border-bottom: 1px solid #e9ecef;
-}
+        /* Purchase Card */
+        .purchase-card .card-header {
+            background: #fff;
+            border-bottom: 1px solid #e9ecef;
+        }
 
-.purchase-box {
-    max-width: 900px;
-    margin: 0 auto;
-}
-
-
-/* كل خطوة */
-.purchase-step {
-    display: flex;
-    gap: 16px;
-    align-items: flex-start;
-}
+        .purchase-box {
+            max-width: 900px;
+            margin: 0 auto;
+        }
 
 
-/* رقم الخطوة */
-.step-number {
-    width: 34px;
-    height: 34px;
-    min-width: 34px;
-
-    display: flex;
-    align-items: center;
-    justify-content: center;
-
-    border-radius: 50%;
-
-    background: #f8f9fa;
-    border: 1px solid #dee2e6;
-
-    color: #495057;
-    font-weight: 700;
-    font-size: 14px;
-}
+        /* كل خطوة */
+        .purchase-step {
+            display: flex;
+            gap: 16px;
+            align-items: flex-start;
+        }
 
 
-/* محتوى الخطوة */
-.step-content {
-    flex: 1;
-    min-width: 0;
-}
+        /* رقم الخطوة */
+        .step-number {
+            width: 34px;
+            height: 34px;
+            min-width: 34px;
 
-.step-content .form-label {
-    font-weight: 600;
-    margin-bottom: 4px;
-}
+            display: flex;
+            align-items: center;
+            justify-content: center;
 
+            border-radius: 50%;
 
-/* وصف الخطوة */
-.step-description {
-    color: #6c757d;
-    font-size: 13px;
-    margin-bottom: 12px;
-}
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
 
-
-/* الخط الفاصل بين الخطوات */
-.step-divider {
-    height: 1px;
-    background: #e9ecef;
-    margin: 24px 0;
-}
+            color: #495057;
+            font-weight: 700;
+            font-size: 14px;
+        }
 
 
-/* المعلومة الصغيرة أسفل الوحدة */
-.selected-unit-hint {
-    margin-top: 8px;
-    font-size: 13px;
-    color: #6c757d;
-}
+        /* محتوى الخطوة */
+        .step-content {
+            flex: 1;
+            min-width: 0;
+        }
 
-.selected-unit-hint i {
-    color: #0d6efd;
-}
-
-
-/* كمية المخزون + اسم الوحدة */
-.stock-input-wrapper {
-    display: flex;
-    align-items: stretch;
-}
-
-.stock-input-wrapper .stock-input {
-    border-top-left-radius: 0;
-    border-bottom-left-radius: 0;
-}
-
-.stock-unit {
-    min-width: 85px;
-
-    display: flex;
-    align-items: center;
-    justify-content: center;
-
-    padding: 0 14px;
-
-    background: #f8f9fa;
-    border: 1px solid #ced4da;
-    border-right: 0;
-
-    border-radius: 0.375rem 0 0 0.375rem;
-
-    font-weight: 600;
-    color: #495057;
-
-    transition: all 0.2s ease;
-}
+        .step-content .form-label {
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
 
 
-/* عندما يتم اختيار الوحدة */
-.stock-unit.active {
-    background: #fff8e1;
-    color: #856404;
-    border-color: #ffc107;
-}
+        /* وصف الخطوة */
+        .step-description {
+            color: #6c757d;
+            font-size: 13px;
+            margin-bottom: 12px;
+        }
 
 
-/* الحقول المعطلة */
-.form-control:disabled {
-    background-color: #f8f9fa;
-    cursor: not-allowed;
-}
+        /* الخط الفاصل بين الخطوات */
+        .step-divider {
+            height: 1px;
+            background: #e9ecef;
+            margin: 24px 0;
+        }
 
 
-.base-unit-help {
-    font-size: 13px;
-    font-weight: 400;
-    color: #6c757d;
-    margin-top: 4px;
-    line-height: 1.6;
-}
+        /* المعلومة الصغيرة أسفل الوحدة */
+        .selected-unit-hint {
+            margin-top: 8px;
+            font-size: 13px;
+            color: #6c757d;
+        }
 
-.purchase-price-help {
-    margin-top: 10px;
-    padding: 9px 12px;
+        .selected-unit-hint i {
+            color: #0d6efd;
+        }
 
-    background-color: #fff8e1;
-    border: 1px solid #ffe082;
-    border-radius: 6px;
 
-    font-size: 14px;
-    font-weight: 500;
-    color: #664d03;
+        /* كمية المخزون + اسم الوحدة */
+        .stock-input-wrapper {
+            display: flex;
+            align-items: stretch;
+        }
 
-    line-height: 1.6;
-}
+        .stock-input-wrapper .stock-input {
+            border-top-left-radius: 0;
+            border-bottom-left-radius: 0;
+        }
 
-/* الموبايل */
-@media (max-width: 576px) {
+        .stock-unit {
+            min-width: 85px;
 
-    .purchase-card .card-body {
-        padding: 1rem !important;
-    }
+            display: flex;
+            align-items: center;
+            justify-content: center;
 
-    .purchase-step {
-        gap: 10px;
-    }
+            padding: 0 14px;
 
-    .step-number {
-        width: 30px;
-        height: 30px;
-        min-width: 30px;
-        font-size: 13px;
-    }
+            background: #f8f9fa;
+            border: 1px solid #ced4da;
+            border-right: 0;
 
-    .stock-unit {
-        min-width: 70px;
-        padding: 0 8px;
-    }
+            border-radius: 0.375rem 0 0 0.375rem;
 
-}
+            font-weight: 600;
+            color: #495057;
+
+            transition: all 0.2s ease;
+        }
+
+
+        /* عندما يتم اختيار الوحدة */
+        .stock-unit.active {
+            background: #fff8e1;
+            color: #856404;
+            border-color: #ffc107;
+        }
+
+
+        .purchase-unit {
+            min-width: 85px;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            padding: 0 14px;
+
+            background: #f8f9fa;
+            border: 1px solid #ced4da;
+
+            border-radius: 0.375rem 0 0 0.375rem;
+
+            font-weight: 600;
+            color: #495057;
+
+            transition: all 0.2s ease;
+        }
+
+
+        /* عندما يتم اختيار الوحدة */
+        .purchase-unit.active {
+            background: #fff8e1;
+            color: #856404;
+            border-color: #ffc107;
+        }
+
+
+        /* الحقول المعطلة */
+        .form-control:disabled {
+            background-color: #f8f9fa;
+            cursor: not-allowed;
+        }
+
+
+        .base-unit-help {
+            font-size: 15px;
+            font-weight: 400;
+            color: #000000;
+            margin-top: 4px;
+            line-height: 1.6;
+            background-color: #dc35451a;
+            border: 1px solid #dc35454d;
+            border-radius: 6px;
+            padding: 6px 12px;
+        }
+
+        .purchase-price-help {
+            margin-top: 10px;
+            padding: 9px 12px;
+
+            background-color: #fff8e1;
+            border: 1px solid #ffe082;
+            border-radius: 6px;
+
+            font-size: 14px;
+            font-weight: 500;
+            color: #664d03;
+
+            line-height: 1.6;
+        }
+
+        .pointer {
+            cursor: pointer;
+        }
+
+        /* الموبايل */
+        @media (max-width: 576px) {
+
+            .purchase-card .card-body {
+                padding: 1rem !important;
+            }
+
+            .purchase-step {
+                gap: 10px;
+            }
+
+            .step-number {
+                width: 30px;
+                height: 30px;
+                min-width: 30px;
+                font-size: 13px;
+            }
+
+            .stock-unit {
+                min-width: 70px;
+                padding: 0 8px;
+            }
+
+        }
 
 
 
@@ -430,12 +467,7 @@
                                     اختر التصنيف
                                 </option>
 
-                                <option value="1">مشروبات</option>
-                                <option value="2">مواد غذائية</option>
-                                <option value="3">سجائر</option>
-                                <option value="4">مخبوزات</option>
-                                <option value="5">أخرى</option>
-
+                                <option value="" disabled id="loadingCategory">جاري التحميل...</option>
                             </select>
 
                         </div>
@@ -460,7 +492,7 @@
                         الوحدة الأساسية
 
                         <div class="base-unit-help">
-                            <span class="form-text text-danger">مهم جدًا:</span>
+                            <span class="form-text text-danger">مهم جدًا : </span>
                             أصغر وِحدة يمكن بيع المنتج بها، مثل:
                             سيجارة، قطعة، رغيف، كيلو، حبة، إلخ.
                         </div>
@@ -485,14 +517,6 @@
                                     <span class="required">*</span>
 
                                 </label>
-
-                                <!-- <input
-                                type="text"
-                                class="form-control"
-                                id="baseUnitName"
-                                placeholder="مثال: سيجارة"
-                                required
-                            > -->
 
                                 <select class="form-select" id="baseUnitName" name="base_unit" required>
                                     <option value="" selected disabled> اختر الوِحدة </option>
@@ -547,7 +571,7 @@
                                 <div class="input-group">
 
                                     <input type="number" class="form-control price-input" id="baseSellingPrice" min="0"
-                                        step="0.01" placeholder="0.00">
+                                        step="0.5" placeholder="0.00">
 
                                     <span class="input-group-text">
                                         ₪
@@ -567,17 +591,18 @@
                                     الاستخدام
                                 </label>
                                 <div class="form-check">
-                                    <input class="form-check-input" type="checkbox" id="baseForPurchase">
+                                    <input class="form-check-input pointer" type="checkbox" id="baseForPurchase">
 
-                                    <label class="form-check-label" for="baseForPurchase">
+                                    <label class="form-check-label pointer" for="baseForPurchase">
                                         يمكن الشراء بهذه الوحدة
                                     </label>
                                 </div>
 
                                 <div class="form-check">
-                                    <input class="form-check-input" type="checkbox" id="baseForSale" checked disabled>
+                                    <input class="form-check-input pointer" type="checkbox" id="baseForSale" checked
+                                        disabled>
 
-                                    <label class="form-check-label" for="baseForSale">
+                                    <label class="form-check-label pointer" for="baseForSale">
                                         يمكن البيع بهذه الوحدة
                                     </label>
                                 </div>
@@ -585,12 +610,6 @@
                             </div>
 
                         </div>
-
-
-
-
-
-
                     </div>
 
                 </div>
@@ -698,7 +717,7 @@
                                 </label>
 
                                 <input type="number" class="form-control" id="newUnitQuantity" min="1" step="1"
-                                    placeholder="20">
+                                    placeholder="مثال : 20">
 
                             </div>
 
@@ -735,7 +754,7 @@
                                 <div class="input-group">
 
                                     <input type="number" class="form-control price-input" id="newUnitPrice" min="0"
-                                        step="0.01" placeholder="0.00">
+                                        step="0.5" placeholder="0.00">
 
                                     <span class="input-group-text">
                                         ₪
@@ -766,29 +785,6 @@
                             </div>
 
 
-                            <!-- يمكن البيع -->
-                            <!-- <div class="col-md-4">
-
-                                <label class="form-label">
-                                    الاستخدام
-                                </label>
-
-                                <div class="usage-checkboxes mt-2">
-
-                                    <div class="form-check">
-
-                                        <input class="form-check-input" type="checkbox" id="newUnitForSale" checked>
-
-                                        <label class="form-check-label" for="newUnitForSale">
-                                            يمكن البيع بهذه الوحدة
-                                        </label>
-
-                                    </div>
-
-                                </div>
-
-                            </div> -->
-
                             <div class="col-md-4">
 
                                 <label class="form-label">
@@ -799,20 +795,21 @@
 
                                     <div class="form-check">
 
-                                        <input class="form-check-input" type="checkbox" id="newUnitForPurchase">
+                                        <input class="form-check-input pointer" type="checkbox" id="newUnitForPurchase">
 
-                                        <label class="form-check-label" for="newUnitForPurchase">
-                                             يمكن الشراء بهذه الوحدة
+                                        <label class="form-check-label pointer" for="newUnitForPurchase">
+                                            يمكن الشراء بهذه الوحدة
                                         </label>
 
                                     </div>
 
                                     <div class="form-check">
 
-                                        <input class="form-check-input" type="checkbox" id="newUnitForSale" checked>
+                                        <input class="form-check-input pointer" type="checkbox" id="newUnitForSale"
+                                            checked>
 
-                                        <label class="form-check-label" for="newUnitForSale">
-                                             يمكن البيع بهذه الوحدة
+                                        <label class="form-check-label pointer" for="newUnitForSale">
+                                            يمكن البيع بهذه الوحدة
                                         </label>
 
                                     </div>
@@ -894,175 +891,200 @@
             </div>
 
 
-        
-            
-<div class="card mb-4 purchase-card">
-
-    <div class="card-header">
-
-        <div class="section-title mb-1">
-            <i class="fa-solid fa-cart-shopping text-warning ms-1"></i>
-            بيانات سعر الشراء والمخزون
-        </div>
-
-        <div class="text-muted small">
-            حدّد الوحدة التي ستسجّل بها المخزون، ثم أدخل الكمية وسعر شراء الوحدة نفسها.
-        </div>
-
-    </div>
 
 
-    <div class="card-body p-4">
+            <div class="card mb-4 purchase-card">
 
-        <div class="purchase-box">
+                <div class="card-header">
 
-            <!-- الخطوة الأولى -->
-            <div class="purchase-step">
-
-                <div class="step-number">
-                    1
-                </div>
-
-                <div class="step-content">
-
-                    <label class="form-label">
-                        وحدة المخزون
-                        <span class="required">*</span>
-                    </label>
-
-                    <div class="step-description">
-                        اختر الوحدة التي تريد تسجيل المخزون الحالي بها.
+                    <div class="section-title mb-1">
+                        <i class="fa-solid fa-cart-shopping text-warning ms-1"></i>
+                        بيانات سعر الشراء والمخزون
                     </div>
 
-                    <select class="form-select" id="purchaseUnit" required>
-                        <option value="">
-                            اختر وحدة المخزون
-                        </option>
-                    </select>
-
-                    <div class="selected-unit-hint" id="selectedUnitHint">
-                        <i class="fa-solid fa-circle-info ms-1"></i>
-                        مثال: حبة، علبة، دزينة، مشتاح...
+                    <div class="text-muted small">
+                       حدّد وِحدة قياس المخزون الحالي، ثم أدخل الكمية وسعر شراء الوحدة.
                     </div>
 
                 </div>
 
-            </div>
+
+                <div class="card-body p-4">
+
+                    <div class="purchase-box">
+
+                        <!-- الخطوة الأولى -->
+                        <div class="purchase-step">
+
+                            <div class="step-number">
+                                1
+                            </div>
+
+                            <div class="step-content">
+
+                                <label class="form-label">
+                                    وحدة المخزون
+                                    <span class="required">*</span>
+                                </label>
+
+                                <div class="step-description">
+                                   اختر الوحدة التي ستقيس بها المخزون الحالي بها.
+                                </div>
+
+                                <select class="form-select" id="purchaseUnit" required>
+                                    <option value="">
+                                        اختر وحدة قياس المخزون الحالي
+                                    </option>
+                                </select>
+
+                                <div class="selected-unit-hint" id="selectedUnitHint">
+                                    <i class="fa-solid fa-circle-info ms-1"></i>
+                                    مثال: حبة، علبة، دزينة، مشتاح...
+                                </div>
+
+                            </div>
+
+                        </div>
 
 
-            <div class="step-divider"></div>
+                        <div class="step-divider"></div>
 
 
-            <!-- الخطوة الثانية -->
-            <div class="purchase-step">
+                        <!-- الخطوة الثانية -->
+                        <div class="purchase-step">
 
-                <div class="step-number">
-                    2
-                </div>
+                            <div class="step-number">
+                                2
+                            </div>
 
-                <div class="step-content">
+                            <div class="step-content">
 
-                    <label class="form-label">
-                        كمية المخزون الحالية
-                        <span class="required">*</span>
-                    </label>
+                                <label class="form-label">
+                                    كمية المخزون الحالية
+                                    <span class="required">*</span>
+                                </label>
 
-                    <div class="step-description">
-                        أدخل كمية المخزون الموجودة حاليًا من الوحدة التي اخترتها.
-                    </div>
+                                <div class="step-description">
+                                    أدخل كمية المخزون الموجودة حاليًا من الوحدة التي اخترتها.
+                                </div>
 
-                    <div class="stock-input-wrapper">
+                                <div class="stock-input-wrapper">
 
-                        <input type="number"
-                            class="form-control stock-input"
-                            id="currentStock"
-                            min="0"
-                            step="1"
-                            placeholder="0"
-                            required
-                            disabled>
+                                    <input type="number" class="form-control stock-input" id="currentStock" min="0"
+                                        step="1" placeholder="0" required disabled>
 
-                        <span class="stock-unit" id="stockUnit">
-                            الوحدة
-                        </span>
+                                    <span class="stock-unit" id="stockUnit">
+                                        الوحدة
+                                    </span>
 
-                    </div>
+                                </div>
 
-                    <div class="form-text" id="stockUnitHelp">
-                        اختر وحدة المخزون أولًا.
-                    </div>
+                                <div class="form-text text-danger" id="stockUnitHelp">
+                                    اختر وحدة المخزون أولًا.
+                                </div>
 
-                </div>
+                            </div>
 
-            </div>
+                        </div>
 
-            <!-- نتيجة التحويل -->
-            <div class="stock-result mt-4" id="stockResult" style="display: none;">
+                        <!-- نتيجة التحويل -->
+                        <div class="stock-result mt-4" id="stockResult" style="display: none;">
 
-                <i class="fa-solid fa-boxes-stacked ms-1"></i>
+                            <i class="fa-solid fa-boxes-stacked ms-1"></i>
 
-                المخزون يعادل:
+                            المخزون يعادل:
 
-                <strong id="stockEquivalent">
-                    0
-                </strong>
+                            <strong id="stockEquivalent">
+                                0
+                            </strong>
 
-            </div>
+                        </div>
 
-            <div class="step-divider"></div>
+                        <div class="step-divider"></div>
 
 
-            <!-- الخطوة الثالثة -->
-            <div class="purchase-step">
+                        <!-- الخطوة الثالثة -->
+                        <div class="purchase-step">
 
-                <div class="step-number">
-                    3
-                </div>
+                            <div class="step-number">
+                                3
+                            </div>
 
-                <div class="step-content">
+                            <div class="step-content">
 
-                    <label class="form-label">
-                        سعر شراء الوحدة
-                        <span class="required">*</span>
-                    </label>
+                                <label class="form-label">
+                                    سعر شراء الوحدة
+                                    <span class="required">*</span>
+                                </label>
 
-                    <div class="step-description">
-                        أدخل السعر الذي دفعتَه لشراء وحدة واحدة من الوحدة التي اخترتها.
-                    </div>
+                                <div class="step-description">
+                                    أدخل السعر الذي دفعتَه لشراء وحدة واحدة من الوحدة التي اخترتها.
+                                </div>
 
-                    <div class="input-group">
+                                <!-- <div class="input-group">
 
-                        <input type="number"
-                            class="form-control price-input"
-                            id="purchasePrice"
-                            min="0"
-                            step="0.01"
-                            placeholder="0.00"
-                            required
-                            disabled>
+                                    <input type="number" class="form-control price-input" id="purchasePrice" min="0"
+                                        step="0.01" placeholder="0.00" required disabled>
 
-                        <span class="input-group-text">
-                            ₪
-                        </span>
+                                    <span class="input-group-text">
+                                        ₪
+                                    </span>
 
-                    </div>
+                                    
 
-                    <div class="purchase-price-help" id="purchasePriceHelp">
-                        مثال: إذا اخترت "علبة"، أدخل سعر شراء العلبة الواحدة.
-                    </div>
+                                </div> -->
 
-                </div>
+                                <div class="input-group">
 
-            </div>
+    <input type="number"
+        class="form-control price-input"
+        id="purchasePrice"
+        min="0"
+        step="0.01"
+        placeholder="0.00"
+        required
+        disabled>
 
+    <!-- وحدة الشراء -->
+   
 
-            
+    <!-- العملة -->
+    <span class="input-group-text">
+        ₪
+    </span>
 
-        </div>
-
-    </div>
+     <span class="input-group-text purchase-unit" id="purchasePriceUnit">
+        الوحدة
+    </span>
 
 </div>
+
+                                <div class="purchase-price-help d-flex gap-1" id="purchasePriceHelp">
+
+                                    <div class="fw-bold mb-1">
+
+                                        <i class="fa-solid fa-lightbulb ms-1"></i>
+
+                                        مثال :
+
+                                    </div>
+                                    <span id="purchasePriceHelp">
+                                        إذا اخترت "علبة"، أدخل سعر شراء العلبة الواحدة.
+                                    </span>
+                                </div>
+
+                            </div>
+
+                        </div>
+
+
+
+
+                    </div>
+
+                </div>
+
+            </div>
 
 
 

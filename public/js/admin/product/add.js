@@ -10,13 +10,12 @@ const header = document.querySelector("site-header");
 
 const autoBarcodeCheckbox = document.getElementById('auto_barcode');
 
-const categoryFilter = document.getElementById('category_id');
 let errorMessage = document.getElementById("errors");
 // let form = document.getElementById("product_form");
 let errorList = document.getElementById("error_list");
 // let price = document.getElementById('price');
 let loader = document.getElementById("overlay_loader");
-// const barcode = document.getElementById('barcode');
+
 
 const baseUnitBarcodeInput = document.getElementById("baseBarcode");
 
@@ -157,24 +156,10 @@ function resetProductForm() {
 }
 
 
-// document.addEventListener('DOMContentLoaded', async function () {
-//     await buildSelectCategory();
+document.addEventListener('DOMContentLoaded', async function () {
+    await buildSelectCategory();
 
-//     document.addEventListener('click', function (e) {
-//         if (e.target.classList.contains('delete-row') || e.target.closest('.delete-row')) {
-//             e.target.closest('tr').remove();
-//         }
-//     });
-
-
-//     categoryFilter.addEventListener('change', function () {
-//         if (this.value === 'goToPage') {
-//             window.location.href = '../category/home.html';
-//             return;
-//         }
-//     });
-
-// });
+});
 
 
 autoBarcodeCheckbox.addEventListener('change', function () {
@@ -209,11 +194,11 @@ function updateUnitBarcodeState() {
 
 
 async function buildSelectCategory() {
-    const select = document.getElementById("category_id");
+    const select = document.getElementById("productCategory");
     try {
 
         const categories = await fetchCategories();
-
+        document.getElementById("loadingCategory")?.remove();
         if (categories.length > 0) {
             categories.forEach(category => {
                 const option = document.createElement("option");
@@ -223,11 +208,6 @@ async function buildSelectCategory() {
             });
         }
 
-        const newOption = document.createElement("option");
-        newOption.value = "goToPage";
-        newOption.textContent = "➕ إنشاء فئة جديدة";
-        select.appendChild(newOption);
-
     } catch (err) {
         console.error("Error fetching categories:", err);
     }
@@ -235,21 +215,8 @@ async function buildSelectCategory() {
 
 
 
-
-/*
-|--------------------------------------------------------------------------
-| State
-|--------------------------------------------------------------------------
-*/
-
 let units = [];
 
-
-/*
-|--------------------------------------------------------------------------
-| Helpers
-|--------------------------------------------------------------------------
-*/
 
 function getBaseUnitName() {
 
@@ -272,11 +239,6 @@ function normalizeNumber(value) {
 }
 
 
-/*
-|--------------------------------------------------------------------------
-| تحديث قائمة الوحدات التي يمكن اختيارها
-|--------------------------------------------------------------------------
-*/
 
 function updateContainsUnitOptions() {
 
@@ -340,11 +302,7 @@ function updateContainsUnitOptions() {
 }
 
 
-/*
-|--------------------------------------------------------------------------
-| تحديث قائمة وحدة الشراء
-|--------------------------------------------------------------------------
-*/
+
 
 function updatePurchaseUnitOptions() {
 
@@ -357,7 +315,7 @@ function updatePurchaseUnitOptions() {
 
     select.innerHTML = `
             <option value="">
-                اختر وحدة الشراء
+                 اختر وِحدة قياس المخزون الحالي
             </option>
         `;
 
@@ -423,11 +381,6 @@ function updatePurchaseUnitOptions() {
 }
 
 
-/*
-|--------------------------------------------------------------------------
-| حساب conversion factor
-|--------------------------------------------------------------------------
-*/
 
 function getParentConversionFactor(parentId) {
 
@@ -458,18 +411,10 @@ function getParentConversionFactor(parentId) {
 }
 
 
-/*
-|--------------------------------------------------------------------------
-| الحصول على وحدة محددة
-|--------------------------------------------------------------------------
-*/
 
 function getSelectedPurchaseUnit() {
 
-    const selectedId =
-        document
-            .getElementById("purchaseUnit")
-            .value;
+    const selectedId = document.getElementById("purchaseUnit").value;
 
 
     if (!selectedId) {
@@ -503,11 +448,7 @@ function getSelectedPurchaseUnit() {
 }
 
 
-/*
-|--------------------------------------------------------------------------
-| تحديث نتيجة المخزون
-|--------------------------------------------------------------------------
-*/
+
 
 function updateStockEquivalent() {
 
@@ -555,33 +496,17 @@ function updateStockEquivalent() {
 }
 
 
-/*
-|--------------------------------------------------------------------------
-| إضافة وحدة
-|--------------------------------------------------------------------------
-*/
+
 
 function addUnit() {
 
-    const unitName =
-        document
-            .getElementById("newUnitName")
-            .value
-            .trim();
+    const unitName = document.getElementById("newUnitName").value.trim();
 
 
-    const quantity =
-        normalizeNumber(
-            document
-                .getElementById("newUnitQuantity")
-                .value
-        );
+    const quantity = normalizeNumber(document.getElementById("newUnitQuantity").value);
 
 
-    const containsUnit =
-        document
-            .getElementById("newUnitContains")
-            .value;
+    const containsUnit = document.getElementById("newUnitContains").value;
 
 
     const barcode = unitBarcodeInput.value.trim();
@@ -596,7 +521,7 @@ function addUnit() {
 
 
     const forSale = document.getElementById("newUnitForSale").checked;
-    
+
     const forPurchase = document.getElementById("newUnitForPurchase").checked;
 
     /*
@@ -648,9 +573,21 @@ function addUnit() {
     }
 
 
-    /*
-    | عدم تكرار الوحدة الأساسية
-    */
+
+    if (!forSale && !forPurchase) {
+        bootboxError('يجب تفعيل خيار "يُمكن البيع بهذه الوحدة" أو "يُمكن الشراء بهذه الوحدة" على الأقل');
+        return;
+    }
+
+    if (forSale && sellingPrice <= 0) {
+        bootboxError('يرجى إدخال سعر بيع صحيح أو تعطيل خيار "يُمكن البيع بهذه الوحدة"');
+        return;
+    }
+
+    if (forPurchase && sellingPrice != 0) {
+        bootboxError('لا يمكن إدخال سعر بيع لوحدة مخصصة للشراء فقط');
+        return;
+    }
 
     const baseUnitName = getBaseUnitName();
 
@@ -665,9 +602,7 @@ function addUnit() {
     }
 
 
-    /*
-    | عدم تكرار الوحدات
-    */
+
 
     const duplicated =
         units.some(
@@ -750,9 +685,9 @@ function addUnit() {
 
         conversion_factor: conversionFactor,
 
-        barcode: autoUnitBarcodeCheckbox.checked ? 'سيتم توليده تلقائياً'
-            : barcode || null
-        ,
+        barcode: barcode || null,
+
+        auto_generated_barcode: autoUnitBarcodeCheckbox.checked,
 
         selling_price: sellingPrice,
 
@@ -804,15 +739,10 @@ function addUnit() {
 }
 
 
-/*
-|--------------------------------------------------------------------------
-| رسم جدول الوحدات
-|--------------------------------------------------------------------------
-*/
 
 function renderUnits() {
 
-    const tbody =document.getElementById("unitsTableBody");
+    const tbody = document.getElementById("unitsTableBody");
 
 
     const baseUnitName =
@@ -846,11 +776,6 @@ function renderUnits() {
 
     let html = "";
 
-
-    /*
-    | الوحدة الأساسية
-    */
-
     const baseBarcode = baseUnitBarcodeInput.value.trim();
 
 
@@ -863,7 +788,7 @@ function renderUnits() {
 
 
     const baseForSale = document.getElementById("baseForSale").checked;
-    
+
     const baseForPurchase = document.getElementById("baseForPurchase").checked;
 
     html += `
@@ -938,10 +863,6 @@ function renderUnits() {
         `;
 
 
-    /*
-    | الوحدات الإضافية
-    */
-
     units.forEach(
         (unit, index) => {
 
@@ -984,12 +905,12 @@ function renderUnits() {
 
 
                         <td>
-
-                            ${unit.barcode
-                    ? escapeHtml(unit.barcode)
-                    : '<span class="text-muted">—</span>'
+                            ${unit.auto_generated_barcode
+                    ? '<span class="text-muted">سيتم توليده تلقائياً</span>'
+                    : unit.barcode
+                        ? escapeHtml(unit.barcode)
+                        : '<span class="text-muted">—</span>'
                 }
-
                         </td>
 
 
@@ -1029,17 +950,11 @@ function renderUnits() {
     );
 
 
-    tbody.innerHTML =
-        html;
+    tbody.innerHTML = html;
 
 }
 
 
-/*
-|--------------------------------------------------------------------------
-| الاستخدام
-|--------------------------------------------------------------------------
-*/
 
 function renderUsage(forPurchase, forSale) {
 
@@ -1075,11 +990,7 @@ function renderUsage(forPurchase, forSale) {
 
 }
 
-/*
-|--------------------------------------------------------------------------
-| حذف وحدة
-|--------------------------------------------------------------------------
-*/
+
 
 function deleteUnit(index) {
 
@@ -1136,18 +1047,6 @@ function deleteUnit(index) {
     }
 
 
-    // const confirmed =
-    //     confirm(
-    //         `هل تريد حذف وحدة "${unit.unit_name}"؟`
-    //     );
-
-
-    // if (!confirmed) {
-
-    //     return;
-
-    // }
-
     bootbox.confirm({
         message: `هل تريد حذف وحدة "${unit.unit_name}"؟`,
         buttons: {
@@ -1187,34 +1086,73 @@ function deleteUnit(index) {
 }
 
 
-/*
-|--------------------------------------------------------------------------
-| Reset
-|--------------------------------------------------------------------------
-*/
+
+// function resetForm() {
+
+//     const confirmed =
+//         confirm(
+//             "هل تريد إعادة تعيين جميع البيانات؟"
+//         );
+
+
+//     if (!confirmed) {
+
+//         return;
+
+//     }
+
+
+//     document
+//         .getElementById("productForm")
+//         .reset();
+
+
+//     units = [];
+
+
+//     renderUnits();
+
+//     updateContainsUnitOptions();
+
+//     updatePurchaseUnitOptions();
+
+//     document
+//         .getElementById("stockResult")
+//         .style.display = "none";
+
+// }
 
 function resetForm() {
 
-    const confirmed =
-        confirm(
-            "هل تريد إعادة تعيين جميع البيانات؟"
-        );
+    bootbox.confirm({
+        message: 'هل تريد إعادة تعيين جميع البيانات؟',
+        buttons: {
+            confirm: {
+                label: 'إعادة تعيين',
+                className: 'btn-danger'
+            },
+            cancel: {
+                label: 'إلغاء',
+                className: 'btn-secondary'
+            }
+        },
+        callback: function (confirmed) {
+
+            if (!confirmed) {
+                return;
+            }
+
+           resetAllInputs();
+        }
+    });
+
+}
 
 
-    if (!confirmed) {
-
-        return;
-
-    }
-
-
-    document
-        .getElementById("productForm")
-        .reset();
-
+function resetAllInputs() {
+    document.getElementById("productForm").reset();
 
     units = [];
-
 
     renderUnits();
 
@@ -1222,18 +1160,11 @@ function resetForm() {
 
     updatePurchaseUnitOptions();
 
-    document
-        .getElementById("stockResult")
-        .style.display = "none";
-
+    document.getElementById("stockResult").style.display = "none";
 }
 
 
-/*
-|--------------------------------------------------------------------------
-| Submit
-|--------------------------------------------------------------------------
-*/
+
 
 async function submitProduct() {
 
@@ -1268,7 +1199,7 @@ async function submitProduct() {
         );
 
 
-    const baseForSale =document.getElementById("baseForSale").checked;
+    const baseForSale = document.getElementById("baseForSale").checked;
 
     const baseForPurchase = document.getElementById("baseForPurchase").checked;
 
@@ -1276,10 +1207,10 @@ async function submitProduct() {
     const purchaseUnitId = document.getElementById("purchaseUnit").value;
 
 
-    const purchasePrice =normalizeNumber(document.getElementById("purchasePrice").value);
+    const purchasePrice = normalizeNumber(document.getElementById("purchasePrice").value);
 
 
-    const currentStock =normalizeNumber(document.getElementById("currentStock").value);
+    const currentStock = normalizeNumber(document.getElementById("currentStock").value);
 
 
     if (!productName) {
@@ -1362,7 +1293,7 @@ async function submitProduct() {
     }
 
 
-    const stockInBaseUnit = currentStock *purchaseUnit.conversion_factor;
+    const stockInBaseUnit = currentStock * purchaseUnit.conversion_factor;
 
 
     const data = {
@@ -1395,17 +1326,19 @@ async function submitProduct() {
 
                 id: "base",
 
-                unit_name:baseUnitName,
+                unit_name: baseUnitName,
 
-                contains_quantity:null,
+                contains_quantity: null,
 
-                contains_unit_id:null,
+                contains_unit_id: null,
 
-                contains_unit_name:null,
+                contains_unit_name: null,
 
-                conversion_factor:1,
+                conversion_factor: 1,
 
-                barcode:baseBarcode || null,
+                barcode: baseBarcode || null,
+
+                auto_generated_barcode: autoBarcodeCheckbox.checked,
 
                 selling_price: baseSellingPrice,
 
@@ -1471,11 +1404,6 @@ async function submitProduct() {
 }
 
 
-/*
-|--------------------------------------------------------------------------
-| Format
-|--------------------------------------------------------------------------
-*/
 
 function formatNumber(value) {
 
@@ -1504,11 +1432,6 @@ function formatPrice(value) {
 }
 
 
-/*
-|--------------------------------------------------------------------------
-| Escape HTML
-|--------------------------------------------------------------------------
-*/
 
 function escapeHtml(value) {
 
@@ -1536,12 +1459,6 @@ function escapeHtml(value) {
 
 }
 
-
-/*
-|--------------------------------------------------------------------------
-| Event Delegation
-|--------------------------------------------------------------------------
-*/
 
 document.addEventListener("click", function (e) {
 
@@ -1604,11 +1521,6 @@ document.addEventListener("click", function (e) {
 );
 
 
-/*
-|--------------------------------------------------------------------------
-| Submit
-|--------------------------------------------------------------------------
-*/
 
 document.getElementById("productForm").addEventListener("submit", async function (e) {
     e.preventDefault();
@@ -1617,12 +1529,6 @@ document.getElementById("productForm").addEventListener("submit", async function
 }
 );
 
-
-/*
-|--------------------------------------------------------------------------
-| Input Events
-|--------------------------------------------------------------------------
-*/
 
 document.addEventListener("input", function (e) {
     if (
@@ -1662,12 +1568,6 @@ document.addEventListener("input", function (e) {
 );
 
 
-/*
-|--------------------------------------------------------------------------
-| Change Events
-|--------------------------------------------------------------------------
-*/
-
 document.addEventListener("change", function (e) {
 
     if (e.target.id === "baseForPurchase" || e.target.id === "baseForSale") {
@@ -1684,11 +1584,6 @@ document.addEventListener("change", function (e) {
 );
 
 
-/*
-|--------------------------------------------------------------------------
-| Initial
-|--------------------------------------------------------------------------
-*/
 
 updateContainsUnitOptions();
 
@@ -1701,45 +1596,45 @@ renderUnits();
 
 
 async function submitProductData(finalData) {
-    console.log("Submitting product data:", finalData);
-    // try {
-    //     let res = await fetch(url + '/item/add', {
-    //         method: "POST",
-    //         body: JSON.stringify(finalData),
-    //         headers: {
-    //             "Content-Type": "application/json",
-    //             "Authorization": `${getAuthToken('auth')}`
-    //         },
-    //     });
-    //     let data = await res.json();
-    //     if (res.status === 200) {
-    //         bootboxSuccess(data.message);
-    //         return;
-    //     }
-    //     else if (res.status === 400) {
-    //         console.error(data.message);
-    //         return;
-    //     }
+    //console.log("Submitting product data:", finalData);
+    try {
+        let res = await fetch(url + '/item/add', {
+            method: "POST",
+            body: JSON.stringify(finalData),
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": `${getAuthToken('auth')}`
+            },
+        });
+        let data = await res.json();
+        if (res.status === 200) {
+            bootboxSuccess(data.message);
+            return;
+        }
+        else if (res.status === 400) {
+            console.error(data.message);
+            return;
+        }
 
-    //     else if (res.status === 401) {
-    //         showAuthExpired(data.message);
-    //         return;
-    //     }
+        else if (res.status === 401) {
+            showAuthExpired(data.message);
+            return;
+        }
 
-    //     else if (res.status === 409) {
-    //         console.error(data.message);
-    //         return;
-    //     }
+        else if (res.status === 409) {
+            console.error(data.message);
+            return;
+        }
 
-    //     else {
-    //         console.error(data.message);
-    //     }
-    // } catch (err) {
-    //     console.error(err.message);
-    //     return;
-    // } finally {
-    //     loader.style.display = 'none';
-    // }
+        else {
+            console.error(data.message);
+        }
+    } catch (err) {
+        console.error(err.message);
+        return;
+    } finally {
+        loader.style.display = 'none';
+    }
 }
 
 
@@ -1752,7 +1647,7 @@ const stockUnit = document.getElementById('stockUnit');
 const selectedUnitHint = document.getElementById('selectedUnitHint');
 const stockUnitHelp = document.getElementById('stockUnitHelp');
 const purchasePriceHelp = document.getElementById('purchasePriceHelp');
-
+const purchasePriceUnit = document.getElementById('purchasePriceUnit');
 
 purchaseUnit.addEventListener('change', function () {
 
@@ -1765,6 +1660,8 @@ purchaseUnit.addEventListener('change', function () {
 
         stockUnit.textContent = 'الوحدة';
         stockUnit.classList.remove('active');
+        purchasePriceUnit.textContent = 'الوحدة';
+        purchasePriceUnit.classList.remove('active');
 
         selectedUnitHint.innerHTML = `
             <i class="fa-solid fa-circle-info ms-1"></i>
@@ -1792,6 +1689,9 @@ purchaseUnit.addEventListener('change', function () {
     stockUnit.textContent = unitName;
     stockUnit.classList.add('active');
 
+    purchasePriceUnit.textContent = unitName;
+    purchasePriceUnit.classList.add('active');
+
 
     // تحديث النصوص حسب الوحدة المختارة
     selectedUnitHint.innerHTML = `
@@ -1802,6 +1702,6 @@ purchaseUnit.addEventListener('change', function () {
     stockUnitHelp.textContent =
         `أدخل كمية المخزون الحالية من ${unitName}.`;
 
-    purchasePriceHelp.textContent =
-        `أدخل سعر شراء ال  ${unitName} الواحد/ة.`;
+    purchasePriceHelp.innerHTML =
+        `أدخل سعر شراء الـ <strong>${unitName}</strong> الواحد/ة.`;
 });

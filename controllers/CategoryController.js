@@ -8,11 +8,9 @@ export const getCategoryList = async (req, res) => {
 
     try {
         const result = await pool.request()
-            .input("admin_id", sql.Int, adminId)
             .query(`
             SELECT id, name 
             FROM categories 
-            WHERE admin_id = @admin_id
         `);
 
         const categories = result.recordset;
@@ -34,7 +32,7 @@ export const addCategory = async (req, res) => {
             throw new SystemError("إنتهت صلاحية الجلسة , الرجاء تسجيل الدخول مرة أخرى", 401);
         }
 
-        const adminId = await checkToken(token);
+        await checkToken(token);
 
         const { name , main_category_id } = req.body;
 
@@ -44,12 +42,11 @@ export const addCategory = async (req, res) => {
         const parsedData = CategorySchema.parse({ name });
 
         await pool.request()
-            .input("admin_id", sql.Int, adminId)
             .input("name", sql.NVarChar, parsedData.name)
             .input("main_category_id", sql.Int, mainCategoryId)
             .query(`
-                INSERT INTO categories (admin_id, name, main_category_id)
-                VALUES (@admin_id, @name, @main_category_id)
+                INSERT INTO categories (name, main_category_id)
+                VALUES (@name, @main_category_id)
         `);
 
         return res.status(200).json({
