@@ -53,7 +53,7 @@ export const addItem = async (req, res) => {
     if (!token) {
       throw new SystemError("إنتهت صلاحية الجلسة , الرجاء تسجيل الدخول مرة أخرى", 401);
     }
-    
+
     await checkToken(token);
 
     const body = req.body;
@@ -103,7 +103,7 @@ export const addItem = async (req, res) => {
         message: validationErrors[0].message
       });
     }
-    
+
     return res.status(e.status || 500).json({
       success: false,
       message: e.message || "حدث خطأ غير معروف",
@@ -355,6 +355,62 @@ export const getMenueTree = async (req, res) => {
     const menue = buildMenuTree(row);
 
     return res.status(200).json(menue);
+
+
+  } catch (e) {
+    return res.status(e.status || 500).json({
+      success: false,
+      message: e.message || "حدث خطأ غير معروف"
+    });
+  }
+
+}
+
+export const getItemUnitTreeForSupplier = async (req, res) => {
+  try {
+    const token = req.headers.authorization;
+
+    if (!token) {
+      return res.status(401).json({
+        message: "إنتهت صلاحية الجلسة , الرجاء تسجيل الدخول مرة أخرى"
+      });
+    }
+
+    await checkToken(token);
+
+    const result = await pool.request()
+      .query(`
+        SELECT
+          i.id,
+          i.name,
+          i.category_id,
+
+          iu.id AS unit_id,
+          iu.unit_name,
+          iu.for_purchase,
+          iu.barcode,
+          iu.conversion_factor,
+
+          sb.cost_price AS last_cost_price
+
+        FROM items i
+
+        INNER JOIN items_units iu
+            ON iu.item_id = i.id
+
+        OUTER APPLY (
+            SELECT TOP 1
+                cost_price
+            FROM stock_batches sb
+            WHERE sb.item_id = i.id
+            ORDER BY sb.id DESC
+        ) sb
+
+        ORDER BY i.name ASC;
+    `);
+
+    const itemsData = buildItemsDataForSupplier(result);
+    return res.status(200).json(itemsData);
 
 
   } catch (e) {
@@ -799,7 +855,43 @@ function buildMenuTree(rows) {
 }
 
 
+function buildItemsDataForSupplier(result) {
 
+  const itemsMap = new Map();
+
+  for (const row of result.recordset) {
+
+    let item = itemsMap.get(row.id);
+
+    if (!item) {
+      item = {
+        id: row.id,
+        category_id: row.category_id,
+        name: row.name,
+        barcode: [],
+        units: [],
+        cost_price: row.last_cost_price
+      };
+      itemsMap.set(row.id, item);
+    }
+
+
+    if (row.barcode !== null && !item.barcode.includes(row.barcode)) {
+      item.barcode.push(row.barcode);
+    }
+
+
+    if (row.for_purchase && !item.units.some(unit => unit.name === row.unit_name)) {
+      item.units.push({
+        id: row.unit_id,
+        name: row.unit_name,
+        conversion_factor: row.conversion_factor
+      });
+    }
+  }
+
+  return Array.from(itemsMap.values());
+}
 
 
 

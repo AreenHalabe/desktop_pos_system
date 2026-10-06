@@ -1,11 +1,14 @@
 import  express  from "express";
-import { addCategory, getCategoryList, updateCategory, deleteCategory } from "../controllers/CategoryController.js";
+import { addCategory, getCategoryList, updateCategory, deleteCategory, getCategoryTreeForSupplier } from "../controllers/CategoryController.js";
 
 export const CategoryRoute = express.Router();
 
 
 
 CategoryRoute.get('/category/list' , getCategoryList);
+
+
+CategoryRoute.get('/category/tree-for-supplier' , getCategoryTreeForSupplier);
 
 CategoryRoute.post('/category/add' , addCategory);
 

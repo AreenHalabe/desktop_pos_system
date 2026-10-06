@@ -1,93 +1,384 @@
-/* ====== Base (Mobile <768px) ====== */
-  body {
-    font-family: system-ui, sans-serif !important;
-    line-height: 1.5 !important; /* تحسين القراءة */
+body {
+    background: #f5f6f8;
+    font-family: "Tahoma", sans-serif;
     background-color: #c8ced3;
-  }
-
-
-.form-control,
-.form-select {
-    font-size: 1rem !important;
-    font-weight: 400;
-} 
-table {
-    font-size: 0.85rem;
-    width: 100%;
-    overflow-x: auto;
-    display: block;
 }
 
-.btn{
+.page-wrapper {
+    max-width: 1100px;
+    margin: 40px auto;
+}
+
+.card {
+    border: 0;
+    border-radius: 14px;
+    box-shadow: 0 3px 15px rgba(0, 0, 0, 0.06);
+}
+
+.card-header {
+    background: #fff;
+    border-bottom: 1px solid #eee;
+    padding: 20px 24px;
+    border-radius: 14px 14px 0 0 !important;
+}
+
+.section-title {
     font-size: 17px;
+    font-weight: 700;
+    margin-bottom: 18px;
+    color: #343a40;
 }
 
-img {
-      width: 185px;
-      height: auto;
-      aspect-ratio: 1 / 1;   
-      object-fit: cover;
-    }
-
-.hidden{
-    display: none;
+.form-label {
+    font-weight: 600;
 }
-a:hover{
+
+.form-text {
+    font-size: 14px;
+    color: #6c757d;
+}
+
+.base-unit-box {
+    background: #f8f9fa;
+    border: 1px solid #dee2e6;
+    border-radius: 10px;
+    padding: 15px;
+}
+
+.unit-builder {
+    border: 1px dashed #adb5bd;
+    background: #fafbfc;
+    border-radius: 12px;
+    padding: 20px;
+}
+
+.unit-builder-title {
+    font-weight: 700;
+    margin-bottom: 15px;
+}
+
+.unit-table th {
+    background: #f8f9fa;
+    white-space: nowrap;
+}
+
+.unit-table td {
+    vertical-align: middle;
+}
+
+.unit-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 5px 10px;
+    background: #eef5ff;
+    color: #0d6efd;
+    border-radius: 20px;
+    font-size: 13px;
+}
+
+.base-badge {
+    background: #e8f7ee;
+    color: #198754;
+}
+
+.empty-state {
+    padding: 35px 20px;
+    text-align: center;
+    color: #6c757d;
+}
+
+.empty-state i {
+    font-size: 35px;
+    margin-bottom: 12px;
+    opacity: 0.5;
+}
+
+
+.action-buttons {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+    margin-top: 25px;
+}
+
+.required {
+    color: #dc3545;
+}
+
+.example-box {
+    background: #fff8e1;
+    border: 1px solid #ffe69c;
+    border-radius: 10px;
+    padding: 12px 15px;
+    font-size: 13px;
+    color: #664d03;
+}
+
+.usage-checkboxes {
+    display: flex;
+    gap: 15px;
+    flex-wrap: wrap;
+}
+
+.unit-name-cell {
+    font-weight: 600;
+}
+
+.purchase-box {
+    background: #f8f9fa;
+    border: 1px solid #dee2e6;
+    border-radius: 10px;
+    padding: 20px;
+}
+
+.stock-result {
+    background: #e8f7ee;
+    border: 1px solid #badbcc;
+    border-radius: 10px;
+    padding: 12px 15px;
+    color: #146c43;
+    font-size: 13px;
+}
+
+.stock-result strong {
+    font-size: 15px;
+}
+
+
+
+/* Purchase Card */
+.purchase-card .card-header {
+    background: #fff;
+    border-bottom: 1px solid #e9ecef;
+}
+
+.purchase-box {
+    max-width: 900px;
+    margin: 0 auto;
+}
+
+
+/* كل خطوة */
+.purchase-step {
+    display: flex;
+    gap: 16px;
+    align-items: flex-start;
+}
+
+
+/* رقم الخطوة */
+.step-number {
+    width: 34px;
+    height: 34px;
+    min-width: 34px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 50%;
+
+    background: #f8f9fa;
+    border: 1px solid #dee2e6;
+
+    color: #495057;
+    font-weight: 700;
+    font-size: 14px;
+}
+
+
+/* محتوى الخطوة */
+.step-content {
+    flex: 1;
+    min-width: 0;
+}
+
+.step-content .form-label {
+    font-weight: 600;
+    margin-bottom: 4px;
+}
+
+
+/* وصف الخطوة */
+.step-description {
+    color: #6c757d;
+    font-size: 13px;
+    margin-bottom: 12px;
+}
+
+
+/* الخط الفاصل بين الخطوات */
+.step-divider {
+    height: 1px;
+    background: #e9ecef;
+    margin: 24px 0;
+}
+
+
+/* المعلومة الصغيرة أسفل الوحدة */
+.selected-unit-hint {
+    margin-top: 8px;
+    font-size: 13px;
+    color: #6c757d;
+}
+
+.selected-unit-hint i {
+    color: #0d6efd;
+}
+
+
+/* كمية المخزون + اسم الوحدة */
+.stock-input-wrapper {
+    display: flex;
+    align-items: stretch;
+}
+
+.stock-input-wrapper .stock-input {
+    border-top-left-radius: 0;
+    border-bottom-left-radius: 0;
+}
+
+.stock-unit {
+    min-width: 85px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    padding: 0 14px;
+
+    background: #f8f9fa;
+    border: 1px solid #ced4da;
+    border-right: 0;
+
+    border-radius: 0.375rem 0 0 0.375rem;
+
+    font-weight: 600;
+    color: #495057;
+
+    transition: all 0.2s ease;
+}
+
+
+/* عندما يتم اختيار الوحدة */
+.stock-unit.active {
+    background: #fff8e1;
+    color: #856404;
+    border-color: #ffc107;
+}
+
+
+.purchase-unit {
+    min-width: 85px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    padding: 0 14px;
+
+    background: #f8f9fa;
+    border: 1px solid #ced4da;
+
+    border-radius: 0.375rem 0 0 0.375rem;
+
+    font-weight: 600;
+    color: #495057;
+
+    transition: all 0.2s ease;
+}
+
+
+/* عندما يتم اختيار الوحدة */
+.purchase-unit.active {
+    background: #fff8e1;
+    color: #856404;
+    border-color: #ffc107;
+}
+
+
+/* الحقول المعطلة */
+.form-control:disabled {
+    background-color: #f8f9fa;
+    cursor: not-allowed;
+}
+
+
+.base-unit-help {
+    font-size: 15px;
+    font-weight: 400;
+    color: #000000;
+    margin-top: 4px;
+    line-height: 1.6;
+    background-color: #dc35451a;
+    border: 1px solid #dc35454d;
+    border-radius: 6px;
+    padding: 6px 12px;
+}
+
+.purchase-price-help {
+    margin-top: 10px;
+    padding: 9px 12px;
+
+    background-color: #fff8e1;
+    border: 1px solid #ffe082;
+    border-radius: 6px;
+
+    font-size: 14px;
+    font-weight: 500;
+    color: #664d03;
+
+    line-height: 1.6;
+}
+
+.pointer {
     cursor: pointer;
 }
 
-@media (max-width: 400px) {
-    table td:first-child {
-        width: 50%;
-    }
-}
+/* الموبايل */
+@media (max-width: 576px) {
 
-/* ====== Tablet (768px - 1024px) ====== */
-@media (min-width: 768px) and (max-width: 1023px) {
-
-    .form-control,
-    .form-select {
-        font-size: 1.1rem !important;
-        font-weight: 400;
+    .purchase-card .card-body {
+        padding: 1rem !important;
     }
 
-
-   
-
-    table {
-        font-size: 0.9rem;
+    .purchase-step {
+        gap: 10px;
     }
 
-    img {
-      width: 155px;
-      height: auto;
-      aspect-ratio: 1 / 1;   
-      object-fit: cover;
+    .step-number {
+        width: 30px;
+        height: 30px;
+        min-width: 30px;
+        font-size: 13px;
+    }
+
+    .stock-unit {
+        min-width: 70px;
+        padding: 0 8px;
     }
 
 }
 
-/* ====== Desktop (>1024px) ====== */
-@media (min-width: 1024px) {
-    
-
-    .form-control,
-    .form-select {
-        font-size: 1.1rem !important;
-    } 
 
 
 
-  
 
-    table {
-        font-size: 0.95rem;
+
+
+@media (max-width: 768px) {
+    .page-wrapper {
+        margin: 20px 10px;
     }
 
-    img {
-      width: 150px;
-      height: auto;
-      aspect-ratio: 1 / 1;   
-      object-fit: cover;
+    .action-buttons {
+        flex-direction: column-reverse;
+        align-items: stretch;
+    }
+
+    .action-buttons button {
+        width: 100%;
     }
 }

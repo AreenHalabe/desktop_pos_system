@@ -1,0 +1,123 @@
+* {
+    box-sizing: border-box;
+}
+
+body {
+    background-color: #c8ced3;
+    margin: 0;
+    padding: 0;
+}
+
+.boxx {
+    border: 1px solid black;
+}
+
+
+
+
+
+.invoice-info {
+    width: 100%;
+    max-width: 1100px;
+    margin: 0 auto;
+}
+
+
+.products-container {
+    background-color: #f1f3f5;
+    padding: 10px;
+    border-radius: 10px;
+    display: grid;
+    /* grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); */
+    grid-template-columns: repeat(auto-fill, minmax(125px, 1fr));
+    gap: 8px;
+
+    overflow-y: auto;
+    max-height: calc(100vh - 170px);
+}
+
+.product-card {
+    height: 100%;
+    min-height: 100px;
+
+    padding: 12px;
+
+    background: #fff;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+
+    cursor: pointer;
+
+    transition:
+        border-color 0.15s ease,
+        box-shadow 0.15s ease,
+        transform 0.15s ease;
+}
+
+.product-card:hover {
+    border-color: #94a3b8;
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.10);
+}
+
+.product-card:active {
+    transform: scale(0.98);
+    background-color: rgba(13, 110, 253, 0.06);
+}
+
+
+.product-name {
+    font-size: 16px;
+    font-weight: 600;
+
+    color: #212529;
+
+    line-height: 1.4;
+
+    margin-bottom: 6px;
+
+    /* لو اسم الصنف طويل */
+    display: -webkit-box;
+    /* -webkit-line-clamp: 2; */
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+
+.product-price {
+    font-size: 14px;
+    font-weight: 500;
+
+    color: #6c757d;
+}
+
+
+.product-category {
+    font-size: 11px;
+
+    color: #adb5bd;
+
+    margin-top: 7px;
+}
+
+.invoice-summary-wrapper {
+    max-width: 700px;
+    width: 100%;
+    margin-right: auto;
+    margin-left: 0;
+}
+
+@media (max-height: 800px) {
+    .products-container {
+        grid-template-rows: repeat(4, 1fr);
+    }
+}
+
+@media (min-height: 801px) {
+    .products-container {
+        grid-template-rows: repeat(3, 1fr);
+    }
+}

@@ -1,7 +1,6 @@
 import { fetchCategories } from "../../../api/category.js";
 import { url } from "../../../api/urlEndPoint.js";
 import { showAuthExpired, bootboxSuccess, bootboxError } from "../../../component/bootbox.js";
-import { compressWithLibrary } from "../../../component/handlimage.js";
 import { setActiveNavLink } from "../../../component/bootbox.js";
 
 import { getAuthToken, removeAuthToken } from "../../../component/auth.js";
@@ -10,10 +9,6 @@ const header = document.querySelector("site-header");
 
 const autoBarcodeCheckbox = document.getElementById('auto_barcode');
 
-let errorMessage = document.getElementById("errors");
-// let form = document.getElementById("product_form");
-let errorList = document.getElementById("error_list");
-// let price = document.getElementById('price');
 let loader = document.getElementById("overlay_loader");
 
 
@@ -70,95 +65,11 @@ header.addEventListener("header:ready", () => {
 });
 
 
-// form.addEventListener("submit", async (e) => {
-//     e.preventDefault();
-//     loader.style.display = 'flex';
-//     errorMessage.innerHTML = "";
 
-//     hideError();
-
-//     let formData = new FormData(form);
-
-//     const finalData = {
-//         name: formData.get("name"),
-//         category_id: formData.get('category_id'),
-//         cost_price: formData.get('cost_price'),
-//         price: formData.get('price'),
-//         auto_generated_barcode : formData.get('auto_barcode'),
-//         barcode: formData.get('barcode'),
-//         stock: formData.get('stock') || 0,
-//     }
-
-
-//     try {
-//         let res = await fetch(url + '/item/add', {
-//             method: "POST",
-//             body: JSON.stringify(finalData),
-//             headers: {
-//                 "Content-Type": "application/json",
-//                 "Authorization": `${getAuthToken('auth')}`
-//             },
-//         });
-//         let data = await res.json();
-//         if (res.status === 200) {
-//             bootboxSuccess(data.message);
-//             resetProductForm();
-//             return;
-//         }
-//         else if (res.status === 400) {
-//             showError();
-//             errorMessage.innerHTML =
-//                 data.errors.map(err => `<li>${err.message}</li>`).join("");
-//             return;
-//         }
-
-//         else if (res.status === 401) {
-//             showAuthExpired(data.message);
-//             return;
-//         }
-
-//         else if (res.status === 409) {
-//             showError();
-//             errorMessage.innerHTML = `<li>${data.message}</li>`;
-//             return;
-//         }
-
-//         else {
-//             showError();
-//             errorMessage.innerHTML = `<li>${data.message}</li>`;
-//             return;
-//         }
-//     } catch (err) {
-//         console.error(err.message);
-//         showError();
-//         errorMessage.innerHTML = `<li> ${err.message} </li>`;
-//         return;
-//     } finally {
-//         loader.style.display = 'none';
-//     }
-// });
-
-function resetProductForm() {
-
-    form.reset();
-
-
-    autoBarcodeCheckbox.checked = false;
-    barcode.disabled = false;
-    barcode.placeholder = 'الباركود';
-    barcode.style.cursor = 'text';
-
-
-
-    price.value = '';
-    price.placeholder = 'السعر';
-
-}
 
 
 document.addEventListener('DOMContentLoaded', async function () {
     await buildSelectCategory();
-
 });
 
 
@@ -575,17 +486,23 @@ function addUnit() {
 
 
     if (!forSale && !forPurchase) {
-        bootboxError('يجب تفعيل خيار "يُمكن البيع بهذه الوحدة" أو "يُمكن الشراء بهذه الوحدة" على الأقل');
+        bootboxError(
+            'يجب تفعيل خيار "يُمكن البيع بهذه الوحدة" أو "يُمكن الشراء بهذه الوحدة" على الأقل'
+        );
         return;
     }
 
     if (forSale && sellingPrice <= 0) {
-        bootboxError('يرجى إدخال سعر بيع صحيح أو تعطيل خيار "يُمكن البيع بهذه الوحدة"');
+        bootboxError(
+            'يرجى إدخال سعر بيع صحيح أو تعطيل خيار "يُمكن البيع بهذه الوحدة"'
+        );
         return;
     }
 
-    if (forPurchase && sellingPrice != 0) {
-        bootboxError('لا يمكن إدخال سعر بيع لوحدة مخصصة للشراء فقط');
+    if (forPurchase && !forSale && sellingPrice != 0) {
+        bootboxError(
+            'لا يمكن إدخال سعر بيع لوحدة مخصصة للشراء فقط'
+        );
         return;
     }
 
@@ -1087,41 +1004,6 @@ function deleteUnit(index) {
 
 
 
-// function resetForm() {
-
-//     const confirmed =
-//         confirm(
-//             "هل تريد إعادة تعيين جميع البيانات؟"
-//         );
-
-
-//     if (!confirmed) {
-
-//         return;
-
-//     }
-
-
-//     document
-//         .getElementById("productForm")
-//         .reset();
-
-
-//     units = [];
-
-
-//     renderUnits();
-
-//     updateContainsUnitOptions();
-
-//     updatePurchaseUnitOptions();
-
-//     document
-//         .getElementById("stockResult")
-//         .style.display = "none";
-
-// }
-
 function resetForm() {
 
     bootbox.confirm({
@@ -1142,7 +1024,7 @@ function resetForm() {
                 return;
             }
 
-           resetAllInputs();
+            resetAllInputs();
         }
     });
 
@@ -1609,28 +1491,20 @@ async function submitProductData(finalData) {
         let data = await res.json();
         if (res.status === 200) {
             bootboxSuccess(data.message);
-            return;
+
         }
-        else if (res.status === 400) {
-            console.error(data.message);
-            return;
-        }
+
 
         else if (res.status === 401) {
             showAuthExpired(data.message);
-            return;
         }
 
-        else if (res.status === 409) {
-            console.error(data.message);
-            return;
-        }
 
         else {
-            console.error(data.message);
+            bootboxError(data.message);
         }
     } catch (err) {
-        console.error(err.message);
+        bootboxError(err.message);
         return;
     } finally {
         loader.style.display = 'none';

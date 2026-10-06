@@ -163,6 +163,77 @@ export const deleteCategory = async (req, res) => {
 }
 
 
+export const getCategoryTreeForSupplier = async (req, res) => {
+    try {
+        const token = req.headers.authorization;
+
+        if (!token) {
+            throw new SystemError("إنتهت صلاحية الجلسة , الرجاء تسجيل الدخول مرة أخرى", 401);
+        }
+
+        const adminId = await checkToken(token);
+
+        const result = await pool.request()
+            .input("admin_id", sql.Int, adminId)
+            .query(`
+                SELECT
+                    mc.id AS main_category_id,
+                    mc.name AS main_category_name,
+                    c.id AS category_id,
+                    c.name AS category_name
+
+                FROM main_category mc
+
+                RIGHT JOIN categories c
+                    ON c.main_category_id = mc.id
+
+                WHERE mc.admin_id = @admin_id
+
+                ORDER BY
+                    mc.name ASC,
+                    c.name ASC
+            `);
+
+        const categories = buildCategoryTree(result);
+
+        return res.status(200).json(categories);
+
+    } catch (err) {
+        return res.status(500).json({ message: err.message });
+    }
+
+}
+
+function buildCategoryTree(result) {
+
+    const categoriesMap = new Map();
+
+    for (const row of result.recordset) {
+
+        let mainCategory = categoriesMap.get(row.main_category_id);
+
+        if (!mainCategory) {
+
+            mainCategory = {
+                id: row.main_category_id,
+                name: row.main_category_name,
+                categories: []
+            };
+
+            categoriesMap.set(
+                row.main_category_id,
+                mainCategory
+            );
+        }
+
+        mainCategory.categories.push({
+            id: row.category_id,
+            name: row.category_name
+        });
+    }
+
+    return Array.from(categoriesMap.values());
+}
 
 const CategorySchema = z.object({
     name: z

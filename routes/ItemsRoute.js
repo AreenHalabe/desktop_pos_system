@@ -1,5 +1,5 @@
 import  express  from "express";
-import { addItem, deleteItem, getItem, updateItem, filterItemsByCategory, getMenueTree, getAllItems } from "../controllers/ItemsController.js";
+import { addItem, deleteItem, getItem, updateItem, filterItemsByCategory, getMenueTree, getAllItems, getItemUnitTreeForSupplier } from "../controllers/ItemsController.js";
 
 export const ItemRoute = express.Router();
 
@@ -8,6 +8,9 @@ ItemRoute.get('/item/get' ,  getItem);
 
 
 ItemRoute.get('/items', getAllItems);
+
+ItemRoute.get('/items/tree-for-supplier', getItemUnitTreeForSupplier);
+
 
 ItemRoute.post('/item/add' , addItem);
 
