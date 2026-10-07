@@ -772,15 +772,14 @@ async function generateUniqueBarcode() {
 }
 
 async function batchStockForItem(itemId, stock, cost_price, transaction) {
-  const currentTimeStamp = new Date();
+
   await transaction.request()
     .input("item_id", sql.Int, itemId)
     .input("quantity", sql.Decimal(18, 3), stock)
     .input('cost_price', sql.Decimal(18, 3), cost_price)
-    .input("created_at", sql.DateTime2, currentTimeStamp)
     .query(`
-      INSERT INTO stock_batches (item_id, quantity, remaining_qty, cost_price, created_at)
-      VALUES (@item_id, @quantity, @quantity, @cost_price, @created_at)
+      INSERT INTO stock_batches (item_id, quantity, remaining_qty, cost_price)
+      VALUES (@item_id, @quantity, @quantity, @cost_price)
     `);
 
 }

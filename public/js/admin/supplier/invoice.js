@@ -687,13 +687,11 @@ document.addEventListener("change", function (e) {
         }
 
 
-        item.unit = unit.id;
+        item.unit_id = unit.id;
+        item.unit_name = unit.name;
 
-        item.cost_price = Number(Number(product.cost_price) * Number(unit.conversion_factor)).toFixed(2);
-            // product.cost_price *
-            // unit.conversion_factor;
-
-
+        item.cost_price = roundAmount(Number(Number(product.cost_price) * Number(unit.conversion_factor)).toFixed(2));
+        
         renderInvoice();
 
 
@@ -934,17 +932,18 @@ function addProduct(productId) {
 
             name: product.name,
 
-            // barcode: product.barcode,
-
             cost_price: product.units.length === 1
-                ? Number(Number(product.cost_price) * Number(product.units[0].conversion_factor)).toFixed(2)
-                : null,
+                ? roundAmount(Number(Number(product.cost_price) * Number(product.units[0].conversion_factor)).toFixed(2))
+                : 0,
 
-            unit: product.units.length === 1
+            unit_id: product.units.length === 1
                 ? product.units[0].id
                 : null,
 
-            
+            unit_name :product.units.length === 1
+                ? product.units[0].name
+                : '',
+
 
             qty: 1
 
@@ -1030,9 +1029,7 @@ function updateCostPrice(productId, value) {
         Number(value);
 
 
-    if (price < 0 || isNaN(price)) {
-        return;
-    }
+    
 
 
     item.cost_price = price;
@@ -1083,8 +1080,7 @@ function renderInvoice() {
     invoiceItems.forEach((item, index) => {
 
         const total =
-            item.cost_price * item.qty;
-
+           Number(item.cost_price * item.qty).toFixed(2);
 
         const row =
             document.createElement("tr");
@@ -1110,7 +1106,7 @@ function renderInvoice() {
                             class="form-select unit-select"
                             data-product-id="${item.id}"
                         >
-                            ${item.unit === null
+                            ${item.unit_id === null
                                 ? `
                                         <option value="" selected disabled>
                                             اختر الوحدة
@@ -1122,7 +1118,7 @@ function renderInvoice() {
                             ${products.find(product => product.id === item.id).units.map(unit => `
                                     <option
                                         value="${unit.id}"
-                                        ${unit.id === item.unit ? "selected" : ""}
+                                        ${unit.id === item.unit_id ? "selected" : ""}
                                     >
                                         ${unit.name}
                                     </option>
@@ -1165,7 +1161,7 @@ function renderInvoice() {
                     <td>
 
                         <strong>
-                            ${total.toFixed(2)} ₪
+                            ${total} ₪
                         </strong>
 
                     </td>
@@ -1247,7 +1243,7 @@ function updateTotals() {
 // CONFIRM ORDER
 // ==========================================
 
-function confirmOrder() {
+async function confirmOrder() {
 
     const supplierId =
         document.getElementById(
@@ -1272,54 +1268,72 @@ function confirmOrder() {
 
     }
 
+    let totalPrice = 0;
+    let hasErrorInInput = false;
+    invoiceItems.forEach(item => {
+        if (item.unit_id === null) {
+            bootboxError(`يرجى اختيار الوحدة للصنف: ${item.name}`);
+            hasErrorInInput = true;
 
-    const subtotal =
-        invoiceItems.reduce(
-            (sum, item) =>
-                sum +
-                (item.cost_price * item.qty),
-            0
-        );
+            return;
+        }
+        if (item.cost_price === null || item.cost_price <= 0) {
+            bootboxError(`يرجى إدخال سعر التكلفة للصنف: ${item.name}`);
+            hasErrorInInput = true;
+
+            return;
+        }
+
+        if (item.qty <= 0) {
+            bootboxError(`يرجى إدخال كمية صحيحة للصنف: ${item.name}`);
+            hasErrorInInput = true;
+
+            return;
+        }
+
+        totalPrice += Number(item.cost_price * item.qty);
+    });
+
+    if(hasErrorInInput){
+        return;
+    }
 
 
-    let discount =
-        Number(discountInput.value) || 0;
+    let discount = Number(discountInput.value) || 0;
 
 
     if (discount < 0) {
-        discount = 0;
+        bootboxError('الخصم لا يمكن أن يكون بالسالب');
+        return;
     }
 
 
-    if (discount > subtotal) {
-        discount = subtotal;
+    if (discount > totalPrice) {
+        bootboxError("الخصم لا يمكن أن يكون أكبر من المجموع الفرعي");
+        return;
     }
 
 
-    const totalPrice =
-        subtotal - discount;
 
 
     const orderData = {
 
         supplier_id: Number(supplierId),
 
-        total_price: Number(
-            totalPrice.toFixed(2)
-        ),
+        total_price: totalPrice,
 
-        discount: Number(
-            discount.toFixed(2)
-        ),
+        discount: Number(discount.toFixed(2)),
 
         items: invoiceItems
 
     };
 
+    await createInvoice(orderData);
 
-    console.log("ORDER DATA:");
 
-    console.log(orderData);
+    // console.log("ORDER DATA:");
+
+    // console.log(orderData);
 
 
 
@@ -1404,7 +1418,6 @@ async function loadCategoriesTree() {
             categoriesData = data;
             document.getElementById("loadingMainCategory")?.remove();
             document.getElementById("loadingSubCategory")?.remove();
-            console.log("Categories Tree:", data);
         }
         else if (res.status === 401) {
             showAuthExpired(data.message);
@@ -1432,7 +1445,6 @@ async function loadItemsTree() {
 
         if (res.status === 200) {
             products = data;
-            console.log("Items Tree:", data);
         }
 
 
@@ -1448,4 +1460,48 @@ async function loadItemsTree() {
     } catch (err) {
         bootboxError("حدث خطأ في الاتصال : " + err.message);
     }
+}
+
+
+
+async function createInvoice(invoiceData) {
+    console.log(invoiceData);
+    try {
+        const res = await fetch(url + `/invoice/create`, {
+            method: 'POST',
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": `${getAuthToken('auth')}`
+            },
+            body: JSON.stringify(invoiceData),
+        });
+        const data = await res.json();
+
+        if (res.status === 200) {
+           bootboxSuccess(data.message);
+        }
+
+
+        else if (res.status === 401) {
+            showAuthExpired(data.message);
+        }
+
+
+        else {
+            bootboxError(data.message);
+        }
+
+    } catch (err) {
+        bootboxError("حدث خطأ في الاتصال : " + err.message);
+    }
+}
+
+function roundAmount(amount) {
+    if (amount === 0) return 0;
+
+    const decimal = amount - Math.floor(amount);
+
+    return decimal >= 0.5
+        ? amount
+        : Math.floor(amount);
 }

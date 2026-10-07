@@ -19,6 +19,7 @@ const baseUnitBarcodeInput = document.getElementById("baseBarcode");
 const unitBarcodeInput = document.getElementById("newUnitBarcode");
 const autoUnitBarcodeCheckbox = document.getElementById('auto_barcode_unit');
 
+let units = [];
 
 
 class SiteHeader extends HTMLElement {
@@ -73,20 +74,9 @@ document.addEventListener('DOMContentLoaded', async function () {
 });
 
 
-autoBarcodeCheckbox.addEventListener('change', function () {
-    if (this.checked) {
-        baseUnitBarcodeInput.value = '';
-        baseUnitBarcodeInput.disabled = true;
-        baseUnitBarcodeInput.placeholder = 'سيتم توليد باركود تلقائياً';
-        baseUnitBarcodeInput.style.cursor = 'not-allowed';
-    } else {
-        baseUnitBarcodeInput.disabled = false;
-        baseUnitBarcodeInput.placeholder = 'الباركود';
-        baseUnitBarcodeInput.style.cursor = 'text';
 
-    }
-    renderUnits();
-});
+autoBarcodeCheckbox.addEventListener('change', updateBaseBarcodeState);
+
 
 autoUnitBarcodeCheckbox.addEventListener('change', updateUnitBarcodeState);
 
@@ -101,6 +91,24 @@ function updateUnitBarcodeState() {
         unitBarcodeInput.placeholder = 'الباركود';
         unitBarcodeInput.style.cursor = 'text';
     }
+}
+
+function updateBaseBarcodeState(){
+     if (autoBarcodeCheckbox.checked) {
+        baseUnitBarcodeInput.value = '';
+        baseUnitBarcodeInput.disabled = true;
+        baseUnitBarcodeInput.placeholder = 'سيتم توليد باركود تلقائياً';
+        baseUnitBarcodeInput.style.cursor = 'not-allowed';
+    } else {
+        baseUnitBarcodeInput.disabled = false;
+        baseUnitBarcodeInput.placeholder = 'الباركود';
+        baseUnitBarcodeInput.style.cursor = 'text';
+
+    }
+    
+    renderUnits();
+
+    
 }
 
 
@@ -126,7 +134,6 @@ async function buildSelectCategory() {
 
 
 
-let units = [];
 
 
 function getBaseUnitName() {
@@ -1043,6 +1050,8 @@ function resetAllInputs() {
     updatePurchaseUnitOptions();
 
     document.getElementById("stockResult").style.display = "none";
+    updateUnitBarcodeState();
+    updateBaseBarcodeState(false);
 }
 
 
@@ -1247,42 +1256,6 @@ async function submitProduct() {
 
     };
     await submitProductData(data);
-
-    /*
-    |--------------------------------------------------------------------------
-    | طباعة البيانات
-    |--------------------------------------------------------------------------
-    */
-
-    // console.log(
-    //     "================================="
-    // );
-
-    // console.log(
-    //     "PRODUCT DATA"
-    // );
-
-    // console.log(
-    //     data
-    // );
-
-    // console.log(
-    //     JSON.stringify(
-    //         data,
-    //         null,
-    //         4
-    //     )
-    // );
-
-    // console.log(
-    //     "================================="
-    // );
-
-
-    // bootboxError(
-    //     "تم تجهيز بيانات المنتج.\n\nافتح Console لمشاهدة البيانات."
-    // );
-
 }
 
 
@@ -1478,7 +1451,8 @@ renderUnits();
 
 
 async function submitProductData(finalData) {
-    //console.log("Submitting product data:", finalData);
+    console.log("Submitting product data:", finalData);
+    loader.style.display = 'flex';
     try {
         let res = await fetch(url + '/item/add', {
             method: "POST",
@@ -1491,7 +1465,7 @@ async function submitProductData(finalData) {
         let data = await res.json();
         if (res.status === 200) {
             bootboxSuccess(data.message);
-
+            resetAllInputs();
         }
 
 

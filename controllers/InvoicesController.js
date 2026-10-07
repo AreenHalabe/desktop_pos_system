@@ -4,7 +4,6 @@ import { z } from "zod";
 
 
 export const createInvoiceFromSupplier = async (req, res) => {
-    const supplierId = Number(req.query.supplier_id);
     const transaction = new sql.Transaction(pool);
     let transactionStarted = false;
     try {
@@ -25,23 +24,25 @@ export const createInvoiceFromSupplier = async (req, res) => {
         await transaction.begin();
         transactionStarted = true;
 
-        const invoiceId = await createPayInvoice(supplierId, parsedData, transaction);
+        const invoiceId = await createPayInvoice(parsedData, transaction);
+
+        await addInvoiceItems(invoiceId, parsedData.items, transaction);
 
 
+          const {
+            updateStockBatchs,
+            addNewStockBatchs,
+            updateItemsStock
+        } = await prepareStockBatches(parsedData.items);
 
-        const [_, stockBatches] = await Promise.all([
-            addInvoiceItems(invoiceId, parsedData.items, transaction),
-            getStockBatchesByIds(parsedData.items)
-        ]);
-
-
-        await updateStockBatches(parsedData.items, stockBatches, transaction);
+        await updateStockBatches(updateStockBatchs, transaction);
+        await addNewStockBatches(addNewStockBatchs, transaction);
+        await updateStockItems(updateItemsStock, transaction);
 
         await transaction.commit();
 
         return res.status(200).json({
             success: true,
-            invoice_number : invoiceId,
             message: "تم إنشاء الفاتورة",
         });
 
@@ -72,18 +73,20 @@ export const createInvoiceFromSupplier = async (req, res) => {
 
 
 
-async function createPayInvoice(supplierId, parsedData, transaction) {
+async function createPayInvoice(parsedData, transaction) {
+    const totalPrice = parsedData.total_price - parsedData.discount;
     const currentTimeStamp = new Date();
+    
     const result = await transaction.request()
-        .input("supplier_id", sql.Int, supplierId)
-        .input("total_price", sql.Decimal(18, 2), parsedData.totalPrice)
-        .input("paied", sql.Decimal(18, 2), 0)
-        .input("remaining", sql.Decimal(18, 2), parsedData.totalPrice)
+        .input("supplier_id", sql.Int, parsedData.supplier_id)
+        .input("total_price", sql.Decimal(18, 2), totalPrice)
+        .input("remaining", sql.Decimal(18, 2), totalPrice)
         .input("created_at", sql.DateTime, currentTimeStamp)
-        .input("discount", sql.Decimal(9, 2), parsedData.discount)
+        .input("discount", sql.Decimal(15, 2), parsedData.discount)
         .query(`
-            INSERT INTO supplier_invoices (supplier_id, total_price, paied, remaining, created_at, discount)
-            VALUES (@supplier_id, @total_price, @paied, @remaining, @created_at, @discount);
+            INSERT INTO supplier_invoices (supplier_id, total_price, remaining, created_at, discount)
+            OUTPUT INSERTED.id
+            VALUES (@supplier_id, @total_price, @remaining, @created_at, @discount);
         `);
     const invoiceId = result.recordset[0].id;
 
@@ -98,22 +101,24 @@ async function addInvoiceItems(invoiceId, items, transaction) {
     const values = items.map((item, index) => {
         request.input(`itemId${index}`, sql.Int, item.id);
         request.input(`name${index}`, sql.NVarChar, item.name);
-        request.input(`quantity${index}`, sql.Int, item.qty);
-        request.input(`costPrice${index}`, sql.Decimal(9, 2), item.cost_price);
+        request.input(`quantity${index}`, sql.Decimal(12, 2), item.qty);
+        request.input(`costPrice${index}`, sql.Decimal(12, 2), item.cost_price);
+        request.input(`unit${index}`, sql.NVarChar, item.unit_name);
 
         return `(
             @invoiceId,
             @itemId${index},
             @name${index},
             @quantity${index},
-            @costPrice${index}
+            @costPrice${index},
+            @unit${index}
         )`;
     });
 
 
     await request.query(`
-        INSERT INTO invoice_items
-            (invoice_id, item_id, name, quantity, cost_price)
+        INSERT INTO item_invoices
+            (invoice_id, item_id, name, quantity, cost_price, unit)
         VALUES
             ${values.join(",\n")}
     `);
@@ -121,151 +126,238 @@ async function addInvoiceItems(invoiceId, items, transaction) {
 }
 
 
-async function getStockBatchesByIds(items) {
 
-    const ids = items.map(item => item.id);
+async function updateStockBatches(updateStockBatchs, transaction) {
 
-    const request = pool.request();
-
-    const params = ids.map((id, index) => {
-        request.input(`id${index}`, sql.Int, id);
-        return `@id${index}`;
-    });
-
-    const result = await request.query(`
-        SELECT *
-        FROM stock_batches
-        WHERE item_id IN (${params.join(", ")})
-        ORDER BY item_id ASC
-    `);
-
-    const batches = result.recordset;
-
-
-    const batchMap = new Map();
-
-    for (const batch of batches) {
-        const key = `${batch.item_id}_${batch.cost_price}`;
-        batchMap.set(key, batch);
+    if (updateStockBatchs.length === 0) {
+        return;
     }
-
-    return batchMap;
-}
-
-
-
-
-
-async function updateStockBatches(items, stockBatches, transaction) {
-    const updates = [];
-    const inserts = [];
-    const currentTimeStamp = new Date();
-
-    // 1. تحديد الـ UPDATE والـ INSERT
-    for (const item of items) {
-        const key = `${item.id}_${item.cost_price}`;
-        const batch = stockBatches.get(key);
-
-        if (batch) {
-            updates.push({
-                item_id: batch.id,
-                quantity: batch.quantity + item.qty,
-                remaining_qty: batch.remaining_qty + item.qty
-            });
-        } else {
-            inserts.push({
-                item_id: item.id,
-                quantity: item.qty,
-                remaining_qty: item.qty,
-                cost_price: item.cost_price,
-                created_at: currentTimeStamp
-            });
-        }
-    }
-
-    await runInsertInvoiceStatment(inserts, transaction),
-    await runUpdateInvoiceStatment(updates, transaction)
-
-}
-
-async function runUpdateInvoiceStatment(statment, transaction) {
-    if (!statment || statment.length === 0) return;
 
     const request = transaction.request();
 
-    const values = statment.map((update, index) => {
-        request.input(`item_id${index}`, sql.Int, update.item_id);
-        request.input(`quantity${index}`, sql.Int, update.quantity);
+    const values = updateStockBatchs.map((batch, index) => {
+
+        request.input(`batchId${index}`, sql.Int, batch.id);
         request.input(
-            `remaining_qty${index}`,
-            sql.Int,
-            update.remaining_qty
+            `quantity${index}`,
+            sql.Decimal(18, 2),
+            batch.quantity
+        );
+        request.input(
+            `remainingQty${index}`,
+            sql.Decimal(18, 2),
+            batch.remaining_qty
         );
 
-        return `(@id${index}, @quantity${index}, @remaining_qty${index})`;
+        return `(
+            @batchId${index},
+            @quantity${index},
+            @remainingQty${index}
+        )`;
     });
 
     await request.query(`
         UPDATE sb
         SET
-            sb.quantity = v.quantity,
-            sb.remaining_qty = v.remaining_qty
+            sb.quantity = sb.quantity + v.quantity,
+            sb.remaining_qty = sb.remaining_qty + v.remaining_qty
         FROM stock_batches sb
         INNER JOIN (
             VALUES
-                ${values.join(",")}
-        ) v(id, quantity, remaining_qty)
-            ON sb.item_id = v.item_id
+                ${values.join(",\n")}
+        ) AS v(id, quantity, remaining_qty)
+            ON v.id = sb.id
     `);
 }
 
-async function runInsertInvoiceStatment(statment, transaction) {
-    if (!statment || statment.length === 0) return;
+
+async function addNewStockBatches(addNewStockBatchs, transaction) {
+
+    if (addNewStockBatchs.length === 0) {
+        return;
+    }
 
     const request = transaction.request();
 
-    const values = statment.map((insert, index) => {
-        request.input(`item_id${index}`, sql.Int, insert.item_id);
+    const values = addNewStockBatchs.map((batch, index) => {
+
+        request.input(`itemId${index}`, sql.Int, batch.item_id);
         request.input(
             `quantity${index}`,
-            sql.Int,
-            insert.quantity
-        );
-        request.input(
-            `remaining_qty${index}`,
-            sql.Int,
-            insert.remaining_qty
-        );
-        request.input(
-            `cost_price${index}`,
             sql.Decimal(18, 2),
-            insert.cost_price
+            batch.quantity
         );
-        request.input(`created_at${index}`, sql.DateTime, insert.created_at);
+        request.input(
+            `remainingQty${index}`,
+            sql.Decimal(18, 2),
+            batch.remaining_qty
+        );
+        request.input(
+            `costPrice${index}`,
+            sql.Decimal(18, 3),
+            batch.cost_price
+        );
 
         return `(
-            @item_id${index},
+            @itemId${index},
             @quantity${index},
-            @remaining_qty${index},
-            @cost_price${index},
-            @created_at${index}
+            @remainingQty${index},
+            @costPrice${index}
         )`;
     });
 
     await request.query(`
         INSERT INTO stock_batches
-            (item_id, quantity, remaining_qty, cost_price, created_at)
+        (
+            item_id,
+            quantity,
+            remaining_qty,
+            cost_price
+        )
         VALUES
-            ${values.join(",")}
+            ${values.join(",\n")}
     `);
 }
+
+
+
+
+async function updateStockItems(updateItemsStock, transaction) {
+
+    if (updateItemsStock.length === 0) {
+        return;
+    }
+
+    const request = transaction.request();
+
+    const values = updateItemsStock.map((item, index) => {
+        request.input(
+            `item_id${index}`,
+            sql.Int,
+            item.item_id
+        );
+
+        request.input(
+            `quantity${index}`,
+            sql.Decimal(18, 2),
+            item.new_stock
+        );
+
+        return `(
+            @item_id${index},
+            @quantity${index}
+        )`;
+    });
+
+    await request.query(`
+        UPDATE i
+        SET
+            i.stock = i.stock + v.new_stock
+        FROM items i
+        INNER JOIN (
+            VALUES
+                ${values.join(",\n")}
+        ) AS v(id, new_stock)
+            ON v.id = i.id
+    `);
+}
+
+
+
+
+
+
+async function prepareStockBatches(items) {
+    const updateStockBatchs = [];
+    const addNewStockBatchs = [];
+    const updateItemsStock = [];
+    for (const item of items) {
+
+        const itemId = item.id;
+        const unitId = item.unit_id;
+
+        const [unitResult, batchesResult] = await Promise.all([
+            pool
+                .request()
+                .input("unitId", sql.Int, unitId)
+                .query(`
+                    SELECT conversion_factor
+                    FROM items_units
+                    WHERE id = @unitId
+                `),
+
+            pool
+                .request()
+                .input("itemId", sql.Int, itemId)
+                .query(`
+                    SELECT 
+                        id,
+                        cost_price
+                    FROM stock_batches
+                    WHERE item_id = @itemId
+                    ORDER BY id ASC
+                `)
+        ]);
+
+        
+
+        const conversionFactor = Number(unitResult.recordset[0].conversion_factor);
+        // سعر التكلفة للقطعة
+        const costPricePerPiece = Number(item.cost_price / conversionFactor).toFixed(3);
+        // الكمية بالقطع
+        const quantityInPieces = item.qty * conversionFactor;
+
+
+        const batches = batchesResult.recordset;
+        
+        // آخر batch
+        const lastBatch = batches[batches.length - 1];
+
+        
+        // نفس سعر التكلفة -> تعديل آخر batch
+        if (Number(lastBatch.cost_price).toFixed(3) === costPricePerPiece) {
+            updateStockBatchs.push({
+                id: lastBatch.id,
+                quantity: quantityInPieces,
+                remaining_qty: quantityInPieces
+            });
+        } else {
+            addNewStockBatchs.push({
+                item_id: itemId,
+                quantity: quantityInPieces,
+                remaining_qty: quantityInPieces,
+                cost_price: costPricePerPiece
+            });
+        }
+
+        updateItemsStock.push({
+            item_id : itemId,
+            new_stock : quantityInPieces
+        });
+    }
+
+    return {
+        updateStockBatchs,
+        addNewStockBatchs,
+        updateItemsStock
+    };
+};
+
+
+
 
 
 
 
 
 const invoiceSchema = z.object({
-    totalPrice: z.preprocess(
+
+    supplier_id: z.preprocess(
+        val => Number(val),
+        z.number().int("يجب إختيار المورد")
+    ),
+
+    total_price: z.preprocess(
         val => Number(val),  // يحول أي شيء إلى Number
         z.number().positive("القيمة يجب أن تكون رقمًا موجبًا")
     ),
@@ -277,6 +369,24 @@ const invoiceSchema = z.object({
 
     items: z.array(
         z.object({
+            id: z.preprocess(
+                val => Number(val),
+                z.number().int("معرف المنتج يجب أن يكون رقمًا صحيحًا")
+            ),
+            
+            unit_id: z.preprocess(
+                val => Number(val),
+                z.number().int("يجب إختيار الوِحدة الشرائية لجميع الأصناف")
+            ),
+
+            name: z.string()
+                .trim()
+                .min(1, "اسم الصنف يجب أن يحتوي على حرف على الأقل"),
+
+            unit_name: z.string()
+                .trim()
+                .min(1, "اسم وِحدة الشراء يجب أن يحتوي على حرف على الأقل"),
+
             cost_price: z.preprocess(
                 val => Number(val),
                 z.number().positive("سعر التكلفة يجب أن يكون رقمًا موجبًا")
@@ -284,13 +394,8 @@ const invoiceSchema = z.object({
 
             qty: z.preprocess(
                 val => Number(val),
-                z.number().int().positive("الكمية يجب أن تكون رقمًا صحيحًا أكبر من صفر")
+                z.number().positive("الكمية يجب أن تكون رقمًا أكبر من صفر")
             ),
-
-            id: z.preprocess(
-                val => Number(val),
-                z.number().int("معرف المنتج يجب أن يكون رقمًا صحيحًا")
-            )
         })
     )
 });
