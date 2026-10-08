@@ -3,7 +3,40 @@ import { checkToken, SystemError } from "../shared/functionality.js";
 import { z } from "zod";
 
 
-export const getSuppliers = async (req, res) => {
+
+export const getSupplier = async (req , res) =>{
+    const supplierId = Number(req.query.supplier_id);
+    try {
+        const token = req.headers.authorization;
+        if (!token) {
+            throw new SystemError("إنتهت صلاحية الجلسة , الرجاء تسجيل الدخول مرة أخرى", 401);
+        }
+        await checkToken(token);
+        const result = await pool.request()
+            .input('supplier_id', sql.Int, supplierId)
+            .query(`
+                SELECT *
+                FROM suppliers
+                WHERE id = @supplier_id    
+            `)
+        ;
+
+        const supplier = result.recordset[0];
+
+        return res.status(200).json({
+            success: true,
+            supplier: supplier,
+        });
+
+    } catch (e) {
+        return res.status(e.status || 500).json({
+            success: false,
+            message: e.message || "حدث خطأ غير معروف",
+        });
+    }
+}
+
+export const getAllSuppliers = async (req, res) => {
     try {
         const token = req.headers.authorization;
         if (!token) {
@@ -25,6 +58,110 @@ export const getSuppliers = async (req, res) => {
         return res.status(200).json({
             success: true,
             suppliers: suppliers,
+        });
+
+    } catch (e) {
+        return res.status(e.status || 500).json({
+            success: false,
+            message: e.message || "حدث خطأ غير معروف",
+        });
+    }
+}
+
+
+export const getSupplierPayment = async (req, res) => {
+    const supplierId = Number(req.query.supplier_id);
+
+    const page = Math.max(Number(req.query.page) || 1, 1);
+    const limit = 30;
+    const offset = (page - 1) * limit;
+
+    try {
+        const token = req.headers.authorization;
+
+        if (!token) {
+            throw new SystemError(
+                "إنتهت صلاحية الجلسة , الرجاء تسجيل الدخول مرة أخرى",
+                401
+            );
+        }
+
+        await checkToken(token);
+
+        const [paymentsResult, countResult] = await Promise.all([
+            pool
+                .request()
+                .input('supplier_id', sql.Int, supplierId)
+                .input('offset', sql.Int, offset)
+                .input('limit', sql.Int, limit)
+                .query(`
+                    SELECT *
+                    FROM supplier_payments
+                    WHERE supplier_id = @supplier_id
+                    ORDER BY id DESC
+                    OFFSET @offset ROWS
+                    FETCH NEXT @limit ROWS ONLY
+                `),
+
+            pool
+                .request()
+                .input('supplier_id', sql.Int, supplierId)
+                .query(`
+                    SELECT COUNT(*) AS total
+                    FROM supplier_payments
+                    WHERE supplier_id = @supplier_id
+                `)
+        ]);
+
+        const payments = paymentsResult.recordset;
+        const total = Number(countResult.recordset[0].total);
+
+        const totalPages = Math.ceil(total / limit);
+
+        return res.status(200).json({
+            success: true,
+            payments,
+            pagination: {
+                page,
+                limit,
+                total,
+                totalPages,
+                hasNextPage: page < totalPages,
+                hasPreviousPage: page > 1
+            }
+        });
+
+    } catch (e) {
+        return res.status(e.status || 500).json({
+            success: false,
+            message: e.message || "حدث خطأ غير معروف",
+        });
+    }
+};
+
+export const getSuppliersItems = async(req , res) =>{
+    const supplierId = Number(req.query.supplier_id);
+    try {
+        const token = req.headers.authorization;
+        if (!token) {
+            throw new SystemError("إنتهت صلاحية الجلسة , الرجاء تسجيل الدخول مرة أخرى", 401);
+        }
+        await checkToken(token);
+
+        const result = await pool.request()
+            .input('supplier_id', sql.Int, supplierId)
+            .query(`
+                SELECT *
+                FROM supplier_items
+                WHERE supplier_id = @supplier_id
+            `)
+        ;
+        const items = result.recordset;
+
+
+        return res.status(200).json({
+            success: true,
+            supplier_items: items,
         });
 
     } catch (e) {
@@ -148,13 +285,18 @@ export const deleteSupplier = async (req, res) => {
         }
         await checkToken(token);
 
+        const hasInvoices = await checkIfTheSupplerHasInvoices(supplierId);
+        if(hasInvoices){
+            throw new SystemError("لا يمكن حذف هذا المورد بسبب وجود فواتير مسجلة بحسابه", 400);
+        }
+
         const result = await pool.request()
             .input('id', sql.Int, supplierId)
             .query(`
                 DELETE FROM suppliers
                 WHERE id = @id
             `)
-            ;
+        ;
 
         return res.status(200).json({
             success: true,
@@ -169,13 +311,153 @@ export const deleteSupplier = async (req, res) => {
     }
 }
 
+
+
+
+export const getInvoicesForSupplier = async (req, res) => {
+
+    const supplierId = Number(req.query.supplier_id);
+
+    const page = Math.max(Number(req.query.page) || 1, 1);
+    const limit = 30;
+    const offset = (page - 1) * limit;
+
+    try {
+
+        const token = req.headers.authorization;
+
+        if (!token) {
+            throw new SystemError(
+                "إنتهت صلاحية الجلسة , الرجاء تسجيل الدخول مرة أخرى",
+                401
+            );
+        }
+
+        await checkToken(token);
+
+        const [invoicesResult, countResult] = await Promise.all([
+
+            pool
+                .request()
+                .input('supplier_id', sql.Int, supplierId)
+                .input('offset', sql.Int, offset)
+                .input('limit', sql.Int, limit)
+                .query(`
+                    SELECT
+                        si.*,
+                        it.name,
+                        it.unit,
+                        it.quantity,
+                        it.cost_price
+                    FROM (
+                        SELECT *
+                        FROM supplier_invoices
+                        WHERE supplier_id = @supplier_id
+                        ORDER BY id DESC
+                        OFFSET @offset ROWS
+                        FETCH NEXT @limit ROWS ONLY
+                    ) si
+                    INNER JOIN invoice_items it
+                        ON it.invoice_id = si.id
+                    ORDER BY si.id DESC
+                `),
+
+            pool
+                .request()
+                .input('supplier_id', sql.Int, supplierId)
+                .query(`
+                    SELECT COUNT(*) AS total
+                    FROM supplier_invoices
+                    WHERE supplier_id = @supplier_id
+                `)
+
+        ]);
+
+        const rows = invoicesResult.recordset;
+        const countRows = countResult.recordset;
+
+        const invoicesData = mapInvoicesDate(rows);
+
+        const total = Number(countRows[0].total);
+        const totalPages = Math.ceil(total / limit);
+
+        return res.status(200).json({
+            success: true,
+            invoices: invoicesData,
+            pagination: {
+                page,
+                limit,
+                total,
+                totalPages,
+                hasNextPage: page < totalPages,
+                hasPreviousPage: page > 1
+            }
+        });
+
+    } catch (e) {
+
+        return res.status(e.status || 500).json({
+            success: false,
+            message: e.message || "حدث خطأ غير معروف",
+        });
+
+    }
+};
+
+
+
+async function checkIfTheSupplerHasInvoices(supplierId) {
+    const result = await pool.request()
+        .input('supplier_id', sql.Int, supplierId)
+        .query(`
+            SELECT TOP 1 id
+            FROM supplier_invoices
+            WHERE supplier_id = @supplier_id  
+        `)
+    ;
+
+    return result.recordset[0]?.id;
+}
+
+function mapInvoicesDate(invoicesData) {
+    if (invoicesData.length === 0) return [];
+
+    const invoices = new Map();
+
+    for (const row of invoicesData) {
+        if (!invoices.has(row.id)) {
+            invoices.set(row.id, {
+                id: row.id,
+                total_price: row.total_price,
+                paied: row.paied,
+                remaining: row.remaining,
+                created_at: row.created_at,
+                discount: row.discount,
+                items: []
+            });
+        }
+
+        invoices.get(row.id).items.push({
+            name: row.name,
+            quantity: row.quantity,
+            cost_price: row.cost_price,
+            unit: row.unit
+        });
+    }
+
+    return [...invoices.values()];
+}
+
+
+
+
 const supplierSchema = z.object({
     name: z.string()
         .trim()
         .min(2, "الاسم يجب أن يحتوي على حرفين على الأقل")
         .regex(
-            /^[\u0600-\u06FFa-zA-Z\s]+$/,
-            "الاسم يجب أن يحتوي على حروف فقط"
+            /^[\u0600-\u06FFa-zA-Z0-9\s]+$/,
+            "الاسم يجب أن يحتوي على حروف وأرقام فقط"
         ),
 
     phone: z.string()

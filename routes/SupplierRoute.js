@@ -1,13 +1,22 @@
 import  express  from "express";
-import { getSuppliers, addSupplier, updateSupplier, deleteSupplier } from "../controllers/SupplierController.js";
+import { getSupplier, getAllSuppliers, addSupplier, updateSupplier, deleteSupplier, getSuppliersItems, getInvoicesForSupplier, getSupplierPayment } from "../controllers/SupplierController.js";
 
 export const SupplierRoute = express.Router();
 
 
-SupplierRoute.get('/suppliers' , getSuppliers);
+SupplierRoute.get('/suppliers' , getAllSuppliers);
+
+SupplierRoute.get('/supplier/get' , getSupplier);
+
+SupplierRoute.get('/supplier/payment' , getSupplierPayment);
+
+
+SupplierRoute.get('/supplier/items' , getSuppliersItems);
 
 SupplierRoute.post('/supplier/add' , addSupplier);
 
 SupplierRoute.put('/supplier/update' , updateSupplier);
 
 SupplierRoute.delete('/supplier/delete' , deleteSupplier);
+
+SupplierRoute.get('/supplier/invoices' , getInvoicesForSupplier);

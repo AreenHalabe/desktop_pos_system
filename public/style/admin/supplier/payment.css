@@ -1,0 +1,116 @@
+#paymentModal .modal-header {
+    background: #123f50;
+    color: #fff;
+}
+
+#paymentModal .modal-title {
+    font-size: clamp(1rem, 1.5vw, 1.2rem);
+    font-weight: 600;
+}
+
+#paymentModal .form-label {
+    font-size: 1rem;
+    font-weight: 600;
+}
+
+#paymentModal .form-control,
+#paymentModal .form-select {
+    min-height: 44px;
+    font-size: 1rem;
+}
+
+#paymentModal .input-group-text {
+    font-weight: 600;
+    background: #f1f3f5;
+}
+
+.pay-modal-btn {
+    border: none;
+    border-radius: 0.4rem;
+    padding: 0.55rem 1rem;
+
+    background: #123f50;
+    color: #fff;
+
+    font-size: clamp(0.95rem, 1.4vw, 1.1rem);
+    font-weight: 600;
+
+    cursor: pointer;
+    transition: 0.2s ease;
+}
+
+.pay-modal-btn:hover {
+    background: #0e3442;
+}
+
+.pay-modal-btn:active {
+    transform: scale(0.97);
+}
+
+.payment-balance {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    padding: 0.75rem 1rem;
+    margin-bottom: 1.25rem;
+
+    background: #eef4f6;
+    border-radius: 0.5rem;
+
+    font-size: 1rem;
+}
+
+.payment-balance strong {
+    color: #123f50;
+    font-size: 1.1rem;
+}
+
+
+.check-fields {
+    margin-top: 1.25rem;
+    padding: 1rem;
+    border: 1px solid #dee2e6;
+    border-radius: 0.5rem;
+    background: #f8f9fa;
+}
+
+.check-fields-title {
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: #123f50;
+
+    padding-bottom: 0.75rem;
+    margin-bottom: 1rem;
+
+    border-bottom: 1px solid #dee2e6;
+}
+
+#paymentModal textarea.form-control {
+    resize: vertical;
+}
+
+.pay-modal-btn {
+    border: none;
+    border-radius: 0.4rem;
+    padding: 0.55rem 1rem;
+
+    background: #123f50;
+    color: #fff;
+
+    font-size: clamp(0.95rem, 1.4vw, 1.1rem);
+    font-weight: 600;
+
+    cursor: pointer;
+    transition: 0.2s ease;
+}
+
+.pay-modal-btn:hover {
+    background: #0e3442;
+}
+
+.pay-modal-btn:active {
+    transform: scale(0.97);
+}
+
+

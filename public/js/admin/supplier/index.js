@@ -89,7 +89,6 @@ createAccountForm.addEventListener("submit", async (e) => {
         name: formData.get("name"),
         phone: formData.get('phone') || null,
     }
-    // console.log(data);
     await createSupplierAccount(data);
 });
 
@@ -102,7 +101,6 @@ editAccountForm.addEventListener("submit", async (e) => {
         name: formData.get("name"),
         phone: formData.get('phone') || null,
     }
-    // console.log(data);
 
     await editSupplierAccount(supplierId, data);
 
@@ -118,9 +116,7 @@ document.addEventListener("click", async function (e) {
         const btn = e.target.closest('.view-btn');
 
         const id = btn.dataset.id;
-        const name = btn.dataset.name;
-
-        // window.location.href = `/admin/customer/depts.html?customer_id=${id}&customer_name=${name}`;
+        window.location.href = `./account.html?supplier_id=${id}`;
 
     }
 });
@@ -268,7 +264,6 @@ function renderSuppliersTable() {
                             type="button" 
                             class="btn btn-sm view-btn"
                             data-id="${supplier.id}"
-                            data-name="${supplier.name}"
                             title="عرض الحساب"
                         >
                             <i class="fas fa-eye"></i>
