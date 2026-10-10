@@ -14,7 +14,6 @@ class SiteHeader extends HTMLElement {
         const res = await fetch('../component/header.html');
         this.innerHTML = await res.text();
 
-        // 🔔 إعلان رسمي: الهيدر جاهز
         this.dispatchEvent(
             new CustomEvent("header:ready", {
                 bubbles: true
@@ -61,6 +60,8 @@ document.addEventListener('DOMContentLoaded', async function () {
         loadSuppliers()
     ]);
 
+    await loadInvoice();
+
     loadMainCategories();
 
     filterProducts();
@@ -69,489 +70,8 @@ document.addEventListener('DOMContentLoaded', async function () {
 
 let categoriesData;
 
-// let categoriesData = [
-
-//     {
-//         id: 1,
-//         name: "الوجبات",
-
-//         categories: [
-//             { id: 1, name: "برجر" },
-//             { id: 2, name: "بيتزا" },
-//             { id: 3, name: "شاورما" }
-//         ]
-//     },
-
-//     {
-//         id: 2,
-//         name: "المشروبات",
-
-//         categories: [
-//             { id: 4, name: "عصائر" },
-//             { id: 5, name: "مشروبات غازية" },
-//             { id: 6, name: "قهوة" }
-//         ]
-//     },
-
-//     {
-//         id: 3,
-//         name: "الحلويات",
-
-//         categories: [
-//             { id: 7, name: "كيك" },
-//             { id: 8, name: "آيس كريم" }
-//         ]
-//     }
-
-// ];
 
 let products ;
-
-// let products = [
-
-//     {
-//         id: 1,
-//         category_id: 1,
-//         name: "برجر لحم",
-//         price: 30,
-//         barcode: "44566782210",
-//         cost_price: 1.5
-//     },
-
-//     {
-//         id: 2,
-//         category_id: 1,
-//         name: "برجر دجاج",
-//         price: 28,
-//         barcode: "99534464742",
-//         cost_price: 4
-//     },
-
-//     {
-//         id: 3,
-//         category_id: 2,
-//         name: "بيتزا مارجريتا",
-//         price: 40,
-//         barcode: "9953401742",
-//         cost_price: 10
-//     },
-
-//     {
-//         id: 4,
-//         category_id: 2,
-//         name: "بيتزا خضار",
-//         price: 42,
-//         barcode: "995364742",
-//         cost_price: 2.5
-//     },
-
-//     {
-//         id: 5,
-//         category_id: 3,
-//         name: "شاورما دجاج",
-//         price: 25,
-//         barcode: "111222333",
-//         cost_price: 8
-//     },
-
-//     {
-//         id: 6,
-//         category_id: 4,
-//         name: "عصير برتقال",
-//         price: 8,
-//         barcode: "444555666",
-//         cost_price: 3
-//     },
-
-//     {
-//         id: 7,
-//         category_id: 5,
-//         name: "بيبسي",
-//         price: 5,
-//         barcode: "777888999",
-//         cost_price: 2
-//     },
-
-//     {
-//         id: 8,
-//         category_id: 6,
-//         name: "قهوة",
-//         price: 10,
-//         barcode: "123456789",
-//         cost_price: 4
-//     },
-
-//     {
-//         id: 9,
-//         category_id: 7,
-//         name: "كيك شوكولاتة",
-//         price: 20,
-//         barcode: "987654321",
-//         cost_price: 9
-//     },
-
-//     {
-//         id: 10,
-//         category_id: 8,
-//         name: "آيس كريم فانيلا",
-//         price: 12,
-//         barcode: "555444333",
-//         cost_price: 5
-//     },
-//     {
-//         id: 6,
-//         category_id: 4,
-//         name: "عصير برتقال",
-//         price: 8,
-//         barcode: "444555666",
-//         cost_price: 3
-//     },
-
-//     {
-//         id: 7,
-//         category_id: 5,
-//         name: "بيبسي",
-//         price: 5,
-//         barcode: "777888999",
-//         cost_price: 2
-//     },
-
-//     {
-//         id: 8,
-//         category_id: 6,
-//         name: "قهوة",
-//         price: 10,
-//         barcode: "123456789",
-//         cost_price: 4
-//     },
-
-//     {
-//         id: 9,
-//         category_id: 7,
-//         name: "كيك شوكولاتة",
-//         price: 20,
-//         barcode: "987654321",
-//         cost_price: 9
-//     },
-
-//     {
-//         id: 10,
-//         category_id: 8,
-//         name: "آيس كريم فانيلا",
-//         price: 12,
-//         barcode: "555444333",
-//         cost_price: 5
-//     },
-//     {
-//         id: 6,
-//         category_id: 4,
-//         name: "عصير برتقال",
-//         price: 8,
-//         barcode: "444555666",
-//         cost_price: 3
-//     },
-
-//     {
-//         id: 7,
-//         category_id: 5,
-//         name: "بيبسي",
-//         price: 5,
-//         barcode: "777888999",
-//         cost_price: 2
-//     },
-
-//     {
-//         id: 8,
-//         category_id: 6,
-//         name: "قهوة",
-//         price: 10,
-//         barcode: "123456789",
-//         cost_price: 4
-//     },
-
-//     {
-//         id: 9,
-//         category_id: 7,
-//         name: "كيك شوكولاتة",
-//         price: 20,
-//         barcode: "987654321",
-//         cost_price: 9
-//     },
-
-//     {
-//         id: 10,
-//         category_id: 8,
-//         name: "آيس كريم فانيلا",
-//         price: 12,
-//         barcode: "555444333",
-//         cost_price: 5
-//     },
-//     {
-//         id: 6,
-//         category_id: 4,
-//         name: "عصير برتقال",
-//         price: 8,
-//         barcode: "444555666",
-//         cost_price: 3
-//     },
-
-//     {
-//         id: 7,
-//         category_id: 5,
-//         name: "بيبسي",
-//         price: 5,
-//         barcode: "777888999",
-//         cost_price: 2
-//     },
-
-//     {
-//         id: 8,
-//         category_id: 6,
-//         name: "قهوة",
-//         price: 10,
-//         barcode: "123456789",
-//         cost_price: 4
-//     },
-
-//     {
-//         id: 9,
-//         category_id: 7,
-//         name: "كيك شوكولاتة",
-//         price: 20,
-//         barcode: "987654321",
-//         cost_price: 9
-//     },
-
-//     {
-//         id: 10,
-//         category_id: 8,
-//         name: "آيس كريم فانيلا",
-//         price: 12,
-//         barcode: "555444333",
-//         cost_price: 5
-//     },
-//     {
-//         id: 6,
-//         category_id: 4,
-//         name: "عصير برتقال",
-//         price: 8,
-//         barcode: "444555666",
-//         cost_price: 3
-//     },
-
-//     {
-//         id: 7,
-//         category_id: 5,
-//         name: "بيبسي",
-//         price: 5,
-//         barcode: "777888999",
-//         cost_price: 2
-//     },
-
-//     {
-//         id: 8,
-//         category_id: 6,
-//         name: "قهوة",
-//         price: 10,
-//         barcode: "123456789",
-//         cost_price: 4
-//     },
-
-//     {
-//         id: 9,
-//         category_id: 7,
-//         name: "كيك شوكولاتة",
-//         price: 20,
-//         barcode: "987654321",
-//         cost_price: 9
-//     },
-
-//     {
-//         id: 10,
-//         category_id: 8,
-//         name: "آيس كريم فانيلا",
-//         price: 12,
-//         barcode: "555444333",
-//         cost_price: 5
-//     },
-//     {
-//         id: 6,
-//         category_id: 4,
-//         name: "عصير برتقال",
-//         price: 8,
-//         barcode: "444555666",
-//         cost_price: 3
-//     },
-
-//     {
-//         id: 7,
-//         category_id: 5,
-//         name: "بيبسي",
-//         price: 5,
-//         barcode: "777888999",
-//         cost_price: 2
-//     },
-
-//     {
-//         id: 8,
-//         category_id: 6,
-//         name: "قهوة",
-//         price: 10,
-//         barcode: "123456789",
-//         cost_price: 4
-//     },
-
-//     {
-//         id: 9,
-//         category_id: 7,
-//         name: "كيك شوكولاتة",
-//         price: 20,
-//         barcode: "987654321",
-//         cost_price: 9
-//     },
-
-//     {
-//         id: 10,
-//         category_id: 8,
-//         name: "آيس كريم فانيلا",
-//         price: 12,
-//         barcode: "555444333",
-//         cost_price: 5
-//     },
-//     {
-//         id: 6,
-//         category_id: 4,
-//         name: "عصير برتقال",
-//         price: 8,
-//         barcode: "444555666",
-//         cost_price: 3
-//     },
-
-//     {
-//         id: 7,
-//         category_id: 5,
-//         name: "بيبسي",
-//         price: 5,
-//         barcode: "777888999",
-//         cost_price: 2
-//     },
-
-//     {
-//         id: 8,
-//         category_id: 6,
-//         name: "قهوة",
-//         price: 10,
-//         barcode: "123456789",
-//         cost_price: 4
-//     },
-
-//     {
-//         id: 9,
-//         category_id: 7,
-//         name: "كيك شوكولاتة",
-//         price: 20,
-//         barcode: "987654321",
-//         cost_price: 9
-//     },
-
-//     {
-//         id: 10,
-//         category_id: 8,
-//         name: "آيس كريم فانيلا",
-//         price: 12,
-//         barcode: "555444333",
-//         cost_price: 5
-//     },
-//     {
-//         id: 6,
-//         category_id: 4,
-//         name: "عصير برتقال",
-//         price: 8,
-//         barcode: "444555666",
-//         cost_price: 3
-//     },
-
-//     {
-//         id: 7,
-//         category_id: 5,
-//         name: "بيبسي",
-//         price: 5,
-//         barcode: "777888999",
-//         cost_price: 2
-//     },
-
-//     {
-//         id: 8,
-//         category_id: 6,
-//         name: "قهوة",
-//         price: 10,
-//         barcode: "123456789",
-//         cost_price: 4
-//     },
-
-//     {
-//         id: 9,
-//         category_id: 7,
-//         name: "كيك شوكولاتة",
-//         price: 20,
-//         barcode: "987654321",
-//         cost_price: 9
-//     },
-
-//     {
-//         id: 10,
-//         category_id: 8,
-//         name: "آيس كريم فانيلا",
-//         price: 12,
-//         barcode: "555444333",
-//         cost_price: 5
-//     },
-//     {
-//         id: 6,
-//         category_id: 4,
-//         name: "عصير برتقال",
-//         price: 8,
-//         barcode: "444555666",
-//         cost_price: 3
-//     },
-
-//     {
-//         id: 7,
-//         category_id: 5,
-//         name: "بيبسي",
-//         price: 5,
-//         barcode: "777888999",
-//         cost_price: 2
-//     },
-
-//     {
-//         id: 8,
-//         category_id: 6,
-//         name: "قهوة",
-//         price: 10,
-//         barcode: "123456789",
-//         cost_price: 4
-//     },
-
-//     {
-//         id: 9,
-//         category_id: 7,
-//         name: "كيك شوكولاتة",
-//         price: 20,
-//         barcode: "987654321",
-//         cost_price: 9
-//     },
-
-//     {
-//         id: 10,
-//         category_id: 8,
-//         name: "آيس كريم فانيلا",
-//         price: 12,
-//         barcode: "555444333",
-//         cost_price: 5
-//     },
-
-// ];
 
 
 
@@ -1431,6 +951,8 @@ async function loadItemsTree() {
 
         if (res.status === 200) {
             products = data;
+
+            console.log(products);
         }
 
 
@@ -1446,6 +968,57 @@ async function loadItemsTree() {
     } catch (err) {
         bootboxError("حدث خطأ في الاتصال : " + err.message);
     }
+}
+
+async function loadInvoice() {
+    const id = getInvoiceId();
+
+    if(!id) return;
+   
+    try {
+        const res = await fetch(url + `/invoice?invoice_id=${id}`, {
+            method: "GET",
+            headers: {
+                "Authorization": `${getAuthToken('auth')}`
+            }
+        });
+        const data = await res.json();
+
+        if (res.status === 401) {
+            showAuthExpired(data.message);
+            return;
+        }
+        else if (res.status === 200) {
+            console.log(data.invoice);
+            addItemInvoiceInTable(data.invoice.items);
+            // currentInvoice = data.invoice;
+        
+            // fillInvoiceData(data.invoice);
+        }
+        else {
+            bootboxError(data.message);
+        }
+
+    } catch (e) {
+        bootboxError(e.message);
+    }
+    
+
+
+}
+
+
+function getInvoiceId() {
+    const params = new URLSearchParams(window.location.search);
+    const invoiceId = params.get("invoice_id");
+
+    return invoiceId;
+}
+function getSupplierId() {
+    const params = new URLSearchParams(window.location.search);
+    const supplierId = params.get("supplier_id");
+
+    return supplierId;
 }
 
 async function loadSuppliers() {
@@ -1480,6 +1053,8 @@ function setSupplierData(suppliers) {
 
     document.getElementById('loadingSupplier')?.remove();
 
+    const supplierId = getSupplierId();
+
     if(suppliers.length === 0){
         const option = document.createElement("option");
         option.value = '';
@@ -1495,45 +1070,57 @@ function setSupplierData(suppliers) {
 
         option.textContent = supplier.name;
 
+        if (Number(supplier.id) === Number(supplierId)) {
+            option.selected = true;
+        }
+
         selectSuppliers.appendChild(option);
 
     });
 
+    
+
+
+
 }
 async function createInvoice(invoiceData) {
-    const loader = document.getElementById('overlay_loader');
-    loader.style.display= 'flex';
-    try {
-        const res = await fetch(url + `/invoice/create`, {
-            method: 'POST',
-            headers: {
-                "Content-Type": "application/json",
-                "Authorization": `${getAuthToken('auth')}`
-            },
-            body: JSON.stringify(invoiceData),
-        });
-        const data = await res.json();
 
-        if (res.status === 200) {
-           bootboxSuccess(data.message);
-        }
+    console.log(invoiceData);
+    // const loader = document.getElementById('overlay_loader');
+    // loader.style.display= 'flex';
+    // try {
+    //     const res = await fetch(url + `/invoice/create`, {
+    //         method: 'POST',
+    //         headers: {
+    //             "Content-Type": "application/json",
+    //             "Authorization": `${getAuthToken('auth')}`
+    //         },
+    //         body: JSON.stringify(invoiceData),
+    //     });
+    //     const data = await res.json();
 
-
-        else if (res.status === 401) {
-            showAuthExpired(data.message);
-        }
+    //     if (res.status === 200) {
+    //        bootboxSuccess(data.message);
+    //     }
 
 
-        else {
-            bootboxError(data.message);
-        }
+    //     else if (res.status === 401) {
+    //         showAuthExpired(data.message);
+    //     }
 
-    } catch (err) {
-        bootboxError("حدث خطأ في الاتصال : " + err.message);
-    }finally{
-        loader.style.display= 'none';
-    }
+
+    //     else {
+    //         bootboxError(data.message);
+    //     }
+
+    // } catch (err) {
+    //     bootboxError("حدث خطأ في الاتصال : " + err.message);
+    // }finally{
+    //     loader.style.display= 'none';
+    // }
 }
+
+
 function roundAmount(amount) {
     if (amount === 0) return 0;
 
@@ -1543,6 +1130,56 @@ function roundAmount(amount) {
         ? amount
         : Math.floor(amount);
 }
+
+
+function addItemInvoiceInTable(invItems) {
+
+
+    invItems.forEach(item =>{
+        const product =
+            products.find(
+                product =>
+                    product.id === item.item_id
+            )
+        ;
+
+        const unitId = product.units.find(unit => unit.name === item.unit).id;
+
+
+        invoiceItems.push({
+
+            id: item.item_id,
+
+            name: item.name,
+
+            cost_price: item.cost_price,
+
+            unit_id: unitId,
+
+            unit_name :item.unit,
+
+
+            qty: item.quantity
+
+        });
+
+
+
+
+
+
+
+
+
+    });
+
+    
+
+    console.log(invoiceItems);
+     renderInvoice();
+
+}
+
 
 
 function showConfirmSupplierOrderDialog(finalOrder) {

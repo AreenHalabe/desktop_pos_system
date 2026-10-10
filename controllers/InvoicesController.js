@@ -27,7 +27,8 @@ export const getInvoice = async (req, res) => {
                     it.name,
                     it.unit,
                     it.quantity,
-                    it.cost_price
+                    it.cost_price,
+                    it.item_id
                 FROM supplier_invoices si
                 INNER JOIN invoice_items it
                     ON it.invoice_id = si.id
@@ -1215,7 +1216,8 @@ function mapInvoiceDate(rows) {
             name: row.name,
             unit: row.unit,
             quantity: row.quantity,
-            cost_price: row.cost_price
+            cost_price: row.cost_price,
+            item_id: row.item_id
         });
     }
 
@@ -1275,4 +1277,51 @@ const invoiceSchema = z.object({
             ),
         })
     )
+});
+
+
+const paymentSchema = z.object({
+    amount: z.preprocess(
+        val => Number(val),  // يحول أي شيء إلى Number
+        z.number().positive("قيمة الدفع يجب أن تكون رقمًا موجبًا")
+    ),
+
+    paymentMethode: z.enum(["نقدا", "حوالة بنكية", "شيك"], {
+        errorMap: () => ({ message: "يجب اختيار طريقة الدفع" })
+    }),
+
+});
+
+const checkSchema = z.object({
+
+    checkNumber: z.string()
+        .trim()
+        .regex(/^\d+$/, "رقم الشيك يجب أن يحتوي على أرقام فقط")
+        .min(1, "رقم الشيك مطلوب"),
+
+    checkAccountName: z.string()
+        .trim()
+        .min(2, "اسم الحساب مطلوب")
+        .regex(/^[\u0600-\u06FF\s]+$/, "اسم الحساب يجب أن يحتوي على أحرف عربية فقط"),
+    
+    currency: z.enum(["ILS", "USD", "JOD", "EUR"], {
+        errorMap: () => ({ message: "يجب اختيار عملة الشيك" })
+    }),
+    
+    bankName: z.string()
+        .trim()
+        .min(2, "اسم البنك مطلوب")
+        .regex(/^[\u0600-\u06FF\s]+$/, "اسم البنك يجب أن يحتوي على أحرف عربية فقط"),
+
+
+    dueDate: z.string()
+        .regex(
+            /^\d{4}-\d{2}-\d{2}$/,
+            "تاريخ استحقاق الشيك غير صحيح"
+        ),
+
+    notes: z.string()
+        .trim()
+        .optional()
+
 });
