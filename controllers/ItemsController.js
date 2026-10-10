@@ -423,6 +423,52 @@ export const getItemUnitTreeForSupplier = async (req, res) => {
 }
 
 
+export const getItemUnitTreeForCashier = async (req, res) => {
+  try {
+    const token = req.headers.authorization;
+
+    if (!token) {
+      return res.status(401).json({
+        message: "إنتهت صلاحية الجلسة , الرجاء تسجيل الدخول مرة أخرى"
+      });
+    }
+
+    await checkToken(token);
+
+    const result = await pool.request()
+      .query(`
+        SELECT
+          i.id,
+          i.name,
+          i.category_id,
+
+          iu.id AS unit_id,
+          iu.unit_name,
+          iu.barcode,
+          iu.conversion_factor,
+          iu.price
+
+        FROM items i
+
+        INNER JOIN items_units iu
+            ON iu.item_id = i.id
+        WHER iu.for_sale =1
+
+        ORDER BY i.name ASC, iu.id ASC;
+    `);
+
+    const itemsData = buildItemsDataForCashier(result);
+    return res.status(200).json(itemsData);
+
+
+  } catch (e) {
+    return res.status(e.status || 500).json({
+      success: false,
+      message: e.message || "حدث خطأ غير معروف"
+    });
+  }
+
+}
 
 
 
@@ -892,7 +938,38 @@ function buildItemsDataForSupplier(result) {
   return Array.from(itemsMap.values());
 }
 
+function buildItemsDataForCashier(result) {
 
+  const itemsMap = new Map();
+
+  for(const row of result.recordset) {
+
+    let item = itemsMap.get(row.id);
+
+    if (!item) {
+      item = {
+        id: row.id,
+        category_id: row.category_id,
+        name: row.name,
+        units: [],
+      };
+      itemsMap.set(row.id, item);
+    }
+
+
+    if (!item.units.some(unit => unit.id === row.unit_id)) {
+      item.units.push({
+        id: row.unit_id,
+        name: row.unit_name,
+        price : row.price,
+        barcode: row.barcode,
+        conversion_factor: row.conversion_factor
+      });
+    }
+  }
+
+  return Array.from(itemsMap.values());
+}
 
 
 
