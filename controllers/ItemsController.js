@@ -452,7 +452,7 @@ export const getItemUnitTreeForCashier = async (req, res) => {
 
         INNER JOIN items_units iu
             ON iu.item_id = i.id
-        WHER iu.for_sale =1
+        WHERE iu.for_sale = 1
 
         ORDER BY i.name ASC, iu.id ASC;
     `);
