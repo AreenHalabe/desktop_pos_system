@@ -23,7 +23,7 @@ body {
 body {
     background: var(--bg);
     color: var(--text);
-    font-family: Tahoma, Arial, sans-serif;
+    /* font-family: Tahoma, Arial, sans-serif; */
     font-size: 13px;
 }
 
@@ -658,6 +658,107 @@ body {
     font-size: 15px;
     font-weight: 700;
 }
+
+.invoice-modal .modal-dialog {
+    width: 100vw;
+    max-width: 800px;
+    height: 100vh;
+    margin: 0 auto;
+}
+
+.invoice-modal .modal-content {
+    height: 100vh;
+    border-radius: 8px;
+}
+
+.invoice-modal .modal-body {
+    overflow-y: auto;
+}
+
+
+.cash-calculator {
+    display: block;
+    width: fit-content;
+    max-width: 100%;
+    background: #f8f9fa;
+    border-color: #e9ecef !important;
+    padding: 10px !important;
+    margin-inline: auto;
+}
+
+.cash-calculator .row {
+    display: flex;
+    flex-wrap: nowrap;
+    gap: 8px;
+    margin: 0;
+}
+
+.cash-calculator .col-6 {
+    flex: 0 0 auto;
+    width: auto;
+    padding: 0;
+}
+
+.cash-calculator-box {
+    width: 170px;
+    padding: 8px;
+    background: #fff;
+    border: 1px solid #e9ecef;
+    border-radius: 8px;
+}
+
+.cash-calculator-box .form-label {
+    display: block;
+    margin-bottom: 6px;
+    color: #6c757d;
+    font-size: 0.8rem;
+    white-space: nowrap;
+}
+
+.cash-calculator-box .form-control,
+.cash-calculator-box .input-group-text {
+    font-size: 0.9rem;
+    padding: 6px 8px;
+}
+
+.change-amount {
+    min-height: 35px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+     background: #e8f5e9;
+    font-size: 1rem;
+    font-weight: bolder;
+    color: #198754;
+    direction: ltr;
+    white-space: nowrap;
+}
+
+.confirm-order-modal{
+    max-height: 280px; 
+    overflow-y: auto;
+    scrollbar-width: thin;
+}
+
+.confirm-order-modal::-webkit-scrollbar {
+    width: 6px;
+}
+
+.confirm-order-modal::-webkit-scrollbar-track {
+    background: transparent;
+    border-radius: 10px;
+}
+
+.confirm-order-modal::-webkit-scrollbar-thumb {
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 10px;
+}
+
+.confirm-order-modal::-webkit-scrollbar-thumb:hover {
+    background: rgba(0, 0, 0, 0.35);
+}
+
+
 
 @media (max-width: 995px) {
     .cashier-layout {

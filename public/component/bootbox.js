@@ -78,6 +78,7 @@ export function bootboxConfirm(e, options = {}) {
 
 
 export function bootboxError(message = "حدث خطأ أثناء تنفيذ العملية") {
+  document.activeElement?.blur();
   bootbox.alert({
     title: `
       <div class="d-flex justify-content-between align-items-center">
@@ -108,6 +109,7 @@ export function bootboxSuccess(
   hasPrint = false,
   onClose = null,
 ) {
+   document.activeElement?.blur();
   bootbox.dialog({
     title: `
       <div class="d-flex justify-content-between align-items-center">

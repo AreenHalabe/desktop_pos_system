@@ -7,6 +7,7 @@ import { bootboxLoginAsAdmin, closeSideBar } from "../Switch-user-functionality.
 
 // const header = document.querySelector("site-header");
 
+const overlayLoader = document.getElementById('overlay_loader');
 
 let sessionId;
 
@@ -81,46 +82,11 @@ function handleSessionStatus() {
     `;
 }
 
-function clearLoader(){
+function clearLoader() {
     document.getElementById("productLoader").remove();
 }
 
 
-// async function createOrder() {
-//     displaySpinnerLoader(confirmOrderModal);
-//     try {
-//         const res = await fetch(urlServer + `/creat/order?session_id=${sessionId}`, {
-//             method: 'POST',
-//             headers: {
-//                 "Content-Type": "application/json",
-//                 "Authorization": `${getAuthToken('user-auth')}`
-//             },
-//             body: JSON.stringify(finalOrderDetails),
-//         });
-//         const data = await res.json();
-//         if (res.status === 401) {
-//             showAuthExpired(data.message);
-//             return false;
-//         }
-//         else if (res.status === 200) {
-//             return {
-//                 inv_num: data.invoiceNum,
-//                 success: data.success
-//             };
-//         }
-//         else {
-//             bootboxError(data.message);
-//             return false;
-//         }
-
-//     } catch (err) {
-//         bootboxError(err.message);
-//         return false;
-//     }
-//     finally {
-//         hiddeSpinnerLoader(confirmOrderModal);
-//     }
-// }
 
 
 
@@ -979,7 +945,7 @@ function renderCart(addNewItem = false) {
             "نسبة الخصم"
         );
 
-        discountInput.value = String(row.discount_item);
+        discountInput.value = row.discount_item ? String(row.discount_item) : '';
         discountInput.disabled = discountType === "full";
 
         const percentLabel = document.createElement("span");
@@ -1032,7 +998,7 @@ function renderCart(addNewItem = false) {
     elements.invoiceBody.append(fragment);
 
 
-    if(addNewItem){
+    if (addNewItem) {
         elements.invoiceTable.scrollTop = elements.invoiceTable.scrollHeight;
     }
 }
@@ -1315,22 +1281,9 @@ function printInvoiceToConsole() {
 
     const subtotal = calculateSubtotal();
     const totalDiscount = calculateTotalDiscount();
-    const grandTotal = calculateGrandTotal();
 
     const invoice = {
-        items: cart.map(row => ({
-            item_id: row.item_id,
-            item_name: row.item_name,
-
-            unit_id: row.unit_id,
-            unit_name: row.unit_name,
-            unit_price: row.unit_price,
-            conversion_factor: row.conversion_factor,
-
-            quantity: row.quantity,
-            discount_item: row.discount_item
-        })),
-
+        items: cart,
         total_discount_percentage:
             discountType === "full"
                 ? getValidPercentage(
@@ -1338,15 +1291,11 @@ function printInvoiceToConsole() {
                 )
                 : 0,
 
-        discount_type: discountType,
-
         total_price: Number(subtotal.toFixed(2)),
         discount_amount: Number(totalDiscount.toFixed(2)),
     };
 
-    console.log("بيانات الفاتورة:", invoice);
-
-    return invoice;
+    showConfirmPayDialog(invoice);
 }
 
 
@@ -1456,6 +1405,9 @@ document.addEventListener("click", function (e) {
             elements.barcodeInput.focus();
         }
     }
+
+
+    
 });
 
 
@@ -1518,18 +1470,16 @@ elements.invoiceBody?.addEventListener(
 // 19. تغيير خصم الصنف
 // ==================================================
 
-elements.invoiceBody?.addEventListener(
-    "input",
-    function (e) {
-        if (!e.target.matches(".discount-input")) return;
+elements.invoiceBody?.addEventListener("input", function (e) {
+    if (!e.target.matches(".discount-input")) return;
 
-        updateLineDiscount(
-            Number(
-                e.target.closest("tr")?.dataset.cartId
-            ),
-            e.target.value
-        );
-    }
+    updateLineDiscount(
+        Number(
+            e.target.closest("tr")?.dataset.cartId
+        ),
+        e.target.value
+    );
+}
 );
 
 
@@ -1661,3 +1611,228 @@ async function loadItemsTree() {
         bootboxError("حدث خطأ في الاتصال : " + err.message);
     }
 }
+
+
+async function createOrder(invData) {
+    overlayLoader.style.display = 'flex';
+    try {
+        const res = await fetch(urlServer + `/creat/order?session_id=${sessionId}`, {
+            method: 'POST',
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": `${getAuthToken('user-auth')}`
+            },
+            body: JSON.stringify(invData),
+        });
+        const data = await res.json();
+        if (res.status === 401) {
+            showAuthExpired(data.message);
+            return false;
+        }
+        else if (res.status === 200) {
+            return {
+                inv_num: data.invoiceNum,
+                success: data.success
+            };
+        }
+        else {
+            bootboxError(data.message);
+            return false;
+        }
+
+    } catch (err) {
+        bootboxError(err.message);
+        return false;
+    }
+    finally {
+        overlayLoader.style.display = 'none';
+    }
+}
+
+let currentInvoiceData = null;
+
+const confirmPayModalElement = document.getElementById("confirmPayModal");
+
+const confirmPayModal = bootstrap.Modal.getOrCreateInstance(
+    confirmPayModalElement
+);
+
+const confirmPayDialog = $(confirmPayModalElement);
+
+// عرض الفاتورة وفتح النافذة
+function showConfirmPayDialog(invoiceData) {
+    currentInvoiceData = invoiceData;
+
+    const itemsHtml = invoiceData.items.map(item => {
+        const lineTotal = calculateLineTotal(item);
+
+        return `
+            <tr>
+                <td class="text-center fw-semibold">
+                    ${item.item_name}
+                </td>
+
+                <td class="text-center" style ="font-size:15px">
+                    ${item.unit_name}
+                </td>
+
+                <td class="text-center">
+                    ${item.quantity}
+                </td>
+
+                <td class="text-center" style ="font-size:15px">
+                    ₪ ${formatMoney(item.unit_price)}
+                </td>
+
+                <td class="text-center">
+                    <span class="badge bg-danger-subtle text-danger border border-danger-subtle" style ="font-size:12px">
+                        ${invoiceData.discount_type === "full"
+                ? "—"
+                : `%${item.discount_item || 0}`}
+                    </span>
+                </td>
+
+                <td class="text-center fw-bold">
+                    ₪ ${formatMoney(lineTotal)}
+                </td>
+            </tr>
+        `;
+    }).join("");
+
+    // تحديث أصناف الفاتورة
+    confirmPayDialog.find("#confirmOrderItems").html(itemsHtml);
+
+    // تحديث المجاميع
+    confirmPayDialog.find("#confirmSubtotal").text(
+        `₪ ${formatMoney(invoiceData.total_price)}`
+    );
+
+    confirmPayDialog.find("#confirmDiscount").text(
+        `− ₪ ${formatMoney(invoiceData.discount_amount)}`
+    );
+
+    const grandTotal = Number(
+        (
+            invoiceData.total_price -
+            invoiceData.discount_amount
+        ).toFixed(2)
+    );
+
+    confirmPayDialog.find("#confirmGrandTotal").text(
+        `₪ ${formatMoney(grandTotal)}`
+    );
+
+    // إعادة تعيين الحقول عند فتح فاتورة جديدة
+    confirmPayDialog.find("#confirmPaymentMethod").val("");
+
+    confirmPayDialog.find("#receivedAmount").val("");
+
+    confirmPayDialog.find("#changeAmount")
+        .text("0.00 ₪")
+        .css("color", "#6c757d");
+
+    // إعادة حالة زر التأكيد
+    const confirmButton = confirmPayDialog.find("#confirmOrderButton");
+
+    confirmButton
+        .prop("disabled", true)
+        .html('<i class="fa-solid fa-check me-1"></i> تأكيد الطلب');
+
+    // فتح نفس النافذة كل مرة
+    confirmPayModal.show();
+}
+
+
+// التمرير داخل جدول الفاتورة
+confirmPayModalElement.addEventListener("shown.bs.modal", function () {
+    const tableWrapper = confirmPayDialog.find(".table-responsive")[0];
+
+    if (tableWrapper) {
+        tableWrapper.scrollTo({
+            top: tableWrapper.scrollHeight,
+            behavior: "smooth"
+        });
+    }
+});
+
+
+// تعطيل التأكيد حتى يختار طريقة الدفع
+confirmPayDialog.find("#confirmPaymentMethod").on("change", function () {
+    confirmPayDialog.find("#confirmOrderButton")
+        .prop("disabled", !this.value);
+});
+
+
+// حساب الباقي للزبون
+confirmPayDialog.find("#receivedAmount").on("input", function () {
+    if (!currentInvoiceData) {
+        return;
+    }
+
+    const receivedAmount = Number(this.value);
+
+    const grandTotal = Number(
+        (
+            currentInvoiceData.total_price -
+            currentInvoiceData.discount_amount
+        ).toFixed(2)
+    );
+
+    const change = receivedAmount - grandTotal;
+
+    const changeElement = confirmPayDialog.find("#changeAmount");
+
+    if (this.value === "" || !Number.isFinite(receivedAmount)) {
+        changeElement.text("0.00 ₪");
+        changeElement.css("color", "#6c757d");
+        return;
+    }
+
+    changeElement.text(`${change.toFixed(2)} ₪`);
+
+    changeElement.css(
+        "color",
+        change < 0 ? "#dc3545" : "#198754"
+    );
+});
+
+
+// تأكيد الطلب وحفظه
+confirmPayDialog.find("#confirmOrderButton").on("click", async function () {
+    const confirmButton = $(this);
+
+    const paymentMethod = confirmPayDialog.find("#confirmPaymentMethod").val();
+
+    if (!paymentMethod || !currentInvoiceData) {
+        return;
+    }
+
+    confirmButton.prop("disabled", true);
+
+    confirmButton.html(
+        '<span class="spinner-border spinner-border-sm me-1"></span> جاري الحفظ...'
+    );
+
+    currentInvoiceData.payment_method = paymentMethod;
+
+   
+    const result = await createOrder(currentInvoiceData);
+
+    if (result === false) {
+        confirmButton.prop("disabled", false);
+
+        confirmButton.html(
+            '<i class="fa-solid fa-check me-1"></i> تأكيد الطلب'
+        );
+
+        return;
+    }
+
+    
+
+    confirmPayModal.hide();
+
+    bootboxSuccess('تم بنجاح');
+
+    
+});
