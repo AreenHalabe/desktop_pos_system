@@ -784,13 +784,12 @@ async function createNewItem(item, transaction) {
     .request()
     .input("name", sql.NVarChar, item.name)
     .input("category_id", sql.Int, item.category_id)
-    .input("stock", sql.Decimal(20, 3), item.stock_quantity)
 
     .input("admin_id", sql.Int, item.admin_id)
     .query(`
-      INSERT INTO items (name, category_id, stock)
+      INSERT INTO items (name, category_id)
       OUTPUT INSERTED.id
-      VALUES (@name, @category_id, @stock)
+      VALUES (@name, @category_id)
     `)
     ;
 

@@ -6,9 +6,9 @@ import { z } from "zod";
 
 
 export const createOrder = async (req, res) => {
-    // const sessionId = Number(req.query.session_id);
-    // const transaction = new sql.Transaction(pool);
-    // let transactionStarted = false;
+    const sessionId = Number(req.query.session_id);
+    const transaction = new sql.Transaction(pool);
+    let transactionStarted = false;
     try {
         const token = req.headers.authorization;
         if (!token) {
@@ -26,20 +26,24 @@ export const createOrder = async (req, res) => {
         const parsedData = invoiceSchema.parse(orderData);
 
 
-        // await transaction.begin();
-        // transactionStarted = true;
+        await transaction.begin();
+        transactionStarted = true;
 
-        // const invoiceNum = await generateInvoiceInfo(sessionId, transaction);
-        // const orderId    = await insertOrder(adminId, sessionId, invoiceNum, parsedData.totalPrice, orderData.discount, parsedData.paymentMethod, parsedData.orderType, 'مكتمل', transaction);
-        // await insertItems(orderId, orderData.items, transaction);
+        const invoiceNum = await generateInvoiceInfo(sessionId, transaction);
+        const orderId    = await insertOrder(adminId, sessionId, invoiceNum, parsedData.total_price, orderData.discount_amount, parsedData.payment_method, 'مكتمل', transaction);
+        
+        const {items, updateStockBatches, deleteStockBatches } = await handleCostPriceForEachStock(parsedData.items);
 
 
+        await runUpdateStockBatches(updateStockBatches, transaction);
+        await runDeleteStockBatches(deleteStockBatches, transaction);
+        await insertItems(orderId, items, transaction);
 
-        // await transaction.commit();
+        await transaction.commit();
 
         return res.status(200).json({
             success: true,
-            invoiceNum: 5,
+            invoiceNum,
             message: "تم إنشاء الطلب",
         });
 
@@ -199,11 +203,6 @@ async function getOrderById(orderId) {
 
 
 
-function getSize(name) {
-    const parts = name.split("-");
-    return parts.length > 1 ? parts[1].trim() : 'NaN';
-}
-
 async function generateInvoiceInfo(sessionId, transaction) {
     const result = await transaction
         .request()
@@ -221,7 +220,7 @@ async function generateInvoiceInfo(sessionId, transaction) {
     return invoiceNum;
 }
 
-async function insertOrder(adminId, sessionId, invoiceNum, mainPrice, discount, paymentMethod, orderType, status, transaction) {
+async function insertOrder(adminId, sessionId, invoiceNum, mainPrice, discount, paymentMethod, status, transaction) {
 
     const totalPrice = mainPrice - discount;
 
@@ -231,16 +230,15 @@ async function insertOrder(adminId, sessionId, invoiceNum, mainPrice, discount, 
         .input('admin_id', sql.Int, adminId)
         .input('session_id', sql.Int, sessionId)
         .input('invoice_num', sql.NVarChar, invoiceNum)
-        .input('total_price', sql.Decimal(10, 2), totalPrice)
-        .input('discount', sql.Decimal(10, 2), discount)
+        .input('total_price', sql.Decimal(15, 2), totalPrice)
+        .input('discount', sql.Decimal(15, 2), discount)
         .input('payment_method', sql.NVarChar, paymentMethod)
         .input('status', sql.NVarChar, status)
-        .input('type', sql.NVarChar, orderType)
         .input("created_at", sql.DateTime2, currentTimeStamp)
         .query(`
-            INSERT INTO orders (admin_id, session_id, invoice_num, total_price, discount, payment_method, status, type, created_at)
+            INSERT INTO orders (admin_id, session_id, invoice_num, total_price, discount, payment_method, status, created_at)
             OUTPUT INSERTED.id
-            VALUES (@admin_id, @session_id, @invoice_num, @total_price, @discount, @payment_method, @status, @type, @created_at)
+            VALUES (@admin_id, @session_id, @invoice_num, @total_price, @discount, @payment_method, @status, @created_at)
         `)
         ;
 
@@ -258,18 +256,20 @@ async function insertItems(orderId, items, transaction) {
 
     items.forEach((item, index) => {
         values.push(`
-            (@order_id${index}, @item_id${index}, @quantity${index}, @price${index}, @size_name${index})
+            (@order_id${index}, @item_id${index}, @quantity${index}, @price${index}, @cost_price${index}, @unit${index}, @discount_item${index})
         `);
         request.input(`order_id${index}`, sql.Int, orderId);
-        request.input(`item_id${index}`, sql.Int, item.id);
-        request.input(`quantity${index}`, sql.Int, item.qty);
-        request.input(`price${index}`, sql.Decimal(10, 2), item.price);
-        request.input(`size_name${index}`, sql.NVarChar, item.sizeName || 'NaN');
+        request.input(`item_id${index}`, sql.Int, item.item_id);
+        request.input(`quantity${index}`, sql.Int, item.quantity);
+        request.input(`price${index}`, sql.Decimal(15, 2), item.unit_price);
+        request.input(`cost_price${index}`, sql.Decimal(15, 3), item.cost_price);
+        request.input(`unit${index}`, sql.NVarChar, item.unit_name);
+        request.input(`discount_item${index}`, sql.Decimal(7, 2), item.discount_item);
     });
 
     const query = `
         INSERT INTO order_items 
-        (order_id, item_id, quantity, price, size_name)
+        (order_id, item_id, quantity, price, cost_price, unit, discount_item)
         VALUES ${values.join(", ")}
     `;
 
@@ -278,18 +278,7 @@ async function insertItems(orderId, items, transaction) {
 
 
 
-async function getAllBatchesForItem(itemId) {
-    const batchesResult = await pool.request()
-        .input("itemId", sql.Int, itemId)
-        .query(`
-            SELECT id, item_id, quantity, remaining_qty, cost_price
-            FROM stock_batches
-            WHERE item_id = @itemId
-            ORDER BY id ASC
-        `);
 
-    return batchesResult.recordset;
-}
 
 async function getAllBatchesForItems(items) {
     const itemIds = [
@@ -334,84 +323,7 @@ async function getAllBatchesForItems(items) {
 
 
 
-// async function handleCostPriceForEachStock(items) {
-//     const updateStockBatches = [];
-//     const deleteStockBatches = [];
 
-//     for (const item of items) {
-//         const stockBatches = await getAllBatchesForItem(item.item_id);
-
-//         if (stockBatches.length === 1) {
-//             const batch = stockBatches[0];
-//             item.cost_price = batch.cost_price;
-//             if (Number(batch.remaining_qty) != 0) {
-//                 const newRemainingQty = Math.max(0, batch.remaining_qty - item.quantity);
-//                 updateStockBatches.push({
-//                     id: batch.id,
-//                     remaining_qty: newRemainingQty
-//                 });
-//             }
-
-//             continue;
-//         }
-
-//         let remainingQuantity = Number(item.quantity);
-//         let totalConsumedQuantity = 0;
-//         let totalConsumedCost = 0;
-//         let lastBatchCostPrice = null;
-
-//         for (let i = 0; i < stockBatches.length; i++) {
-
-//             if (remainingQuantity <= 0) {
-//                 break;
-//             }
-
-//             const batch = stockBatches[i];
-//             const batchRemainingQty = Number(batch.remaining_qty);
-
-//             if (batchRemainingQty <= 0) {
-//                 continue;
-//             }
-
-//             const consumedQuantity = Math.min(batchRemainingQty, remainingQuantity);
-
-//             lastBatchCostPrice = Number(batch.cost_price);
-
-//             totalConsumedQuantity += consumedQuantity;
-//             totalConsumedCost += consumedQuantity * Number(batch.cost_price);
-
-//             const newRemainingQty = batchRemainingQty - consumedQuantity;
-
-//             if (newRemainingQty === 0 && i !== 0) {
-
-//                 deleteStockBatches.push({
-//                     id: batch.id
-//                 });
-
-//             } else {
-
-//                 updateStockBatches.push({
-//                     id: batch.id,
-//                     remaining_qty: newRemainingQty
-//                 });
-
-//             }
-
-//             remainingQuantity -= consumedQuantity;
-//         }
-
-        
-//         if (remainingQuantity > 0 && lastBatchCostPrice !== null) {
-//             totalConsumedCost += remainingQuantity * lastBatchCostPrice;
-//             totalConsumedQuantity += remainingQuantity;
-//         }
-
-//         if (totalConsumedQuantity > 0) {
-//             item.cost_price = totalConsumedCost / totalConsumedQuantity;
-//         }
-
-//     }
-// }
 
 async function handleCostPriceForEachStock(items) {
     const updateStockBatches = new Map();
@@ -421,8 +333,7 @@ async function handleCostPriceForEachStock(items) {
     const batchesByItemId = await getAllBatchesForItems(items);
 
     for (const item of items) {
-        const stockBatches =
-            batchesByItemId.get(Number(item.item_id)) ?? [];
+        const stockBatches = batchesByItemId.get(Number(item.item_id)) ?? [];
 
         const quantityInPieces =
             Number(item.quantity) * Number(item.conversion_factor);
@@ -451,10 +362,7 @@ async function handleCostPriceForEachStock(items) {
                 remainingQtyByBatch.get(batch.id);
 
             if (currentRemainingQty > 0) {
-                const newRemainingQty = Math.max(
-                    0,
-                    currentRemainingQty - quantityInPieces
-                );
+                const newRemainingQty = Math.max(0,currentRemainingQty - quantityInPieces);
 
                 remainingQtyByBatch.set(batch.id, newRemainingQty);
 
@@ -570,6 +478,55 @@ function setBatchDelete(updateMap, deleteMap, batchId) {
     deleteMap.set(batchId, {
         id: batchId
     });
+}
+
+
+async function runUpdateStockBatches(updateStockBatches, transaction) {
+    if (updateStockBatches.length === 0) {
+        return;
+    }
+
+    const request = transaction.request();
+
+    const values = updateStockBatches.map((batch, index) => {
+        request.input(`id${index}`, sql.Int, batch.id);
+        request.input(
+            `remainingQty${index}`,
+            sql.Decimal(18, 2),
+            batch.remaining_qty
+        );
+
+        return `(@id${index}, @remainingQty${index})`;
+    });
+
+    await request.query(`
+        UPDATE sb
+        SET sb.remaining_qty = v.remaining_qty
+        FROM stock_batches AS sb
+        INNER JOIN (
+            VALUES ${values.join(", ")}
+        ) AS v(id, remaining_qty)
+            ON sb.id = v.id;
+    `);
+}
+
+
+async function runDeleteStockBatches(deleteStockBatches, transaction) {
+    if (deleteStockBatches.length === 0) {
+        return;
+    }
+
+    const request = transaction.request();
+
+    const parameters = deleteStockBatches.map((batch, index) => {
+        request.input(`id${index}`, sql.Int, batch.id);
+        return `@id${index}`;
+    });
+
+    await request.query(`
+        DELETE FROM stock_batches
+        WHERE id IN (${parameters.join(", ")});
+    `);
 }
 
 const cancelResonSchema = z.object({

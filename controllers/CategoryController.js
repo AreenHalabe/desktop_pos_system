@@ -172,7 +172,6 @@ export const getCategoryTreeForSupplier = async (req, res) => {
         }
 
         const adminId = await checkToken(token);
-
         const result = await pool.request()
             .input("admin_id", sql.Int, adminId)
             .query(`

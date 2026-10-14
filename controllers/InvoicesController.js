@@ -80,16 +80,9 @@ export const createInvoiceFromSupplier = async (req, res) => {
 
         await addInvoiceItems(invoiceId, parsedData.items, transaction);
 
+        const addNewStockBatchs = await prepareStockBatches(parsedData.items, invoiceId);
 
-        const {
-            addNewStockBatchs,
-            updateItemsStock,
-        } = await prepareStockBatches(parsedData.items, invoiceId);
-
-        // await updateStockBatches(updateStockBatchs, currentTimeStamp, transaction);
-        
         await addNewStockBatches(addNewStockBatchs, currentTimeStamp, transaction);
-        await updateStockItems(updateItemsStock, true, transaction);
 
         const totalPrice = parsedData.total_price - parsedData.discount;
 
@@ -207,31 +200,21 @@ export const deleteInvoice = async (req, res) => {
         await checkToken(token);
 
         
-        const [invoice, invoiceItems] = await Promise.all([
-            getInvoices(invoiceId),
-            getIncoiceItems(invoiceId)
-        ]);
-
-        
-
-
+        const invoice = await getInvoices(invoiceId)
+            
         if (invoice.total_price == invoice.remaining) {
             await transaction.begin();
             transactionStarted = true;
-
-            await removeQuantityOfInvoiceItemsFormStockBatches(invoiceItems, transaction);
 
             await transaction.request()
                 .input('id', sql.Int, invoiceId)
                 .query(`
                     DELETE FROM supplier_invoices WHERE id = @id
                 `)
-                ;
+            ;
 
             await updateBalanceForSupplier(invoice.supplier_id, invoice.total_price, false, transaction);
-            
-            
-
+        
             await transaction.commit();
         }
         else {
@@ -444,58 +427,8 @@ async function addInvoiceItems(invoiceId, items, transaction) {
 
 
 
-async function updateStockBatches(updateStockBatchs, currentTimeStamp, transaction) {
 
-    if (updateStockBatchs.length === 0) {
-        return;
-    }
 
-    const request = transaction.request();
-
-    const values = updateStockBatchs.map((batch, index) => {
-
-        request.input(`batchId${index}`, sql.Int, batch.id);
-
-        request.input(
-            `quantity${index}`,
-            sql.Decimal(18, 2),
-            batch.quantity
-        );
-
-        request.input(
-            `remainingQty${index}`,
-            sql.Decimal(18, 2),
-            batch.remaining_qty
-        );
-
-        request.input(
-            `createdAt${index}`,
-            sql.DateTime,
-            currentTimeStamp
-        );
-
-        return `(
-            @batchId${index},
-            @quantity${index},
-            @remainingQty${index},
-            @createdAt${index}
-        )`;
-    });
-
-    await request.query(`
-        UPDATE sb
-        SET
-            sb.quantity = sb.quantity + v.quantity,
-            sb.remaining_qty = sb.remaining_qty + v.remaining_qty,
-            sb.created_at = v.created_at
-        FROM stock_batches sb
-        INNER JOIN (
-            VALUES
-                ${values.join(",\n")}
-        ) AS v(id, quantity, remaining_qty, created_at)
-            ON v.id = sb.id
-    `);
-}
 async function addNewStockBatches(addNewStockBatchs, currentTimeStamp, transaction) {
 
     if (addNewStockBatchs.length === 0) {
@@ -557,72 +490,10 @@ async function addNewStockBatches(addNewStockBatchs, currentTimeStamp, transacti
             ${values.join(",\n")}
     `);
 }
-async function updateStockItems(updateItemsStock, isAddInvoice, transaction) {
 
-    if (updateItemsStock.length === 0) {
-        return;
-    }
 
-    const request = transaction.request();
 
-    const values = updateItemsStock.map((item, index) => {
-        request.input(
-            `item_id${index}`,
-            sql.Int,
-            item.item_id
-        );
-
-        request.input(
-            `quantity${index}`,
-            sql.Decimal(18, 2),
-            item.invoice_item_qty
-        );
-
-        return `(
-            @item_id${index},
-            @quantity${index}
-        )`;
-    });
-
-    await request.query(`
-        UPDATE i
-        SET
-            i.stock = i.stock ${isAddInvoice ? '+' : '-'} v.invoice_item_qty
-        FROM items i
-        INNER JOIN (
-            VALUES
-                ${values.join(",\n")}
-        ) AS v(id, invoice_item_qty)
-            ON v.id = i.id
-    `);
-}
-
-async function getUnitAndBatchesById(unitId, itemId) {
-    // const [unitResult, batchesResult] = await Promise.all([
-    //     pool
-    //         .request()
-    //         .input("unitId", sql.Int, unitId)
-    //         .query(`
-    //             SELECT conversion_factor
-    //             FROM items_units
-    //             WHERE id = @unitId
-    //         `),
-
-    //     pool
-    //         .request()
-    //         .input("itemId", sql.Int, itemId)
-    //         .query(`
-    //             SELECT *
-    //             FROM stock_batches
-    //             WHERE item_id = @itemId
-    //             ORDER BY id ASC
-    //         `)
-    // ]);
-
-    // return {
-    //     unitResult,
-    //     batchesResult
-    // };
+async function getUnitAndBatchesById(unitId) {
 
     const unitResult = await pool
             .request()
@@ -636,75 +507,24 @@ async function getUnitAndBatchesById(unitId, itemId) {
     return unitResult;
 
 }
-// async function getUnitAndBatchesByNameUnit(unitName, itemId) {
-//     const [unitResult, batchesResult] = await Promise.all([
-//         pool
-//             .request()
-//             .input("unit_name", sql.NVarChar, unitName)
-//             .input("item_id", sql.Int, itemId)
-//             .query(`
-//                 SELECT conversion_factor
-//                 FROM items_units
-//                 WHERE unit_name = @unit_name AND item_id = @item_id
-//             `),
 
-//         pool
-//             .request()
-//             .input("itemId", sql.Int, itemId)
-//             .query(`
-//                 SELECT *
-//                 FROM stock_batches
-//                 WHERE item_id = @itemId
-//                 ORDER BY id ASC
-//             `)
-//     ]);
 
-//     return {
-//         unitResult,
-//         batchesResult
-//     };
-// }
 
-async function getUnitAndBatchesByNameUnit(unitName, itemId) {
-    const unitResult = await pool
-        .request()
-        .input("unit_name", sql.NVarChar, unitName)
-        .input("item_id", sql.Int, itemId)
-        .query(`
-            SELECT conversion_factor
-            FROM items_units
-            WHERE unit_name = @unit_name AND item_id = @item_id
-        `)
-    ;
-
-    
-    return unitResult;
-       
-    
-}
 async function prepareStockBatches(items, invoiceId) {
 
     const addNewStockBatchs = [];
-    const updateItemsStock = [];
-
+    
     for (const item of items) {
         const itemId = item.id;
         const unitId = item.unit_id;
 
-        //const { unitResult, batchesResult } = await getUnitAndBatchesById(unitId, itemId);
-
-        const unitResult = await getUnitAndBatchesById(unitId, itemId);
+        const unitResult = await getUnitAndBatchesById(unitId);
 
         const conversionFactor = Number(unitResult.recordset[0].conversion_factor);
         // سعر التكلفة للقطعة
         const costPricePerPiece = Number(item.cost_price / conversionFactor).toFixed(3);
         // الكمية بالقطع
         const quantityInPieces = item.qty * conversionFactor;
-
-
-        // const batches = batchesResult.recordset;
-
-        // const lastBatch = batches[batches.length - 1];
 
         addNewStockBatchs.push({
             item_id: itemId,
@@ -714,32 +534,11 @@ async function prepareStockBatches(items, invoiceId) {
             invoice_id : invoiceId
         });
         
-        // نفس سعر التكلفة -> تعديل آخر batch
-        // if (Number(lastBatch.cost_price).toFixed(3) === costPricePerPiece) {
-        //     updateStockBatchs.push({
-        //         id: lastBatch.id,
-        //         quantity: quantityInPieces,
-        //         remaining_qty: quantityInPieces
-        //     });
-        // } else {
-        //     addNewStockBatchs.push({
-        //         item_id: itemId,
-        //         quantity: quantityInPieces,
-        //         remaining_qty: quantityInPieces,
-        //         cost_price: costPricePerPiece
-        //     });
-        // }
-
-        updateItemsStock.push({
-            item_id: itemId,
-            invoice_item_qty: quantityInPieces
-        });
     }
 
-    return {
-        addNewStockBatchs,
-        updateItemsStock,
-    };
+    return addNewStockBatchs;
+        
+    
 };
 
 
@@ -861,189 +660,6 @@ async function getInvoices(invoiceId) {
         );
 
     return result.recordset[0];
-}
-
-async function getIncoiceItems(invoiceId) {
-    const result = await pool.request()
-        .input('invoice_id', sql.Int, invoiceId)
-        .query(`
-            SELECT *
-            FROM invoice_items
-            WHERE invoice_id = @invoice_id       
-        `
-        );
-
-    return result.recordset;
-}
-
-
-
-// async function removeQuantityOfInvoiceItemsFormStockBatches(invoiceItems, invoiceDate, transaction) {
-//     const updateStockBatchs = [];
-//     const deleteStockBatchs = [];
-//     const updateItemsStock = [];
-
-//     for (const item of invoiceItems) {
-//         const itemId = item.item_id;
-//         const unitName = item.unit;
-
-//         const { unitResult, batchesResult } = await getUnitAndBatchesByNameUnit(unitName, itemId);
-
-//         if (!unitResult.recordset || unitResult.recordset.length === 0) {
-//             continue;
-//         }
-
-//         const conversionFactor = Number(unitResult.recordset[0].conversion_factor);
-
-
-
-//         const quantityInPieces = conversionFactor * item.quantity;
-
-//         // سعر التكلفة للقطعة
-//         const itemInvoiceCostPricePerPiece = Number(item.cost_price / conversionFactor).toFixed(3);
-
-//         const batches = batchesResult.recordset;
-
-//         for (const batch of batches) {
-
-//             const batchCostPrice = Number(batch.cost_price).toFixed(3);
-            
-//             if(batchCostPrice === itemInvoiceCostPricePerPiece && batch.created_at.getTime() === invoiceDate.getTime()) {
-
-//                 const newRemainingQty = Math.max(0, Number(batch.remaining_qty) - quantityInPieces);
-
-//                 if (newRemainingQty === 0) {
-
-//                     if (batches.length > 1) {
-//                         deleteStockBatchs.push({
-//                             id: batch.id
-//                         });
-
-//                     } else {
-
-//                         updateStockBatchs.push({
-//                             id: batch.id,
-//                             remaining_qty: 0,
-//                             inv_qty : quantityInPieces
-//                         });
-
-//                     }
-//                 } else {
-//                     updateStockBatchs.push({
-//                         id: batch.id,
-//                         remaining_qty: newRemainingQty,
-//                         inv_qty : quantityInPieces
-//                     });
-//                 }
-
-//                 break;
-//             }
-//         }
-//         updateItemsStock.push({
-//             item_id: itemId,
-//             invoice_item_qty: quantityInPieces
-//         });
-//     }
-
-//     await updateQuantityInStockBatches(updateStockBatchs, transaction);
-//     await deleteStockBatches(deleteStockBatchs, transaction);
-//     await updateStockItems(updateItemsStock, false, transaction);
-// }
-
-async function removeQuantityOfInvoiceItemsFormStockBatches(invoiceItems, transaction) {
-    const updateItemsStock = [];
-
-    for (const item of invoiceItems) {
-        const itemId = item.item_id;
-        const unitName = item.unit;
-
-        const unitResult = await getUnitAndBatchesByNameUnit(unitName, itemId);
-
-        if (!unitResult.recordset || unitResult.recordset.length === 0) {
-            continue;
-        }
-
-        const conversionFactor = Number(unitResult.recordset[0].conversion_factor);
-        const quantityInPieces = conversionFactor * item.quantity;
-
-        updateItemsStock.push({
-            item_id: itemId,
-            invoice_item_qty: quantityInPieces
-        });
-    }
-
-    
-    await updateStockItems(updateItemsStock, false, transaction);
-}
-async function updateQuantityInStockBatches(updateStockBatchs, transaction) {
-
-    if (updateStockBatchs.length === 0) {
-        return;
-    }
-    const request = transaction.request();
-    const values = updateStockBatchs.map((batch, index) => {
-
-        request.input(
-            `id${index}`,
-            sql.Int,
-            batch.id
-        );
-
-        request.input(
-            `remainingQty${index}`,
-            sql.Decimal(18, 2),
-            batch.remaining_qty
-        );
-
-        request.input(
-            `invQty${index}`,
-            sql.Decimal(18, 2),
-            batch.inv_qty
-        );
-
-        return `(
-            @id${index},
-            @remainingQty${index},
-            @invQty${index}
-        )`;
-    });
-
-    await request.query(`
-        UPDATE sb
-        SET
-            sb.remaining_qty = b.remaining_qty,
-            sb.quantity = sb.quantity - b.inv_qty
-        FROM stock_batches sb
-        INNER JOIN (
-            VALUES
-                ${values.join(",\n")}
-        ) AS b(id, remaining_qty, inv_qty)
-            ON sb.id = b.id
-    `);
-}
-async function deleteStockBatches(deleteStockBatchs, transaction) {
-
-    if (deleteStockBatchs.length === 0) {
-        return;
-    }
-
-    const request = transaction.request();
-
-    const ids = deleteStockBatchs.map((batch, index) => {
-
-        request.input(
-            `id${index}`,
-            sql.Int,
-            batch.id
-        );
-
-        return `@id${index}`;
-    });
-
-    await request.query(`
-        DELETE FROM stock_batches
-        WHERE id IN (${ids.join(", ")})
-    `);
 }
 
 

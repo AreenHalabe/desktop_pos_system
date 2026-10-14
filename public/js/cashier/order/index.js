@@ -5,55 +5,55 @@ import { printInvoiceFromCashier } from "../../../component/invoices.js";
 import { bootboxLoginAsAdmin, closeSideBar } from "../Switch-user-functionality.js";
 
 
-// const header = document.querySelector("site-header");
+const header = document.querySelector("site-header");
 
 const overlayLoader = document.getElementById('overlay_loader');
 
 let sessionId;
 
 
-// class SiteHeader extends HTMLElement {
-//     async connectedCallback() {
-//         const res = await fetch('../component/header.html');
-//         this.innerHTML = await res.text();
+class SiteHeader extends HTMLElement {
+    async connectedCallback() {
+        const res = await fetch('../component/header.html');
+        this.innerHTML = await res.text();
 
-//         this.dispatchEvent(
-//             new CustomEvent("header:ready", {
-//                 bubbles: true
-//             })
-//         );
-//     }
-// }
-// customElements.define("site-header", SiteHeader);
+        this.dispatchEvent(
+            new CustomEvent("header:ready", {
+                bubbles: true
+            })
+        );
+    }
+}
+customElements.define("site-header", SiteHeader);
 
-// header.addEventListener("header:ready", () => {
-//     setActiveNavLink();
+header.addEventListener("header:ready", () => {
+    setActiveNavLink();
 
-//     const logoutFrom = document.getElementById('logoutForm');
-//     logoutFrom.addEventListener("submit", async function (e) {
-//         e.preventDefault();
-//         closeSideBar();
-//         bootbox.confirm({
-//             title: "تسجيل الخروج",
-//             message: "هل أنت متأكد من تسجيل الخروج؟",
-//             buttons: {
-//                 confirm: {
-//                     label: "نعم",
-//                 },
-//                 cancel: {
-//                     label: "إلغاء",
-//                 },
-//             },
-//             callback: function (result) {
-//                 if (!result) return;
+    const logoutFrom = document.getElementById('logoutForm');
+    logoutFrom.addEventListener("submit", async function (e) {
+        e.preventDefault();
+        closeSideBar();
+        bootbox.confirm({
+            title: "تسجيل الخروج",
+            message: "هل أنت متأكد من تسجيل الخروج؟",
+            buttons: {
+                confirm: {
+                    label: "نعم",
+                },
+                cancel: {
+                    label: "إلغاء",
+                },
+            },
+            callback: function (result) {
+                if (!result) return;
 
-//                 removeAuthToken();
-//                 window.location.href = "../../mainWindow.html";
-//             },
-//         });
-//     });
+                removeAuthToken();
+                window.location.href = "../../mainWindow.html";
+            },
+        });
+    });
 
-// });
+});
 
 
 document.addEventListener("DOMContentLoaded", async function () {
@@ -1668,7 +1668,7 @@ function showConfirmPayDialog(invoiceData) {
 
         return `
             <tr>
-                <td class="text-center fw-semibold">
+                <td class="text-center fw-semibold" style ="font-size:13px">
                     ${item.item_name}
                 </td>
 
