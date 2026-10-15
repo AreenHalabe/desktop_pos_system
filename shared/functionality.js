@@ -80,7 +80,8 @@ export function buildTreeOfOrders(rows) {
         item_name: row.item_name,
         quantity: row.quantity,
         price: row.price,
-        size_name: row.size_name
+        unit: row.unit,
+        discount_item: row.discount_item
       });
     }
   }

@@ -8,6 +8,8 @@
     --muted: #7b8790;
 }
 
+
+
 * {
     box-sizing: border-box;
 }
@@ -23,9 +25,13 @@ body {
 body {
     background: var(--bg);
     color: var(--text);
+
     /* font-family: Tahoma, Arial, sans-serif; */
     /* font-size: 13px; */
 }
+
+
+
 
 .header-wrapper {
     position: absolute;
@@ -916,4 +922,166 @@ body {
 
 .boxx {
     border: 1px solid black;
+}
+
+
+
+/* =========================
+   الخلفية العامة
+========================= */
+
+:root {
+    --bg: #DDF2FA;
+    --border: #B4D7E5;
+    --text: #304B59;
+    --muted: #607D8B;
+}
+
+/* خلفية الصفحة */
+body {
+    background: #DDF2FA;
+    color: #304B59;
+}
+
+/* =========================
+   لوحة الوصول للأصناف
+========================= */
+
+.products-panel {
+    background: #C5E4F0;
+    border-color: #B4D7E5;
+}
+
+.products-panel .panel-heading {
+    background: #C5E4F0;
+    border-bottom-color: #B4D7E5;
+}
+
+.invoice-panel .panel-heading {
+    background: #C5E4F0;
+    border-bottom-color: #B4D7E5;
+}
+
+.products-panel .filters {
+    background: #C5E4F0;
+}
+
+.products-panel .section-content {
+    background: #C5E4F0;
+}
+
+.products-panel .panel-title,
+.products-panel .section-title,
+.products-panel .form-label {
+    color: #304B59;
+}
+
+/* حقول البحث والتصنيفات */
+.products-panel .form-control,
+.products-panel .form-select,
+.products-panel .input-group-text {
+    background-color: #EAF7FC;
+    color: #304B59;
+    border-color: #ACD1E0;
+}
+
+.products-panel .form-control::placeholder {
+    color: #718D9A;
+    opacity: 1;
+}
+
+.products-panel .form-control:focus,
+.products-panel .form-select:focus {
+    background-color: #F3FBFE;
+    color: #304B59;
+    border-color: #4F9DBB;
+    box-shadow: 0 0 0 2px rgb(79 157 187 / 15%);
+}
+
+/* =========================
+   كروت الأصناف
+========================= */
+
+.product-item {
+    background: #ACD5E6;
+    border-color: #91C3D8;
+    color: #304B59;
+}
+
+.product-item:hover {
+    background: #8EC5DC;
+    border-color: #559CB8;
+}
+
+.product-item:active {
+    background: #7CB8D1;
+}
+
+.product-name {
+    color: #304B59;
+}
+
+.product-price,
+.quick-price {
+    color: #176B82;
+}
+
+/* =========================
+   منطقة الدفع السفلية
+========================= */
+
+.payment-panel {
+    background: #C5E4F0;
+    border-color: #B4D7E5;
+}
+
+.payment-label {
+    color: #526F7D;
+}
+
+/* الإجمالي المطلوب */
+.total-value {
+    color: #176B82;
+}
+
+/* الخصم يبقى أخضر هادئ */
+.discount-box {
+    background: #D3E8DF;
+    border-color: #B2D5C7;
+}
+
+/* الباقي يبقى بلون أحمر هادئ */
+.remaining-box {
+    background: #F7DEDF;
+    border-color: #E9BFC3;
+}
+
+
+
+
+.product-item {
+    background: #A7D3E5;
+    border: 1px solid #83B9CF;
+    border-radius: 7px;
+    color: #dfe1e2;
+    transition: background-color 0.15s, border-color 0.15s;
+}
+
+.product-item:hover {
+    background: #91C6DC;
+    border-color: #579DBB;
+}
+
+.product-item:active {
+    background: #7EB9D2;
+}
+
+.product-name {
+    color: #000000;
+    font-weight: 700;
+}
+
+.product-price {
+    color: #020202;
+    font-weight: 800;
 }

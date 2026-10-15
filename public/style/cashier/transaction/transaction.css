@@ -9,7 +9,13 @@ body {
     box-shadow: 0 4px 15px rgba(0,0,0,0.05);
     overflow: hidden;
 }
-
+.header-wrapper {
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    width: fit-content;
+    z-index: 1000;
+}
 .table thead th {
     background: #f8f9fa;
     border-bottom: 2px solid #dee2e6;

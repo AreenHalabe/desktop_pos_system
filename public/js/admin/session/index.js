@@ -335,7 +335,7 @@ function renderOrdersTable() {
                 <td><span class='status-badge ${paymentClass}'>  ${order.payment_method}</span></td>
                 <td class='nowrap-cell'>${formatDateOnly(utcToPalestine(order.created_at))}</td>
                 <td class='nowrap-cell'>${formatTimeOnly(utcToPalestine(order.created_at))}</td>
-                <td class='nowrap-cell'>${order.total_price} ₪</td>
+                <td class='nowrap-cell fw-bold'>${order.total_price} ₪</td>
                 <td><span class="badge ${badgeClass}">${order.status}</span></td>
                 <td>
                     <button class="btn btn-sm btn-light viewOrder" data-id="${order.id}">
@@ -539,23 +539,25 @@ function viewOrder(orderId) {
     // بناء HTML الجدول
     let itemsHtml = '';
     orderItems.forEach(item => {
-        const displayName = item.size_name !== 'NaN'
-            ? `${item?.item_name || 'تم حذف الصنف'} - ${item.size_name}`
-            : item?.item_name || 'تم حذف الصنف';
+        const displayName = item.item_name 
+            ? `${item.item_name }`
+            : 'تم حذف الصنف';
 
         itemsHtml += `
             <tr>
                 <td>${displayName}</td>
+                <td>${item.unit}</td>
                 <td>${item.quantity}</td>
                 <td>${item.price} ₪</td>
-                <td>${item.quantity * item.price} ₪</td>
+                <td class='text-danger'>%${item.discount_item}</td>
+                <td class='fw-bold'>${item.quantity * item.price} ₪</td>
             </tr>
         `;
     });
 
     itemsHtml += `
         <tr>
-            <td colspan="3" class="text-end pe-3">
+            <td colspan="5" class="text-end pe-3">
                 <strong>المجموع</strong>
             </td>
             <td>
@@ -564,7 +566,7 @@ function viewOrder(orderId) {
         </tr>
 
         <tr>
-            <td colspan="3" class="text-end pe-3 text-danger">
+            <td colspan="5" class="text-end pe-3 text-danger">
                 <strong>الخصم</strong>
             </td>
             <td class="text-danger">
@@ -573,7 +575,7 @@ function viewOrder(orderId) {
         </tr>
 
         <tr class="table-success">
-            <td colspan="3" class="text-end pe-3">
+            <td colspan="5" class="text-end pe-3">
                 <strong>الإجمالي</strong>
             </td>
             <td>

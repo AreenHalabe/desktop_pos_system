@@ -256,10 +256,6 @@ function renderOrdersTable() {
     tableBody.innerHTML = '';
 
 
-
-    const firstIsCanceled = pageOrders[0]?.status === 'ملغي';
-
-
     pageOrders.forEach((order) => {
         const statusClass = order.status === 'مكتمل' ? 'status-completed' :
             order.status === 'معدل' ? 'status-pending' : 'status-cancelled';
@@ -280,7 +276,7 @@ function renderOrdersTable() {
 
                 <td data-label = 'التاريخ' class='nowrap-cell'>${formatDateOnly(utcToPalestine(order.created_at))}</td>
                 <td data-label = 'الوقت' class='nowrap-cell'>${formatTimeOnly(utcToPalestine(order.created_at))}</td>
-                <td data-label = 'المبلغ' class='nowrap-cell'>${order.total_price} ₪</td>
+                <td data-label = 'المبلغ' class='nowrap-cell fw-bold'>${order.total_price} ₪</td>
                 <td data-label = 'الحالة'><span class="status-badge ${statusClass}">${order.status}</span></td>
 
                 <td data-label = 'الإجراءات' class='content-action-btn'>
@@ -547,23 +543,25 @@ function viewOrder(orderId) {
     // بناء HTML الجدول
     let itemsHtml = '';
     orderItems.forEach(item => {
-        const displayName = item.size_name !== 'NaN'
-            ? `${item?.item_name || 'تم حذف الصنف'} - ${item.size_name}`
-            : item?.item_name || 'تم حذف الصنف';
+        const displayName = item.item_name 
+            ? `${item.item_name }`
+            : 'تم حذف الصنف';
 
         itemsHtml += `
             <tr>
                 <td>${displayName}</td>
+                <td>${item.unit}</td>
                 <td>${item.quantity}</td>
                 <td>${item.price} ₪</td>
-                <td>${item.quantity * item.price} ₪</td>
+                <td class='text-danger'>%${item.discount_item}</td>
+                <td class='fw-bold'>${item.quantity * item.price} ₪</td>
             </tr>
         `;
     });
 
     itemsHtml += `
         <tr>
-            <td colspan="3" class="text-end pe-3">
+            <td colspan="5" class="text-end pe-3">
                 <strong>المجموع</strong>
             </td>
             <td>
@@ -572,8 +570,8 @@ function viewOrder(orderId) {
         </tr>
 
         <tr>
-            <td colspan="3" class="text-end pe-3 text-danger">
-                <strong>الخصم</strong>
+            <td colspan="5" class="text-end pe-3 text-danger">
+                <strong>قيمة الخصم</strong>
             </td>
             <td class="text-danger">
                 <strong>${order.discount} ₪</strong>
@@ -581,7 +579,7 @@ function viewOrder(orderId) {
         </tr>
 
         <tr class="table-success">
-            <td colspan="3" class="text-end pe-3">
+            <td colspan="5" class="text-end pe-3">
                 <strong>الإجمالي</strong>
             </td>
             <td>

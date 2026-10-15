@@ -26,7 +26,8 @@ export async function getOrderAndItemsBySession(sessionId, pool, sql){
                 io.item_id,
                 io.quantity,
                 io.price,
-                io.size_name, 
+                io.unit, 
+                io.discount_item,
                 i.name AS item_name
             FROM orders o
             LEFT JOIN order_items io
