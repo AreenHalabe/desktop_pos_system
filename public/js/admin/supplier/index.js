@@ -19,9 +19,6 @@ const createAccountForm = document.getElementById('createSupplierForm');
 const editAccountForm = document.getElementById('editSupplierForm');
 
 
-const editCustomerName = document.getElementById('editCustomerName');
-const editAccountBtn = document.getElementById('editAccountBtn');
-
 const overlayLoader = document.getElementById('overlay_loader');
 const tableBody = document.getElementById('customersTableBody');
 let suppliers = [];
@@ -49,22 +46,27 @@ header.addEventListener("header:ready", () => {
     const logoutFrom = document.getElementById('logoutForm');
     logoutFrom.addEventListener("submit", async function (e) {
         e.preventDefault();
-        if (!confirm("هل أنت متأكد من تسجيل الخروج؟")) return;
-        try {
-            const res = await fetch(url + '/logout', {
-                method: 'POST',
-                credentials: 'include'
-            });
-            if (res.status === 200) {
+        bootbox.confirm({
+            title: "تسجيل الخروج",
+            message: "هل أنت متأكد من تسجيل الخروج؟",
+            buttons: {
+            confirm: {
+                label: "نعم",
+            },
+            cancel: {
+                label: "إلغاء",
+            },
+            },
+            callback: function (result) {
+                if (!result) return;
+
                 removeAuthToken();
-                window.location.href = '/admin/login';
-                return;
-            }
-        } catch (err) {
-            console.log(err.message);
-        }
+                window.location.href = "../../mainWindow.html";
+            },
+        });
     });
 });
+
 
 
 

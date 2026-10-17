@@ -96,12 +96,29 @@ export const deleteOrder = async (req, res) => {
         const currentTimestamp = new Date();
 
 
+        const {
+            orderItems,
+            stockBatches,
+            unitConversionFactors
+        } = await getOrderDataForStockRestore(orderId);
 
-        const order = await getOrderById(orderId);
+
+        const updateStockBatchesData = prepareStockBatchesRestore(
+            orderItems,
+            stockBatches,
+            unitConversionFactors
+        );
 
         await transaction.begin();
         transactionStarted = true;
 
+
+        await updateStockBatchesQuery(updateStockBatchesData, transaction);
+
+
+       
+
+        
         await transaction.request()
             .input('id', sql.Int, orderId)
             .input('cancel_reason', sql.NVarChar, cancel_reason)
@@ -184,22 +201,6 @@ export const getDaliyOrders = async (req, res) => {
 
 
 
-async function getOrderById(orderId) {
-    const result = await pool
-        .request()
-        .input('id', sql.Int, orderId)
-        .query(`
-            SELECT *
-            FROM orders
-            WHERE id = @id;
-        `)
-        ;
-    return result.recordset[0];
-}
-
-
-
-
 
 
 
@@ -219,7 +220,6 @@ async function generateInvoiceInfo(sessionId, transaction) {
 
     return invoiceNum;
 }
-
 async function insertOrder(adminId, sessionId, invoiceNum, mainPrice, discount, paymentMethod, status, transaction) {
 
     const totalPrice = mainPrice - discount;
@@ -246,9 +246,6 @@ async function insertOrder(adminId, sessionId, invoiceNum, mainPrice, discount, 
 
     return orderId;
 }
-
-
-
 async function insertItems(orderId, items, transaction) {
     const request = transaction.request();
 
@@ -275,9 +272,6 @@ async function insertItems(orderId, items, transaction) {
 
     await request.query(query);
 }
-
-
-
 
 
 async function getAllBatchesForItems(items) {
@@ -320,11 +314,6 @@ async function getAllBatchesForItems(items) {
 
     return batchesByItemId;
 }
-
-
-
-
-
 async function handleCostPriceForEachStock(items) {
     const updateStockBatches = new Map();
     const deleteStockBatches = new Map();
@@ -470,7 +459,6 @@ function setBatchUpdate(
         remaining_qty: remainingQty
     });
 }
-
 function setBatchDelete(updateMap, deleteMap, batchId) {
     // الحالة النهائية لهذه الدفعة هي الحذف
     updateMap.delete(batchId);
@@ -479,7 +467,6 @@ function setBatchDelete(updateMap, deleteMap, batchId) {
         id: batchId
     });
 }
-
 
 async function runUpdateStockBatches(updateStockBatches, transaction) {
     if (updateStockBatches.length === 0) {
@@ -509,8 +496,6 @@ async function runUpdateStockBatches(updateStockBatches, transaction) {
             ON sb.id = v.id;
     `);
 }
-
-
 async function runDeleteStockBatches(deleteStockBatches, transaction) {
     if (deleteStockBatches.length === 0) {
         return;
@@ -529,15 +514,305 @@ async function runDeleteStockBatches(deleteStockBatches, transaction) {
     `);
 }
 
+
+
+
+
+async function getOrderItems(orderId) {
+    const request = pool.request();
+
+    request.input("orderId", sql.Int, orderId);
+
+    const result = await request.query(`
+        SELECT 
+            item_id,
+            quantity,
+            unit as unit_name
+        FROM order_items
+        WHERE order_id = @orderId;
+    `);
+
+    return result.recordset;
+}
+async function getStockBatchesByOrderItems(orderItems) {
+    const itemIds = [
+        ...new Set(
+            orderItems.map(item => Number(item.item_id))
+        )
+    ];
+
+    if (itemIds.length === 0) {
+        return [];
+    }
+
+    const request = pool.request();
+
+    const parameters = itemIds.map((itemId, index) => {
+        request.input(`itemId${index}`, sql.Int, itemId);
+        return `@itemId${index}`;
+    });
+
+    const result = await request.query(`
+        SELECT
+            id,
+            item_id,
+            quantity,
+            remaining_qty,
+            cost_price
+        FROM stock_batches
+        WHERE item_id IN (${parameters.join(", ")})
+        ORDER BY item_id ASC, id ASC;
+    `);
+
+    return result.recordset;
+}
+async function getItemsUnitConversionFactors(orderItems) {
+    const uniqueUnits = new Map();
+
+    for (const item of orderItems) {
+        const key = JSON.stringify([
+            Number(item.item_id),
+            item.unit_name
+        ]);
+
+        if (!uniqueUnits.has(key)) {
+            uniqueUnits.set(key, {
+                item_id: Number(item.item_id),
+                unit_name: item.unit_name
+            });
+        }
+    }
+
+    const units = [...uniqueUnits.values()];
+
+    if (units.length === 0) {
+        return [];
+    }
+
+    const request = pool.request();
+
+    const values = units.map((unit, index) => {
+        request.input(`itemId${index}`, sql.Int, unit.item_id);
+        request.input(
+            `unitName${index}`,
+            sql.NVarChar(100),
+            unit.unit_name
+        );
+
+        return `(@itemId${index}, @unitName${index})`;
+    });
+
+    const result = await request.query(`
+        SELECT
+            iu.item_id,
+            iu.unit_name,
+            iu.conversion_factor
+        FROM (
+            VALUES ${values.join(", ")}
+        ) AS requested(item_id, unit_name)
+        INNER JOIN items_units AS iu
+            ON iu.item_id = requested.item_id
+            AND iu.unit_name = requested.unit_name;
+    `);
+
+    return result.recordset;
+}
+
+async function getOrderDataForStockRestore(orderId) {
+    const orderItems = await getOrderItems(orderId);
+
+    if (orderItems.length === 0) {
+        return {
+            orderItems: [],
+            stockBatches: [],
+            unitConversionFactors: []
+        };
+    }
+
+    const [
+        stockBatches,
+        unitConversionFactors
+    ] = await Promise.all([
+        getStockBatchesByOrderItems(orderItems),
+        getItemsUnitConversionFactors(orderItems)
+    ]);
+
+    return {
+        orderItems,
+        stockBatches,
+        unitConversionFactors
+    };
+}
+
+
+function prepareStockBatchesRestore(orderItems, stockBatches,unitConversionFactors){
+    const updateStockBatches = new Map();
+    const batchesByItemId = new Map();
+    const conversionFactorByUnit = new Map();
+
+    // تجميع الدفعات حسب الصنف
+    for (const batch of stockBatches) {
+        if (!batchesByItemId.has(batch.item_id)) {
+            batchesByItemId.set(batch.item_id, []);
+        }
+
+        batchesByItemId.get(batch.item_id).push(batch);
+    }
+
+    // تجهيز معاملات التحويل
+    for (const unit of unitConversionFactors) {
+        const key = JSON.stringify([
+            Number(unit.item_id),
+            unit.unit_name
+        ]);
+
+        conversionFactorByUnit.set(
+            key,
+            Number(unit.conversion_factor)
+        );
+    }
+
+    // الاحتفاظ بآخر كمية محسوبة لكل دفعة
+    const remainingQtyByBatch = new Map(
+        stockBatches.map(batch => [
+            batch.id,
+            Number(batch.remaining_qty)
+        ])
+    );
+
+    for (const item of orderItems) {
+        const itemId = Number(item.item_id);
+
+        const key = JSON.stringify([
+            itemId,
+            item.unit_name
+        ]);
+
+        const conversionFactor = conversionFactorByUnit.get(key);
+
+        if (
+            conversionFactor === undefined ||
+            !Number.isFinite(conversionFactor) ||
+            conversionFactor <= 0
+        ) {
+            throw new Error(
+                `معامل التحويل غير صالح للصنف ${itemId} والوحدة ${item.unit_name}`
+            );
+        }
+
+        const quantityToRestore =
+            Number(item.quantity) * conversionFactor;
+
+        if (
+            !Number.isFinite(quantityToRestore) ||
+            quantityToRestore <= 0
+        ) {
+            throw new Error(
+                `كمية غير صالحة للصنف ${itemId}`
+            );
+        }
+
+        const batches = batchesByItemId.get(itemId) ?? [];
+
+        if (batches.length === 0) {
+            throw new Error(
+                `لا توجد دفعات مخزون للصنف ${itemId}`
+            );
+        }
+
+        // ترتيب الدفعات من الأقدم إلى الأحدث
+        batches.sort((a, b) => a.id - b.id);
+
+        let targetBatch = batches[0];
+
+        // إذا توجد دفعة واحدة فقط، نزيد كميتها
+        if (batches.length === 1) {
+            targetBatch = batches[0];
+        } else {
+            // إذا كانت أول دفعة فارغة، نفحص الدفعات التالية
+            for (let i = 1; i < batches.length; i++) {
+                const previousBatch = batches[i - 1];
+                const currentBatch = batches[i];
+
+                const currentRemainingQty =
+                    remainingQtyByBatch.get(currentBatch.id);
+
+                const originalQuantity =
+                    Number(currentBatch.quantity);
+
+                const isFull =
+                    currentRemainingQty === originalQuantity;
+
+                if (isFull) {
+                    targetBatch = previousBatch;
+                    break;
+                }
+
+                targetBatch = currentBatch;
+                break;
+            }
+        }
+
+        // تحديث الكمية النهائية للدفعة المستهدفة
+        const currentRemainingQty =
+            remainingQtyByBatch.get(targetBatch.id);
+
+        const newRemainingQty =
+            currentRemainingQty + quantityToRestore;
+
+        remainingQtyByBatch.set(
+            targetBatch.id,
+            newRemainingQty
+        );
+
+        updateStockBatches.set(targetBatch.id, {
+            id: targetBatch.id,
+            remaining_qty: newRemainingQty
+        });
+    }
+
+    return [...updateStockBatches.values()];
+}
+
+async function updateStockBatchesQuery(updateStockBatches, transaction) {
+    if (updateStockBatches.length === 0) {
+        return;
+    }
+
+    const request = transaction.request();
+
+    const values = updateStockBatches.map((batch, index) => {
+        request.input(`id${index}`, sql.Int, batch.id);
+
+        request.input(
+            `remainingQty${index}`,
+            sql.Decimal(18, 2),
+            batch.remaining_qty
+        );
+
+        return `(@id${index}, @remainingQty${index})`;
+    });
+
+    await request.query(`
+        UPDATE sb
+        SET sb.remaining_qty = v.remaining_qty
+        FROM stock_batches AS sb
+        INNER JOIN (
+            VALUES ${values.join(", ")}
+        ) AS v(id, remaining_qty)
+            ON sb.id = v.id;
+    `);
+}
+
+
+
+
 const cancelResonSchema = z.object({
     cancel_reason: z
         .string()
         .min(1, "يجب إدخال سبب إلغاء الطلب")
         .regex(/^[\p{L}\s]+$/u, "يسمح بالحروف فقط"),
 });
-
-
-
 
 const invoiceItemSchema = z.object({
     item_id: z.preprocess(

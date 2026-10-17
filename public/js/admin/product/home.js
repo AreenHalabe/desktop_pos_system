@@ -343,8 +343,7 @@ function fetchProducts(categoryId) {
 async function loadItems() {
   showLoader();
   showEmptyNotice(false);
-  // clearTable();
-  // setCategoryTitle(0);
+
   try {
     const res = await fetch(url + '/items', {
       method: 'GET',

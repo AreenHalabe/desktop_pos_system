@@ -290,15 +290,132 @@ export const getAllItems = async (req, res) => {
 
     await checkToken(token);
 
-    const result = await pool.request().query(`
-      SELECT * 
-      FROM items
-      ORDER BY name ASC
-    `);
 
-    let items = result.recordset;
+    const categoryId = req.query.category_id
+      ? Number(req.query.category_id)
+      : null;
 
-    return res.status(200).json({ items });
+    const barcode = req.query.barcode?.trim() || null;
+
+    const page = Number.parseInt(req.query.page, 10) || 1;
+    const limit = Number.parseInt(req.query.limit, 10) || 50;
+
+    if (
+      (categoryId !== null &&
+        (!Number.isInteger(categoryId) || categoryId <= 0)) ||
+      page < 1 ||
+      limit < 1 ||
+      limit > 100
+    ) {
+      return res.status(400).json({
+        success: false,
+        message: "معاملات البحث أو Pagination غير صحيحة"
+      });
+    }
+
+
+    // =========================
+    // 2. البحث عن طريق الباركود
+    // =========================
+
+    if (barcode !== null) {
+      const result = await pool.request()
+        .input("barcode", sql.NVarChar(100), barcode)
+        .query(`
+                    SELECT TOP (1)
+                        i.id,
+                        i.name,
+                        i.category_id
+                    FROM items AS i
+                    WHERE EXISTS (
+                        SELECT 1
+                        FROM items_units AS iu
+                        WHERE iu.item_id = i.id
+                          AND iu.for_sale = 1
+                          AND iu.barcode = @barcode
+                    )
+                    ORDER BY i.name ASC, i.id ASC;
+                `);
+
+      if (result.recordset.length === 0) {
+        return res.status(404).json({
+          success: false,
+          message: "لم يتم العثور على صنف بهذا الباركود"
+        });
+      }
+
+      const item = result.recordset[0];
+
+      const itemData = await getItemsDetails(
+        pool,
+        [item.id]
+      );
+
+      return res.status(200).json({
+        success: true,
+        item: itemData[0]
+      });
+    }
+
+    // =========================
+    // 3. حساب عدد الأصناف
+    // =========================
+
+    const countRequest = pool.request()
+      .input("category_id", sql.Int, categoryId);
+
+    const countResult = await countRequest.query(`
+            SELECT COUNT_BIG(*) AS totalItems
+            FROM items AS i
+            WHERE @category_id IS NULL
+               OR i.category_id = @category_id;
+        `);
+
+    const totalItems = Number(countResult.recordset[0].totalItems);
+    const totalPages = Math.ceil(totalItems / limit);
+    const offset = (page - 1) * limit;
+
+    // =========================
+    // 4. جلب صفحة الأصناف
+    // =========================
+
+    const itemsRequest = pool.request()
+      .input("category_id", sql.Int, categoryId)
+      .input("offset", sql.Int, offset)
+      .input("limit", sql.Int, limit);
+
+    const itemsResult = await itemsRequest.query(`
+            SELECT
+                i.id,
+                i.name,
+                i.category_id
+            FROM items AS i
+            WHERE @category_id IS NULL
+               OR i.category_id = @category_id
+            ORDER BY i.name ASC, i.id ASC
+            OFFSET @offset ROWS
+            FETCH NEXT @limit ROWS ONLY;
+        `);
+
+    const itemIds = itemsResult.recordset.map(item => item.id);
+
+    // لا داعي للاستعلام عن الوحدات والدفعات إذا لم توجد أصناف
+    const items = itemIds.length > 0
+      ? await getItemsDetails(pool, itemIds, itemsResult.recordset)
+      : [];
+
+    return res.status(200).json({
+      success: true,
+      items,
+      pagination: {
+        page,
+        limit,
+        totalItems,
+        totalPages,
+        hasNextPage: page < totalPages,
+        hasPreviousPage: page > 1
+      }
+    });
 
   } catch (e) {
     return res.status(e.status || 500).json({
@@ -306,7 +423,8 @@ export const getAllItems = async (req, res) => {
       message: e.message || "حدث خطأ غير معروف"
     });
   }
-}
+};
+
 
 export const getMenueTree = async (req, res) => {
   try {
@@ -832,9 +950,6 @@ async function batchStockForItem(itemId, stock, cost_price, transaction) {
 
 
 
-
-
-
 function buildMenuTree(rows) {
   const mainCategoriesMap = {};
   const itemsMap = {};
@@ -941,7 +1056,7 @@ function buildItemsDataForCashier(result) {
 
   const itemsMap = new Map();
 
-  for(const row of result.recordset) {
+  for (const row of result.recordset) {
 
     let item = itemsMap.get(row.id);
 
@@ -960,7 +1075,7 @@ function buildItemsDataForCashier(result) {
       item.units.push({
         id: row.unit_id,
         name: row.unit_name,
-        price : row.price,
+        price: row.price,
         barcode: row.barcode,
         conversion_factor: row.conversion_factor
       });
@@ -1041,6 +1156,118 @@ function buildProductSchema(AddNewItems = true) {
       )
       : z.null().optional(),
   });
+}
+
+
+async function getItemsDetails(pool, itemIds, baseItems = null) {
+    if (itemIds.length === 0) {
+        return [];
+    }
+
+    // تجهيز Request مستقل لكل استعلام مع نفس الـ parameters
+    function createItemsRequest() {
+        const request = pool.request();
+
+        const parameters = itemIds.map((id, index) => {
+            const name = `itemId${index}`;
+
+            request.input(name, sql.Int, id);
+
+            return `@${name}`;
+        });
+
+        return {
+            request,
+            itemIdList: parameters.join(", ")
+        };
+    }
+
+    const unitsRequest = createItemsRequest();
+    const batchesRequest = createItemsRequest();
+
+    const [unitsResult, batchesResult] = await Promise.all([
+        unitsRequest.request.query(`
+            SELECT
+                iu.id,
+                iu.item_id,
+                iu.unit_name,
+                iu.barcode,
+                iu.price,
+                iu.conversion_factor
+            FROM items_units AS iu
+            WHERE iu.for_sale = 1
+              AND iu.item_id IN (${unitsRequest.itemIdList});
+        `),
+
+        batchesRequest.request.query(`
+            SELECT
+                sb.id,
+                sb.item_id,
+                sb.remaining_qty
+            FROM stock_batches AS sb
+            WHERE sb.item_id IN (${batchesRequest.itemIdList});
+        `)
+    ]);
+
+    const itemsMap = new Map();
+
+    const items = baseItems ?? await getBaseItems(pool, itemIds);
+
+    for (const item of items) {
+        itemsMap.set(item.id, {
+            id: item.id,
+            name: item.name,
+            category_id: item.category_id,
+            
+            units: [],
+            stock_batches: []
+        });
+    }
+
+    // إضافة الوحدات والباركودات لكل صنف
+    for (const unit of unitsResult.recordset) {
+        const item = itemsMap.get(unit.item_id);
+
+        if (!item) continue;
+
+        item.units.push({
+            id: unit.id,
+            unit_name: unit.unit_name,
+            price: unit.price,
+            conversion_factor: unit.conversion_factor
+        });
+    }
+
+    // إضافة دفعات المخزون لكل صنف
+    for (const batch of batchesResult.recordset) {
+        const item = itemsMap.get(batch.item_id);
+
+        if (!item) continue;
+
+        const { item_id, ...batchData } = batch;
+
+        item.stock_batches.push(batchData);
+    }
+
+    return Array.from(itemsMap.values());
+}
+
+async function getBaseItems(pool, itemIds) {
+    const request = pool.request();
+
+    const parameters = itemIds.map((id, index) => {
+        const name = `itemId${index}`;
+        request.input(name, sql.Int, id);
+        return `@${name}`;
+    });
+
+    const result = await request.query(`
+        SELECT id, name, category_id
+        FROM items
+        WHERE id IN (${parameters.join(", ")});
+    `);
+
+    return result.recordset;
 }
 
 
