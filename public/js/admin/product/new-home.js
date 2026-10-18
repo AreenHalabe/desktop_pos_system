@@ -1,8 +1,8 @@
 
 import { fetchCategories } from "../../../api/category.js";
 import { url } from "../../../api/urlEndPoint.js";
-import {showAuthExpired, bootboxConfirm, bootboxSuccess, bootboxError, setActiveNavLink} from "../../../component/bootbox.js";
-import {removeAuthToken, getAuthToken} from "../../../component/auth.js";
+import { showAuthExpired, bootboxConfirm, bootboxSuccess, bootboxError, setActiveNavLink } from "../../../component/bootbox.js";
+import { removeAuthToken, getAuthToken } from "../../../component/auth.js";
 
 // ============================================
 // Header
@@ -12,47 +12,47 @@ const header = document.querySelector("site-header");
 
 
 class SiteHeader extends HTMLElement {
-  async connectedCallback() {
+    async connectedCallback() {
 
-    const res = await fetch('../component/header.html');
-    this.innerHTML = await res.text();
+        const res = await fetch('../component/header.html');
+        this.innerHTML = await res.text();
 
-    // 🔔 إعلان رسمي: الهيدر جاهز
-    this.dispatchEvent(
-      new CustomEvent("header:ready", {
-        bubbles: true
-      })
-    );
-  }
+        // 🔔 إعلان رسمي: الهيدر جاهز
+        this.dispatchEvent(
+            new CustomEvent("header:ready", {
+                bubbles: true
+            })
+        );
+    }
 }
 
 customElements.define("site-header", SiteHeader);
 
 
 header.addEventListener("header:ready", () => {
-  setActiveNavLink();
-  const logoutFrom = document.getElementById('logoutForm');
-  logoutFrom.addEventListener("submit", async function (e) {
-    e.preventDefault();
-    bootbox.confirm({
-      title: "تسجيل الخروج",
-      message: "هل أنت متأكد من تسجيل الخروج؟",
-      buttons: {
-        confirm: {
-          label: "نعم",
-        },
-        cancel: {
-          label: "إلغاء",
-        },
-      },
-      callback: function (result) {
-        if (!result) return;
+    setActiveNavLink();
+    const logoutFrom = document.getElementById('logoutForm');
+    logoutFrom.addEventListener("submit", async function (e) {
+        e.preventDefault();
+        bootbox.confirm({
+            title: "تسجيل الخروج",
+            message: "هل أنت متأكد من تسجيل الخروج؟",
+            buttons: {
+                confirm: {
+                    label: "نعم",
+                },
+                cancel: {
+                    label: "إلغاء",
+                },
+            },
+            callback: function (result) {
+                if (!result) return;
 
-        removeAuthToken();
-        window.location.href = "../../mainWindow.html";
-      },
+                removeAuthToken();
+                window.location.href = "../../mainWindow.html";
+            },
+        });
     });
-  });
 });
 
 
@@ -562,7 +562,7 @@ function renderItemsTable(items) {
     //     fragment.appendChild(row);
     // }
 
-     for (const item of items) {
+    for (const item of items) {
         const row = document.createElement("tr");
 
         // اسم الصنف
@@ -852,16 +852,16 @@ function resetFilters() {
 // ============================================
 
 function openAddItemPage() {
-    window.location.href = "./add-item.html";
+    window.location.href = "./add.html";
 }
 
 function openEditItemPage(itemId) {
     const editUrl = new URL(
-        "./edit-item.html",
+        "./edit.html",
         window.location.href
     );
 
-    editUrl.searchParams.set("id", itemId);
+    editUrl.searchParams.set("item_id", itemId);
     window.location.href = editUrl.href;
 }
 
@@ -1109,23 +1109,34 @@ function renderItemPrices(item) {
 
     if (units.length > 1) {
         return `
-            <ul class="list-unstyled m-0 ul_box">
-                ${units.map(unit => `
+        <ul class="list-unstyled m-0 ul_box">
+            ${units.reduce((html, unit) => {
+            if (Number(unit.price) <= 0 || unit.price == null) {
+                return html;
+            }
+
+            return html + `
                     <li class="list">
                         <span class="badge bg-primary" dir="ltr">
-                            ${escapeHtml(unit.unit_name)} : ₪ ${escapeHtml(unit.price ?? '-')}
+                            ${escapeHtml(unit.unit_name)} : ₪ ${escapeHtml(unit.price)}
                         </span>
                     </li>
-                `).join('')}
-            </ul>
-        `;
+                `;
+        }, '')}
+        </ul>
+    `;
     }
 
     if (units.length === 1) {
         return `
-            <span class="badge bg-primary fs-6" dir="ltr">
-                ${escapeHtml(units[0].price ?? '-')} ₪
+        <ul class="list-unstyled m-0 ul_box">
+        <li class="list">
+            <span class="badge bg-primary" dir="ltr">
+
+                ${escapeHtml(units[0].unit_name)} : ₪ ${escapeHtml(units[0].price ?? '-')}
             </span>
+        </li>
+        </ul>
         `;
     }
 
@@ -1202,8 +1213,8 @@ function renderItemStock(item) {
         <ul class="list-unstyled m-0 ul_box">
             ${stockParts.map(part => `
                 <li class="list">
-                    <span class="badge bg-primary" dir="rtl">
-                        ${escapeHtml(part.name)} : ${escapeHtml(part.quantity)}
+                    <span class="badge ${totalStock === 0 ? 'bg-danger' : 'bg-success'}" dir="rtl">
+                        ${escapeHtml(part.quantity)} : ${escapeHtml(part.name)} 
                     </span>
                 </li>
             `).join('')}
@@ -1211,11 +1222,11 @@ function renderItemStock(item) {
     `;
 }
 function escapeHtml(text) {
-  if (text === null || text === undefined) return '';
-  return String(text)
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&#039;');
+    if (text === null || text === undefined) return '';
+    return String(text)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
 }

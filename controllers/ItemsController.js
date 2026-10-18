@@ -14,20 +14,54 @@ export const getItem = async (req, res) => {
     }
     await checkToken(token);
 
-    const itemResult = await pool.request()
-      .input("id", itemId)
-      .query(`
-        SELECT *
-        FROM items
-        WHERE id = @id  
-      `)
-      ;
-    const item = itemResult.recordset[0];
+
+    const [itemResult, unitsResult, batchesResult] = await Promise.all([
+      pool.request()
+        .input("id", itemId)
+        .query(`
+          SELECT *
+          FROM items
+          WHERE id = @id  
+        `)
+      ,
+
+      pool.request()
+        .input("id", itemId)
+        .query(`
+          SELECT *
+          FROM items_units
+          WHERE item_id = @id  
+          ORDER BY id ASC
+        `)
+      ,
+
+      pool.request()
+        .input("id", itemId)
+        .query(`
+          SELECT TOP 1
+            cost_price,
+            SUM(remaining_qty) OVER() AS total_remaining_qty
+          FROM stock_batches
+          WHERE item_id = @id
+          ORDER BY id ASC;
+        `)
+      
+    ]);
+
+    const item       = itemResult.recordset[0]; 
+    const units      = unitsResult.recordset;
+    const stockBatches = batchesResult.recordset[0];
+
+    const itemData = {
+      item,
+      units,
+      stockBatches
+    }
 
 
     return res.status(200).json({
       success: true,
-      item: item,
+      item: itemData,
     });
 
   } catch (e) {
@@ -331,7 +365,6 @@ export const getAllItems = async (req, res) => {
                         SELECT 1
                         FROM items_units AS iu
                         WHERE iu.item_id = i.id
-                          AND iu.for_sale = 1
                           AND iu.barcode = @barcode
                     )
                     ORDER BY i.name ASC, i.id ASC;
@@ -1160,33 +1193,33 @@ function buildProductSchema(AddNewItems = true) {
 
 
 async function getItemsDetails(pool, itemIds, baseItems = null) {
-    if (itemIds.length === 0) {
-        return [];
-    }
+  if (itemIds.length === 0) {
+    return [];
+  }
 
-    // تجهيز Request مستقل لكل استعلام مع نفس الـ parameters
-    function createItemsRequest() {
-        const request = pool.request();
+  // تجهيز Request مستقل لكل استعلام مع نفس الـ parameters
+  function createItemsRequest() {
+    const request = pool.request();
 
-        const parameters = itemIds.map((id, index) => {
-            const name = `itemId${index}`;
+    const parameters = itemIds.map((id, index) => {
+      const name = `itemId${index}`;
 
-            request.input(name, sql.Int, id);
+      request.input(name, sql.Int, id);
 
-            return `@${name}`;
-        });
+      return `@${name}`;
+    });
 
-        return {
-            request,
-            itemIdList: parameters.join(", ")
-        };
-    }
+    return {
+      request,
+      itemIdList: parameters.join(", ")
+    };
+  }
 
-    const unitsRequest = createItemsRequest();
-    const batchesRequest = createItemsRequest();
+  const unitsRequest = createItemsRequest();
+  const batchesRequest = createItemsRequest();
 
-    const [unitsResult, batchesResult] = await Promise.all([
-        unitsRequest.request.query(`
+  const [unitsResult, batchesResult] = await Promise.all([
+    unitsRequest.request.query(`
             SELECT
                 iu.id,
                 iu.item_id,
@@ -1195,11 +1228,10 @@ async function getItemsDetails(pool, itemIds, baseItems = null) {
                 iu.price,
                 iu.conversion_factor
             FROM items_units AS iu
-            WHERE iu.for_sale = 1
-              AND iu.item_id IN (${unitsRequest.itemIdList});
+            WHERE iu.item_id IN (${unitsRequest.itemIdList});
         `),
 
-        batchesRequest.request.query(`
+    batchesRequest.request.query(`
             SELECT
                 sb.id,
                 sb.item_id,
@@ -1207,67 +1239,66 @@ async function getItemsDetails(pool, itemIds, baseItems = null) {
             FROM stock_batches AS sb
             WHERE sb.item_id IN (${batchesRequest.itemIdList});
         `)
-    ]);
+  ]);
 
-    const itemsMap = new Map();
+  const itemsMap = new Map();
 
-    const items = baseItems ?? await getBaseItems(pool, itemIds);
+  const items = baseItems ?? await getBaseItems(pool, itemIds);
 
-    for (const item of items) {
-        itemsMap.set(item.id, {
-            id: item.id,
-            name: item.name,
-            category_id: item.category_id,
-            
-            units: [],
-            stock_batches: []
-        });
-    }
+  for (const item of items) {
+    itemsMap.set(item.id, {
+      id: item.id,
+      name: item.name,
+      category_id: item.category_id,
+      units: [],
+      stock_batches: []
+    });
+  }
 
-    // إضافة الوحدات والباركودات لكل صنف
-    for (const unit of unitsResult.recordset) {
-        const item = itemsMap.get(unit.item_id);
+  // إضافة الوحدات والباركودات لكل صنف
+  for (const unit of unitsResult.recordset) {
+    const item = itemsMap.get(unit.item_id);
 
-        if (!item) continue;
+    if (!item) continue;
 
-        item.units.push({
-            id: unit.id,
-            unit_name: unit.unit_name,
-            price: unit.price,
-            conversion_factor: unit.conversion_factor
-        });
-    }
+    item.units.push({
+      id: unit.id,
+      unit_name: unit.unit_name,
+      price: unit.price,
+      conversion_factor: unit.conversion_factor
+    });
+  }
 
-    // إضافة دفعات المخزون لكل صنف
-    for (const batch of batchesResult.recordset) {
-        const item = itemsMap.get(batch.item_id);
+  // إضافة دفعات المخزون لكل صنف
+  for (const batch of batchesResult.recordset) {
+    const item = itemsMap.get(batch.item_id);
 
-        if (!item) continue;
+    if (!item) continue;
 
-        const { item_id, ...batchData } = batch;
+    const { item_id, ...batchData } = batch;
 
-        item.stock_batches.push(batchData);
-    }
+    item.stock_batches.push(batchData);
+  }
 
-    return Array.from(itemsMap.values());
+  return Array.from(itemsMap.values());
 }
 
 async function getBaseItems(pool, itemIds) {
-    const request = pool.request();
+  const request = pool.request();
 
-    const parameters = itemIds.map((id, index) => {
-        const name = `itemId${index}`;
-        request.input(name, sql.Int, id);
-        return `@${name}`;
-    });
+  const parameters = itemIds.map((id, index) => {
+    const name = `itemId${index}`;
+    request.input(name, sql.Int, id);
+    return `@${name}`;
+  });
 
-    const result = await request.query(`
+  const result = await request.query(`
         SELECT id, name, category_id
         FROM items
         WHERE id IN (${parameters.join(", ")});
     `);
 
-    return result.recordset;
+  return result.recordset;
 }
 
 
