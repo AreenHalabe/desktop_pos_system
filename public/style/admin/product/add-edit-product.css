@@ -337,6 +337,55 @@ body {
     cursor: pointer;
 }
 
+
+
+
+
+.edit-purchase-card {
+    border: 1px solid #dbe7ef;
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+.edit-purchase-card .card-header {
+    background: #f0f9ff;
+    border-bottom: 1px solid #dbe7ef;
+    padding: 16px 20px;
+}
+
+.edit-purchase-card .card-body {
+    background: #f8fbfd;
+}
+
+.cost-price-input {
+    max-width: 260px;
+}
+
+.stock-unit-card {
+    background: #fff;
+    border: 1px solid #dbe7ef;
+    border-radius: 10px;
+    padding: 16px;
+    height: 100%;
+}
+
+.stock-unit-card .unit-quantity {
+    color: #0369a1;
+    font-size: 25px;
+    font-weight: 700;
+}
+
+.stock-unit-card .unit-name {
+    color: #64748b;
+    font-size: 13px;
+}
+
+.stock-total {
+    color: #475569;
+    font-size: 13px;
+}
+
+
 /* الموبايل */
 @media (max-width: 576px) {
 

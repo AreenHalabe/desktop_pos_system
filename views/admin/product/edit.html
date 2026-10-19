@@ -93,7 +93,7 @@
             </div>
 
 
-        
+
             <!-- =========================
              وحدات المنتج
         ========================== -->
@@ -166,80 +166,70 @@
 
                         <div class="row g-3">
 
-                            <!-- اسم الوحدة -->
-                            <div class="col-md-3">
+                            <div class="col-md-12 d-flex justify-content-between">
+                                <!-- اسم الوحدة -->
+                                <div>
 
-                                <label class="form-label">
+                                    <label class="form-label">
 
-                                    اسم الوحدة
+                                        اسم الوحدة
 
-                                    <span class="required">*</span>
+                                        <span class="required">*</span>
 
-                                </label>
+                                    </label>
 
-                                <input type="text" class="form-control" id="newUnitName" placeholder="مثال: باكيت">
-
-                            </div>
-
-
-                            <!-- الكمية -->
-                            <div class="col-md-3">
-
-                                <label class="form-label">
-
-                                    تحتوي على
-
-                                    <span class="required">*</span>
-
-                                </label>
-
-                                <input type="number" class="form-control" id="newUnitQuantity" min="1" step="1"
-                                    placeholder="مثال : 20">
-
-                            </div>
-
-
-                            <!-- الوحدة المحتواة -->
-                            <div class="col-md-3">
-
-                                <label class="form-label">
-
-                                    من وحدة
-
-                                    <span class="required">*</span>
-
-                                </label>
-
-                                <select class="form-select" id="newUnitContains">
-
-                                    <option value="">
-                                        اختر الوحدة
-                                    </option>
-
-                                </select>
-
-                            </div>
-
-
-                            <!-- سعر البيع -->
-                            <div class="col-md-3">
-
-                                <label class="form-label">
-                                    سعر البيع
-                                </label>
-
-                                <div class="input-group">
-
-                                    <input type="number" class="form-control price-input" id="newUnitPrice" min="0"
-                                        step="0.5" placeholder="0.00">
-
-                                    <span class="input-group-text">
-                                        ₪
-                                    </span>
+                                    <input type="text" class="form-control" id="newUnitName" placeholder="مثال: باكيت">
 
                                 </div>
 
+
+                                <!-- الكمية -->
+                                <div>
+
+                                    <label class="form-label">
+
+                                        تحتوي على
+
+                                        <span class="required">*</span>
+
+                                    </label>
+
+
+                                    <div class="input-group input-group">
+                                        <input type="number" class="form-control" id="newUnitQuantity" min="0.1" step="any">
+                                        <span class="input-group-text fw-bold" id="baseUnitName">
+                                            سيجارة
+                                        </span>
+                                    </div>
+
+                                </div>
+
+
+
+
+                                <!-- سعر البيع -->
+                                <div>
+
+                                    <label class="form-label">
+                                        سعر البيع
+                                    </label>
+
+                                    <div class="input-group">
+
+                                        <input type="number" class="form-control price-input" id="newUnitPrice" min="0"
+                                            step="0.5" placeholder="0.00">
+
+                                        <span class="input-group-text">
+                                            ₪
+                                        </span>
+
+                                    </div>
+
+                                </div>
+
+
                             </div>
+
 
 
 
@@ -325,10 +315,6 @@
                                     </th>
 
                                     <th>
-                                        تحتوي على
-                                    </th>
-
-                                    <th>
                                         التحويل للمخزون
                                     </th>
 
@@ -367,6 +353,22 @@
 
 
 
+            <div class="card mb-4 edit-purchase-card">
+                <div class="card-header">
+                    <div class="section-title mb-1">
+                        <i class="fa-solid fa-boxes-stacked text-primary ms-1"></i>
+                        تكلفة الصنف والمخزون
+                    </div>
+
+                    <div class="text-muted small">
+                        سعر تكلفة الوحدة الأساسية وتفاصيل توزيع المخزون الحالي.
+                    </div>
+                </div>
+
+                <div class="card-body p-4" id="stock-cost-container">
+                    <!-- يتم تعبئة البيانات من JavaScript -->
+                </div>
+            </div>
 
 
 
@@ -375,20 +377,11 @@
         ========================== -->
             <div class="action-buttons">
 
-                <button type="button" class="btn btn-outline-secondary" id="resetBtn">
+                <button type="submit" class="btn btn-success px-5 ms-auto fw-bold">
 
-                    <i class="fa-solid fa-rotate-right ms-1"></i>
+                    <i class="fa-solid fa-save ms-1"></i>
 
-                    إعادة تعيين
-
-                </button>
-
-
-                <button type="submit" class="btn btn-success px-5">
-
-                    <i class="fa-solid fa-check ms-1"></i>
-
-                    حفظ المنتج
+                    حفظ التعديلات
 
                 </button>
 
@@ -400,7 +393,7 @@
 
 
     <div id="overlay_loader" style="
-                display:none;
+                display:flex;
                 position: fixed;
                 inset: 0;
                 background: rgba(0,0,0,0.55);

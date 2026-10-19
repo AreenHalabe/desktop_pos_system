@@ -1,9 +1,9 @@
 
 import { fetchCategories } from "../../../api/category.js";
 import { url } from "../../../api/urlEndPoint.js";
-import {showAuthExpired, bootboxSuccess, bootboxError, setActiveNavLink} from "../../../component/bootbox.js";
+import { showAuthExpired, bootboxSuccess, bootboxError, setActiveNavLink } from "../../../component/bootbox.js";
 
-import { getAuthToken, removeAuthToken} from "../../../component/auth.js";
+import { getAuthToken, removeAuthToken } from "../../../component/auth.js";
 
 const header = document.querySelector("site-header");
 
@@ -71,16 +71,15 @@ header.addEventListener("header:ready", () => {
 ========================= */
 
 document.addEventListener("DOMContentLoaded", async function () {
-    loader.style.display = "flex";
-    try{
+    try {
         await buildSelectCategory();
         await loadItem();
-    }catch(e){
+    } catch (e) {
         console.log(e);
-    }finally{
+    } finally {
         loader.style.display = "none";
     }
-    
+
 });
 
 async function buildSelectCategory() {
@@ -140,64 +139,8 @@ function normalizeNumber(value) {
     return Number.isFinite(number) ? number : 0;
 }
 
-function updateContainsUnitOptions() {
-    const select = document.getElementById("newUnitContains");
-    const currentValue = select.value;
 
-    select.innerHTML = `
-        <option value="">
-            اختر الوحدة
-        </option>
-    `;
 
-    // const baseUnitName = getBaseUnitName();
-
-    // if (baseUnitName) {
-    //     select.insertAdjacentHTML(
-    //         "beforeend",
-    //         `
-    //             <option value="base">
-    //                 ${escapeHtml(baseUnitName)}
-    //             </option>
-    //         `
-    //     );
-    // }
-
-    units.forEach(unit => {
-        select.insertAdjacentHTML(
-            "beforeend",
-            `
-                <option value="${unit.id}">
-                    ${escapeHtml(unit.unit_name)}
-                </option>
-            `
-        );
-    });
-
-    if (
-        [...select.options].some(
-            option => option.value === currentValue
-        )
-    ) {
-        select.value = currentValue;
-    }
-}
-
-function getParentConversionFactor(parentId) {
-    if (parentId === "base") {
-        return 1;
-    }
-
-    const parentUnit = units.find(
-        unit => String(unit.id) === String(parentId)
-    );
-
-    if (!parentUnit) {
-        return null;
-    }
-
-    return parentUnit.conversion_factor;
-}
 
 
 /* =========================
@@ -205,22 +148,14 @@ function getParentConversionFactor(parentId) {
 ========================= */
 
 function addUnit() {
-    const unitName = document
-        .getElementById("newUnitName")
-        .value
-        .trim();
+    const unitName = document.getElementById("newUnitName").value.trim();
 
-    const quantity = normalizeNumber(
-        document.getElementById("newUnitQuantity").value
-    );
+    const conversionFactor = normalizeNumber(document.getElementById("newUnitQuantity").value);
 
-    const containsUnit = document.getElementById("newUnitContains").value;
 
     const barcode = unitBarcodeInput.value.trim();
 
-    const sellingPrice = normalizeNumber(
-        document.getElementById("newUnitPrice").value
-    );
+    const sellingPrice = normalizeNumber(document.getElementById("newUnitPrice").value);
 
     const forSale = document.getElementById("newUnitForSale").checked;
     const forPurchase = document.getElementById("newUnitForPurchase").checked;
@@ -236,7 +171,7 @@ function addUnit() {
         return;
     }
 
-    if (quantity <= 0) {
+    if (conversionFactor <= 0) {
         bootboxError("يرجى إدخال كمية صحيحة.");
 
         document.getElementById("newUnitQuantity").focus();
@@ -244,13 +179,7 @@ function addUnit() {
         return;
     }
 
-    if (!containsUnit) {
-        bootboxError("يرجى اختيار الوحدة التي تحتوي عليها هذه الوحدة.");
 
-        document.getElementById("newUnitContains").focus();
-
-        return;
-    }
 
     if (!forSale && !forPurchase) {
         bootboxError(
@@ -287,38 +216,15 @@ function addUnit() {
         return;
     }
 
-    const parentConversion = getParentConversionFactor(containsUnit);
 
-    if (parentConversion === null) {
-        bootboxError("تعذر حساب تحويل الوحدة.");
 
-        return;
-    }
 
-    const conversionFactor = quantity * parentConversion;
 
-    let containsUnitName = baseUnitName;
-
-    if (containsUnit !== "base") {
-        const parentUnit = units.find(
-            unit => String(unit.id) === String(containsUnit)
-        );
-
-        if (parentUnit) {
-            containsUnitName = parentUnit.unit_name;
-        }
-    }
 
     const newUnit = {
         id: crypto.randomUUID(),
 
         unit_name: unitName,
-
-        contains_quantity: quantity,
-
-        contains_unit_id: containsUnit,
-
-        contains_unit_name: containsUnitName,
 
         conversion_factor: conversionFactor,
 
@@ -336,13 +242,11 @@ function addUnit() {
     units.push(newUnit);
 
     renderUnits();
-    updateContainsUnitOptions();
 
     // تفريغ الحقول
 
     document.getElementById("newUnitName").value = "";
     document.getElementById("newUnitQuantity").value = "";
-    document.getElementById("newUnitContains").value = "";
 
     unitBarcodeInput.value = "";
     autoUnitBarcodeCheckbox.checked = false;
@@ -365,63 +269,54 @@ function addUnit() {
 function renderUnits() {
     const tbody = document.getElementById("unitsTableBody");
 
-    // const baseUnitName = getBaseUnitName();
-
-    // if (!baseUnitName) {
-    //     tbody.innerHTML = `
-    //         <tr>
-    //             <td colspan="7">
-    //                 <div class="empty-state">
-    //                     <i class="fa-solid fa-box-open d-block"></i>
-    //                     أدخل الوحدة الأساسية أولاً.
-    //                 </div>
-    //             </td>
-    //         </tr>
-    //     `;
-
-    //     return;
-    // }
-
     let html = "";
-
-    const baseBarcode = '';
-
-
-    const baseForSale = 0
-    const baseForPurchase = 0
 
     html += `
         <tr>
             <td class="unit-name-cell">
                 <span class="unit-badge base-badge">
                     <i class="fa-solid fa-star"></i>
-                    ${escapeHtml('g')}
+                    ${escapeHtml(units[0].unit_name)}
                 </span>
+                <span class="text-muted mt-2">—</span>
+                <small class='text-muted' style="font-size: 14px;"> الوحدة الأساسية</small>
             </td>
 
             <td>
-                <span class="text-muted">
-                    الوحدة الأساسية
-                </span>
+                <strong>
+                    ${units[0].conversion_factor}
+                </strong>
+
+                ${escapeHtml(units[0].unit_name)}
+            </td>
+
+
+            <td style="width: 18%;">
+                <input type="text" class="form-control unit-barcode"
+                data-unit-id="${units[0].id}"
+                value="${units[0].barcode || ''}"
+                placeholder="لا يوجد">
+            </td>
+
+
+            <td style="width: 12%;">
+                <div class="input-group input-group-sm">
+                    <input
+                        type="number"
+                        class="form-control selling-price"
+                        data-unit-id="${units[0].id}"
+                        value="${units[0].selling_price}"
+                        min="0.5"
+                        step="any"
+                    >
+                    <span class="input-group-text">
+                        ₪
+                    </span>
+                </div>
             </td>
 
             <td>
-                <strong>1</strong>
-                ${escapeHtml('s')}
-            </td>
-
-            <td>
-                ${
-                    baseBarcode
-                }
-            </td>
-
-            <td>
-            ${baseForSale}
-            </td>
-
-            <td>
-                ${baseForPurchase}
+                ${renderUsage(units[0].for_purchase, units[0].for_sale, units[0].id, true)}
             </td>
 
             <td>
@@ -431,45 +326,72 @@ function renderUnits() {
     `;
 
     units.forEach((unit, index) => {
+        if (index === 0) return;
         html += `
             <tr>
                 <td class="unit-name-cell">
-                    <span class="unit-badge">
-                        <i class="fa-solid fa-box"></i>
-                        ${escapeHtml(unit.unit_name)}
-                    </span>
+                    <input type="text" class="form-control unit-name" 
+                      placeholder="مثال: باكيت"
+                      data-unit-id="${unit.id}"
+                     value="${unit.unit_name}">
+                </td>
+
+                
+                <td style="width: 20%;">
+                    <div class="input-group input-group-sm">
+                        <input
+                            type="number"
+                            class="form-control conversion-factor"
+                            data-unit-id="${unit.id}"
+                            value="${unit.conversion_factor}"
+                            min="0.1"
+                            step="any"
+                        >
+                        <span class="input-group-text">
+                            ${escapeHtml(units[0].unit_name)}
+                        </span>
+                    </div>
+                </td>
+
+                <td style="width: 18%;">
+                    ${unit.auto_generated_barcode
+                ? `
+                            <span class="text-muted">سيتم توليده تلقائياً</span>
+                        `
+
+                : `
+                            <input type="text" class="form-control unit-barcode" 
+                            data-unit-id="${unit.id}"
+                            value="${unit.barcode || ''}"
+                            placeholder="لا يوجد">
+                        `
+            }
+                    
+                </td>
+
+                <td style="width: 12%;">
+                    ${unit.for_sale
+                ? `<div class="input-group input-group-sm">
+                                    <input
+                                        type="number"
+                                        class="form-control selling-price"
+                                        data-unit-id="${unit.id}"
+                                        value="${unit.selling_price}"
+                                        min="0.5"
+                                        step="any"
+                                    >
+                                    <span class="input-group-text">
+                                        ₪
+                                    </span>
+                                </div>
+                            `
+                : `<span class="text-muted mt-2">—</span>`
+            }
+                    
                 </td>
 
                 <td>
-                    <strong>
-                        ${formatNumber(unit.contains_quantity)}
-                    </strong>
-                    ${escapeHtml(unit.contains_unit_name)}
-                </td>
-
-                <td>
-                    <strong>
-                        ${formatNumber(unit.conversion_factor)}
-                    </strong>
-                    ${escapeHtml(baseUnitName)}
-                </td>
-
-                <td>
-                    ${
-                        unit.auto_generated_barcode
-                            ? '<span class="text-muted">سيتم توليده تلقائياً</span>'
-                            : unit.barcode
-                                ? escapeHtml(unit.barcode)
-                                : '<span class="text-muted">—</span>'
-                    }
-                </td>
-
-                <td>
-                    ${formatPrice(unit.selling_price)}
-                </td>
-
-                <td>
-                    ${renderUsage(unit.for_purchase, unit.for_sale)}
+                    ${renderUsage(unit.for_purchase, unit.for_sale, unit.id)}
                 </td>
 
                 <td>
@@ -489,30 +411,40 @@ function renderUnits() {
     tbody.innerHTML = html;
 }
 
-function renderUsage(forPurchase, forSale) {
-    const values = [];
 
-    if (forPurchase) {
-        values.push(
-            '<span class="badge text-bg-primary">شراء</span>'
-        );
-    }
+function renderUsage(forPurchase, forSale, id, isBaseUnit = false) {
+    return `
+        <div class="d-flex align-items-center gap-3">
+            
+            ${isBaseUnit
+            ? '<span class="badge text-bg-success">بيع</span>'
+            : `
+                    <div class="form-check mb-0">
+                        <input
+                            type="checkbox"
+                            id="sale-${id}"
+                            data-unit-id="${id}"
+                            class="form-check-input usage-check-sale pointer"
+                            ${forSale ? "checked" : ""}
+                        >
+                        <label class="form-check-label pointer" for='sale-${id}'>بيع</label>
+                    </div>
+                `
+        }
 
-    if (forSale) {
-        values.push(
-            '<span class="badge text-bg-success">بيع</span>'
-        );
-    }
-
-    if (!values.length) {
-        return `
-            <span class="badge text-bg-secondary">
-                بدون استخدام
-            </span>
-        `;
-    }
-
-    return values.join(" ");
+            <div class="form-check mb-0">
+                <input
+                    type="checkbox"
+                    id="purchase-${id}"
+                    data-unit-id="${id}"
+                    class="form-check-input usage-check-purchase pointer"
+                    ${forPurchase ? "checked" : ""}
+                    
+                >
+                <label class="form-check-label pointer" for='purchase-${id}'>شراء</label>
+            </div>
+        </div>
+    `;
 }
 
 
@@ -559,7 +491,6 @@ function deleteUnit(index) {
                 units.splice(index, 1);
 
                 renderUnits();
-                updateContainsUnitOptions();
             }
         }
     });
@@ -570,31 +501,7 @@ function deleteUnit(index) {
    إعادة تعيين النموذج
 ========================= */
 
-function resetForm() {
-    bootbox.confirm({
-        message: "هل تريد إعادة تعيين جميع البيانات؟",
 
-        buttons: {
-            confirm: {
-                label: "إعادة تعيين",
-                className: "btn-danger"
-            },
-
-            cancel: {
-                label: "إلغاء",
-                className: "btn-secondary"
-            }
-        },
-
-        callback: function (confirmed) {
-            if (!confirmed) {
-                return;
-            }
-
-            resetAllInputs();
-        }
-    });
-}
 
 function resetAllInputs() {
     document.getElementById("productForm").reset();
@@ -602,7 +509,6 @@ function resetAllInputs() {
     units = [];
 
     renderUnits();
-    updateContainsUnitOptions();
 
     updateUnitBarcodeState();
 }
@@ -613,30 +519,11 @@ function resetAllInputs() {
 ========================= */
 
 async function submitProduct() {
-    const productName = document
-        .getElementById("productName")
-        .value
-        .trim();
+    const productName = document.getElementById("productName").value.trim();
 
-    const categoryId = document
-        .getElementById("productCategory")
-        .value;
+    const categoryId = document.getElementById("productCategory").value;
 
-    const baseUnitName = document
-        .getElementById("baseUnitName")
-        .value
-        .trim();
-
-    const baseBarcode = baseUnitBarcodeInput.value.trim();
-
-    const baseSellingPrice = normalizeNumber(
-        document.getElementById("baseSellingPrice").value
-    );
-
-    const baseForSale = document.getElementById("baseForSale").checked;
-    const baseForPurchase = document.getElementById("baseForPurchase").checked;
-
-
+    const costPrice  = document.getElementById('stock-cost-price').value;
     // التحقق من البيانات
 
     if (!productName) {
@@ -651,11 +538,38 @@ async function submitProduct() {
         return;
     }
 
-    if (!baseUnitName) {
-        bootboxError("يرجى إدخال الوحدة الأساسية.");
+    if(Number(costPrice) <= 0){
+        bootboxError("خطأ : سعر التكلفة للوحدة الأساسية يجب أن يكون أكبر من صفر");
 
         return;
     }
+
+    for (const unit of units) {
+        if (!unit.unit_name || unit.unit_name.trim() === "") {
+            bootboxError("يرجى إدخال اسم الوحدة.");
+            return;
+        }
+
+        if (unit.conversion_factor <= 0) {
+            bootboxError("يرجى إدخال معامل تحويل صحيح أكبر من صفر للوحدة: " + unit.unit_name);
+            return;
+        }
+
+        if (!unit.for_sale && !unit.for_purchase) {
+            bootboxError(
+                `يجب تفعيل خيار البيع أو الشراء على الأقل للوحدة: ${unit.unit_name}.`
+            );
+            return;
+        }
+
+        if (unit.for_sale && (!Number.isFinite(Number(unit.selling_price)) || Number(unit.selling_price) <= 0)) {
+            bootboxError(
+                `يرجى إدخال سعر بيع صحيح أكبر من صفر للوحدة: ${unit.unit_name}، أو تعطيل خيار البيع.`
+            );
+            return;
+        }
+    }
+
 
 
     // تجهيز بيانات المنتج والوحدات فقط
@@ -666,65 +580,15 @@ async function submitProduct() {
             category_id: Number(categoryId)
         },
 
-        units: [
-            {
-                id: "base",
+        cost_price : costPrice,
 
-                unit_name: baseUnitName,
-
-                contains_quantity: null,
-
-                contains_unit_id: null,
-
-                contains_unit_name: null,
-
-                conversion_factor: 1,
-
-                barcode: baseBarcode || null,
-
-                auto_generated_barcode: autoBarcodeCheckbox.checked,
-
-                selling_price: baseSellingPrice,
-
-                for_sale: baseForSale,
-
-                for_purchase: baseForPurchase,
-
-                is_base_unit: true
-            },
-
-            ...units.map(unit => ({
-                ...unit,
-                is_base_unit: false
-            }))
-        ]
+        units: units
     };
 
+    console.log(data);
     await submitProductData(data);
 }
 
-
-/* =========================
-   التنسيق
-========================= */
-
-function formatNumber(value) {
-    return Number(value).toLocaleString("en-US", {
-        maximumFractionDigits: 4
-    });
-}
-
-function formatPrice(value) {
-    return `
-        <strong>
-            ${Number(value).toFixed(2)}
-        </strong>
-
-        <span class="text-muted">
-            ₪
-        </span>
-    `;
-}
 
 function escapeHtml(value) {
     return String(value)
@@ -759,13 +623,6 @@ document.addEventListener("click", function (e) {
         return;
     }
 
-    const resetButton = e.target.closest("#resetBtn");
-
-    if (resetButton) {
-        resetForm();
-
-        return;
-    }
 });
 
 
@@ -778,19 +635,6 @@ document.getElementById("productForm").addEventListener(
     }
 );
 
-
-
-
-
-
-/* =========================
-   التهيئة الأولية
-========================= */
-
-updateContainsUnitOptions();
-renderUnits();
-
-
 /* =========================
    إرسال البيانات للسيرفر
 ========================= */
@@ -801,8 +645,8 @@ async function submitProductData(finalData) {
     loader.style.display = "flex";
 
     try {
-        const res = await fetch(url + "/item/add", {
-            method: "POST",
+        const res = await fetch(url + `/item/update?item_id=${itemId}`, {
+            method: "PUT",
 
             body: JSON.stringify(finalData),
 
@@ -817,7 +661,6 @@ async function submitProductData(finalData) {
         if (res.status === 200) {
             bootboxSuccess(data.message);
 
-            resetAllInputs();
         } else if (res.status === 401) {
             showAuthExpired(data.message);
         } else {
@@ -825,7 +668,6 @@ async function submitProductData(finalData) {
         }
     } catch (err) {
         bootboxError(err.message);
-
         return;
     } finally {
         loader.style.display = "none";
@@ -854,11 +696,15 @@ async function loadItem() {
             return;
         }
 
-        else if(res.status === 200){
+        else if (res.status === 200) {
             console.log(data);
 
             setItemData(data.item);
-        }
+
+            setUnits(data.item.units);
+
+            renderStockAndCost(data.item.units, data.item.stockBatches);
+        }   
 
         else {
             bootboxError(data.message);
@@ -873,23 +719,237 @@ async function loadItem() {
 
 function setItemData(data) {
     document.getElementById("productName").value = data.item.name;
-
-        
-
     document.getElementById("productCategory").value = data.item.category_id;
-
-    // const baseUnitName = document
-    //     .getElementById("baseUnitName")
-    //     .value
-    //     .trim();
-
-    // const baseBarcode = baseUnitBarcodeInput.value.trim();
-
-    // const baseSellingPrice = normalizeNumber(
-    //     document.getElementById("baseSellingPrice").value
-    // );
-
-   
+}
 
 
+function setUnits(data) {
+
+    data.forEach(unit => {
+        const newUnit = {
+            id: unit.id,
+
+            unit_name: unit.unit_name,
+
+            conversion_factor: unit.conversion_factor,
+
+            barcode: unit.barcode || null,
+
+            auto_generated_barcode: false,
+
+            selling_price: unit.price,
+
+            for_sale: unit.for_sale,
+
+            for_purchase: unit.for_purchase
+        };
+
+        units.push(newUnit);
+    });
+    renderUnits();
+}
+
+
+document.addEventListener("input", (event) => {
+
+    if (event.target.closest(".unit-barcode")) {
+        const input = event.target.closest(".unit-barcode");
+        const unitId = String(input.dataset.unitId);
+        const barcode = input.value.trim();
+
+        const unit = units.find(unit => String(unit.id) === unitId);
+        if (!unit) return;
+
+        unit.barcode = barcode || null;
+    }
+
+    else if (event.target.closest(".unit-name")) {
+        const input = event.target.closest(".unit-name");
+        const unitId = String(input.dataset.unitId);
+        const name = input.value.trim();
+
+        const unit = units.find(unit => String(unit.id) === unitId);
+        if (!unit) return;
+
+        unit.unit_name = name;
+    }
+
+    else if (event.target.closest(".conversion-factor")) {
+        const input = event.target.closest(".conversion-factor");
+        const unitId = String(input.dataset.unitId);
+        const conversionFactor = input.value.trim();
+
+        const unit = units.find(unit => String(unit.id) === unitId);
+        if (!unit) return;
+
+        unit.conversion_factor = conversionFactor;
+    }
+
+    else if (event.target.closest(".selling-price")) {
+        const input = event.target.closest(".selling-price");
+        const unitId = String(input.dataset.unitId);
+        const price = input.value.trim();
+
+        const unit = units.find(unit => String(unit.id) === unitId);
+        if (!unit) return;
+
+        unit.selling_price = price;
+    }
+
+    else if (event.target.closest(".usage-check-sale")) {
+        const input = event.target.closest(".usage-check-sale");
+        const unitId = String(input.dataset.unitId);
+
+        const checked = input.checked;
+
+        const unit = units.find(unit => String(unit.id) === unitId);
+        if (!unit) return;
+
+        unit.for_sale = checked;
+
+
+        if (!checked) {
+            unit.selling_price = 0;
+        }
+
+        renderUnits();
+    }
+
+    else if (event.target.closest(".usage-check-purchase")) {
+        const input = event.target.closest(".usage-check-purchase");
+        const unitId = String(input.dataset.unitId);
+
+        const checked = input.checked;
+
+        const unit = units.find(unit => String(unit.id) === unitId);
+        if (!unit) return;
+
+        unit.for_purchase = checked;
+    }
+
+
+
+
+});
+
+
+function renderStockAndCost(units, stockBatch) {
+    const container = document.getElementById("stock-cost-container");
+    document.getElementById('baseUnitName').textContent = units[0].unit_name;
+    if (!container) return;
+
+    const totalQty = Number(stockBatch?.total_remaining_qty) || 0;
+    const costPrice = Number(stockBatch?.cost_price) || 0;
+
+    // ترتيب الوحدات من الأكبر إلى الأصغر
+    const sortedUnits = [...units]
+        .filter(unit => Number(unit.conversion_factor) > 0)
+        .sort((a, b) =>
+            Number(b.conversion_factor) -
+            Number(a.conversion_factor)
+        );
+
+    // حساب الكمية المتوفرة من كل وحدة
+    let remainingQty = totalQty;
+    const stockUnits = [];
+
+    for (const unit of sortedUnits) {
+        const conversionFactor = Number(unit.conversion_factor);
+
+        const quantity = Math.floor(
+            (remainingQty + 1e-9) / conversionFactor
+        );
+
+        remainingQty -= quantity * conversionFactor;
+
+        stockUnits.push({
+            id: unit.id,
+            unit_name: unit.unit_name,
+            conversion_factor: conversionFactor,
+            quantity
+        });
+    }
+
+    container.innerHTML = `
+        <!-- سعر التكلفة -->
+        <div class="mb-4">
+            <label for="stock-cost-price"
+                   class="form-label fw-bold">
+                <i class="fa-solid fa-coins text-primary ms-1"></i>
+                سعر تكلفة الوحدة الأساسية
+            </label>
+
+            <div class="input-group cost-price-input">
+                <input
+                    type="number"
+                    id="stock-cost-price"
+                    class="form-control"
+                    value="${costPrice}"
+                    min="0"
+                    step="any"
+                >
+
+                <span class="input-group-text">₪</span>
+            </div>
+
+            <div class="form-text">
+                سعر التكلفة محسوب للوحدة الأساسية: ${
+                    units[0]?.unit_name || "غير محددة"
+                }.
+            </div>
+        </div>
+
+        <hr class="my-4">
+
+        <!-- ملخص المخزون -->
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <div class="fw-bold">
+                <i class="fa-solid fa-boxes-stacked text-primary ms-1"></i>
+                المخزون الحالي
+            </div>
+
+            <span class="stock-total">
+                ${totalQty.toLocaleString("en-US")} وحدة أساسية
+            </span>
+        </div>
+
+        <!-- توزيع المخزون حسب الوحدات -->
+        <div class="row g-3">
+            ${stockUnits.map(unit => `
+                <div class="col-6 col-md-4 col-lg-3">
+                    <div class="stock-unit-card">
+                        <div class="unit-name mb-2">
+                            ${unit.unit_name}
+                        </div>
+
+                        <div class="unit-quantity">
+                            ${unit.quantity.toLocaleString("en-US")}
+                        </div>
+
+                        <div class="unit-name mt-1">
+                            ${
+                                unit.conversion_factor === 1
+                                    ? "الوحدة الأساسية"
+                                    : `كل وحدة = ${unit.conversion_factor} ${
+                                        units[0]?.unit_name || "وحدة أساسية"
+                                    }`
+                            }
+                        </div>
+                    </div>
+                </div>
+            `).join("")}
+        </div>
+
+        ${
+            remainingQty > 1e-9
+                ? `
+                    <div class="alert alert-warning mt-3 mb-0">
+                        الكمية المتبقية غير الموزعة:
+                        ${remainingQty}
+                        ${units[0]?.unit_name || "وحدة أساسية"}
+                    </div>
+                `
+                : ""
+        }
+    `;
 }
