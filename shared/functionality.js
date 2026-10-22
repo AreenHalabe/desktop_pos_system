@@ -54,6 +54,7 @@ export function buildTreeOfOrders(rows) {
         created_at: row.created_at,
         updated_at: row.updated_at,
         table_num: row.table_num,
+        total_discount_p: row.total_discount_percentage,
         items: []
       };
 

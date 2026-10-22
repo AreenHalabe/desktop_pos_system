@@ -30,9 +30,9 @@ export const createOrder = async (req, res) => {
         transactionStarted = true;
 
         const invoiceNum = await generateInvoiceInfo(sessionId, transaction);
-        const orderId    = await insertOrder(adminId, sessionId, invoiceNum, parsedData.total_price, orderData.discount_amount, parsedData.payment_method, 'مكتمل', transaction);
-        
-        const {items, updateStockBatches, deleteStockBatches } = await handleCostPriceForEachStock(parsedData.items);
+        const orderId = await insertOrder(adminId, sessionId, invoiceNum, parsedData.total_price, orderData.discount_amount, parsedData.total_discount_percentage, parsedData.payment_method, 'مكتمل', transaction);
+
+        const { items, updateStockBatches, deleteStockBatches } = await handleCostPriceForEachStock(parsedData.items);
 
 
         await runUpdateStockBatches(updateStockBatches, transaction);
@@ -116,9 +116,9 @@ export const deleteOrder = async (req, res) => {
         await updateStockBatchesQuery(updateStockBatchesData, transaction);
 
 
-       
 
-        
+
+
         await transaction.request()
             .input('id', sql.Int, orderId)
             .input('cancel_reason', sql.NVarChar, cancel_reason)
@@ -168,6 +168,105 @@ export const deleteOrder = async (req, res) => {
         });
     }
 }
+
+
+
+export const restoreOrderItems = async (req, res) => {
+    const transaction = new sql.Transaction(pool);
+    let transactionStarted = false;
+    try {
+        const token = req.headers.authorization;
+        if (!token) {
+            throw new SystemError("إنتهت صلاحية الجلسة , الرجاء تسجيل الدخول مرة أخرى", 401);
+        }
+
+        await checkToken(token);
+
+        const body = req.body;
+
+        const currentTimestamp = new Date();
+
+
+        const {
+            orderItems,
+            stockBatches,
+            unitConversionFactors
+        } = await getOrderDataForStockRestore(Number(body.id));
+
+        const {
+            itemsToUpdate,
+            itemsToDelete,
+            deletedItems,
+            stockReturns
+        } = compareOrderItems(orderItems, body.items, unitConversionFactors);
+
+        const updateStockBatches = prepareStockBatchesRestoreItems(stockReturns, stockBatches);
+
+        
+        await transaction.begin();
+        transactionStarted = true;
+
+        
+        await updateStockBatchesQuery(updateStockBatches, transaction);
+
+
+        await transaction.request()
+            .input('id', sql.Int, Number(body.id))
+            
+            .input('total_price', sql.Decimal(15, 2), (body.total_price))
+
+            .input('discount', sql.Decimal(15, 2), Number(body.discount))
+            
+            .input('updated_at', sql.DateTime2, currentTimestamp)
+            .query(`
+                UPDATE orders
+                SET total_price = @total_price, discount = @discount, updated_at = @updated_at
+                WHERE id=@id
+            `);
+        ;
+
+        await updateOrderItems(itemsToUpdate, transaction);
+        await deleteOrderItems(itemsToDelete, transaction);
+
+
+        await insertDeletedItems(deletedItems, body.id, currentTimestamp, transaction);
+
+
+        await transaction.commit();
+
+
+        return res.status(200).json({
+            success: true,
+            message: "تم تعديل الطلب بنجاح",
+        });
+
+
+    } catch (e) {
+        if (transactionStarted) {
+            try {
+                await transaction.rollback();
+            } catch (err) {
+                console.error(err);
+            }
+        }
+
+        const validationErrors = e?.errors || e?.issues;
+
+        if (Array.isArray(validationErrors) && validationErrors.length > 0) {
+            return res.status(400).json({
+                success: false,
+                message: validationErrors[0].message
+            });
+        }
+
+
+        return res.status(e.status || 500).json({
+            success: false,
+            message: e.message || "حدث خطأ غير معروف",
+        });
+    }
+}
+
 
 
 export const getDaliyOrders = async (req, res) => {
@@ -220,7 +319,7 @@ async function generateInvoiceInfo(sessionId, transaction) {
 
     return invoiceNum;
 }
-async function insertOrder(adminId, sessionId, invoiceNum, mainPrice, discount, paymentMethod, status, transaction) {
+async function insertOrder(adminId, sessionId, invoiceNum, mainPrice, discount, totalDiscountPercentage, paymentMethod, status, transaction) {
 
     const totalPrice = mainPrice - discount;
 
@@ -232,13 +331,14 @@ async function insertOrder(adminId, sessionId, invoiceNum, mainPrice, discount, 
         .input('invoice_num', sql.NVarChar, invoiceNum)
         .input('total_price', sql.Decimal(15, 2), totalPrice)
         .input('discount', sql.Decimal(15, 2), discount)
+        .input('total_discount_percentage', sql.Decimal(5, 2), totalDiscountPercentage)
         .input('payment_method', sql.NVarChar, paymentMethod)
         .input('status', sql.NVarChar, status)
         .input("created_at", sql.DateTime2, currentTimeStamp)
         .query(`
-            INSERT INTO orders (admin_id, session_id, invoice_num, total_price, discount, payment_method, status, created_at)
+            INSERT INTO orders (admin_id, session_id, invoice_num, total_price, discount, total_discount_percentage, payment_method, status, created_at)
             OUTPUT INSERTED.id
-            VALUES (@admin_id, @session_id, @invoice_num, @total_price, @discount, @payment_method, @status, @created_at)
+            VALUES (@admin_id, @session_id, @invoice_num, @total_price, @discount, @total_discount_percentage, @payment_method, @status, @created_at)
         `)
         ;
 
@@ -351,7 +451,7 @@ async function handleCostPriceForEachStock(items) {
                 remainingQtyByBatch.get(batch.id);
 
             if (currentRemainingQty > 0) {
-                const newRemainingQty = Math.max(0,currentRemainingQty - quantityInPieces);
+                const newRemainingQty = Math.max(0, currentRemainingQty - quantityInPieces);
 
                 remainingQtyByBatch.set(batch.id, newRemainingQty);
 
@@ -525,6 +625,7 @@ async function getOrderItems(orderId) {
 
     const result = await request.query(`
         SELECT 
+            id,
             item_id,
             quantity,
             unit as unit_name
@@ -645,18 +746,131 @@ async function getOrderDataForStockRestore(orderId) {
 }
 
 
-function prepareStockBatchesRestore(orderItems, stockBatches,unitConversionFactors){
+// function prepareStockBatchesRestore(orderItems, stockBatches, unitConversionFactors) {
+//     const updateStockBatches = new Map();
+//     const batchesByItemId = new Map();
+//     const conversionFactorByUnit = new Map();
+
+//     // تجميع الدفعات حسب الصنف
+//     for (const batch of stockBatches) {
+//         if (!batchesByItemId.has(batch.item_id)) {
+//             batchesByItemId.set(batch.item_id, []);
+//         }
+
+//         batchesByItemId.get(batch.item_id).push(batch);
+//     }
+
+//     // تجهيز معاملات التحويل
+//     for (const unit of unitConversionFactors) {
+//         const key = JSON.stringify([
+//             Number(unit.item_id),
+//             unit.unit_name
+//         ]);
+
+//         conversionFactorByUnit.set(
+//             key,
+//             Number(unit.conversion_factor)
+//         );
+//     }
+
+//     // الاحتفاظ بآخر كمية محسوبة لكل دفعة
+//     const remainingQtyByBatch = new Map(
+//         stockBatches.map(batch => [
+//             batch.id,
+//             Number(batch.remaining_qty)
+//         ])
+//     );
+
+//     for (const item of orderItems) {
+//         const itemId = Number(item.item_id);
+
+//         const key = JSON.stringify([
+//             itemId,
+//             item.unit_name
+//         ]);
+
+//         const conversionFactor = conversionFactorByUnit.get(key);
+
+
+//         const quantityToRestore = Number(item.quantity) * conversionFactor;
+
+
+//         const batches = batchesByItemId.get(itemId) ?? [];
+
+
+//         // ترتيب الدفعات من الأقدم إلى الأحدث
+//         batches.sort((a, b) => a.id - b.id);
+
+//         let targetBatch = batches[0];
+
+//         // إذا توجد دفعة واحدة فقط، نزيد كميتها
+//         if (batches.length === 1) {
+//             targetBatch = batches[0];
+//         } else {
+//             // إذا كانت أول دفعة فارغة، نفحص الدفعات التالية
+//             for (let i = 1; i < batches.length; i++) {
+//                 const previousBatch = batches[i - 1];
+//                 const currentBatch = batches[i];
+
+//                 const currentRemainingQty =
+//                     remainingQtyByBatch.get(currentBatch.id);
+
+//                 const originalQuantity =
+//                     Number(currentBatch.quantity);
+
+//                 const isFull =
+//                     currentRemainingQty === originalQuantity;
+
+//                 if (isFull) {
+//                     targetBatch = previousBatch;
+//                     break;
+//                 }
+
+//                 targetBatch = currentBatch;
+//                 break;
+//             }
+//         }
+
+//         // تحديث الكمية النهائية للدفعة المستهدفة
+//         const currentRemainingQty =
+//             remainingQtyByBatch.get(targetBatch.id);
+
+//         const newRemainingQty =
+//             currentRemainingQty + quantityToRestore;
+
+//         remainingQtyByBatch.set(
+//             targetBatch.id,
+//             newRemainingQty
+//         );
+
+//         updateStockBatches.set(targetBatch.id, {
+//             id: targetBatch.id,
+//             remaining_qty: newRemainingQty
+//         });
+//     }
+
+//     return [...updateStockBatches.values()];
+// }
+
+
+function prepareStockBatchesRestore(orderItems, stockBatches, unitConversionFactors) {
     const updateStockBatches = new Map();
     const batchesByItemId = new Map();
     const conversionFactorByUnit = new Map();
 
     // تجميع الدفعات حسب الصنف
     for (const batch of stockBatches) {
-        if (!batchesByItemId.has(batch.item_id)) {
-            batchesByItemId.set(batch.item_id, []);
+        const itemId = Number(batch.item_id);
+
+        if (!batchesByItemId.has(itemId)) {
+            batchesByItemId.set(itemId, []);
         }
 
-        batchesByItemId.get(batch.item_id).push(batch);
+        batchesByItemId.get(itemId).push({
+            ...batch,
+            quantity: Number(batch.quantity),
+            remaining_qty: Number(batch.remaining_qty)
+        });
     }
 
     // تجهيز معاملات التحويل
@@ -672,107 +886,99 @@ function prepareStockBatchesRestore(orderItems, stockBatches,unitConversionFacto
         );
     }
 
-    // الاحتفاظ بآخر كمية محسوبة لكل دفعة
-    const remainingQtyByBatch = new Map(
-        stockBatches.map(batch => [
-            batch.id,
-            Number(batch.remaining_qty)
-        ])
-    );
-
     for (const item of orderItems) {
         const itemId = Number(item.item_id);
 
-        const key = JSON.stringify([
+        const conversionKey = JSON.stringify([
             itemId,
             item.unit_name
         ]);
 
-        const conversionFactor = conversionFactorByUnit.get(key);
+        const conversionFactor =
+            conversionFactorByUnit.get(conversionKey);
 
-        if (
-            conversionFactor === undefined ||
-            !Number.isFinite(conversionFactor) ||
-            conversionFactor <= 0
-        ) {
-            throw new Error(
-                `معامل التحويل غير صالح للصنف ${itemId} والوحدة ${item.unit_name}`
-            );
-        }
 
-        const quantityToRestore =
-            Number(item.quantity) * conversionFactor;
+        let qtyToRestore = Number(item.quantity) * conversionFactor;
 
-        if (
-            !Number.isFinite(quantityToRestore) ||
-            quantityToRestore <= 0
-        ) {
-            throw new Error(
-                `كمية غير صالحة للصنف ${itemId}`
-            );
-        }
+        const batches = batchesByItemId.get(itemId);
 
-        const batches = batchesByItemId.get(itemId) ?? [];
+        const firstBatch = batches[0];
 
-        if (batches.length === 0) {
-            throw new Error(
-                `لا توجد دفعات مخزون للصنف ${itemId}`
-            );
-        }
-
-        // ترتيب الدفعات من الأقدم إلى الأحدث
-        batches.sort((a, b) => a.id - b.id);
-
-        let targetBatch = batches[0];
-
-        // إذا توجد دفعة واحدة فقط، نزيد كميتها
+        // إذا في دفعة واحدة، نرجّع الكمية كاملة إلها
         if (batches.length === 1) {
-            targetBatch = batches[0];
-        } else {
-            // إذا كانت أول دفعة فارغة، نفحص الدفعات التالية
-            for (let i = 1; i < batches.length; i++) {
-                const previousBatch = batches[i - 1];
-                const currentBatch = batches[i];
+            const newRemainingQty =
+                firstBatch.remaining_qty + qtyToRestore;
 
-                const currentRemainingQty =
-                    remainingQtyByBatch.get(currentBatch.id);
+            firstBatch.remaining_qty = newRemainingQty;
 
-                const originalQuantity =
-                    Number(currentBatch.quantity);
+            updateStockBatches.set(firstBatch.id, {
+                id: firstBatch.id,
+                remaining_qty: newRemainingQty
+            });
 
-                const isFull =
-                    currentRemainingQty === originalQuantity;
+            continue;
+        }
 
-                if (isFull) {
-                    targetBatch = previousBatch;
-                    break;
-                }
+        // إذا الدفعة الأولى فيها متبقي، نرجع الكمية كاملة إلها
+        if (firstBatch.remaining_qty > 0) {
+            const newRemainingQty =
+                firstBatch.remaining_qty + qtyToRestore;
 
-                targetBatch = currentBatch;
+            firstBatch.remaining_qty = newRemainingQty;
+
+            updateStockBatches.set(firstBatch.id, {
+                id: firstBatch.id,
+                remaining_qty: newRemainingQty
+            });
+
+            continue;
+        }
+
+        for (let i = 1; i < batches.length; i++) {
+            if (qtyToRestore <= 0) {
                 break;
             }
+
+            const batch = batches[i];
+
+            const availableCapacity = Math.max(
+                0,
+                batch.quantity - batch.remaining_qty
+            );
+
+            const qtyToAdd = Math.min(
+                qtyToRestore,
+                availableCapacity
+            );
+
+            if (qtyToAdd <= 0) {
+                continue;
+            }
+
+            batch.remaining_qty += qtyToAdd;
+
+            updateStockBatches.set(batch.id, {
+                id: batch.id,
+                remaining_qty: batch.remaining_qty
+            });
+
+            qtyToRestore -= qtyToAdd;
         }
 
-        // تحديث الكمية النهائية للدفعة المستهدفة
-        const currentRemainingQty =
-            remainingQtyByBatch.get(targetBatch.id);
+        // إذا بقيت كمية، نرجعها للدفعة الأولى
+        if (qtyToRestore > 0) {
+            firstBatch.remaining_qty += qtyToRestore;
 
-        const newRemainingQty =
-            currentRemainingQty + quantityToRestore;
-
-        remainingQtyByBatch.set(
-            targetBatch.id,
-            newRemainingQty
-        );
-
-        updateStockBatches.set(targetBatch.id, {
-            id: targetBatch.id,
-            remaining_qty: newRemainingQty
-        });
+            updateStockBatches.set(firstBatch.id, {
+                id: firstBatch.id,
+                remaining_qty: firstBatch.remaining_qty
+            });
+        }
     }
 
     return [...updateStockBatches.values()];
 }
+
 
 async function updateStockBatchesQuery(updateStockBatches, transaction) {
     if (updateStockBatches.length === 0) {
@@ -801,6 +1007,312 @@ async function updateStockBatchesQuery(updateStockBatches, transaction) {
             VALUES ${values.join(", ")}
         ) AS v(id, remaining_qty)
             ON sb.id = v.id;
+    `);
+}
+
+
+
+
+
+function compareOrderItems(oldItems, newItems, unitConversionFactors) {
+
+    const itemsToUpdate = [];
+    const itemsToDelete = [];
+    const deletedItems = [];
+    const stockReturnsMap = new Map();
+
+
+    const newItemsMap = new Map(
+        newItems.map(item => [
+            Number(item.order_item_id),
+            item
+        ])
+    );
+
+
+    const conversionMap = new Map(
+        unitConversionFactors.map(unit => [
+            JSON.stringify([
+                Number(unit.item_id),
+                unit.unit_name
+            ]),
+            Number(unit.conversion_factor)
+        ])
+    );
+
+    for (const oldItem of oldItems) {
+        const newItem = newItemsMap.get(Number(oldItem.id));
+
+        let returnedQty = 0;
+
+        if (!newItem) {
+            itemsToDelete.push({
+                id: oldItem.id
+            });
+            returnedQty = Number(oldItem.quantity);
+        } else {
+            const newQty = Number(newItem.quantity);
+            const oldQty = Number(oldItem.quantity);
+
+            if (newQty > oldQty) {
+                throw new Error(
+                    `لا يمكن زيادة كمية الصنف ذي المعرف ${oldItem.id} في عملية الإرجاع`
+                );
+            }
+
+            if (newQty < oldQty) {
+                itemsToUpdate.push({
+                    id: oldItem.id,
+                    quantity: newQty
+                });
+
+                returnedQty = oldQty - newQty;
+            }
+        }
+
+        // لا يوجد إرجاع للمخزون إذا لم تتغير الكمية
+        if (returnedQty === 0) {
+            continue;
+        }
+
+        deletedItems.push({
+            item_id: Number(oldItem.item_id),
+            unit_name: oldItem.unit_name,
+            quantity: returnedQty
+        });
+
+        const itemId = Number(oldItem.item_id);
+        const unitName = oldItem.unit_name;
+
+        const conversionKey = JSON.stringify([
+            itemId,
+            unitName
+        ]);
+
+        const conversionFactor = conversionMap.get(conversionKey);
+
+
+        // تحويل الكمية الراجعة إلى وحدة المخزون الأساسية
+        const stockQty = returnedQty * conversionFactor;
+
+
+        if (!stockReturnsMap.has(itemId)) {
+            stockReturnsMap.set(itemId, {
+                item_id: itemId,
+                qty: 0
+            });
+        }
+
+        stockReturnsMap.get(itemId).qty += stockQty;
+    }
+
+    return {
+        itemsToUpdate,
+        itemsToDelete,
+        deletedItems,
+        stockReturns: [...stockReturnsMap.values()]
+    };
+}
+async function deleteOrderItems(itemsToDelete , transaction) {
+    if (itemsToDelete.length === 0) {
+        return;
+    }
+
+    const request = transaction.request();
+
+    const values = itemsToDelete.map((item, index) => {
+        request.input(`id${index}`, sql.Int, item.id);
+        return `(@id${index})`;
+    });
+
+    await request.query(`
+        DELETE FROM order_items
+        WHERE id IN (
+            SELECT id
+            FROM (VALUES ${values.join(", ")}) AS requested(id)
+        );
+    `);
+}
+async function updateOrderItems(itemsToUpdate , transaction) {
+    if (itemsToUpdate.length === 0) {
+        return;
+    }
+
+    const request = transaction.request();
+
+    const values = itemsToUpdate.map((item, index) => {
+        request.input(`id${index}`, sql.Int, item.id);
+        request.input(
+            `quantity${index}`,
+            sql.Decimal(18, 2),
+            item.quantity
+        );
+
+        return `(@id${index}, @quantity${index})`;
+    });
+
+    await request.query(`
+        UPDATE oi
+        SET oi.quantity = requested.quantity
+        FROM order_items AS oi
+        INNER JOIN (
+            VALUES ${values.join(", ")}
+        ) AS requested(id, quantity)
+            ON oi.id = requested.id;
+    `);
+}
+
+
+function prepareStockBatchesRestoreItems(stockReturns, stockBatches) {
+    const updateStockBatches = new Map();
+
+    // تجميع الدفعات حسب الصنف مع الحفاظ على ترتيبها حسب id
+    const batchesByItemId = new Map();
+
+    for (const batch of stockBatches) {
+        const itemId = Number(batch.item_id);
+
+        if (!batchesByItemId.has(itemId)) {
+            batchesByItemId.set(itemId, []);
+        }
+
+        batchesByItemId.get(itemId).push({
+            ...batch,
+            quantity: Number(batch.quantity),
+            remaining_qty: Number(batch.remaining_qty)
+        });
+    }
+
+    for (const stockReturn of stockReturns) {
+        const itemId = Number(stockReturn.item_id);
+        let qtyToRestore = Number(stockReturn.qty);
+
+        const batches = batchesByItemId.get(itemId);
+
+        if (!batches || batches.length === 0) {
+            throw new Error(
+                `لا توجد دفعات مخزون للصنف ${itemId}`
+            );
+        }
+
+        // إذا في دفعة واحدة، نضيف كامل الكمية إلها
+        if (batches.length === 1) {
+            const firstBatch = batches[0];
+
+            updateStockBatches.set(firstBatch.id, {
+                id: firstBatch.id,
+                remaining_qty:
+                    firstBatch.remaining_qty + qtyToRestore
+            });
+            continue;
+        }
+
+        const firstBatch = batches[0];
+
+        // إذا المتبقي في الدفعة الأولى أكبر من صفر،
+        // نضيف كامل الكمية المرتجعة إلها
+        if (firstBatch.remaining_qty > 0) {
+            updateStockBatches.set(firstBatch.id, {
+                id: firstBatch.id,
+                remaining_qty:
+                    firstBatch.remaining_qty + qtyToRestore
+            });
+
+            continue;
+        }
+
+        // إذا الدفعة الأولى فارغة، نبدأ بتعبئة الدفعات التالية
+        for (let i = 1; i < batches.length; i++) {
+            if (qtyToRestore <= 0) {
+                break;
+            }
+
+            const batch = batches[i];
+
+            // ما بنزيد الدفعة عن quantity
+            const availableCapacity = Math.max(
+                0,
+                batch.quantity - batch.remaining_qty
+            );
+
+            if (availableCapacity === 0) {
+                continue;
+            }
+
+            const qtyToAdd = Math.min(
+                qtyToRestore,
+                availableCapacity
+            );
+
+            updateStockBatches.set(batch.id, {
+                id: batch.id,
+                remaining_qty:
+                    batch.remaining_qty + qtyToAdd
+            });
+
+            qtyToRestore -= qtyToAdd;
+        }
+
+        // إذا ضل جزء مرتجع، بنرجعه للدفعة الأولى
+        if (qtyToRestore > 0) {
+            updateStockBatches.set(firstBatch.id, {
+                id: firstBatch.id,
+                remaining_qty:
+                    firstBatch.remaining_qty + qtyToRestore
+            });
+        }
+    }
+
+    return [...updateStockBatches.values()];
+}
+
+async function insertDeletedItems(deletedItems, orderId, deletedAt, transaction) {
+    if (deletedItems.length === 0) {
+        return;
+    }
+
+    const request = transaction.request();
+
+    request.input("orderId", sql.Int, Number(orderId));
+    request.input("deletedAt", sql.DateTime2, deletedAt);
+
+    const values = deletedItems.map((item, index) => {
+        request.input(
+            `itemId${index}`,
+            sql.Int,
+            item.item_id
+        );
+
+        request.input(
+            `unitName${index}`,
+            sql.NVarChar(100),
+            item.unit_name
+        );
+
+        request.input(
+            `quantity${index}`,
+            sql.Decimal(18, 2),
+            item.quantity
+        );
+
+        return `(
+            @itemId${index},
+            @unitName${index},
+            @quantity${index},
+            @orderId,
+            @deletedAt
+        )`;
+    });
+
+    await request.query(`
+        INSERT INTO deleted_items (
+            item_id,
+            unit_name,
+            quantity,
+            order_id,
+            deleted_at
+        )
+        VALUES ${values.join(", ")};
     `);
 }
 

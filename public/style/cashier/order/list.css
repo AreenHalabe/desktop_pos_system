@@ -97,7 +97,7 @@ p{
 
 .btn-danger ,
 .btn-show-completed{
-    padding: clamp(6px, 1vw, 12px) clamp(10px, 2vw, 20px);
+    padding: clamp(6px, 1vw, 12px) ;
     font-size: clamp(14px, 1.2vw, 18px);
 }
 
@@ -252,6 +252,73 @@ p{
   padding: 10px;
   border-radius: 6px;
   margin: 10px 0;
+}
+
+.edit-item-btn {
+    width: 28px;
+    height: 28px;
+    padding: 0;
+
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    background-color: #fff1f0;
+    color: #dc5a55;
+    border: 1px solid #f5d0cd;
+    border-radius: 6px;
+
+    font-size: 12px;
+    transition: background-color 0.15s ease,
+                color 0.15s ease,
+                border-color 0.15s ease;
+}
+
+.edit-item-btn:hover {
+    background-color: #dc5a55;
+    color: #fff;
+    border-color: #dc5a55;
+}
+
+.edit-item-btn:active {
+    background-color: #c94b46 !important;
+    color: #fff !important;
+    border-color: #c94b46 !important;
+}
+
+.edit-item-btn:focus-visible {
+    outline: 2px solid #f0a5a1;
+    outline-offset: 2px;
+}
+
+.items-table {
+    --bs-table-bg: #f2f2f2;
+}
+
+.edit-items-btn {
+    transition: all 0.2s ease;
+    cursor: pointer;
+}
+
+.edit-items-btn:hover {
+    background-color: #0aa2c0;
+    border-color: #0aa2c0;
+    transform: translateY(-2px);
+    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.15);
+}
+
+.edit-items-btn:active {
+    transform: translateY(0);
+    box-shadow: none;
+}
+
+.modal.show:has(~ #confirmPayModal.show)::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.4);
+    z-index: 10;
+    pointer-events: none;
 }
 
 @media (max-width: 450px) {

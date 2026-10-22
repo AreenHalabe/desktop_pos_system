@@ -1307,8 +1307,6 @@ function confirmOrder() {
     }
 
 
-
-
     const orderData = {
 
         supplier_id: Number(supplierId),
@@ -1320,8 +1318,6 @@ function confirmOrder() {
         items: invoiceItems
 
     };
-
-    // await createInvoice(orderData);
 
     showConfirmSupplierOrderDialog(orderData);
 }
@@ -1516,6 +1512,7 @@ async function createInvoice(invoiceData) {
 
         if (res.status === 200) {
            bootboxSuccess(data.message);
+           reSetInputs();
         }
 
 
@@ -1591,23 +1588,11 @@ function showConfirmSupplierOrderDialog(finalOrder) {
                 </div>
 
 
-                <!-- رسالة التأكيد -->
-                <div class="text-center mb-4">
-
-                    <i class="fas fa-circle-question text-warning fs-1 mb-3"></i>
-
-                    <p class="mb-0 fw-bold">
-                        هل أنت متأكد من تأكيد هذه الطلبية؟
-                    </p>
-
-                </div>
-
-
                 <hr>
 
 
                 <!-- جدول الأصناف -->
-                <div style="max-height:250px; overflow:auto;">
+                <div style="max-height:350px; overflow:auto;">
 
                     <table class="table table-sm table-bordered text-center align-middle">
 
@@ -1705,4 +1690,12 @@ function showConfirmSupplierOrderDialog(finalOrder) {
 
     });
 
+}
+
+function reSetInputs(){
+    const select = document.getElementById("supplierSelect");
+    select.value = "";
+    invoiceItems = [];
+    discountInput.value = 0;
+    renderInvoice();
 }

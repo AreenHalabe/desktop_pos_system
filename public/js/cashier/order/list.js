@@ -2,14 +2,20 @@ import { showAuthExpired, showError, hiddeError, setActiveNavLink, showPrintLoad
 import { url, urlServer } from "../../../api/urlEndPoint.js";
 import { getAuthToken, removeAuthToken } from "../../../component/auth.js";
 import { handelOrderDatabeforPrinting } from "../../../component/invoices.js";
-import { bootboxLoginAsAdmin, closeSideBar, SwitchToAdmin } from "../Switch-user-functionality.js";
+import { closeSideBar } from "../Switch-user-functionality.js";
 import { formatDateOnly, formatTimeOnly, utcToPalestine } from "../../admin/report/shared-functionality.js";
 
 const header = document.querySelector("site-header");
 const deletedBtn = document.getElementById('toggle-deleted-btn');
 const combletBtn = document.getElementById('toggle-complet-btn');
 const errorBox = document.getElementById('error-box');
+const editItemsBtn = document.getElementById("editItemsBtn");
 
+const orderDetailsModal = document.getElementById("orderDetailsModal");
+
+const confirmPayModalElement = document.getElementById("confirmPayModal");
+const confirmPayModal = bootstrap.Modal.getOrCreateInstance(confirmPayModalElement);
+const confirmPayDialog = $(confirmPayModalElement);
 
 let completedOrders;
 let deletedOrders;
@@ -23,6 +29,8 @@ let itemsPerPage = 10;
 let totalItems;
 let totalPages;
 let sessionId;
+
+let updatedOrder;
 
 class SiteHeader extends HTMLElement {
     async connectedCallback() {
@@ -150,17 +158,44 @@ document.addEventListener("click", async function (e) {
         order.date = formatDateOnly(utcToPalestine(order.created_at));
 
         try {
-           await handelOrderDatabeforPrinting(order);
+            await handelOrderDatabeforPrinting(order);
         } catch (e) {
             bootboxError(e.message);
-        }finally{
+        } finally {
             hidePrintLoader();
         }
     }
 
-    else if (e.target.closest('.switch-admin-btn')) {
-        const input = document.getElementById('adminPassword');
-        await SwitchToAdmin(url, input.value);
+    else if (e.target.closest('.edit-item-btn')) {
+        const btn = e.target.closest(".edit-item-btn");
+
+        const orderItemId = Number(btn.dataset.id);
+
+
+        const index = updatedOrder.items.findIndex(
+            item => Number(item.order_item_id) === orderItemId
+        );
+
+        if (index !== -1) {
+            updatedOrder.items[index].quantity -= 1;
+
+            if (updatedOrder.items[index].quantity <= 0) {
+                updatedOrder.items.splice(index, 1);
+            }
+        }
+
+        renderUpdatedOrderItems(updatedOrder);
+
+    }
+
+    else if (e.target.closest('.edit-items-btn')) {
+       
+        showConfirmPayDialog(updatedOrder);
+
+    }
+
+    else if (e.target.closest('#confirmOrderButton')) {
+        await updateOrderItems(updatedOrder);
     }
 
 });
@@ -231,6 +266,9 @@ document.addEventListener('change', async (e) => {
 
 
 
+orderDetailsModal.addEventListener("hidden.bs.modal", function () {
+    reSetUpdateOrderState();
+});
 
 
 function renderOrdersTable() {
@@ -487,6 +525,43 @@ async function restoreOrder(id) {
     }
 }
 
+async function updateOrderItems(finalOrder) {
+    console.log(finalOrder);
+    const loader = document.getElementById('overlay_loader');
+    loader.style.display='flex';
+    try {
+        const res = await fetch(urlServer + `/order/update`, {
+            method: 'PUT',
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": `${getAuthToken('user-auth')}`
+            },
+            body: JSON.stringify(finalOrder),
+        });
+        const data = await res.json();
+
+        if (res.status === 401) {
+            showAuthExpired(data.message);
+        }
+        else if (res.status === 200) {
+            confirmPayModal.hide();
+            closeModale();
+            await getAllCompletedDeletedDailyOrders();
+            bootboxSuccess(data.message);
+        }
+        else {
+            bootboxError(data.message);
+        }
+
+    } catch (e) {
+        bootboxError(e.message);
+    }finally{
+        loader.style.display='none';
+    }
+
+}
+
+
 
 function handlePagination(orders = [], isMakeDeleteOrRestore = false) {
 
@@ -543,9 +618,16 @@ function viewOrder(orderId) {
     // بناء HTML الجدول
     let itemsHtml = '';
     orderItems.forEach(item => {
-        const displayName = item.item_name 
-            ? `${item.item_name }`
+        const displayName = item.item_name
+            ? `${item.item_name}`
             : 'تم حذف الصنف';
+
+        
+        const discountPercent = Number(item.discount_item) || 0;
+
+        const discountValue = roundDiscount(
+            Number(item.quantity * item.price) * discountPercent / 100
+        );
 
         itemsHtml += `
             <tr>
@@ -553,7 +635,11 @@ function viewOrder(orderId) {
                 <td>${item.unit}</td>
                 <td>${item.quantity}</td>
                 <td>${item.price} ₪</td>
-                <td class='text-danger'>%${item.discount_item}</td>
+                <td class='text-danger'>
+                    %${discountPercent}
+                    —
+                    ${discountValue}₪
+                </td>
                 <td class='fw-bold'>${item.quantity * item.price} ₪</td>
             </tr>
         `;
@@ -562,7 +648,7 @@ function viewOrder(orderId) {
     itemsHtml += `
         <tr>
             <td colspan="5" class="text-end pe-3">
-                <strong>المجموع</strong>
+                <strong>المجموع بدون الخصم</strong>
             </td>
             <td>
                 <strong>${order.total_price + order.discount} ₪</strong>
@@ -574,6 +660,10 @@ function viewOrder(orderId) {
                 <strong>قيمة الخصم</strong>
             </td>
             <td class="text-danger">
+                ${Number(order.total_discount_p) > 0
+                    ?`<strong>${order.total_discount_p}%</strong> —`
+                    :''
+                }
                 <strong>${order.discount} ₪</strong>
             </td>
         </tr>
@@ -597,6 +687,7 @@ function viewOrder(orderId) {
     document.getElementById('modalItemsTable').innerHTML = itemsHtml;
     // تخزين id داخل زر الطباعة
     document.querySelector('.printBtn').dataset.orderId = orderId;
+    editItemsBtn.dataset.orderId = orderId;
 
     if (order.cancel_reason != null) {
         displayCanselResonAndTimeUpdated();
@@ -608,7 +699,7 @@ function viewOrder(orderId) {
     }
 
     // إظهار المودل
-    const modal = new bootstrap.Modal(document.getElementById('orderDetailsModal'));
+    const modal = new bootstrap.Modal(orderDetailsModal);
     modal.show();
 }
 
@@ -732,9 +823,241 @@ function tooglePaymentMethod(orderId) {
 
 }
 
-function closeModale(){
-    const modalEl = document.getElementById('orderDetailsModal');
-    const modal = bootstrap.Modal.getInstance(modalEl);
-
+function closeModale() {
+    const modal = bootstrap.Modal.getInstance(orderDetailsModal);
     modal.hide();
+}
+
+
+
+editItemsBtn.addEventListener("click", async (event) => {
+
+    if (!editItemsBtn.classList.contains("is-active")) {
+        editItemsBtn.classList.add("is-active");
+        editItemsBtn.classList.remove("btn-danger");
+        editItemsBtn.classList.add("btn-warning");
+        editItemsBtn.innerHTML = `
+            <i class="fas fa-times ms-1"></i> إلغاء العملية
+        `;
+
+        document.getElementById('cartSection').classList.remove('d-none');
+
+        document.getElementById("confirmUpdateOrderBtn").classList.remove("d-none");
+
+        document.getElementById('operation').textContent = 'إرجاع جزء من أصناف الطلب';
+
+        const currentOrderId = Number(editItemsBtn.dataset.orderId);
+
+
+        const order = completedOrders.find(o => o.id === currentOrderId);
+
+
+        renderUpdatedOrderItems(order);
+    } else {
+        reSetUpdateOrderState();
+    }
+
+});
+
+function renderUpdatedOrderItems(order) {
+    const table = document.getElementById("cartTable");
+    table.innerHTML = "";
+
+    updatedOrder = structuredClone(order);
+
+    if (updatedOrder.items.length === 0) return;
+
+
+    let newTotalPrice = 0;
+    let totalDiscountItems = 0;
+
+    table.innerHTML = updatedOrder.items.map(item => {
+        const qty = Number(item.quantity);
+        const price = Number(item.price);
+        const total = qty * price;
+
+        newTotalPrice += total;
+
+        const discountPercent = Number(item.discount_item) || 0;
+        const discountValue = roundDiscount(Number(total) * discountPercent / 100);
+
+      
+        totalDiscountItems += discountValue;
+
+
+        return `
+            <tr>
+
+                <td class="text-center align-middle nowrap-cell">
+                    ${item.item_name}
+                </td>
+                <td class="text-center align-middle nowrap-cell">
+                    ${item.unit}
+                </td>
+
+                <td class="text-center align-middle">
+                    ${qty}
+                </td>
+
+                <td class="text-center align-middle">
+                    ${price}₪
+                </td>
+
+                <td class="text-center align-middle nowrap-cell text-danger">
+                    %${item.discount_item}
+                    —
+                    ${discountValue}₪
+                </td>
+
+                <td class="text-center align-middle">
+                    ${total} ₪
+                </td>
+
+                <td class="d-flex justify-content-center align-items-center p-2">
+                    <button 
+                        class="btn btn-sm edit-item-btn btn-danger"
+                        data-id="${item.order_item_id}"
+                    >
+                        <i class="fa fa-minus"></i>
+                    </button>
+                </td>
+
+            </tr>
+        `;
+
+    }).join("");
+
+    if(Number(updatedOrder.total_discount_p)==0){
+        updatedOrder.discount = totalDiscountItems;
+    }
+    else{
+        const discountPercent = Number(updatedOrder.total_discount_p) || 0;
+        updatedOrder.discount = roundDiscount(newTotalPrice * discountPercent / 100);
+    }
+
+    updatedOrder.total_price = newTotalPrice - updatedOrder.discount
+
+
+
+    table.innerHTML += `
+        <tr>
+            <td colspan="5" class="text-end pe-3 table-light">
+                <strong>المجموع بدون الخصم</strong>
+            </td>
+            <td class="text-center table-light">
+                <strong>${newTotalPrice} ₪</strong>
+            </td>
+            <td class="p-0 border-0"></td>
+        </tr>
+
+        <tr>
+            <td colspan="5" class="text-end pe-3 text-danger table-danger">
+                <strong>قيمة الخصم</strong>
+            </td>
+            <td class="text-danger text-center table-danger">
+                ${
+                    Number(updatedOrder.total_discount_p) > 0
+                        ? `<strong>${updatedOrder.total_discount_p}%</strong> —`
+                        : ''
+                }
+                <strong>${updatedOrder.discount} ₪</strong>
+            </td>
+            <td class="p-0 border-0"></td>
+        </tr>
+    `;
+
+    document.getElementById("totalPrice").innerText = updatedOrder.total_price;
+
+}
+
+function roundDiscount(discount) {
+    if (discount === 0) return 0;
+
+    const firstDecimal = Math.floor(discount * 10) % 10;
+
+    return Math.floor(discount) + (firstDecimal >= 4 ? 1 : 0);
+}
+
+function reSetUpdateOrderState(){
+    editItemsBtn.classList.remove("is-active");
+
+    editItemsBtn.classList.remove("btn-warning");
+    editItemsBtn.classList.add("btn-success");
+
+    editItemsBtn.innerHTML = `
+        <i class="fas fa-edit ms-1"></i>  إرجاع جزء من الطلب
+    `;
+
+    document.getElementById('cartSection').classList.add('d-none');
+    updatedOrder = null;
+}
+
+
+
+
+
+
+function showConfirmPayDialog(invoiceData) {
+
+    const itemsHtml = invoiceData.items.map(item => {
+
+        return `
+            <tr>
+                <td class="text-center fw-semibold" style ="font-size:15px">
+                    ${item.item_name}
+                </td>
+
+                <td class="text-center" style ="font-size:15px">
+                    ${item.unit}
+                </td>
+
+                <td class="text-center">
+                    ${item.quantity}
+                </td>
+
+                <td class="text-center" style ="font-size:15px">
+                    ₪ ${item.price}
+                </td>
+
+                <td class="text-center">
+                    <span class="badge bg-danger-subtle text-danger border border-danger-subtle" style ="font-size:14px">
+                        %${item.discount_item}
+                    </span>
+                </td>
+
+                <td class="text-center fw-bold">
+                    ₪ ${Number(item.quantity) * Number(item.price)}
+                </td>
+            </tr>
+        `;
+    }).join("");
+
+
+       // تحديث أصناف الفاتورة
+    confirmPayDialog.find("#confirmOrderItems").html(itemsHtml);
+
+    // تحديث المجاميع
+    confirmPayDialog.find("#confirmSubtotal").text(
+        `₪ ${Number(invoiceData.total_price) + Number(invoiceData.discount)}`
+    );
+
+    confirmPayDialog.find("#confirmDiscount").text(
+        `${
+            Number(invoiceData.total_discount_p) > 0
+                ? `${invoiceData.total_discount_p}%—`
+                : ''
+        }
+         ₪ ${invoiceData.discount}`
+    );
+
+
+    confirmPayDialog.find("#confirmGrandTotal").text(
+        `₪ ${invoiceData.total_price}`
+    );
+
+
+
+
+    // فتح نفس النافذة كل مرة
+    confirmPayModal.show();
 }

@@ -1294,7 +1294,7 @@ function printInvoiceToConsole() {
         total_price: Number(subtotal.toFixed(2)),
         discount_amount: Number(totalDiscount.toFixed(2)),
     };
-
+    
     showConfirmPayDialog(invoice);
 }
 
@@ -1312,10 +1312,7 @@ document.addEventListener("click", function (e) {
     // إضافة صنف من كرت المنتجات.
     const productButton = e.target.closest(".product-item");
 
-    if (
-        productButton &&
-        elements.productList?.contains(productButton)
-    ) {
+    if (productButton &&elements.productList?.contains(productButton)) {
         const itemId = productButton.dataset.itemId;
 
         const item = itemsData.find(
@@ -1383,27 +1380,7 @@ document.addEventListener("click", function (e) {
     );
 
     if (newInvoiceButton) {
-        cart = [];
-        nextCartId = 1;
-
-        if (elements.totalDiscount) {
-            elements.totalDiscount.value = "";
-        }
-
-        const partialRadio = document.querySelector(
-            'input[name="discountType"][value="partial"]'
-        );
-
-        if (partialRadio) {
-            partialRadio.checked = true;
-        }
-
-        setDiscountMode("partial");
-
-        if (elements.barcodeInput) {
-            elements.barcodeInput.value = "";
-            elements.barcodeInput.focus();
-        }
+        reSetOrder();
     }
 
 
@@ -1836,3 +1813,28 @@ confirmPayDialog.find("#confirmOrderButton").on("click", async function () {
 
     
 });
+
+
+function reSetOrder(){
+    cart = [];
+    nextCartId = 1;
+
+    if (elements.totalDiscount) {
+        elements.totalDiscount.value = "";
+    }
+
+    const partialRadio = document.querySelector(
+        'input[name="discountType"][value="partial"]'
+    );
+
+    if (partialRadio) {
+        partialRadio.checked = true;
+    }
+
+    setDiscountMode("partial");
+
+    if (elements.barcodeInput) {
+        elements.barcodeInput.value = "";
+        elements.barcodeInput.focus();
+    }
+}

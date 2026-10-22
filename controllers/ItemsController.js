@@ -1866,7 +1866,7 @@ const editProductSchema = z.object({
         .min(1, "اسم الوحدة مطلوب")
         .max(100, "اسم الوحدة طويل جداً"),
 
-      conversion_factor: z.number()
+      conversion_factor: z.coerce.number()
         .positive("معامل التحويل يجب أن يكون أكبر من صفر"),
 
       barcode: z.string()

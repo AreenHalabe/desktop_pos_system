@@ -60,7 +60,7 @@ header.addEventListener("header:ready", () => {
 // Settings
 // ============================================
 
-const PAGE_SIZE = 50;
+const PAGE_SIZE = 70;
 const MAX_VISIBLE_PAGES = 5;
 
 
@@ -371,7 +371,6 @@ async function loadItems() {
 
         const data = await res.json();
 
-        console.log(data);
 
         if (!res.ok) {
             if (res.status === 401) {
@@ -872,7 +871,7 @@ function openEditItemPage(itemId) {
 
 async function deleteItem(itemId) {
     const res = await fetch(
-        `${url}/items/${encodeURIComponent(itemId)}`,
+        `${url}/item/delete?item_id=${itemId}`,
         {
             method: "DELETE",
             headers: {

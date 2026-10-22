@@ -497,21 +497,6 @@ function deleteUnit(index) {
 }
 
 
-/* =========================
-   إعادة تعيين النموذج
-========================= */
-
-
-
-function resetAllInputs() {
-    document.getElementById("productForm").reset();
-
-    units = [];
-
-    renderUnits();
-
-    updateUnitBarcodeState();
-}
 
 
 /* =========================
@@ -585,7 +570,6 @@ async function submitProduct() {
         units: units
     };
 
-    console.log(data);
     await submitProductData(data);
 }
 
@@ -640,7 +624,6 @@ document.getElementById("productForm").addEventListener(
 ========================= */
 
 async function submitProductData(finalData) {
-    console.log("Submitting product data:", finalData);
 
     loader.style.display = "flex";
 
@@ -659,7 +642,7 @@ async function submitProductData(finalData) {
         const data = await res.json();
 
         if (res.status === 200) {
-            bootboxSuccess(data.message);
+            bootboxSuccess(data.message, null, false, redirectToHomePage);
 
         } else if (res.status === 401) {
             showAuthExpired(data.message);
@@ -697,7 +680,6 @@ async function loadItem() {
         }
 
         else if (res.status === 200) {
-            console.log(data);
 
             setItemData(data.item);
 
@@ -952,4 +934,8 @@ function renderStockAndCost(units, stockBatch) {
                 : ""
         }
     `;
+}
+
+function redirectToHomePage(){
+    window.location.href = './home.html'
 }
