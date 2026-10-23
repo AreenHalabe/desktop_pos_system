@@ -316,8 +316,7 @@ async function loadCategories() {
         elements.categoryFilter.replaceChildren(fragment);
 
     } catch (error) {
-        console.error("Failed to load categories:", error);
-
+        
         showAlert(
             "تعذّر تحميل الفئات. يمكنك متابعة عرض الأصناف.",
             "warning"
@@ -374,7 +373,7 @@ async function loadItems() {
 
         if (!res.ok) {
             if (res.status === 401) {
-                showAuthExpired();
+                showAuthExpired(data.message);
             }
 
             throw new Error(
@@ -400,7 +399,7 @@ async function loadItems() {
             return;
         }
 
-        console.error("Failed to load items:", error);
+        
 
         state.items = [];
         state.totalItems = 0;
@@ -884,7 +883,11 @@ async function deleteItem(itemId) {
 
     if (!res.ok) {
         if (res.status === 401) {
-            showAuthExpired();
+            showAuthExpired(data.message);
+        }
+        if(res.status === 409){
+            bootboxError(data.message);
+            return;
         }
 
         throw new Error(
@@ -958,7 +961,6 @@ async function confirmDeleteItem() {
         await loadItems();
 
     } catch (error) {
-        console.error("Failed to delete item:", error);
 
         showAlert(
             error.message || "تعذّر حذف الصنف.",

@@ -184,6 +184,13 @@ export const restoreOrderItems = async (req, res) => {
 
         const body = req.body;
 
+        if(body.items.length === 0){
+            throw new SystemError(
+                "لا يمكن إرجاع جميع أصناف الطلب بهذه الطريقة. إذا كنت ترغب في حذف الطلب بالكامل، يُرجى استخدام زر الحذف المخصص لذلك.",
+                400
+            );
+        }
+
         const currentTimestamp = new Date();
 
 

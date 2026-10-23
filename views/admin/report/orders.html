@@ -261,18 +261,18 @@
                                     <table class="table table-hover mb-0">
                                         <thead>
                                             <tr>
-                                                <th>رقم الطلب</th>
-                                                <th>طريقة الدفع</th>
-                                                <th class="position-relative">
+                                                <th class="order-table-th">رقم الطلب</th>
+                                                <th class="order-table-th">طريقة الدفع</th>
+                                                <th class="position-relative order-table-th">
                                                     التاريخ
                                                     <div class="position-absolute bottom-0 text-muted opacity-75" style="font-size:12px;">
                                                     يوم - شهر - سنة
                                                     </div>
                                                 </th>
-                                                <th>الوقت</th>
-                                                <th>المبلغ</th>
-                                                <th>الحالة</th>
-                                                <th>الإجراءات</th>
+                                                <th class="order-table-th">الوقت</th>
+                                                <th class="order-table-th">المبلغ</th>
+                                                <th class="order-table-th">الحالة</th>
+                                                <th class="order-table-th">الإجراءات</th>
                                             </tr>
                                         </thead>
                                         <tbody id="ordersTableBody">
@@ -322,16 +322,16 @@
                     </div>
                     <div class="modal-body">
                         <!-- معلومات الطلب -->
-                        <div class="row mb-4">
-                            <div class="col-md-6">
+                        <div class="d-flex justify-content-around align-items-center p-2 mb-3 border rounded shadow-sm custom-box bg-light">
+                            <div class="p-2 d-flex flex-column gap-2">
                                 <p><strong>رقم الطلب : </strong> <span id="modalOrderId"></span></p>
-                                <p><strong>الوقت : </strong> <span id="modaltime"></span></p>
+                                <p><strong>الوقت : </strong> <span id="modaltime" dir="ltr"></span></p>
                                 
                             </div>
-                            <div class="col-md-6">
+                            <div class="p-2 d-flex flex-column gap-2">
                                 <p><strong>الدفع : </strong> <span id="modalPayment"></span></p>
                                 <p><strong>التاريخ : </strong> <span id="modalDate"></span></p>
-                                <p class="d-none"><strong> نوع الطلب : </strong> <span id="modalOrderType" dir="ltr"></span></p>
+                                <p class="d-none"><strong>نوع الطلب : </strong> <span id="modalOrderType"></span></p>
                             </div>
                         </div>
                         
@@ -346,12 +346,14 @@
                             الأصناف المرتبطة
                         </h6>
                         <div class="table-responsive">
-                            <table class="table table-sm table-bordered">
-                                <thead class="table-light">
+                            <table class="table table-sm table-bordered items-table">
+                                <thead class="table-dark">
                                     <tr>
-                                        <th>الإسم</th>
+                                        <th>الصنف</th>
+                                        <th>الوحدة</th>
                                         <th>الكمية</th>
                                         <th>سعر الوحدة</th>
+                                        <th>خصم الصنف</th>
                                         <th>المجموع</th>
                                     </tr>
                                 </thead>

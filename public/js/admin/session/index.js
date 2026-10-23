@@ -543,20 +543,30 @@ function viewOrder(orderId) {
             ? `${item.item_name }`
             : 'تم حذف الصنف';
 
+        const discountPercent = Number(item.discount_item) || 0;
+
+        const discountValue = roundDiscount(
+            Number(item.quantity * item.price) * discountPercent / 100
+        );
+
         itemsHtml += `
             <tr>
                 <td>${displayName}</td>
                 <td>${item.unit}</td>
                 <td>${item.quantity}</td>
                 <td>${item.price} ₪</td>
-                <td class='text-danger'>%${item.discount_item}</td>
+                <td class='text-danger'>
+                    %${discountPercent}
+                    —
+                    ₪${discountValue}
+                </td>
                 <td class='fw-bold'>${item.quantity * item.price} ₪</td>
             </tr>
         `;
     });
 
     itemsHtml += `
-        <tr>
+        <tr class='table-light'>
             <td colspan="5" class="text-end pe-3">
                 <strong>المجموع</strong>
             </td>
@@ -565,11 +575,15 @@ function viewOrder(orderId) {
             </td>
         </tr>
 
-        <tr>
+        <tr class='table-danger'>
             <td colspan="5" class="text-end pe-3 text-danger">
-                <strong>الخصم</strong>
+                <strong>قيمة الخصم</strong>
             </td>
             <td class="text-danger">
+                ${Number(order.total_discount_p) > 0
+                    ?`<strong>${order.total_discount_p}%</strong> —`
+                    :''
+                }
                 <strong>${order.discount} ₪</strong>
             </td>
         </tr>
@@ -929,3 +943,10 @@ function clearCashDifferenceContaner(){
 }
 
 
+function roundDiscount(discount) {
+    if (discount === 0) return 0;
+
+    const firstDecimal = Math.floor(discount * 10) % 10;
+
+    return Math.floor(discount) + (firstDecimal >= 4 ? 1 : 0);
+}

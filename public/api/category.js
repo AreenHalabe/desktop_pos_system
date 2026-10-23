@@ -1,6 +1,8 @@
  import { url } from "./urlEndPoint.js";
  import { getAuthToken , getAdminId} from "../component/auth.js";
 
+ import { bootboxError } from "../component/bootbox.js";
+
 export async function fetchCategories() {
   try {
       const res = await fetch(url + `/category/list?admin_id=${getAdminId()}`, {
@@ -15,7 +17,7 @@ export async function fetchCategories() {
       return data;
 
     } catch (err) {
-      alert("حدث خطأ في الاتصال : " + err.message);
+      bootboxError("حدث خطأ في الاتصال أثناء تحميل الفئات : " + err.message);
     }
 }
 
@@ -35,6 +37,6 @@ export async function fetchMainCategories() {
       
       return data;
     } catch (err) {
-      alert("حدث خطأ في الاتصال : " + err.message);
+      bootboxError("حدث خطأ في الاتصال أثناء تحميل الفئات الرئيسية : " + err.message);
     }
 }

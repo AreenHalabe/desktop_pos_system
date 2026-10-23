@@ -10,7 +10,9 @@
         transition: transform 0.3s ease;
         height: 100%;
     }
-    
+    p{
+        margin: 0;
+    }
     .stat-card:hover { transform: translateY(-5px); }
     
     .stat-icon {
@@ -79,18 +81,22 @@
         box-shadow: 0 4px 15px rgba(0,0,0,0.05);
         overflow: hidden;
     }
-
+    .items-table{
+        --bs-table-bg: #f2f2f2;
+    }
+    .order-table-th{
+        background: #f8f9fa !important;
+        color: #495057 !important;
+        padding: 10px !important;
+    }
     .table thead th {
-        background: #f8f9fa;
         border-bottom: 2px solid #dee2e6;
         font-weight: 600;
-        padding: 15px;
-        color: #495057;
+        padding: 6px;
     }
 
     .table tbody td {
         vertical-align: middle;
-        padding: 13px;
     }
 
 

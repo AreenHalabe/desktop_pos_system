@@ -20,7 +20,7 @@ ItemRoute.put('/item/update' , updateItem);
 ItemRoute.delete('/item/delete' , deleteItem);
 
 
-ItemRoute.get('/item/by-category' , filterItemsByCategory);
+// ItemRoute.get('/item/by-category' , filterItemsByCategory);
 
 
-ItemRoute.get('/menu/details' , getMenueTree);
+// ItemRoute.get('/menu/details' , getMenueTree);

@@ -195,6 +195,10 @@ document.addEventListener("click", async function (e) {
     }
 
     else if (e.target.closest('#confirmOrderButton')) {
+        if(updatedOrder.items.length === 0){
+            bootboxError("لا يمكن إرجاع جميع أصناف الطلب بهذه الطريقة. إذا كنت ترغب في حذف الطلب بالكامل، يُرجى استخدام زر الحذف المخصص لذلك.");
+            return;
+        }
         await updateOrderItems(updatedOrder);
     }
 
@@ -526,7 +530,6 @@ async function restoreOrder(id) {
 }
 
 async function updateOrderItems(finalOrder) {
-    console.log(finalOrder);
     const loader = document.getElementById('overlay_loader');
     loader.style.display='flex';
     try {
@@ -638,7 +641,7 @@ function viewOrder(orderId) {
                 <td class='text-danger'>
                     %${discountPercent}
                     —
-                    ${discountValue}₪
+                    ₪${discountValue}
                 </td>
                 <td class='fw-bold'>${item.quantity * item.price} ₪</td>
             </tr>
@@ -646,7 +649,7 @@ function viewOrder(orderId) {
     });
 
     itemsHtml += `
-        <tr>
+        <tr class='table-light'>
             <td colspan="5" class="text-end pe-3">
                 <strong>المجموع بدون الخصم</strong>
             </td>
@@ -655,7 +658,7 @@ function viewOrder(orderId) {
             </td>
         </tr>
 
-        <tr>
+        <tr class='table-danger'>
             <td colspan="5" class="text-end pe-3 text-danger">
                 <strong>قيمة الخصم</strong>
             </td>
@@ -860,6 +863,7 @@ editItemsBtn.addEventListener("click", async (event) => {
 });
 
 function renderUpdatedOrderItems(order) {
+    if(!order) return;
     const table = document.getElementById("cartTable");
     table.innerHTML = "";
 
@@ -998,6 +1002,8 @@ function reSetUpdateOrderState(){
 
 
 function showConfirmPayDialog(invoiceData) {
+
+    if(!invoiceData) return ;
 
     const itemsHtml = invoiceData.items.map(item => {
 

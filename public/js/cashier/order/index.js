@@ -860,7 +860,9 @@ function renderCart(addNewItem = false) {
 
             select.dataset.cartId = String(row.cartId);
 
-            for (const unit of units) {
+            const availableUnits = getAvailableUnits(row, units);
+
+            for (const unit of availableUnits) {
                 const option = new Option(
                     unit.name,
                     String(unit.id)
@@ -1003,6 +1005,22 @@ function renderCart(addNewItem = false) {
     }
 }
 
+
+function getAvailableUnits(row, units) {
+    return units.filter(unit => {
+        // الوحدة المختارة حاليًا في هذا الصف
+        if (String(unit.id) === String(row.unit_id)) {
+            return true;
+        }
+
+        // هل الوحدة مستخدمة في صف آخر لنفس الصنف؟
+        return !cart.some(cartRow =>
+            String(cartRow.item_id) === String(row.item_id) &&
+            String(cartRow.cartId) !== String(row.cartId) &&
+            String(cartRow.unit_id) === String(unit.id)
+        );
+    });
+}
 
 function appendCell(row, value) {
     const cell = document.createElement("td");

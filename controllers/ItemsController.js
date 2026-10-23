@@ -219,6 +219,16 @@ export const deleteItem = async (req, res) => {
       throw new SystemError("إنتهت صلاحية الجلسة , الرجاء تسجيل الدخول مرة أخرى", 401);
     }
     await checkToken(token);
+
+    const hasTransaction = await checkIfItemHasTransaction(itemId);
+
+    if (hasTransaction) {
+      throw new SystemError(
+        "لا يمكن حذف الصنف لأنه مرتبط بفواتير سابقة",
+        409
+      );
+    }
+
     await pool.request()
       .input("id", sql.Int, itemId)
       .query(`
@@ -830,6 +840,17 @@ async function addItemUnits(itemId, units, transaction) {
   }
 }
 
+async function checkIfItemHasTransaction(itemId) {
+  const result = await pool.request()
+    .input("id", sql.Int, itemId)
+    .query(`
+      SELECT TOP 1 1 AS hasTransaction
+      FROM order_items
+      WHERE item_id = @id
+    `);
+
+  return result.recordset.length > 0;
+}
 
 function calculateCostPricePerUnit(purchase, units) {
   const purchaseUnit = units.find(u => u.id === purchase.unit_id);

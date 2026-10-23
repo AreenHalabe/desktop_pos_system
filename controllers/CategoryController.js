@@ -139,8 +139,18 @@ export const deleteCategory = async (req, res) => {
 
         await checkToken(token);
 
+        const hasTransaction =
+        await checkIfCategoryHasItemsWithTransactions(categoryId);
+
+        if (hasTransaction) {
+            throw new SystemError(
+                "لا يمكن حذف الفئة لأنها تحتوي على أصناف مرتبطة بفواتير سابقة",
+                409
+            );
+        }
+
         // حذف التصنيف
-        const result = await pool.request()
+        await pool.request()
             .input("id", categoryId)
             .query(`
             DELETE FROM categories 
@@ -201,6 +211,20 @@ export const getCategoryTreeForSupplier = async (req, res) => {
         return res.status(500).json({ message: err.message });
     }
 
+}
+
+async function checkIfCategoryHasItemsWithTransactions(categoryId) {
+  const result = await pool.request()
+    .input("id", sql.Int, categoryId)
+    .query(`
+      SELECT TOP 1 1 AS hasTransaction
+      FROM items i
+      INNER JOIN order_items oi
+        ON oi.item_id = i.id
+      WHERE i.category_id = @id
+    `);
+
+  return result.recordset.length > 0;
 }
 
 function buildCategoryTree(result) {

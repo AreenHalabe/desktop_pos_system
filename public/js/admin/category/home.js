@@ -1,4 +1,4 @@
-import { setActiveNavLink, showAuthExpired, bootboxConfirm, bootboxSuccess } from "../../../component/bootbox.js";
+import { setActiveNavLink, showAuthExpired, bootboxConfirm, bootboxSuccess, bootboxError } from "../../../component/bootbox.js";
 import { url } from "../../../api/urlEndPoint.js";
 import { fetchMainCategories } from "../../../api/category.js";
 import { removeAuthToken, getAuthToken } from "../../../component/auth.js";
@@ -335,9 +335,9 @@ async function deleteMainCategory({ id }) {
       await updateMainCategoryCache();
       return;
     }
-    console.log(data.message);
+    bootboxError(data.message);
   } catch (err) {
-    console.log(err.message);
+    bootboxError(err.message);
   }
 }
 
@@ -364,7 +364,7 @@ async function getMainCategoryDetiles() {
     throw new Error(`${data.message}`);
 
   } catch (err) {
-    alert("حدث خطأ في الاتصال : " + err.message);
+    bootboxError("حدث خطأ في الاتصال : " + err.message);
   }
 
 }
@@ -492,9 +492,9 @@ async function deleteCategory({ id }) {
       await buildListMainCategories();
       return;
     }
-    throw new Error('تعذر الاتصال بالسيرفر');
+    bootboxError(data.message);
   } catch (err) {
-    alert("حدث خطأ في الاتصال : " + err.message);
+    bootboxError("حدث خطأ في الاتصال : " + err.message);
   }
 }
 

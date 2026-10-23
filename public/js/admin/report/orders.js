@@ -118,30 +118,41 @@ modal.addEventListener('show.bs.modal', function (event) {
 
   const order = ordersList.find(o => o.id == orderId);
 
-
   // البحث عن أصناف الطلب
   const orderItems = order.items;
 
   // بناء HTML الجدول
   let itemsHtml = '';
   orderItems.forEach(item => {
-    const displayName = item.size_name !== 'NaN'
-      ? `${item.item_name} - ${item.size_name}`
-      : item.item_name;
+    const displayName = item.item_name
+      ? `${item.item_name}`
+      : 'تم حذف الصنف';
+
+    const discountPercent = Number(item.discount_item) || 0;
+
+    const discountValue = roundDiscount(
+      Number(item.quantity * item.price) * discountPercent / 100
+    );
 
     itemsHtml += `
-          <tr>
-              <td>${displayName || 'تم حذف المنتج'}</td>
-              <td>${item.quantity}</td>
-              <td>${item.price} ₪</td>
-              <td>${item.quantity * item.price} ₪</td>
-          </tr>
+      <tr>
+        <td>${displayName}</td>
+        <td>${item.unit}</td>
+        <td>${item.quantity}</td>
+        <td>${item.price} ₪</td>
+        <td class='text-danger'>
+            %${discountPercent}
+            —
+            ₪${discountValue}
+        </td>
+        <td class='fw-bold'>${item.quantity * item.price} ₪</td>
+      </tr>
       `;
   });
 
   itemsHtml += `
-    <tr>
-        <td colspan="3" class="text-end pe-3">
+    <tr class='table-light'>
+        <td colspan="5" class="text-end pe-3">
             <strong>المجموع</strong>
         </td>
         <td>
@@ -149,17 +160,21 @@ modal.addEventListener('show.bs.modal', function (event) {
         </td>
     </tr>
 
-    <tr>
-        <td colspan="3" class="text-end pe-3 text-danger">
-            <strong>الخصم</strong>
+    <tr class="table-danger">
+        <td colspan="5" class="text-end pe-3 text-danger">
+            <strong>قيمة الخصم</strong>
         </td>
         <td class="text-danger">
-            <strong>${order.discount} ₪</strong>
+          ${Number(order.total_discount_percentage) > 0
+              ?`<strong>${order.total_discount_percentage}%</strong> —`
+              :''
+          }
+          <strong>${order.discount} ₪</strong>
         </td>
     </tr>
 
     <tr class="table-success">
-        <td colspan="3" class="text-end pe-3">
+        <td colspan="5" class="text-end pe-3">
             <strong>الإجمالي</strong>
         </td>
         <td>
@@ -382,7 +397,7 @@ function renderOrdersTable() {
     else badgeClass = 'badge-cancelled';
 
     const paymentClass = order.payment_method === 'كاش' ? 'status-completed' :
-            order.payment_method === 'بطاقة' ? 'bg-info text-white' : 'status-pending';
+      order.payment_method === 'بطاقة' ? 'bg-info text-white' : 'status-pending';
 
 
     html += `
@@ -391,7 +406,7 @@ function renderOrdersTable() {
         <td><span class='status-badge ${paymentClass}'>  ${order.payment_method}</span></td>
         <td class='nowrap-cell'>${formatDateOnly(utcToPalestine(order.created_at))}</td>
         <td class='nowrap-cell'>${formatTimeOnly(utcToPalestine(order.created_at))}</td>
-        <td class='nowrap-cell'>${order.total_price} ₪</td>
+        <td class='nowrap-cell fw-bold'>${order.total_price} ₪</td>
         <td><span class="badge ${badgeClass}">${order.status}</span></td>
         <td>
           <button class="btn btn-sm btn-light"
@@ -481,3 +496,10 @@ function getCurrentDisplayedTotalOrderCount() {
   return currentDisplayedTotalOrderCount;
 }
 
+function roundDiscount(discount) {
+  if (discount === 0) return 0;
+
+  const firstDecimal = Math.floor(discount * 10) % 10;
+
+  return Math.floor(discount) + (firstDecimal >= 4 ? 1 : 0);
+}

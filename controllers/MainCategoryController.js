@@ -212,8 +212,16 @@ export const deleteMainCategory = async (req, res) => {
 
         await checkToken(token);
 
-        // حذف التصنيف
-        const result = await pool.request()
+        const hasTransaction = await checkIfMainCategoryHasItemsWithTransactions(mainCategoryId);
+
+        if (hasTransaction) {
+            throw new SystemError(
+                "لا يمكن حذف التصنيف الرئيسي لأنه يحتوي على أصناف مرتبطة بفواتير سابقة",
+                409
+            );
+        }
+
+        await pool.request()
             .input("id", mainCategoryId)
             .query(`
             DELETE FROM main_category 
@@ -235,6 +243,22 @@ export const deleteMainCategory = async (req, res) => {
     }
 }
 
+
+async function checkIfMainCategoryHasItemsWithTransactions(mainCategoryId) {
+  const result = await pool.request()
+    .input("id", sql.Int, mainCategoryId)
+    .query(`
+      SELECT TOP 1 1 AS hasTransaction
+      FROM categories c
+      INNER JOIN items i
+        ON i.category_id = c.id
+      INNER JOIN order_items oi
+        ON oi.item_id = i.id
+      WHERE c.main_category_id = @id
+    `);
+
+  return result.recordset.length > 0;
+}
 
 const mainCategorySchema = z.object({
     name: z
