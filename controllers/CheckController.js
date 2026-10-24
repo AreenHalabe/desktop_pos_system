@@ -11,7 +11,7 @@ export const createCheck = async (req, res) => {
             throw new SystemError("إنتهت صلاحية الجلسة , الرجاء تسجيل الدخول مرة أخرى", 401);
         }
 
-        await checkToken(token);
+        const adminId = await checkToken(token);
 
         const body = req.body;
 
@@ -44,6 +44,7 @@ export const createCheck = async (req, res) => {
             .input('status', sql.NVarChar(10), status)
             .input('notes', sql.NVarChar(sql.MAX), notes || null)
             .input('account_name', sql.NVarChar(100), accountName)
+            .input("admin_id", sql.Int, adminId)
             .query(`
                 INSERT INTO checks (
                     check_number,
@@ -55,7 +56,8 @@ export const createCheck = async (req, res) => {
                     type,
                     status,
                     notes,
-                    account_name
+                    account_name,
+                    admin_id
                 )
                 VALUES (
                     @check_number,
@@ -67,7 +69,8 @@ export const createCheck = async (req, res) => {
                     @type,
                     @status,
                     @notes,
-                    @account_name
+                    @account_name,
+                    @admin_id
                 )
             `);
 

@@ -131,7 +131,7 @@ export const payIncoice = async (req, res) => {
         if (!token) {
             throw new SystemError("إنتهت صلاحية الجلسة , الرجاء تسجيل الدخول مرة أخرى", 401);
         }
-        await checkToken(token);
+        const adminId = await checkToken(token);
 
         const paymentData = req.body;
         const parsedData = paymentSchema.parse(paymentData);
@@ -154,7 +154,7 @@ export const payIncoice = async (req, res) => {
 
             const amount = Number(paymentData.checkAmount) === 0 ? Number(paymentData.amount) : Number(paymentData.checkAmount);
 
-            checkId = await addNewCheck(data.checkAccountName, data.checkNumber, data.bankName, supplier.name, amount, data.currency, data.dueDate, 'outgoing', 'pending', data.notes, transaction);
+            checkId = await addNewCheck(adminId, data.checkAccountName, data.checkNumber, data.bankName, supplier.name, amount, data.currency, data.dueDate, 'outgoing', 'pending', data.notes, transaction);
         }
 
 
@@ -677,7 +677,7 @@ async function getPayment(paymentId) {
 
     return result.recordset[0];
 }
-async function addNewCheck(accountName, checkNumber, bankName, payeeName, amount, currency, dueDate, type, status, notes, transaction) {
+async function addNewCheck(adminId, accountName, checkNumber, bankName, payeeName, amount, currency, dueDate, type, status, notes, transaction) {
 
     const result = await transaction
         .request()
@@ -691,6 +691,7 @@ async function addNewCheck(accountName, checkNumber, bankName, payeeName, amount
         .input('type', sql.NVarChar(10), type)
         .input('status', sql.NVarChar(10), status)
         .input('notes', sql.NVarChar(sql.MAX), notes || null)
+        .input("admin_id", sql.Int, adminId)
         .query(`
             INSERT INTO checks (
                 account_name,
@@ -702,7 +703,8 @@ async function addNewCheck(accountName, checkNumber, bankName, payeeName, amount
                 due_date,
                 type,
                 status,
-                notes
+                notes,
+                admin_id
             )
             OUTPUT INSERTED.id
             VALUES (
@@ -715,7 +717,8 @@ async function addNewCheck(accountName, checkNumber, bankName, payeeName, amount
                 @due_date,
                 @type,
                 @status,
-                @notes
+                @notes,
+                @admin_id
             )
         `);
 

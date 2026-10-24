@@ -88,7 +88,7 @@ export const addItem = async (req, res) => {
       throw new SystemError("إنتهت صلاحية الجلسة , الرجاء تسجيل الدخول مرة أخرى", 401);
     }
 
-    await checkToken(token);
+   const adminId = await checkToken(token);
 
     const body = req.body;
 
@@ -100,7 +100,7 @@ export const addItem = async (req, res) => {
     await transaction.begin();
     transactionStarted = true;
 
-    const insertedItemId = await createNewItem(result.product, transaction);
+    const insertedItemId = await createNewItem(result.product, adminId, transaction);
 
     await addItemUnits(insertedItemId, result.units, transaction);
 
@@ -903,17 +903,17 @@ function generateBarcode() {
 }
 
 
-async function createNewItem(item, transaction) {
+async function createNewItem(item, adminId, transaction) {
   const result = await transaction
     .request()
     .input("name", sql.NVarChar, item.name)
     .input("category_id", sql.Int, item.category_id)
 
-    .input("admin_id", sql.Int, item.admin_id)
+    .input("admin_id", sql.Int, adminId)
     .query(`
-      INSERT INTO items (name, category_id)
+      INSERT INTO items (name, category_id, admin_id)
       OUTPUT INSERTED.id
-      VALUES (@name, @category_id)
+      VALUES (@name, @category_id, @admin_id)
     `)
     ;
 

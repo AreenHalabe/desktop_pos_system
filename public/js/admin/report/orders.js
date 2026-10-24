@@ -2,7 +2,7 @@ import { showAuthExpired, setActiveNavLink } from "../../../component/bootbox.js
 import { displayLoader, hiddeLoader, hiddeError, displayError, validateDateRange, observer, displayContainer, hiddeContainer, formatHour, formatDateTimeForServer, formatTimeOnly, formatDateOnly, toUTC, utcToPalestine } from "./shared-functionality.js";
 
 
-import { url, urlServer } from "../../../api/urlEndPoint.js";
+import { urlServer } from "../../../api/urlEndPoint.js";
 import { getAuthToken, removeAuthToken } from "../../../component/auth.js";
 
 

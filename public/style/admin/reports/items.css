@@ -56,7 +56,7 @@ body {
 }
 
 .table thead th {
-    background: #f8f9fa;
+    /* background: #f8f9fa; */
     border-bottom: 2px solid #dee2e6;
     font-weight: 600;
     padding: 15px;
@@ -103,4 +103,50 @@ body {
     font-size: 50px;
     margin-bottom: 15px;
     opacity: 0.5;
+}
+
+/* الرقم */
+.col-number {
+    background-color: #f1f3f5 !important;
+}
+
+/* اسم الصنف */
+.col-name {
+    background-color: #ffffff !important;
+}
+
+/* الكمية المباعة */
+.col-quantity {
+    background-color: #e8f4fd !important;
+}
+
+/* المبيعات قبل الخصم */
+.col-before {
+    background-color: #e8f5e9 !important;
+}
+
+/* نسبة الخصم */
+.col-discount-rate {
+    background-color: #fff3e0 !important;
+}
+
+/* قيمة الخصم */
+.col-discount-value {
+    background-color: #fce4ec !important;
+}
+
+/* المبيعات بعد الخصم */
+.col-after {
+    background-color: #d9f2e6 !important;
+    font-weight: 600;
+}
+
+/* متوسط تكلفة الحبة */
+.col-cost {
+    background-color: #ede7f6 !important;
+}
+
+/* نسبة المبيعات */
+.col-percentage {
+    background-color: #e0f7fa !important;
 }

@@ -360,7 +360,7 @@ async function insertItems(orderId, items, transaction) {
 
     items.forEach((item, index) => {
         values.push(`
-            (@order_id${index}, @item_id${index}, @quantity${index}, @price${index}, @cost_price${index}, @unit${index}, @discount_item${index})
+            (@order_id${index}, @item_id${index}, @quantity${index}, @price${index}, @cost_price${index}, @unit${index}, @discount_item${index}, @conversion_factor${index})
         `);
         request.input(`order_id${index}`, sql.Int, orderId);
         request.input(`item_id${index}`, sql.Int, item.item_id);
@@ -369,11 +369,12 @@ async function insertItems(orderId, items, transaction) {
         request.input(`cost_price${index}`, sql.Decimal(15, 3), item.cost_price);
         request.input(`unit${index}`, sql.NVarChar, item.unit_name);
         request.input(`discount_item${index}`, sql.Decimal(7, 2), item.discount_item);
+        request.input(`conversion_factor${index}`, sql.Decimal(15, 2), item.conversion_factor);
     });
 
     const query = `
         INSERT INTO order_items 
-        (order_id, item_id, quantity, price, cost_price, unit, discount_item)
+        (order_id, item_id, quantity, price, cost_price, unit, discount_item, conversion_factor)
         VALUES ${values.join(", ")}
     `;
 

@@ -1,18 +1,18 @@
-import { showAuthExpired, setActiveNavLink} from "../../../component/bootbox.js";
-import{ displayLoader, hiddeLoader, displayError, observer, displayContainer, hiddeContainer } from "./shared-functionality.js";
+import { showAuthExpired, setActiveNavLink } from "../../../component/bootbox.js";
+import { displayLoader, hiddeLoader, displayError, observer, displayContainer, hiddeContainer } from "./shared-functionality.js";
 import { url, urlServer } from "../../../api/urlEndPoint.js";
-import {getAuthToken , removeAuthToken} from "../../../component/auth.js";
+import { getAuthToken, removeAuthToken } from "../../../component/auth.js";
 
 
-const header            = document.querySelector("site-header");
-const tableCard         = document.getElementById('tableCard');
+const header = document.querySelector("site-header");
+const tableCard = document.getElementById('tableCard');
 const headerSummeryCard = document.getElementById('headerSummeryCard');
 
 const topLeastSellingItemsCard = document.getElementById('topLeastSellingItemsCard');
-const leastSellingCard         = document.getElementById('leastSellingCard');
-const topSellingCard           = document.getElementById('topSellingCard');
-const analysesAndInsightsCard  = document.getElementById('analysesAndInsightsCard');
-let currentPage ;
+const leastSellingCard = document.getElementById('leastSellingCard');
+const topSellingCard = document.getElementById('topSellingCard');
+const analysesAndInsightsCard = document.getElementById('analysesAndInsightsCard');
+let currentPage;
 let itemsPerPage = 15;
 let totalItems;
 let totalPages;
@@ -20,34 +20,34 @@ let totalPages;
 let dataAnalysis = [];
 
 class SiteHeader extends HTMLElement {
-  async connectedCallback() {
-    const res = await fetch('../component/header.html');
-    this.innerHTML = await res.text();
+    async connectedCallback() {
+        const res = await fetch('../component/header.html');
+        this.innerHTML = await res.text();
 
-    this.dispatchEvent(
-      new CustomEvent("header:ready", {
-        bubbles: true
-      })
-    );
-  }
+        this.dispatchEvent(
+            new CustomEvent("header:ready", {
+                bubbles: true
+            })
+        );
+    }
 }
 customElements.define("site-header", SiteHeader);
 header.addEventListener("header:ready", () => {
-  setActiveNavLink();
+    setActiveNavLink();
 
-  const logoutFrom = document.getElementById('logoutForm');
-    logoutFrom.addEventListener("submit" , async function(e) {
+    const logoutFrom = document.getElementById('logoutForm');
+    logoutFrom.addEventListener("submit", async function (e) {
         e.preventDefault();
         bootbox.confirm({
             title: "تسجيل الخروج",
             message: "هل أنت متأكد من تسجيل الخروج؟",
             buttons: {
-            confirm: {
-                label: "نعم",
-            },
-            cancel: {
-                label: "إلغاء",
-            },
+                confirm: {
+                    label: "نعم",
+                },
+                cancel: {
+                    label: "إلغاء",
+                },
             },
             callback: function (result) {
                 if (!result) return;
@@ -60,7 +60,7 @@ header.addEventListener("header:ready", () => {
 });
 
 
-document.addEventListener("DOMContentLoaded", async function() {
+document.addEventListener("DOMContentLoaded", async function () {
     displayLoader();
     await loadItemsAnalysis();
     hiddeLoader();
@@ -68,26 +68,26 @@ document.addEventListener("DOMContentLoaded", async function() {
 
 
 document.querySelectorAll(".reveal").forEach(el => {
-  observer.observe(el);
+    observer.observe(el);
 });
 
 
 document.addEventListener("click", async function (e) {
 
-    if(e.target.closest('.prevBtn')) {
+    if (e.target.closest('.prevBtn')) {
         prevPage();
     }
-    else if(e.target.closest('.nextBtn')) {
+    else if (e.target.closest('.nextBtn')) {
         nextPage();
     }
 });
 
 
 async function loadItemsAnalysis() {
-    try{
-        const res = await fetch(urlServer + `/reports/items-selling-details` ,{
+    try {
+        const res = await fetch(urlServer + `/reports/items-selling-details`, {
             method: 'GET',
-                headers: {
+            headers: {
                 "Content-Type": "application/json",
                 "Authorization": `${getAuthToken('auth')}`
             },
@@ -95,14 +95,15 @@ async function loadItemsAnalysis() {
 
         const data = await res.json();
 
-        if(res.status === 401){
+        if (res.status === 401) {
             showAuthExpired(data.message);
         }
-        else if(res.status === 200){
-            if(data.item_analysis.length === 0){
+        else if (res.status === 200) {
+            if (data.item_analysis.length === 0) {
                 renderItemsTable([]);
                 return;
             }
+            console.log(data);
             handelTotalPage(data.item_analysis.length);
             setHeaderSummry(data.item_analysis);
             dataAnalysis = data.item_analysis;
@@ -114,28 +115,28 @@ async function loadItemsAnalysis() {
             setAnalysesAndInsights(data.item_analysis);
             return;
         }
-        else{
+        else {
             displayError(data.message);
         }
-    }catch(err){
+    } catch (err) {
         displayError(err.message);
     }
 }
 
-function setHeaderSummry(data){
+function setHeaderSummry(data) {
     const length = data.length;
     const totalRevenue = document.getElementById('totalRevenue');
 
-    const topSellingItemName  = document.getElementById('topSellingItemName');
+    const topSellingItemName = document.getElementById('topSellingItemName');
     const topSellingItemValue = document.getElementById('topSellingItemValue');
 
-    const leastSellingItemName  = document.getElementById('leastSellingItemName');
+    const leastSellingItemName = document.getElementById('leastSellingItemName');
     const leastSellingItemValue = document.getElementById('leastSellingItemValue');
-    
+
     totalRevenue.textContent = `${data[0].total_revenue} ₪`;
 
-    topSellingItemName.textContent  = data?.[0]?.name ?? "لا يوجد بيانات";
-    topSellingItemValue.textContent = data?.[0]?.quantity 
+    topSellingItemName.textContent = data?.[0]?.name ?? "لا يوجد بيانات";
+    topSellingItemValue.textContent = data?.[0]?.quantity
         ? `${data[0].quantity} طلب`
         : "";
 
@@ -146,30 +147,30 @@ function setHeaderSummry(data){
         : "";
 
     displayContainer(headerSummeryCard);
-    
+
 }
 
-function setAnalysesAndInsights(items){
-     const length = items.length;
-     if(length === 0 ){
+function setAnalysesAndInsights(items) {
+    const length = items.length;
+    if (length === 0) {
         displayContainer(analysesAndInsightsCard);
-     }
-    const topItemDemand   = document.getElementById('topItemDemand');
+    }
+    const topItemDemand = document.getElementById('topItemDemand');
     const leastItemDemand = document.getElementById('leastItemDemand');
-    const highRevLowDem   = document.getElementById('highRevLowDem');
-    const highDemLowRev   = document.getElementById('highDemLowRev');
-   
+    const highRevLowDem = document.getElementById('highRevLowDem');
+    const highDemLowRev = document.getElementById('highDemLowRev');
 
-    const avgQty               = getAvgQty(items);
-    const avgRevenue           = getAvgRevenue(items);
+
+    const avgQty = getAvgQty(items);
+    const avgRevenue = getAvgRevenue(items);
     const highRevLowDemandItem = getHighRevenueLowDemand(items, avgQty, avgRevenue);
     const highDemandLowRevItem = getHighDemandLowRevenue(items, avgQty, avgRevenue);
 
-    topItemDemand.textContent   = `${items[0].name} (${items[0].quantity} طلب)`;
+    topItemDemand.textContent = `${items[0].name} (${items[0].quantity} طلب)`;
     leastItemDemand.textContent = `${items[length - 1].name} (${items[length - 1].quantity} طلب)`;
 
     highRevLowDem.innerHTML = highRevLowDemandItem
-    ? `
+        ? `
         <span class="text-muted">
         ${highRevLowDemandItem.name}
         
@@ -178,11 +179,11 @@ function setAnalysesAndInsights(items){
         (${highRevLowDemandItem.quantity} طلب • ${highRevLowDemandItem.total_sales} ₪)
         </span>
     `
-    : `<span class="text-muted">لا توجد منتجات بإيراد مرتفع وطلب منخفض، مما يدل على أداء متوازن للمنتجات.</span>`;
+        : `<span class="text-muted">لا توجد منتجات بإيراد مرتفع وطلب منخفض، مما يدل على أداء متوازن للمنتجات.</span>`;
 
 
     highDemLowRev.innerHTML = highDemandLowRevItem
-    ? `
+        ? `
         <span class="text-muted">
         ${highDemandLowRevItem.name}
 
@@ -192,35 +193,35 @@ function setAnalysesAndInsights(items){
         
         </span>
     `
-    : `<span class="text-muted">لا توجد منتجات بطلب مرتفع وإيراد منخفض، مما يشير إلى تسعير مناسب.</span>`;
+        : `<span class="text-muted">لا توجد منتجات بطلب مرتفع وإيراد منخفض، مما يشير إلى تسعير مناسب.</span>`;
 
 
     displayContainer(analysesAndInsightsCard);
 }
 
 
-function getAvgQty(items){
-    if(items.length === 0) return 0;
+function getAvgQty(items) {
+    if (items.length === 0) return 0;
     const avgQty = items.reduce((sum, i) => sum + i.quantity, 0) / items.length;
     return avgQty;
 }
-function getAvgRevenue(items){
-    if(items.length === 0) return 0;
+function getAvgRevenue(items) {
+    if (items.length === 0) return 0;
     const avgRevenue = items[0].total_revenue / items.length;
     return avgRevenue;
 }
-function getHighRevenueLowDemand(items, avgQty, avgRevenue){
+function getHighRevenueLowDemand(items, avgQty, avgRevenue) {
     const highRevenueLowDemand = items.find(i =>
         i.total_sales > avgRevenue && i.quantity < avgQty
     );
     return highRevenueLowDemand;
-} 
-function getHighDemandLowRevenue(items, avgQty, avgRevenue){
+}
+function getHighDemandLowRevenue(items, avgQty, avgRevenue) {
     const highDemandLowRevenue = items.find(i =>
         i.quantity > avgQty && i.total_sales < avgRevenue
     );
     return highDemandLowRevenue;
-} 
+}
 
 
 
@@ -240,8 +241,8 @@ function nextPage() {
         renderItemsTable(dataAnalysis);
     }
 }
-function handelTotalPage(numOfItems){
-    if(numOfItems == 0) return;
+function handelTotalPage(numOfItems) {
+    if (numOfItems == 0) return;
     currentPage = 1;
     totalItems = numOfItems;
     totalPages = Math.ceil(totalItems / itemsPerPage);
@@ -250,14 +251,14 @@ function updatePagination() {
     const pageInfo = document.getElementById('pageInfo');
     // تحديث معلومات الصفحة
     pageInfo.textContent = `صفحة ${currentPage} من ${totalPages}`;
-    
+
     // إخفاء/إظهار الأسهم
     document.getElementById('prevBtn').disabled = currentPage === 1;
     document.getElementById('nextBtn').disabled = currentPage === totalPages;
 }
 
 
-function renderItemsTable(items){
+function renderItemsTable(items) {
     const tableBody = document.getElementById('items-table-body');
 
     if (items.length === 0) {
@@ -278,19 +279,70 @@ function renderItemsTable(items){
     const end = start + itemsPerPage;
     const pageItems = items.slice(start, end);
 
-    tableBody.innerHTML='';
+    tableBody.innerHTML = '';
 
     let counter = (currentPage * 15) - (15);
     tableBody.innerHTML = pageItems.map(i => {
-        
+
+        // return `
+        // <tr>
+        //     <td class="text-center" >${++counter}</td>
+        //     <td class="text-center">${i.name}</td>
+        //     <td class="text-center">${i.quantity}</td>
+        //     <td class="text-center">${i.total_sales} ₪</td>
+        //     <td class="text-center">%${i.sales_percentage}</td>
+        // </tr>
+        // `;
+
+        const totalSales = Number(i.total_sales) || 0;
+
+      
+
+        const discountValue = Number(totalSales) * Number(i.average_discount_percentage) / 100;
+
+          // حساب المبيعات بعد الخصم
+        const netSales = totalSales - discountValue;
+        const netProfit = Number(netSales) - (Number(i.average_cost_price) * Number(i.quantity));
         return `
-        <tr>
-            <td class="text-center" >${(++counter).toString().padStart(3, '0')}</td>
-            <td class="text-center">${i.name}</td>
-            <td class="text-center">${i.quantity}</td>
-            <td class="text-center">${i.total_sales} ₪</td>
-            <td class="text-center">%${i.sales_percentage}</td>
-        </tr>
+            <tr>
+                <td class="text-center col-number">
+                    ${++counter}
+                </td>
+
+                <td class="text-center col-name">
+                    ${i.name}
+                </td>
+
+                <td class="text-center col-quantity">
+                     ${Number(i.quantity)} — ${i.base_unit_name ?? ''}
+                </td>
+
+                <td class="text-center col-before fw-bold">
+                    ${Number(totalSales)} ₪
+                </td>
+
+                <td class="text-center col-discount-rate">
+                    %${Number(i.average_discount_percentage)}
+                </td>
+
+                <td class="text-center col-discount-value">
+                    ${roundDiscount(discountValue)} ₪
+                </td>
+
+                
+
+                <td class="text-center col-cost">
+                    ${Number(i.average_cost_price)} ₪
+                </td>
+
+                <td class="text-center col-after fw-bold">
+                    ${Number(netProfit)} ₪
+                </td>
+
+                <td class="text-center col-percentage">
+                    %${Number(i.sales_percentage)}
+                </td>
+            </tr>
         `;
     }).join('');
 
@@ -305,23 +357,23 @@ function renderItemsTable(items){
 
 
 
-function displayPaginationBtn(){
-  const btnContainer = document.getElementById('paginationBtn');
-  btnContainer.classList.remove('d-none');  
-}
-function hiddenPaginationBtn(){
+function displayPaginationBtn() {
     const btnContainer = document.getElementById('paginationBtn');
-    btnContainer.classList.add('d-none');  
+    btnContainer.classList.remove('d-none');
+}
+function hiddenPaginationBtn() {
+    const btnContainer = document.getElementById('paginationBtn');
+    btnContainer.classList.add('d-none');
 }
 
 
 
-function drowingPieChartFroItemBySales(container, salesByItems, isTopItems = true){
+function drowingPieChartFroItemBySales(container, salesByItems, isTopItems = true) {
     const pieChartContainer = container.querySelector('.pieChartContainer');
-    const messageContainer  = container.querySelector('.messageContainer');
-    const ctx               = container.querySelector('.pieChart');
+    const messageContainer = container.querySelector('.messageContainer');
+    const ctx = container.querySelector('.pieChart');
 
-    if(salesByItems.length === 0){
+    if (salesByItems.length === 0) {
         hiddeContainer(pieChartContainer);
         displayContainer(messageContainer);
         return;
@@ -329,25 +381,25 @@ function drowingPieChartFroItemBySales(container, salesByItems, isTopItems = tru
 
     let labels, quantitiesItems;
 
-    if(isTopItems){
+    if (isTopItems) {
         labels = salesByItems.slice(0, 5).map(item => item.name);
         quantitiesItems = salesByItems.slice(0, 5).map(item => item.quantity);
     }
-    else{
+    else {
         labels = salesByItems.slice(-5).map(item => item.name);
         quantitiesItems = salesByItems.slice(-5).map(item => item.quantity);
     }
 
-   
 
-    
-   // const quantitiesItems = salesByItems.slice(0, 5).map(item => item.quantity);
+
+
+    // const quantitiesItems = salesByItems.slice(0, 5).map(item => item.quantity);
 
     const quantities = salesByItems.map(item => item.quantity);
     const totalQuantity = quantities.reduce((sum, q) => sum + q, 0);
 
     Chart.getChart(ctx)?.destroy();
-    
+
     new Chart(ctx, {
         type: "pie",
 
@@ -385,10 +437,10 @@ function drowingPieChartFroItemBySales(container, salesByItems, isTopItems = tru
                 tooltip: {
                     rtl: true,
                     bodyAlign: "right",
-                    displayColors: false, 
+                    displayColors: false,
                     callbacks: {
                         label: () => null,
-                        afterLabel: function(context) {
+                        afterLabel: function (context) {
                             return "عدد الطلبات: " + context.raw;
                         }
                     }
@@ -401,7 +453,7 @@ function drowingPieChartFroItemBySales(container, salesByItems, isTopItems = tru
                         weight: "bold",
                         size: 14
                     },
-                    formatter: function(value) {
+                    formatter: function (value) {
                         const percentage = ((value / totalQuantity) * 100).toFixed(1);
                         return percentage + "%\n" + value + " طلب";
                     }
@@ -414,4 +466,12 @@ function drowingPieChartFroItemBySales(container, salesByItems, isTopItems = tru
 
     hiddeContainer(messageContainer);
     displayContainer(pieChartContainer);
+}
+
+function roundDiscount(discount) {
+    if (discount === 0) return 0;
+
+    const firstDecimal = Math.floor(discount * 10) % 10;
+
+    return Math.floor(discount) + (firstDecimal >= 4 ? 1 : 0);
 }

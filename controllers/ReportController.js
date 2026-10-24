@@ -5,10 +5,10 @@ import { checkToken, SystemError, buildTreeOfOrders } from "../shared/functional
 import { getOrderAndItemsBySession } from "../shared/api.js";
 
 
-export const getWeklyAnalysis = async(req , res) =>{
+export const getWeklyAnalysis = async (req, res) => {
     try {
         const token = req.headers.authorization;
-        if (!token){
+        if (!token) {
             throw new SystemError("إنتهت صلاحية الجلسة , الرجاء تسجيل الدخول مرة أخرى", 401);
         }
         const adminId = await checkToken(token);
@@ -24,11 +24,11 @@ export const getWeklyAnalysis = async(req , res) =>{
             getTopLeastSalesItems(body.from, body.to, adminId),
             getPreviousAnalysis(body.from, adminId)
         ]);
-        
+
         return res.status(200).json({
-            orders_by_day : ordersByDay,
-            top_sales_items : salesByItems.slice(0, 5),
-            statisticsData  : statisticsData,
+            orders_by_day: ordersByDay,
+            top_sales_items: salesByItems.slice(0, 5),
+            statisticsData: statisticsData,
         });
 
     } catch (e) {
@@ -40,10 +40,10 @@ export const getWeklyAnalysis = async(req , res) =>{
 }
 
 
-export const getFinancialAnalysis = async(req , res) =>{
+export const getFinancialAnalysis = async (req, res) => {
     try {
         const token = req.headers.authorization;
-        if (!token){
+        if (!token) {
             throw new SystemError("إنتهت صلاحية الجلسة , الرجاء تسجيل الدخول مرة أخرى", 401);
         }
         const adminId = await checkToken(token);
@@ -66,10 +66,10 @@ export const getFinancialAnalysis = async(req , res) =>{
 
 
 
-export const getTransactionsForSessions = async(req , res) => {
+export const getTransactionsForSessions = async (req, res) => {
     try {
         const token = req.headers.authorization;
-        if (!token){
+        if (!token) {
             throw new SystemError("إنتهت صلاحية الجلسة , الرجاء تسجيل الدخول مرة أخرى", 401);
         }
         const adminId = await checkToken(token);
@@ -80,7 +80,7 @@ export const getTransactionsForSessions = async(req , res) => {
 
         let transactions = [];
 
-        if(sessionIds && sessionIds.length > 0){
+        if (sessionIds && sessionIds.length > 0) {
             const request = pool.request();
             const params = sessionIds.map((id, index) => {
                 const paramName = `id${index}`;
@@ -99,7 +99,7 @@ export const getTransactionsForSessions = async(req , res) => {
                     WHERE session_id IN (${params.join(',')})
                     ORDER BY created_at DESC;
                 `)
-            ;
+                ;
             transactions = result.recordset;
         }
 
@@ -115,53 +115,157 @@ export const getTransactionsForSessions = async(req , res) => {
     }
 }
 
-export const getItemsSellingAnalysis = async(req , res) => {
-    try{
+export const getItemsSellingAnalysis = async (req, res) => {
+    try {
 
         const token = req.headers.authorization;
-        if (!token){
+        if (!token) {
             throw new SystemError("إنتهت صلاحية الجلسة , الرجاء تسجيل الدخول مرة أخرى", 401);
         }
         const adminId = await checkToken(token);
 
+        // const row = await pool.request()
+        //     .input('admin_id', sql.Int, adminId)
+        //     .query(`
+        //         SELECT
+        //             i.id,
+        //             ISNULL(i.name, N'عنصر محذوف') AS name,
+        //             ISNULL(SUM(oi.quantity), 0) AS quantity,
+        //             ISNULL(SUM(oi.price * oi.quantity), 0) AS total_sales,
+
+        //             ROUND(
+        //                 ISNULL(SUM(oi.price * oi.quantity), 0) * 100.0 /
+        //                 NULLIF(
+        //                     SUM(SUM(oi.price * oi.quantity)) OVER (),
+        //                     0
+        //                 ),
+        //             2) AS sales_percentage,
+
+        //             SUM(SUM(oi.price * oi.quantity)) OVER () AS total_revenue
+
+        //         FROM orders o
+        //         INNER JOIN order_items oi
+        //             ON oi.order_id = o.id
+        //         INNER JOIN items i
+        //             ON i.id = oi.item_id
+
+        //         WHERE i.admin_id = @admin_id
+        //             AND o.status = N'مكتمل'
+        //         GROUP BY i.id, i.name
+        //         ORDER BY quantity DESC;
+        //     `)
+        // ;
+        // const itemsAnalysis = row.recordset;
+
         const row = await pool.request()
             .input('admin_id', sql.Int, adminId)
             .query(`
+                WITH ItemSales AS (
+                    SELECT
+                        i.id,
+                        baseUnit.base_unit_name,
+                        ISNULL(i.name, N'عنصر محذوف') AS name,
+
+                        -- الكمية المباعة بوحدة الحبة الأساسية
+                        SUM(
+                            oi.quantity * oi.conversion_factor
+                        ) AS quantity,
+
+                        -- إجمالي المبيعات قبل الخصم
+                        SUM(
+                            oi.price * oi.quantity
+                        ) AS total_sales,
+
+                        -- متوسط تكلفة الحبة المرجح بالكمية
+                        ROUND(
+                            SUM(
+                                oi.cost_price
+                                * oi.quantity
+                                * oi.conversion_factor
+                            ) /
+                            NULLIF(
+                                SUM(
+                                    CASE
+                                        WHEN oi.cost_price IS NOT NULL
+                                        THEN oi.quantity * oi.conversion_factor
+                                        ELSE 0
+                                    END
+                                ),
+                                0
+                            ),
+                            3
+                        ) AS average_cost_price,
+
+                        -- متوسط نسبة الخصم المرجح بقيمة المبيعات
+                        ROUND(
+                            SUM(
+                                oi.price
+                                * oi.quantity
+                                * ISNULL(oi.discount_item, 0)
+                            ) /
+                            NULLIF(
+                                SUM(oi.price * oi.quantity),
+                                0
+                            ),
+                            2
+                        ) AS average_discount_percentage
+
+                    FROM orders o
+
+                    INNER JOIN order_items oi
+                        ON oi.order_id = o.id
+
+                    INNER JOIN items i
+                        ON i.id = oi.item_id
+                    
+                    OUTER APPLY (
+                        SELECT TOP (1)
+                            iu.unit_name AS base_unit_name
+                        FROM items_units iu
+                        WHERE iu.item_id = i.id
+                        ORDER BY iu.id ASC
+                    ) baseUnit
+
+                    WHERE i.admin_id = @admin_id
+                        AND o.status = N'مكتمل'
+
+                    GROUP BY
+                        i.id,
+                        i.name,
+                        baseUnit.base_unit_name
+                )
+
                 SELECT
-                    i.id,
-                    ISNULL(i.name, N'عنصر محذوف') AS name,
-                    ISNULL(SUM(oi.quantity), 0) AS quantity,
-                    ISNULL(SUM(oi.price * oi.quantity), 0) AS total_sales,
+                    id,
+                    name,
+                    quantity,
+                    total_sales,
+                    base_unit_name,
+                    average_cost_price,
+                    average_discount_percentage,
 
+                    -- نسبة مساهمة الصنف من إجمالي المبيعات
                     ROUND(
-                        ISNULL(SUM(oi.price * oi.quantity), 0) * 100.0 /
-                        NULLIF(
-                            SUM(SUM(oi.price * oi.quantity)) OVER (),
-                            0
-                        ),
-                    2) AS sales_percentage,
+                        total_sales * 100.0 /
+                        NULLIF(SUM(total_sales) OVER (), 0),
+                        2
+                    ) AS sales_percentage,
 
-                    SUM(SUM(oi.price * oi.quantity)) OVER () AS total_revenue
+                    -- إجمالي المبيعات لجميع الأصناف
+                    SUM(total_sales) OVER () AS total_revenue
 
-                FROM orders o
-                INNER JOIN order_items oi
-                    ON oi.order_id = o.id
-                INNER JOIN items i
-                    ON i.id = oi.item_id
+                FROM ItemSales
 
-                WHERE i.admin_id = @admin_id
-                    AND o.status = N'مكتمل'
-                GROUP BY i.id, i.name
                 ORDER BY quantity DESC;
-            `)
-        ;
+            `);
+
         const itemsAnalysis = row.recordset;
 
         return res.status(200).json({
-            item_analysis : itemsAnalysis
+            item_analysis: itemsAnalysis
         });
 
-    }catch(e){
+    } catch (e) {
         return res.status(e.status || 500).json({
             success: false,
             message: e.message || "حدث خطأ غير معروف",
@@ -170,31 +274,31 @@ export const getItemsSellingAnalysis = async(req , res) => {
 }
 
 
-export const getOrderAnalysis = async(req , res) => {
+export const getOrderAnalysis = async (req, res) => {
     try {
         const token = req.headers.authorization;
-        if (!token){
+        if (!token) {
             throw new SystemError("إنتهت صلاحية الجلسة , الرجاء تسجيل الدخول مرة أخرى", 401);
         }
         const adminId = await checkToken(token);
         const body = req.body;
         const from = body.from;
-        const to   = body.to;
+        const to = body.to;
 
-         const [
-          orderDetails,
-          orders
+        const [
+            orderDetails,
+            orders
         ] = await Promise.all([
-          getOrderDetails(from, to, adminId),
-          loadOrders(from, to, 'مكتمل', adminId, 20, 0)
+            getOrderDetails(from, to, adminId),
+            loadOrders(from, to, 'مكتمل', adminId, 20, 0)
         ]);
 
         let mapItems = [];
 
-        if(orders.length > 0){
-          const orderIds = orders.map(o => o.id);
-          const items    = await getItemsByOrders(orderIds);
-          mapItems = mapItemByOrder(items, orders);
+        if (orders.length > 0) {
+            const orderIds = orders.map(o => o.id);
+            const items = await getItemsByOrders(orderIds);
+            mapItems = mapItemByOrder(items, orders);
         }
 
 
@@ -202,7 +306,7 @@ export const getOrderAnalysis = async(req , res) => {
             orderDetails,
             mapItems
         });
-    }catch (e) {
+    } catch (e) {
         return res.status(e.status || 500).json({
             success: false,
             message: e.message || "حدث خطأ غير معروف",
@@ -210,48 +314,48 @@ export const getOrderAnalysis = async(req , res) => {
     }
 
 }
-export const loadMoreOrdersAnalysis = async(req , res) =>{
+export const loadMoreOrdersAnalysis = async (req, res) => {
     try {
         const token = req.headers.authorization;
-        if (!token){
+        if (!token) {
             throw new SystemError("إنتهت صلاحية الجلسة , الرجاء تسجيل الدخول مرة أخرى", 401);
         }
         const adminId = await checkToken(token);
 
         const body = req.body;
-        const from       = body.from;
-        const to         = body.to;
-        let currentPage  = Number(body.page); 
-        const status     = body.status;
+        const from = body.from;
+        const to = body.to;
+        let currentPage = Number(body.page);
+        const status = body.status;
         const totalOrder = Number(body.totalOrder);
 
-        const limit      = 20;
+        const limit = 20;
         const totalPage = Math.ceil(totalOrder / limit);
-        const offset    = (currentPage - 1) * limit;
+        const offset = (currentPage - 1) * limit;
 
-        if(currentPage > totalPage){
-          currentPage = totalPage;
+        if (currentPage > totalPage) {
+            currentPage = totalPage;
         }
         let mapItems = [];
         const orders = await loadOrders(from, to, status, adminId, limit, offset);
 
-        if(orders.length > 0){
-          const orderIds = orders.map(o => o.id);
-          const items    = await getItemsByOrders(orderIds);
-          mapItems = mapItemByOrder(items, orders);
+        if (orders.length > 0) {
+            const orderIds = orders.map(o => o.id);
+            const items = await getItemsByOrders(orderIds);
+            mapItems = mapItemByOrder(items, orders);
         }
 
 
         return res.status(200).json({
             mapItems,
-            pagination:{
-              total_page: totalPage,
-              current_page : currentPage
+            pagination: {
+                total_page: totalPage,
+                current_page: currentPage
             }
         });
 
 
-    }catch (e) {
+    } catch (e) {
         return res.status(e.status || 500).json({
             success: false,
             message: e.message || "حدث خطأ غير معروف",
@@ -260,40 +364,40 @@ export const loadMoreOrdersAnalysis = async(req , res) =>{
 }
 
 
-export const getPerformanceAnalysis = async(req , res) =>{
+export const getPerformanceAnalysis = async (req, res) => {
     try {
         const token = req.headers.authorization;
-        if (!token){
+        if (!token) {
             throw new SystemError("إنتهت صلاحية الجلسة , الرجاء تسجيل الدخول مرة أخرى", 401);
         }
         const adminId = await checkToken(token);
 
         const body = req.body;
-        const from       = body.from;
-        const to         = body.to;
-        const timezone   = body.timezone;
+        const from = body.from;
+        const to = body.to;
+        const timezone = body.timezone;
         const [
-          ordersByHours,
-          orderByDay,
-          salesByItems,
-          statisticsData,
+            ordersByHours,
+            orderByDay,
+            salesByItems,
+            statisticsData,
         ] = await Promise.all([
-          getOrdersByHours(from, to, timezone, adminId),
-          getOrderByDay(from, to, timezone, adminId),
-          getTopLeastSalesItems(from, to, adminId),
-          getDashboardMetrics(from, to, adminId)
+            getOrdersByHours(from, to, timezone, adminId),
+            getOrderByDay(from, to, timezone, adminId),
+            getTopLeastSalesItems(from, to, adminId),
+            getDashboardMetrics(from, to, adminId)
         ]);
 
         return res.status(200).json({
-            ordersByHours   : ordersByHours,
-            orderByDay      : orderByDay,
-            topSalesItems   : salesByItems.slice(0, 5),
-            leastSalesItems : salesByItems.slice(-5),
-            statisticsData  : statisticsData,
+            ordersByHours: ordersByHours,
+            orderByDay: orderByDay,
+            topSalesItems: salesByItems.slice(0, 5),
+            leastSalesItems: salesByItems.slice(-5),
+            statisticsData: statisticsData,
         });
-       
 
-    }catch(e){
+
+    } catch (e) {
         return res.status(e.status || 500).json({
             success: false,
             message: e.message || "حدث خطأ غير معروف",
@@ -307,7 +411,7 @@ async function getOrderByDay(from, to, timezone, adminId) {
     const row = await pool.request()
         .input('from', sql.DateTime2, from)
         .input('to', sql.DateTime2, to)
-        .input('status' , 'مكتمل')
+        .input('status', 'مكتمل')
         .input('admin_id', sql.Int, adminId)
         .query(`
             SELECT 
@@ -321,7 +425,7 @@ async function getOrderByDay(from, to, timezone, adminId) {
                 AND admin_id = @admin_id
             ORDER BY created_at;
         `)
-    ;
+        ;
 
     const grouped = groupOrdersByDay(row.recordset, timezone);
 
@@ -354,15 +458,15 @@ async function getTopLeastSalesItems(from, to, adminId) {
             GROUP BY i.id, i.name
             ORDER BY quantity DESC
         `)
-    ;
+        ;
 
     return result.recordset;
 }
 
 async function getPreviousAnalysis(from, adminId) {
 
-    const prevStartDate = previousUTC(from , 8);
-    const prevEndDate   = previousUTC(from , 1);
+    const prevStartDate = previousUTC(from, 8);
+    const prevEndDate = previousUTC(from, 1);
 
     const result = await pool.request()
         .input('previousFrom', sql.DateTime, prevStartDate)
@@ -392,7 +496,7 @@ async function getPreviousAnalysis(from, adminId) {
             FROM orders
             WHERE admin_id = @adminId;
         `)
-    ;
+        ;
 
     return result.recordset[0];
 }
@@ -400,10 +504,10 @@ async function getPreviousAnalysis(from, adminId) {
 
 async function getSessionsDetails(from, to, adminId) {
     const result = await pool.request()
-    .input('admin_id', sql.Int, adminId)
-    .input('from', sql.DateTime2, from)
-    .input('to', sql.DateTime2, to)
-    .query(`
+        .input('admin_id', sql.Int, adminId)
+        .input('from', sql.DateTime2, from)
+        .input('to', sql.DateTime2, to)
+        .query(`
         SELECT
             cs.id AS session_id,
             cs.opening_cash,
@@ -457,7 +561,7 @@ async function getSessionsDetails(from, to, adminId) {
 }
 
 
-async function loadOrders(from, to, status, adminId, limit, offset){
+async function loadOrders(from, to, status, adminId, limit, offset) {
     const result = await pool.request()
         .input('from', sql.DateTime2, from)
         .input('to', sql.DateTime2, to)
@@ -475,7 +579,7 @@ async function loadOrders(from, to, status, adminId, limit, offset){
             OFFSET @offset ROWS
             FETCH NEXT @limit ROWS ONLY
         `)
-    ;
+        ;
 
     return result.recordset;
 }
@@ -484,10 +588,10 @@ async function loadOrders(from, to, status, adminId, limit, offset){
 
 async function getOrderDetails(from, to, adminId) {
     const result = await pool.request()
-    .input('from', sql.DateTime2, from)
-    .input('to', sql.DateTime2, to)
-    .input('admin_id', sql.Int, adminId)
-    .query(`
+        .input('from', sql.DateTime2, from)
+        .input('to', sql.DateTime2, to)
+        .input('admin_id', sql.Int, adminId)
+        .query(`
         SELECT
             SUM(
                 CASE
@@ -572,7 +676,7 @@ async function getOrdersByHours(from, to, timezone, adminId) {
                 AND admin_id = @admin_id
             ORDER BY created_at;
         `)
-    ;
+        ;
 
     const grouped = groupOrdersByHour(row.recordset, timezone);
 
@@ -582,59 +686,19 @@ async function getOrdersByHours(from, to, timezone, adminId) {
 
 
 async function getDashboardMetrics(from, to, adminId) {
-    const dayDiff = getDaysDiff(from , to);
+    const dayDiff = getDaysDiff(from, to);
 
     const previosFrom = previousUTC(from, dayDiff);
-    const previosTo   = previousUTC(from, 1);
+    const previosTo = previousUTC(from, 1);
 
     const row = await pool.request()
-    .input('from', sql.DateTime2, from)
-    .input('to', sql.DateTime2, to)
-    .input('previousFrom', sql.DateTime2, previosFrom)
-    .input('previousTo', sql.DateTime2, previosTo)
-    .input('admin_id', sql.Int, adminId)
-    .query(`
+        .input('from', sql.DateTime2, from)
+        .input('to', sql.DateTime2, to)
+        .input('previousFrom', sql.DateTime2, previosFrom)
+        .input('previousTo', sql.DateTime2, previosTo)
+        .input('admin_id', sql.Int, adminId)
+        .query(`
         SELECT
-            SUM(CASE 
-                WHEN created_at BETWEEN @from AND @to 
-                 AND type = N'طاولة' 
-                THEN 1 ELSE 0 
-            END) AS table_orders,
-
-            SUM(CASE
-                WHEN created_at BETWEEN @from AND @to 
-                 AND type = N'سفري' 
-                THEN 1 ELSE 0 
-            END) AS delivery_orders,
-
-            CAST(
-                SUM(CASE 
-                    WHEN type = N'سفري' 
-                     AND created_at BETWEEN @from AND @to 
-                    THEN 1 ELSE 0 
-                END) * 100.0
-                / NULLIF(
-                    SUM(CASE 
-                        WHEN created_at BETWEEN @from AND @to 
-                        THEN 1 ELSE 0 
-                    END),
-                0)
-            AS INT) AS delivery_percentage,
-
-            CAST(
-                SUM(CASE 
-                    WHEN type = N'طاولة' 
-                     AND created_at BETWEEN @from AND @to 
-                    THEN 1 ELSE 0 
-                END) * 100.0
-                / NULLIF(
-                    SUM(CASE 
-                        WHEN created_at BETWEEN @from AND @to 
-                        THEN 1 ELSE 0 
-                    END),
-                0)
-            AS INT) AS table_percentage,
-
             SUM(CASE 
                 WHEN created_at BETWEEN @from AND @to 
                  AND status = N'مكتمل'
@@ -681,81 +745,81 @@ async function getDashboardMetrics(from, to, adminId) {
 
 
 function groupOrdersByDay(rows, userTimezone) {
-  const resultMap = {};
+    const resultMap = {};
 
-  for (const row of rows) {
-    // 1. نحول من UTC إلى وقت المستخدم
-    const localTime = DateTime
-      .fromISO(row.created_at.toISOString(), { zone: "utc" })
-      .setZone(userTimezone);
+    for (const row of rows) {
+        // 1. نحول من UTC إلى وقت المستخدم
+        const localTime = DateTime
+            .fromISO(row.created_at.toISOString(), { zone: "utc" })
+            .setZone(userTimezone);
 
-    // 2. نطلع اسم اليوم
-    const dayKey = localTime.setLocale('ar').toFormat('cccc');
-    // أو localTime.toFormat('cccc')
+        // 2. نطلع اسم اليوم
+        const dayKey = localTime.setLocale('ar').toFormat('cccc');
+        // أو localTime.toFormat('cccc')
 
-    // 3. grouping
-    if (!resultMap[dayKey]) {
-      resultMap[dayKey] = {
-        day_name: dayKey,
-        orders_count: 0,
-        total_sales: 0
-      };
+        // 3. grouping
+        if (!resultMap[dayKey]) {
+            resultMap[dayKey] = {
+                day_name: dayKey,
+                orders_count: 0,
+                total_sales: 0
+            };
+        }
+
+        resultMap[dayKey].orders_count += 1;
+        resultMap[dayKey].total_sales += Number(row.total_price);
     }
 
-    resultMap[dayKey].orders_count += 1;
-    resultMap[dayKey].total_sales += Number(row.total_price);
-  }
-
-  return Object.values(resultMap);
+    return Object.values(resultMap);
 }
 
 
 
 function groupOrdersByHour(rows, userTimezone) {
-  const resultMap = {};
+    const resultMap = {};
 
-  for (const row of rows) {
-    // UTC → user timezone
-    const localTime = DateTime
-      .fromJSDate(row.created_at, { zone: "utc" })
-      .setZone(userTimezone);
+    for (const row of rows) {
+        // UTC → user timezone
+        const localTime = DateTime
+            .fromJSDate(row.created_at, { zone: "utc" })
+            .setZone(userTimezone);
 
-    // نطلع الساعة
-    const hourKey = localTime.toFormat('HH'); // 00 - 23
+        // نطلع الساعة
+        const hourKey = localTime.toFormat('HH'); // 00 - 23
 
-    if (!resultMap[hourKey]) {
-      resultMap[hourKey] = {
-        hour: hourKey,
-        orders_count: 0,
-        total_sales: 0
-      };
+        if (!resultMap[hourKey]) {
+            resultMap[hourKey] = {
+                hour: hourKey,
+                orders_count: 0,
+                total_sales: 0
+            };
+        }
+
+        resultMap[hourKey].orders_count += 1;
+        resultMap[hourKey].total_sales += Number(row.total_price);
     }
 
-    resultMap[hourKey].orders_count += 1;
-    resultMap[hourKey].total_sales += Number(row.total_price);
-  }
-
-  return Object.values(resultMap).sort((a, b) => a.hour - b.hour);
+    return Object.values(resultMap).sort((a, b) => a.hour - b.hour);
 }
 
-function mapItemByOrder(items, orders){
-  if(orders.length === 0) return;
+function mapItemByOrder(items, orders) {
+    if (orders.length === 0) return;
 
-  const itemsMap = {};
+    const itemsMap = {};
 
-  items.forEach(i => {
-    if (!itemsMap[i.order_id]) {
-      itemsMap[i.order_id] = [];
-    }
-    itemsMap[i.order_id].push(i);
-  });
+    items.forEach(i => {
+        if (!itemsMap[i.order_id]) {
+            itemsMap[i.order_id] = [];
+        }
+        itemsMap[i.order_id].push(i);
+    });
 
-  const ordersWithItems = orders.map(order => ({
-    ...order,
-    items: itemsMap[order.id] || []
-  }));
+    const ordersWithItems = orders.map(order => ({
+        ...order,
+        items: itemsMap[order.id] || []
+    }));
 
-  return ordersWithItems;
+    return ordersWithItems;
 }
 
 
@@ -770,10 +834,10 @@ function getDaysDiff(from, to) {
 
 
 function previousUTC(utcDateString, days) {
-  const date = new Date(utcDateString);
+    const date = new Date(utcDateString);
 
-  // نحسب بالـ UTC مباشرة
-  date.setUTCDate(date.getUTCDate() - days);
+    // نحسب بالـ UTC مباشرة
+    date.setUTCDate(date.getUTCDate() - days);
 
-  return date.toISOString();
+    return date.toISOString();
 }
