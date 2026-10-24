@@ -46,26 +46,37 @@
 
             <div class="row g-4 mb-5 justify-content-center d-none reveal" id="headerSummeryCard">
 
-
-
-                <!-- الإيرادات -->
+                <!-- الإيرادات وصافي الربح -->
                 <div class="col-md-6 col-lg-4 d-flex">
                     <div class="stat-card card p-3 bg-white w-100">
-                        <div class="d-flex flex-column">
-                            <div>
-                                <p class="text-muted mb-1">الايرادات</p>
-                            </div>
+                        <div class="d-flex flex-column h-100">
 
-                            <div class="d-flex justify-content-between align-items-center">
-                                <div>
-                                    <h3 class="mb-2 text-info" id="totalRevenue">
+                            <p class="text-muted mb-2">الإيرادات وصافي الربح</p>
 
-                                    </h3>
+                            <div class="d-flex gap-2 flex-grow-1">
+
+                                <!-- الإيرادات -->
+                                <div class="revenue-box flex-fill rounded-3 p-2
+                                    d-flex flex-column justify-content-center">
+                                    <div class="d-flex align-items-center gap-1 mb-2">
+                                        <i class="fas fa-shekel-sign text-primary"></i>
+                                        <small class="text-primary fw-semibold">الإيرادات</small>
+                                    </div>
+
+                                    <h4 class="mb-0 text-primary" id="totalRevenue"></h4>
                                 </div>
 
-                                <div class="stat-icon bg-info bg-opacity-10 text-info">
-                                    <i class="fas fa-shekel-sign"></i>
+                                <!-- صافي الربح -->
+                                <div class="profit-box flex-fill rounded-3 p-2
+                                    d-flex flex-column justify-content-center">
+                                    <div class="d-flex align-items-center gap-1 mb-2">
+                                        <i class="fas fa-chart-line text-success"></i>
+                                        <small class="text-success fw-semibold">صافي الربح من الأصناف</small>
+                                    </div>
+
+                                    <h4 class="mb-0 text-success" id="totalNetProfit"></h4>
                                 </div>
+
                             </div>
                         </div>
                     </div>
@@ -139,24 +150,22 @@
                 <div class="col-12">
                     <div class="card border-0 table-card">
                         <div class="card-body">
-                            <div class="d-flex justify-content-between align-items-center mb-3">
+                            <div class="d-flex gap-3 mb-3">
                                 <h5 class="card-title">
                                     <i class="fas fa-list ms-2 text-secondary"></i>
                                     قائمة الأصناف
+                                    *
                                 </h5>
+                                <small class="text-muted">
+                                    
+                                    <i class="fas fa-sort-amount-down-alt ms-1"></i>
+                                    مرتبة من الأكثر مبيعًا إلى الأقل مبيعًا
+                                </small>
                             </div>
 
                             <div class="table-responsive">
                                 <table class="table mb-0 table-striped">
                                     <thead>
-                                        <!-- <tr>
-                                                <th class="text-center">الرقم</th>
-                                                <th class="text-center">الصنف</th>
-                                                <th class="text-center">الكمية المباعة</th>
-                                                <th class="text-center">إجمالي المبيعات</th>
-                                                <th class="text-center">نسبة المبيعات</th>
-                                            </tr> -->
-
                                         <tr>
                                             <th class="text-center col-number">الرقم</th>
                                             <th class="text-center col-name">الصنف</th>
@@ -164,7 +173,7 @@
                                             <th class="text-center col-before">المبيعات</th>
                                             <th class="text-center col-discount-rate">نسبة الخصم</th>
                                             <th class="text-center col-discount-value">قيمة الخصم</th>
-                                            <th class="text-center col-cost">متوسط تكلفة الحبة</th>
+                                            <th class="text-center col-cost">متوسط التكلفة</th>
                                             <th class="text-center col-after">صافي الربح</th>
                                             <th class="text-center col-percentage">نسبة المبيعات</th>
                                         </tr>

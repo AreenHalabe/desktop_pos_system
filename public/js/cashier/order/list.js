@@ -875,6 +875,8 @@ function renderUpdatedOrderItems(order) {
     let newTotalPrice = 0;
     let totalDiscountItems = 0;
 
+   
+
     table.innerHTML = updatedOrder.items.map(item => {
         const qty = Number(item.quantity);
         const price = Number(item.price);

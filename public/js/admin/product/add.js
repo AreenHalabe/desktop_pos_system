@@ -19,6 +19,11 @@ const baseUnitBarcodeInput = document.getElementById("baseBarcode");
 const unitBarcodeInput = document.getElementById("newUnitBarcode");
 const autoUnitBarcodeCheckbox = document.getElementById('auto_barcode_unit');
 
+
+const baseUnitName = document.getElementById("baseUnitName");
+const customBaseUnitContainer = document.getElementById("customBaseUnitContainer");
+const customBaseUnitName = document.getElementById("customBaseUnitName");
+
 let units = [];
 
 
@@ -73,6 +78,42 @@ document.addEventListener('DOMContentLoaded', async function () {
     await buildSelectCategory();
 });
 
+baseUnitName.addEventListener("change", () => {
+    const isCustom = baseUnitName.value === "other";
+
+    customBaseUnitContainer.classList.toggle("d-none", !isCustom);
+
+    customBaseUnitName.required = isCustom;
+
+    if (!isCustom) {
+        customBaseUnitName.value = "";
+    } else {
+        customBaseUnitName.focus();
+    }
+});
+// إضافة الوحدة المكتوبة إلى القائمة واختيارها
+customBaseUnitName.addEventListener("change", () => {
+    const unitName = customBaseUnitName.value.trim();
+
+    if (!unitName) return;
+
+    // منع تكرار الوحدة إذا كانت موجودة مسبقاً
+    const existingOption = Array.from(baseUnitName.options).find(
+        option => option.value === unitName
+    );
+
+    if (existingOption) {
+        baseUnitName.value = unitName;
+    } else {
+        const option = new Option(unitName, unitName, true, true);
+        baseUnitName.add(option);
+    }
+
+    // إخفاء حقل الإدخال بعد إضافة الوحدة
+    customBaseUnitContainer.classList.add("d-none");
+    customBaseUnitName.required = false;
+    customBaseUnitName.value = "";
+});
 
 
 autoBarcodeCheckbox.addEventListener('change', updateBaseBarcodeState);
@@ -128,7 +169,7 @@ async function buildSelectCategory() {
         }
 
     } catch (err) {
-        console.error("Error fetching categories:", err);
+        bootboxError("Error fetching categories:", err);
     }
 }
 
@@ -138,10 +179,7 @@ async function buildSelectCategory() {
 
 function getBaseUnitName() {
 
-    return document
-        .getElementById("baseUnitName")
-        .value
-        .trim();
+    return baseUnitName.value.trim();
 
 }
 
@@ -1451,7 +1489,6 @@ renderUnits();
 
 
 async function submitProductData(finalData) {
-    console.log("Submitting product data:", finalData);
     loader.style.display = 'flex';
     try {
         let res = await fetch(url + '/item/add', {

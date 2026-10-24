@@ -500,9 +500,10 @@ export const getItemUnitTreeForSupplier = async (req, res) => {
       });
     }
 
-    await checkToken(token);
+    const adminId = await checkToken(token);
 
     const result = await pool.request()
+      .input('adminId', sql.Int, adminId)
       .query(`
         SELECT
           i.id,
@@ -529,6 +530,8 @@ export const getItemUnitTreeForSupplier = async (req, res) => {
             WHERE sb.item_id = i.id
             ORDER BY sb.id DESC
         ) sb
+
+        WHERE i.admin_id = @adminId
 
         ORDER BY i.name ASC;
     `);
@@ -557,9 +560,10 @@ export const getItemUnitTreeForCashier = async (req, res) => {
       });
     }
 
-    await checkToken(token);
+    const adminId = await checkToken(token);
 
     const result = await pool.request()
+      .input('adminId', sql.Int, adminId)
       .query(`
         SELECT
           i.id,
@@ -576,7 +580,9 @@ export const getItemUnitTreeForCashier = async (req, res) => {
 
         INNER JOIN items_units iu
             ON iu.item_id = i.id
-        WHERE iu.for_sale = 1
+
+        WHERE i.admin_id = @adminId
+          AND iu.for_sale = 1
 
         ORDER BY i.name ASC, iu.id ASC;
     `);

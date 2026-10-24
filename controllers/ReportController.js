@@ -124,39 +124,7 @@ export const getItemsSellingAnalysis = async (req, res) => {
         }
         const adminId = await checkToken(token);
 
-        // const row = await pool.request()
-        //     .input('admin_id', sql.Int, adminId)
-        //     .query(`
-        //         SELECT
-        //             i.id,
-        //             ISNULL(i.name, N'عنصر محذوف') AS name,
-        //             ISNULL(SUM(oi.quantity), 0) AS quantity,
-        //             ISNULL(SUM(oi.price * oi.quantity), 0) AS total_sales,
-
-        //             ROUND(
-        //                 ISNULL(SUM(oi.price * oi.quantity), 0) * 100.0 /
-        //                 NULLIF(
-        //                     SUM(SUM(oi.price * oi.quantity)) OVER (),
-        //                     0
-        //                 ),
-        //             2) AS sales_percentage,
-
-        //             SUM(SUM(oi.price * oi.quantity)) OVER () AS total_revenue
-
-        //         FROM orders o
-        //         INNER JOIN order_items oi
-        //             ON oi.order_id = o.id
-        //         INNER JOIN items i
-        //             ON i.id = oi.item_id
-
-        //         WHERE i.admin_id = @admin_id
-        //             AND o.status = N'مكتمل'
-        //         GROUP BY i.id, i.name
-        //         ORDER BY quantity DESC;
-        //     `)
-        // ;
-        // const itemsAnalysis = row.recordset;
-
+        
         const row = await pool.request()
             .input('admin_id', sql.Int, adminId)
             .query(`

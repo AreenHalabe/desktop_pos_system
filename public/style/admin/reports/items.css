@@ -61,10 +61,14 @@ body {
     font-weight: 600;
     padding: 15px;
     color: #495057;
+
+    vertical-align: middle;
+    white-space: nowrap;
 }
 
 .table tbody td {
     vertical-align: middle;
+    white-space: nowrap;
     padding: 13px;
 }
 
@@ -149,4 +153,24 @@ body {
 /* نسبة المبيعات */
 .col-percentage {
     background-color: #e0f7fa !important;
+}
+
+
+/* تنسيق خاص بكارد الإيرادات فقط */
+.revenue-box {
+    background-color: rgba(13, 202, 240, 0.10);
+    border: 1px solid rgba(13, 202, 240, 0.20);
+    min-width: 0;
+}
+
+.profit-box {
+    background-color: rgba(25, 135, 84, 0.10);
+    border: 1px solid rgba(25, 135, 84, 0.20);
+    min-width: 0;
+}
+
+.revenue-box h5,
+.profit-box h5 {
+    font-size: 1.1rem;
+    overflow-wrap: anywhere;
 }

@@ -13,7 +13,7 @@ const leastSellingCard = document.getElementById('leastSellingCard');
 const topSellingCard = document.getElementById('topSellingCard');
 const analysesAndInsightsCard = document.getElementById('analysesAndInsightsCard');
 let currentPage;
-let itemsPerPage = 15;
+let itemsPerPage = 30;
 let totalItems;
 let totalPages;
 
@@ -103,7 +103,7 @@ async function loadItemsAnalysis() {
                 renderItemsTable([]);
                 return;
             }
-            console.log(data);
+            setTotalNetProfit(data.item_analysis);
             handelTotalPage(data.item_analysis.length);
             setHeaderSummry(data.item_analysis);
             dataAnalysis = data.item_analysis;
@@ -281,28 +281,20 @@ function renderItemsTable(items) {
 
     tableBody.innerHTML = '';
 
+    
+
     let counter = (currentPage * 15) - (15);
     tableBody.innerHTML = pageItems.map(i => {
 
-        // return `
-        // <tr>
-        //     <td class="text-center" >${++counter}</td>
-        //     <td class="text-center">${i.name}</td>
-        //     <td class="text-center">${i.quantity}</td>
-        //     <td class="text-center">${i.total_sales} ₪</td>
-        //     <td class="text-center">%${i.sales_percentage}</td>
-        // </tr>
-        // `;
-
         const totalSales = Number(i.total_sales) || 0;
 
-      
-
-        const discountValue = Number(totalSales) * Number(i.average_discount_percentage) / 100;
+        const discountValue = roundDiscount(totalSales * Number(i.average_discount_percentage) / 100);
 
           // حساب المبيعات بعد الخصم
         const netSales = totalSales - discountValue;
         const netProfit = Number(netSales) - (Number(i.average_cost_price) * Number(i.quantity));
+
+        
         return `
             <tr>
                 <td class="text-center col-number">
@@ -313,44 +305,65 @@ function renderItemsTable(items) {
                     ${i.name}
                 </td>
 
-                <td class="text-center col-quantity">
-                     ${Number(i.quantity)} — ${i.base_unit_name ?? ''}
+                <td class="text-center col-quantity fw-bold">
+                     ${formatNumber(i.quantity)} — ${i.base_unit_name ?? ''}
                 </td>
 
                 <td class="text-center col-before fw-bold">
-                    ${Number(totalSales)} ₪
+                    ${formatNumber(totalSales)} ₪
                 </td>
 
                 <td class="text-center col-discount-rate">
-                    %${Number(i.average_discount_percentage)}
+                    %${formatNumber(i.average_discount_percentage)}
                 </td>
 
                 <td class="text-center col-discount-value">
-                    ${roundDiscount(discountValue)} ₪
+                    ${formatNumber(discountValue)} ₪
                 </td>
 
-                
 
                 <td class="text-center col-cost">
-                    ${Number(i.average_cost_price)} ₪
+                    ${formatNumber(i.average_cost_price)} ₪ — ${i.base_unit_name ?? ''}
                 </td>
 
                 <td class="text-center col-after fw-bold">
-                    ${Number(netProfit)} ₪
+                    ${formatNumber(netProfit)} ₪
                 </td>
 
-                <td class="text-center col-percentage">
-                    %${Number(i.sales_percentage)}
+                <td class="text-center col-percentage fw-bold">
+                    %${formatNumber(i.sales_percentage)}
                 </td>
             </tr>
         `;
     }).join('');
 
+    
     updatePagination();
     displayPaginationBtn();
     displayContainer(tableCard);
 }
 
+const formatNumber = value =>
+    Number(value).toLocaleString('en-US', {
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 2
+    });
+
+async function setTotalNetProfit(items) {
+    let totalProfit = 0;
+    items.forEach(item => {
+        const totalSales = Number(item.total_sales) || 0;
+
+        const discountValue = roundDiscount(totalSales * Number(item.average_discount_percentage) / 100);
+          // حساب المبيعات بعد الخصم
+        const netSales = totalSales - discountValue;
+        const netProfit = Number(netSales) - (Number(item.average_cost_price) * Number(item.quantity));
+
+        totalProfit += netProfit;
+    });
+
+    document.getElementById('totalNetProfit').textContent = `${formatNumber(totalProfit)} ₪`;
+}
 
 
 
@@ -390,10 +403,6 @@ function drowingPieChartFroItemBySales(container, salesByItems, isTopItems = tru
         quantitiesItems = salesByItems.slice(-5).map(item => item.quantity);
     }
 
-
-
-
-    // const quantitiesItems = salesByItems.slice(0, 5).map(item => item.quantity);
 
     const quantities = salesByItems.map(item => item.quantity);
     const totalQuantity = quantities.reduce((sum, q) => sum + q, 0);
