@@ -186,7 +186,35 @@
     color: #155724;
 }
 
+.net-profit-card {
+    background-color: #E8F5E9 !important;
+    border: 1px solid #C8E6C9;
+}
 
+.net-profit-card #netProfit {
+    color: #198754;
+    font-weight: 700;
+}
+
+.net-profit-card .stat-icon {
+    background-color: rgba(25, 135, 84, 0.12) !important;
+    color: #198754 !important;
+}
+
+.revenue-card {
+    background-color: #E3F2FD !important;
+    border: 1px solid #BBDEFB;
+}
+
+.revenue-card #totalSales {
+    color: #1565C0;
+    font-weight: 700;
+}
+
+.revenue-card .stat-icon {
+    background-color: rgba(21, 101, 192, 0.12) !important;
+    color: #1565C0 !important;
+}
 @media (max-width: 768px) {
     .search-btn {
         display: block;

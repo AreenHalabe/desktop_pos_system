@@ -26,7 +26,7 @@ const transactionPaginationBtnContainer = document.getElementById('transactionPa
 
 
 let sessions;
-
+let totalItemsCost = 0;
 let sessionsIds = [];
 let completedOrdersCount = 0;
 let deletedOrdersCount   = 0;
@@ -265,7 +265,7 @@ async function loadSesions() {
             displayError(data.message);
         }
     }catch(e){
-        displayError(err.message);
+        displayError(e.message);
     }
     
 }
@@ -319,7 +319,8 @@ function setSessionData(sessions){
         revenueCash          += session.cash_sales;
         revenueCard          += session.card_sales;
         cashAdditions        += session.cash_in;
-        cashExpenses        += session.cash_out;
+        cashExpenses         += session.cash_out;
+        totalItemsCost       += session.items_cost;
     }
 }
 function resetSessionData(){
@@ -330,6 +331,7 @@ function resetSessionData(){
     revenueCard = 0;
     cashAdditions = 0;
     cashExpenses = 0;
+    totalItemsCost = 0;
 }
 
 
@@ -381,7 +383,9 @@ function setSummeryRevenue(){
     document.getElementById('revenueSummery').textContent = `${revenueCard + revenueCash} ₪`;
     document.getElementById('expensesSummery').textContent = `- ${cashExpenses} ₪`;
     document.getElementById('additionCashSummery').textContent = `+ ${cashAdditions} ₪`;
-    document.getElementById('netProfit').textContent = `${(revenueCard + revenueCash + cashAdditions) - cashExpenses} ₪`;
+    document.getElementById('costOfGoodsSummery').textContent = `${totalItemsCost} ₪`;
+    document.getElementById('netProfit').textContent = `${Number((revenueCard + revenueCash + cashAdditions) - (totalItemsCost + cashExpenses)).toFixed(2)} ₪`;
+    
     displayContainer(summeryRevenue);
 }
 

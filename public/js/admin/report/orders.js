@@ -308,8 +308,9 @@ function setHeaderSummery(data) {
   const totalSales = document.getElementById('totalSales');
   const cashSales = document.getElementById('cashSales');
   const cardSales = document.getElementById('cardSales');
+  const netProfit = document.getElementById('netProfit');
 
-  const avgDemand = document.getElementById('averageDemand');
+  
   totalOrder.textContent = completedOrdersCount + cancelledOrdersCount;
   completedOrder.innerHTML = `<i class="fas fa-check-circle"></i> ${completedOrdersCount} مكتملة`;
   deletedOrder.innerHTML = `<i class="fas fa-times-circle"></i> ${cancelledOrdersCount} ملغية`;
@@ -319,9 +320,7 @@ function setHeaderSummery(data) {
   cardSales.innerHTML = `<i class="fas fa-credit-card"></i> ${data?.orderDetails.card_revenue || 0} ₪ بطاقة `;
 
 
-
-  avgDemand.textContent = completedOrdersCount === 0 ? '0 ₪'
-    : `${((data.orderDetails.cash_revenue + data.orderDetails.card_revenue) / completedOrdersCount).toFixed(2)} ₪`;
+  netProfit.textContent = `${data.orderDetails.total_net_profit} ₪`
 
 
 

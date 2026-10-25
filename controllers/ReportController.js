@@ -1,8 +1,6 @@
 import { DateTime } from "luxon";
-import { StatusCode } from "../HTTPSStatusCode/StatusCode.js";
 import { pool, sql } from "../DataBaseConnections/dbconnection.js";
-import { checkToken, SystemError, buildTreeOfOrders } from "../shared/functionality.js";
-import { getOrderAndItemsBySession } from "../shared/api.js";
+import { checkToken, SystemError } from "../shared/functionality.js";
 
 
 export const getWeklyAnalysis = async (req, res) => {
@@ -124,7 +122,7 @@ export const getItemsSellingAnalysis = async (req, res) => {
         }
         const adminId = await checkToken(token);
 
-        
+
         const row = await pool.request()
             .input('admin_id', sql.Int, adminId)
             .query(`
@@ -492,7 +490,9 @@ async function getSessionsDetails(from, to, adminId) {
             ISNULL(t.cash_in, 0) AS cash_in,
 
             ISNULL(o.completed_orders_count, 0) AS completed_orders_count,
-            ISNULL(o.canceled_orders_count, 0) AS canceled_orders_count
+            ISNULL(o.canceled_orders_count, 0) AS canceled_orders_count,
+
+            ISNULL(ic.items_cost, 0) AS items_cost
         FROM cash_sessions cs
 
         LEFT JOIN (
@@ -515,6 +515,21 @@ async function getSessionsDetails(from, to, adminId) {
             GROUP BY session_id
         ) t ON t.session_id = cs.id
 
+        LEFT JOIN (
+            SELECT
+                o.session_id,
+                SUM(
+                    CAST(oi.cost_price AS DECIMAL(18, 2))
+                    * CAST(oi.quantity AS DECIMAL(18, 2))
+                    * CAST(oi.conversion_factor AS DECIMAL(18, 2))
+                ) AS items_cost
+            FROM orders o
+            INNER JOIN order_items oi ON oi.order_id = o.id
+            WHERE o.admin_id = @admin_id
+              AND o.status = N'مكتمل'
+            GROUP BY o.session_id
+        ) ic ON ic.session_id = cs.id
+
         WHERE cs.admin_id = @admin_id
           AND cs.open_at >= @from
           AND cs.open_at <= @to
@@ -527,6 +542,7 @@ async function getSessionsDetails(from, to, adminId) {
 
     return result.recordset;
 }
+
 
 
 async function loadOrders(from, to, status, adminId, limit, offset) {
@@ -563,41 +579,84 @@ async function getOrderDetails(from, to, adminId) {
         SELECT
             SUM(
                 CASE
-                    WHEN created_at BETWEEN @from AND @to
-                         AND status = N'مكتمل'
-                         AND payment_method = N'كاش'
-                    THEN total_price
+                    WHEN o.created_at BETWEEN @from AND @to
+                         AND o.status = N'مكتمل'
+                         AND o.payment_method = N'كاش'
+                    THEN o.total_price
                     ELSE 0
                 END
             ) AS cash_revenue,
 
             SUM(
                 CASE
-                    WHEN created_at BETWEEN @from AND @to
-                         AND status = N'مكتمل'
-                         AND payment_method = N'بطاقة'
-                    THEN total_price
+                    WHEN o.created_at BETWEEN @from AND @to
+                         AND o.status = N'مكتمل'
+                         AND o.payment_method = N'بطاقة'
+                    THEN o.total_price
                     ELSE 0
                 END
             ) AS card_revenue,
 
             COUNT(
                 CASE
-                    WHEN created_at BETWEEN @from AND @to
-                         AND status = N'مكتمل'
+                    WHEN o.created_at BETWEEN @from AND @to
+                         AND o.status = N'مكتمل'
                     THEN 1
                 END
             ) AS completed_orders,
 
             COUNT(
                 CASE
-                    WHEN created_at BETWEEN @from AND @to
-                         AND status = N'ملغي'
+                    WHEN o.created_at BETWEEN @from AND @to
+                         AND o.status = N'ملغي'
                     THEN 1
                 END
-            ) AS cancelled_orders
-        FROM orders
-        WHERE admin_id = @admin_id
+            ) AS cancelled_orders,
+
+            ISNULL((
+                SELECT SUM(
+                    CAST(
+                        CAST(oi.price AS DECIMAL(18, 4))
+                        * CAST(oi.quantity AS DECIMAL(18, 4))
+                        AS DECIMAL(18, 4)
+                    )
+                    -
+                    CAST(
+                        FLOOR(
+                            CAST(oi.price AS DECIMAL(18, 4))
+                            * CAST(oi.quantity AS DECIMAL(18, 4))
+                            * CAST(ISNULL(oi.discount_item, 0) AS DECIMAL(18, 4))
+                            / 100.0
+                        )
+                        +
+                        CASE
+                            WHEN FLOOR(
+                                CAST(oi.price AS DECIMAL(18, 4))
+                                * CAST(oi.quantity AS DECIMAL(18, 4))
+                                * CAST(ISNULL(oi.discount_item, 0) AS DECIMAL(18, 4))
+                                / 10.0
+                            ) % 10 >= 4 THEN 1
+                            ELSE 0
+                        END
+                        AS DECIMAL(18, 4)
+                    )
+                    -
+                    CAST(
+                        CAST(oi.cost_price AS DECIMAL(18, 4))
+                        * CAST(oi.quantity AS DECIMAL(18, 4))
+                        * CAST(oi.conversion_factor AS DECIMAL(18, 4))
+                        AS DECIMAL(18, 4)
+                    )
+                )
+                FROM orders o2
+                INNER JOIN order_items oi ON oi.order_id = o2.id
+                WHERE o2.admin_id = @admin_id
+                AND o2.created_at BETWEEN @from AND @to
+                AND o2.status = N'مكتمل'
+            ), 0) AS total_net_profit
+
+        FROM orders o
+        WHERE o.admin_id = @admin_id
     `);
 
     return result.recordset[0];
