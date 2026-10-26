@@ -109,7 +109,7 @@ export const getChecksHandler = async (req, res) => {
             throw new SystemError("إنتهت صلاحية الجلسة , الرجاء تسجيل الدخول مرة أخرى", 401);
         }
 
-        await checkToken(token);
+        const adminId = await checkToken(token);
 
         const {
             from,
@@ -133,7 +133,7 @@ export const getChecksHandler = async (req, res) => {
             checkNumber,
             page: Number(page),
             limit: Number(limit)
-        }, pool);
+        }, pool, adminId);
 
         return res.status(200).json({
             success: true,
@@ -157,10 +157,11 @@ export const getChecksRecentAdded = async (req, res) => {
             throw new SystemError("إنتهت صلاحية الجلسة , الرجاء تسجيل الدخول مرة أخرى", 401);
         }
 
-        await checkToken(token);
+        const adminId = await checkToken(token);
 
         const result = await pool
             .request()
+            .input('admin_id', sql.Int, adminId)
             .query(`
             SELECT
                 ch.id,
@@ -188,7 +189,8 @@ export const getChecksRecentAdded = async (req, res) => {
                 END AS is_for_invoice
             FROM checks ch
 
-            WHERE ch.created_at >= DATEADD(DAY, -1, CAST(GETDATE() AS DATE))
+            WHERE ch.admin_id = @admin_id
+                AND ch.created_at >= DATEADD(DAY, -1, CAST(GETDATE() AS DATE))
                 AND ch.created_at < DATEADD(DAY, 1, CAST(GETDATE() AS DATE))
             ORDER BY ch.id DESC
         `);
@@ -391,54 +393,31 @@ async function getChecks({
     checkNumber,
     page = 1,
     limit = 50
-}, pool) {
+}, pool, adminId) {
 
-    const conditions = [];
+    const conditions = ["ch.admin_id = @admin_id"];
 
-    // Pagination
     page = Number(page) || 1;
     limit = Number(limit) || 50;
 
     const offset = (page - 1) * limit;
 
-    // بناء شروط البحث
-    if (from) {
-        conditions.push("ch.due_date >= @from");
-    }
+    if (from) conditions.push("ch.due_date >= @from");
+    if (to) conditions.push("ch.due_date <= @to");
+    if (supplier) conditions.push("ch.payee_name = @supplier");
+    if (status) conditions.push("ch.status = @status");
+    if (type) conditions.push("ch.type = @type");
+    if (account) conditions.push("ch.account_name = @account");
+    if (checkNumber) conditions.push("ch.check_number LIKE @checkNumber");
 
-    if (to) {
-        conditions.push("ch.due_date <= @to");
-    }
+    const whereClause = `WHERE ${conditions.join(" AND ")}`;
 
-    if (supplier) {
-        conditions.push("ch.payee_name = @supplier");
-    }
-
-    if (status) {
-        conditions.push("ch.status = @status");
-    }
-
-    if (type) {
-        conditions.push("ch.type = @type");
-    }
-
-    if (account) {
-        conditions.push("ch.account_name = @account");
-    }
-
-    if (checkNumber) {
-        conditions.push("ch.check_number LIKE @checkNumber");
-    }
-
-    const whereClause = conditions.length
-        ? `WHERE ${conditions.join(" AND ")}`
-        : "";
-
-    // إنشاء Request منفصل لكل Query
     const dataRequest = pool.request();
     const summaryRequest = pool.request();
 
-    // إضافة الـ parameters للـ requestين
+    dataRequest.input("admin_id", sql.Int, adminId);
+    summaryRequest.input("admin_id", sql.Int, adminId);
+
     if (from) {
         dataRequest.input("from", sql.Date, from);
         summaryRequest.input("from", sql.Date, from);
@@ -470,29 +449,15 @@ async function getChecks({
     }
 
     if (checkNumber) {
-        dataRequest.input(
-            "checkNumber",
-            sql.NVarChar(50),
-            `%${checkNumber}%`
-        );
-
-        summaryRequest.input(
-            "checkNumber",
-            sql.NVarChar(50),
-            `%${checkNumber}%`
-        );
+        dataRequest.input("checkNumber", sql.NVarChar(50), `%${checkNumber}%`);
+        summaryRequest.input("checkNumber", sql.NVarChar(50), `%${checkNumber}%`);
     }
 
-    // Pagination parameters
     dataRequest.input("offset", sql.Int, offset);
     dataRequest.input("limit", sql.Int, limit);
 
-    const [
-        dataResult,
-        summaryResult
-    ] = await Promise.all([
+    const [dataResult, summaryResult] = await Promise.all([
 
-        // جلب الشيكات
         dataRequest.query(`
             SELECT
                 ch.id,
@@ -501,14 +466,12 @@ async function getChecks({
                 ch.payee_name,
                 ch.amount,
                 ch.currency,
-
                 CONVERT(VARCHAR(10), ch.due_date, 23) AS due_date,
-
                 ch.type,
                 ch.status,
                 ch.account_name,
                 ch.notes,
-                CASE 
+                CASE
                     WHEN EXISTS (
                         SELECT 1
                         FROM supplier_payments sp
@@ -517,102 +480,52 @@ async function getChecks({
                     THEN 1
                     ELSE 0
                 END AS is_for_invoice
-
             FROM checks ch
-
             ${whereClause}
-
             ORDER BY ch.due_date ASC
-
             OFFSET @offset ROWS
             FETCH NEXT @limit ROWS ONLY
         `),
 
-        // Summary
-        summaryRequest.query(` 
-            SELECT 
-                COUNT(*) AS totalChecks, 
+        summaryRequest.query(`
+            SELECT
+                COUNT(*) AS totalChecks,
 
-                COALESCE( 
-                    SUM( 
-                        CASE 
-                            WHEN ch.currency = 'USD'
-                            AND ch.status = 'pending'
-                            THEN ch.amount 
-                            ELSE 0 
-                        END 
-                    ), 
-                    0 
-                ) AS totalUSD, 
+                COALESCE(SUM(CASE
+                    WHEN ch.currency = 'USD' AND ch.status = 'pending'
+                    THEN ch.amount ELSE 0
+                END), 0) AS totalUSD,
 
-                COALESCE( 
-                    SUM( 
-                        CASE 
-                            WHEN ch.currency = 'JOD'
-                            AND ch.status = 'pending'
-                            THEN ch.amount 
-                            ELSE 0 
-                        END 
-                    ), 
-                    0 
-                ) AS totalJOD, 
+                COALESCE(SUM(CASE
+                    WHEN ch.currency = 'JOD' AND ch.status = 'pending'
+                    THEN ch.amount ELSE 0
+                END), 0) AS totalJOD,
 
-                COALESCE( 
-                    SUM( 
-                        CASE 
-                            WHEN ch.currency = 'ILS'
-                            AND ch.status = 'pending'
-                            THEN ch.amount 
-                            ELSE 0 
-                        END 
-                    ), 
-                    0 
-                ) AS totalILS, 
+                COALESCE(SUM(CASE
+                    WHEN ch.currency = 'ILS' AND ch.status = 'pending'
+                    THEN ch.amount ELSE 0
+                END), 0) AS totalILS,
 
-                COALESCE( 
-                    SUM( 
-                        CASE 
-                            WHEN ch.currency = 'EUR'
-                            AND ch.status = 'pending'
-                            THEN ch.amount 
-                            ELSE 0 
-                        END 
-                    ), 
-                    0 
-                ) AS totalEUR, 
+                COALESCE(SUM(CASE
+                    WHEN ch.currency = 'EUR' AND ch.status = 'pending'
+                    THEN ch.amount ELSE 0
+                END), 0) AS totalEUR,
 
-                COALESCE( 
-                    SUM( 
-                        CASE 
-                            WHEN ch.status = 'pending'
-                            THEN 1 
-                            ELSE 0 
-                        END 
-                    ), 
-                    0 
-                ) AS pendingChecks, 
+                COALESCE(SUM(CASE
+                    WHEN ch.status = 'pending' THEN 1 ELSE 0
+                END), 0) AS pendingChecks,
 
-                COALESCE( 
-                    SUM( 
-                        CASE 
-                            WHEN ch.status = 'paid'
-                            THEN 1 
-                            ELSE 0 
-                        END 
-                    ), 
-                    0 
-                ) AS paidChecks 
+                COALESCE(SUM(CASE
+                    WHEN ch.status = 'paid' THEN 1 ELSE 0
+                END), 0) AS paidChecks
 
             FROM checks ch
-
             ${whereClause}
         `)
     ]);
 
     const rows = dataResult.recordset;
-
     const summary = summaryResult.recordset[0];
-
     const total = Number(summary.totalChecks);
 
     return {

@@ -131,6 +131,9 @@ export const updateCategory = async (req, res) => {
     }
 }
 
+
+
+
 export const deleteCategory = async (req, res) => {
     const categoryId = Number(req.query.category_id);
 
@@ -142,8 +145,7 @@ export const deleteCategory = async (req, res) => {
 
         await checkToken(token);
 
-        const hasTransaction =
-        await checkIfCategoryHasItemsWithTransactions(categoryId);
+        const hasTransaction = await checkIfCategoryHasItemsWithTransactions(categoryId);
 
         if (hasTransaction) {
             throw new SystemError(
