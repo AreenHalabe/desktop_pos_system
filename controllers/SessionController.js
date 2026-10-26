@@ -16,22 +16,22 @@ export const checkCashSession = async (req , res) => {
 
         const session = await checkSession(adminId, pool, sql);
         const hasOpeningSession = !!session;
-        let cashSummery;
+        // let cashSummery;
 
-        if (hasOpeningSession) {
-            cashSummery = await getCashSummery(session.id, pool, sql);
+        // if (hasOpeningSession) {
+        //     cashSummery = await getCashSummery(session.id, pool, sql);
 
-            cashSummery.expected_cash =
-                session.opening_cash + cashSummery.cash_sales + cashSummery.cash_in - cashSummery.cash_out;
+        //     cashSummery.expected_cash =
+        //         session.opening_cash + cashSummery.cash_sales + cashSummery.cash_in - cashSummery.cash_out;
 
-            cashSummery.opening_cash = session.opening_cash;
-        }
+        //     cashSummery.opening_cash = session.opening_cash;
+        // }
 
         return res.status(200).json(
             {
                 hasOpeningSession,
-                session_id: session?.id || null,
-                cash_summery: cashSummery || null
+                session_id: session?.id || null
+                // cash_summery: cashSummery || null
             }
         );
 
