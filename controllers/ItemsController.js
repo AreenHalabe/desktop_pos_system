@@ -76,9 +76,6 @@ export const getItem = async (req, res) => {
     });
   }
 }
-
-
-
 export const addItem = async (req, res) => {
   const transaction = new sql.Transaction(pool);
   let transactionStarted = false;
@@ -144,9 +141,6 @@ export const addItem = async (req, res) => {
     });
   }
 }
-
-
-
 export const updateItem = async (req, res) => {
   const itemId = Number(req.query.item_id);
   const transaction = new sql.Transaction(pool);
@@ -160,11 +154,13 @@ export const updateItem = async (req, res) => {
 
     const body = req.body;
 
+    const parsedData = editProductSchema.parse(body);
+
 
     await transaction.begin();
     transactionStarted = true;
 
-    const parsedData = editProductSchema.parse(body);
+    
 
     const currentItmsUnits = await getItemUnits(itemId);
 
@@ -179,7 +175,7 @@ export const updateItem = async (req, res) => {
 
     await saveItemUnits(itemId, preparedUnits.addUnits, preparedUnits.updateUnits, transaction);
 
-    await saveCostPrice(itemId, parsedData.cost_price, transaction)
+    await saveCostPrice(itemId, parsedData.cost_price, transaction);
 
     await saveItemData(itemId, parsedData.product.name, parsedData.product.category_id, transaction);
 
@@ -209,8 +205,6 @@ export const updateItem = async (req, res) => {
     });
   }
 }
-
-
 export const deleteItem = async (req, res) => {
   const itemId = Number(req.query.item_id);
   try {
@@ -250,39 +244,6 @@ export const deleteItem = async (req, res) => {
   }
 }
 
-
-export const filterItemsByCategory = async (req, res) => {
-  const categoryId = Number(req.query.category_id);
-  try {
-    const token = req.headers.authorization;
-
-    if (!token) {
-      return res.status(401).json({
-        message: "إنتهت صلاحية الجلسة , الرجاء تسجيل الدخول مرة أخرى"
-      });
-    }
-
-    await checkToken(token);
-
-    const result = await pool.request().query(`
-      SELECT * 
-      FROM items
-      WHERE category_id = ${categoryId}
-    `);
-
-    let items = result.recordset;
-
-
-    return res.status(200).json(items);
-
-  } catch (e) {
-    return res.status(e.status || 500).json({
-      success: false,
-      message: e.message || "حدث خطأ غير معروف"
-    });
-  }
-
-}
 
 
 export const getAllItems = async (req, res) => {
@@ -430,66 +391,6 @@ export const getAllItems = async (req, res) => {
     });
   }
 };
-
-
-export const getMenueTree = async (req, res) => {
-  try {
-    const token = req.headers.authorization;
-
-    if (!token) {
-      return res.status(401).json({
-        message: "إنتهت صلاحية الجلسة , الرجاء تسجيل الدخول مرة أخرى"
-      });
-    }
-
-    const adminId = await checkToken(token);
-
-    const result = await pool.request()
-      .input('admin_id', sql.Int, adminId)
-      .query(`
-        SELECT
-          mc.id   AS maincategory_id,
-          mc.name AS maincategory_name,
-
-          c.id    AS category_id,
-          c.name  AS category_name,
-
-          i.id    AS item_id,
-          i.name  AS item_name,
-          i.price AS item_price,
-        
-          i.barcode AS item_barcode,
-
-          s.id    AS size_id,
-          s.name  AS size_name,
-          s.price AS size_price
-
-        FROM Main_category mc
-          JOIN admin a ON a.id = mc.admin_id AND a.status = 1
-          JOIN categories c ON c.main_category_id = mc.id
-          JOIN Items i ON i.category_id = c.id
-          LEFT JOIN sizes s ON s.item_id = i.id
-        WHERE 
-          mc.admin_id = @admin_id
-        ORDER BY mc.id, c.id, i.id, s.price ASC;
-      `)
-      ;
-
-    const row = result.recordset;
-    const menue = buildMenuTree(row);
-
-    return res.status(200).json(menue);
-
-
-  } catch (e) {
-    return res.status(e.status || 500).json({
-      success: false,
-      message: e.message || "حدث خطأ غير معروف"
-    });
-  }
-
-}
-
 export const getItemUnitTreeForSupplier = async (req, res) => {
   try {
     const token = req.headers.authorization;
@@ -548,8 +449,6 @@ export const getItemUnitTreeForSupplier = async (req, res) => {
   }
 
 }
-
-
 export const getItemUnitTreeForCashier = async (req, res) => {
   try {
     const token = req.headers.authorization;
@@ -958,68 +857,8 @@ async function getItemUnits(itemId) {
 
 }
 
-function buildMenuTree(rows) {
-  const mainCategoriesMap = {};
-  const itemsMap = {};
 
-  if (!rows || rows.length === 0) {
-    return { mainCategories: [], items: [] };
-  }
 
-  for (const row of rows) {
-
-    /* ---------- Main Category ---------- */
-    if (!mainCategoriesMap[row.maincategory_id]) {
-      mainCategoriesMap[row.maincategory_id] = {
-        id: row.maincategory_id,
-        name: row.maincategory_name,
-        categories: {}
-      };
-    }
-
-    const mainCategory = mainCategoriesMap[row.maincategory_id];
-
-    /* ---------- Category ---------- */
-    if (!mainCategory.categories[row.category_id]) {
-      mainCategory.categories[row.category_id] = {
-        id: row.category_id,
-        name: row.category_name
-      };
-    }
-
-    /* ---------- Item (Global List) ---------- */
-    if (!itemsMap[row.item_id]) {
-      itemsMap[row.item_id] = {
-        id: row.item_id,
-        name: row.item_name,
-        price: row.item_price,
-        barcode: row.item_barcode,
-        category_id: row.category_id,
-        sizes: []
-      };
-    }
-
-    const item = itemsMap[row.item_id];
-
-    /* ---------- Sizes ---------- */
-    if (row.size_id) {
-      item.sizes.push({
-        id: row.size_id,
-        name: row.size_name,
-        price: row.size_price
-      });
-    }
-  }
-
-  return {
-    mainCategories: Object.values(mainCategoriesMap).map(mc => ({
-      id: mc.id,
-      name: mc.name,
-      categories: Object.values(mc.categories)
-    })),
-    items: Object.values(itemsMap)
-  };
-}
 
 
 function buildItemsDataForSupplier(result) {

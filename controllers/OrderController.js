@@ -1,7 +1,6 @@
-import { StatusCode } from "../HTTPSStatusCode/StatusCode.js";
 import { pool, sql } from "../DataBaseConnections/dbconnection.js";
 import { checkToken, SystemError, buildTreeOfOrders } from "../shared/functionality.js";
-import { getOrderAndItemsBySession, checkSession } from "../shared/api.js";
+import { getOrderAndItemsBySession } from "../shared/api.js";
 import { z } from "zod";
 
 
@@ -753,112 +752,6 @@ async function getOrderDataForStockRestore(orderId) {
     };
 }
 
-
-// function prepareStockBatchesRestore(orderItems, stockBatches, unitConversionFactors) {
-//     const updateStockBatches = new Map();
-//     const batchesByItemId = new Map();
-//     const conversionFactorByUnit = new Map();
-
-//     // تجميع الدفعات حسب الصنف
-//     for (const batch of stockBatches) {
-//         if (!batchesByItemId.has(batch.item_id)) {
-//             batchesByItemId.set(batch.item_id, []);
-//         }
-
-//         batchesByItemId.get(batch.item_id).push(batch);
-//     }
-
-//     // تجهيز معاملات التحويل
-//     for (const unit of unitConversionFactors) {
-//         const key = JSON.stringify([
-//             Number(unit.item_id),
-//             unit.unit_name
-//         ]);
-
-//         conversionFactorByUnit.set(
-//             key,
-//             Number(unit.conversion_factor)
-//         );
-//     }
-
-//     // الاحتفاظ بآخر كمية محسوبة لكل دفعة
-//     const remainingQtyByBatch = new Map(
-//         stockBatches.map(batch => [
-//             batch.id,
-//             Number(batch.remaining_qty)
-//         ])
-//     );
-
-//     for (const item of orderItems) {
-//         const itemId = Number(item.item_id);
-
-//         const key = JSON.stringify([
-//             itemId,
-//             item.unit_name
-//         ]);
-
-//         const conversionFactor = conversionFactorByUnit.get(key);
-
-
-//         const quantityToRestore = Number(item.quantity) * conversionFactor;
-
-
-//         const batches = batchesByItemId.get(itemId) ?? [];
-
-
-//         // ترتيب الدفعات من الأقدم إلى الأحدث
-//         batches.sort((a, b) => a.id - b.id);
-
-//         let targetBatch = batches[0];
-
-//         // إذا توجد دفعة واحدة فقط، نزيد كميتها
-//         if (batches.length === 1) {
-//             targetBatch = batches[0];
-//         } else {
-//             // إذا كانت أول دفعة فارغة، نفحص الدفعات التالية
-//             for (let i = 1; i < batches.length; i++) {
-//                 const previousBatch = batches[i - 1];
-//                 const currentBatch = batches[i];
-
-//                 const currentRemainingQty =
-//                     remainingQtyByBatch.get(currentBatch.id);
-
-//                 const originalQuantity =
-//                     Number(currentBatch.quantity);
-
-//                 const isFull =
-//                     currentRemainingQty === originalQuantity;
-
-//                 if (isFull) {
-//                     targetBatch = previousBatch;
-//                     break;
-//                 }
-
-//                 targetBatch = currentBatch;
-//                 break;
-//             }
-//         }
-
-//         // تحديث الكمية النهائية للدفعة المستهدفة
-//         const currentRemainingQty =
-//             remainingQtyByBatch.get(targetBatch.id);
-
-//         const newRemainingQty =
-//             currentRemainingQty + quantityToRestore;
-
-//         remainingQtyByBatch.set(
-//             targetBatch.id,
-//             newRemainingQty
-//         );
-
-//         updateStockBatches.set(targetBatch.id, {
-//             id: targetBatch.id,
-//             remaining_qty: newRemainingQty
-//         });
-//     }
-
-//     return [...updateStockBatches.values()];
-// }
 
 
 function prepareStockBatchesRestore(orderItems, stockBatches, unitConversionFactors) {

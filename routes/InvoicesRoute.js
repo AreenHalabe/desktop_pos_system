@@ -1,5 +1,5 @@
 import  express  from "express";
-import { createInvoiceFromSupplier, deleteInvoice, payIncoice, editInvoice, deletePayment, getInvoice }from "../controllers/InvoicesController.js";
+import { createInvoiceFromSupplier, deleteInvoice, payIncoice, deletePayment, getInvoice }from "../controllers/InvoicesController.js";
 
 export const InvoiceRoute = express.Router();
 
@@ -11,7 +11,7 @@ InvoiceRoute.get('/invoice' , getInvoice);
 
 InvoiceRoute.post('/invoice/payment' , payIncoice);
 
-InvoiceRoute.put('/invoice/update', editInvoice);
+// InvoiceRoute.put('/invoice/update', editInvoice);
 
 InvoiceRoute.delete('/invoice/delete', deleteInvoice);
 

@@ -77,15 +77,14 @@ export const createInvoiceFromSupplier = async (req, res) => {
         const currentTimeStamp = new Date();
 
         const invoiceId = await createPayInvoice(parsedData, currentTimeStamp, transaction);
-
         await addInvoiceItems(invoiceId, parsedData.items, transaction);
 
+        
         const addNewStockBatchs = await prepareStockBatches(parsedData.items, invoiceId);
-
         await addNewStockBatches(addNewStockBatchs, currentTimeStamp, transaction);
 
-        const totalPrice = parsedData.total_price - parsedData.discount;
 
+        const totalPrice = parsedData.total_price - parsedData.discount;
         await updateBalanceForSupplier(parsedData.supplier_id, totalPrice, true, transaction);
 
         await transaction.commit();
@@ -291,86 +290,7 @@ export const deletePayment = async (req, res) => {
     }
 }
 
-export const editInvoice = async(req , res) =>{
-    const supplierId = Number(req.query.supplier_id);
-    const currentInvoiceId  = Number(req.query.invoice_id);
 
-    const transaction = new sql.Transaction(pool);
-    let transactionStarted = false;
-    try {
-
-        const token = req.headers.authorization;
-        if (!token) {
-            throw new SystemError("إنتهت صلاحية الجلسة , الرجاء تسجيل الدخول مرة أخرى", 401);
-        }
-        await checkToken(token);
-
-        const invData = req.body;
-        const parsedData = invoiceSchema.parse(invData);
-
-        if (invData.discount > invData.total_price) {
-            throw new SystemError("قيمه الخصم اكبر من السعر الأساسي", 400);
-        }
-
-        let date = invData.invoice_date_time;
-
-        const currentInvoice = await getInvoices(currentInvoiceId);
-
-
-
-        if(currentInvoice.total_price !== currentInvoice.remaining){
-            throw new SystemError("حطأ: لا يمكن تعديل فاتورة تم تسديد دفعات عليها", 400);
-        }
-
-
-        await transaction.begin();
-        transactionStarted = true;
-
-        await updateBalanceForSupplier(supplierId, currentInvoice.total_price, false, transaction);
-        await deleteCurrentInvoice(currentInvoiceId, transaction);
-
-
-
-
-        const totalPrice = parsedData.total_price - parsedData.discount;
-        const invoiceId = await createPayInvoice(supplierId, parsedData, totalPrice, date, transaction);
-        await addInvoiceItems(invoiceId, parsedData.items, transaction);
-        await updateBalanceForSupplier(supplierId, totalPrice, true, transaction);
-        await insertItemsForSupplier(supplierId, parsedData.items, transaction);
-
-
-        await transaction.commit();
-
-        return res.status(200).json({
-            success: true,
-            invoice_number: invoiceId,
-            message: "تم تعديل الفاتورة",
-        });
-
-
-
-    } catch (e) {
-        if (transactionStarted) {
-            try {
-                await transaction.rollback();
-            } catch (err) {
-                console.error(err);
-            }
-        }
-        const validationErrors = e?.errors || e?.issues;
-
-        if (Array.isArray(validationErrors) && validationErrors.length > 0) {
-            return res.status(400).json({
-                success: false,
-                message: validationErrors[0].message
-            });
-        }
-        return res.status(e.status || 500).json({
-            success: false,
-            message: e.message || "حدث خطأ غير معروف",
-        });
-    }
-}
 
 
 

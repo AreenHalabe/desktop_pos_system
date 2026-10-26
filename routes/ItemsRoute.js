@@ -1,5 +1,5 @@
 import  express  from "express";
-import { addItem, deleteItem, getItem, updateItem, filterItemsByCategory, getMenueTree, getAllItems, getItemUnitTreeForSupplier, getItemUnitTreeForCashier } from "../controllers/ItemsController.js";
+import { addItem, deleteItem, getItem, updateItem, getAllItems, getItemUnitTreeForSupplier, getItemUnitTreeForCashier } from "../controllers/ItemsController.js";
 
 export const ItemRoute = express.Router();
 
