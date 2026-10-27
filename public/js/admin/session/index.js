@@ -335,7 +335,7 @@ function renderOrdersTable() {
                 <td><span class='status-badge ${paymentClass}'>  ${order.payment_method}</span></td>
                 <td class='nowrap-cell'>${formatDateOnly(utcToPalestine(order.created_at))}</td>
                 <td class='nowrap-cell'>${formatTimeOnly(utcToPalestine(order.created_at))}</td>
-                <td class='nowrap-cell fw-bold'>${order.total_price} ₪</td>
+                <td class='nowrap-cell fw-bold'>${Number(order.total_price).toString()} ₪</td>
                 <td><span class="badge ${badgeClass}">${order.status}</span></td>
                 <td>
                     <button class="btn btn-sm btn-light viewOrder" data-id="${order.id}">
@@ -560,7 +560,7 @@ function viewOrder(orderId) {
                     —
                     ₪${discountValue}
                 </td>
-                <td class='fw-bold'>${item.quantity * item.price} ₪</td>
+                 <td class='fw-bold'>${Number(Number(item.quantity) * Number(item.price)).toFixed(2)} ₪</td>
             </tr>
         `;
     });
@@ -571,7 +571,7 @@ function viewOrder(orderId) {
                 <strong>المجموع</strong>
             </td>
             <td>
-                <strong>${order.total_price + order.discount} ₪</strong>
+                <strong>${Number(order.total_price) + Number(order.discount)} ₪</strong>
             </td>
         </tr>
 
@@ -579,12 +579,13 @@ function viewOrder(orderId) {
             <td colspan="5" class="text-end pe-3 text-danger">
                 <strong>قيمة الخصم</strong>
             </td>
+            
             <td class="text-danger">
                 ${Number(order.total_discount_p) > 0
-                    ?`<strong>${order.total_discount_p}%</strong> —`
+                    ?`<strong>${Number(order.total_discount_p).toString()}%</strong> —`
                     :''
                 }
-                <strong>${order.discount} ₪</strong>
+                <strong>${Number(order.discount)} ₪</strong>
             </td>
         </tr>
 
@@ -593,7 +594,7 @@ function viewOrder(orderId) {
                 <strong>الإجمالي</strong>
             </td>
             <td>
-                <strong>${order.total_price} ₪</strong>
+                <strong>${Number(order.total_price).toString()} ₪</strong>
             </td>
         </tr>
     `;
@@ -700,30 +701,63 @@ function formateOrdersAndSalesByHour(){
 }
 
 
-function setcashSummery(){
-    document.getElementById('totalOrder').textContent = `${completedOrdersCount + deletedOrdersCount}`;
-    document.getElementById('completedOrder').innerHTML= `<i class="fas fa-check-circle"></i> ${completedOrdersCount} مكتملة`;
-    document.getElementById('deletedOrder').innerHTML  = `<i class="fas fa-times-circle"></i> ${deletedOrdersCount} ملغية`;
+function setcashSummery() {
+    const cashSales = Number(cashSummery?.cash_sales || 0);
+    const cardSales = Number(cashSummery?.card_sales || 0);
+    const openingCash = Number(cashSummery?.opening_cash || 0);
+    const expectedCash = Number(cashSummery?.expected_cash || 0);
+    const cashOut = Number(cashSummery?.cash_out || 0);
+    const cashIn = Number(cashSummery?.cash_in || 0);
 
-    document.getElementById('completedCount').textContent = `طلبات مكتملة ${completedOrdersCount}`
-    document.getElementById('deletedCount').textContent = `طلبات محذوفة ${deletedOrdersCount}`
+    document.getElementById('totalOrder').textContent =
+        `${completedOrdersCount + deletedOrdersCount}`;
 
-    document.getElementById('totalSales').textContent = `${cashSummery.cash_sales + cashSummery.card_sales} ₪`;
-    document.getElementById('cashSales').innerHTML    = `<i class="fas fa-money-bill-wave"></i> ${cashSummery?.cash_sales || 0} ₪ كاش`;
-    document.getElementById('cardSales').innerHTML    = `<i class="fas fa-credit-card"></i> ${cashSummery?.card_sales ||0} ₪ بطاقة`;
+    document.getElementById('completedOrder').innerHTML =
+        `<i class="fas fa-check-circle"></i> ${completedOrdersCount} مكتملة`;
 
-    document.getElementById('averageDemand').textContent = completedOrdersCount === 0 ? '0 ₪' 
-                                                        : `${((cashSummery.cash_sales + cashSummery.card_sales) / completedOrdersCount).toFixed(2)} ₪` ;
+    document.getElementById('deletedOrder').innerHTML =
+        `<i class="fas fa-times-circle"></i> ${deletedOrdersCount} ملغية`;
 
-    document.getElementById('averageDemandNote').innerHTML =`<i class="fas fa-receipt"></i> متوسط قيمة الفاتورة`;
+    document.getElementById('completedCount').textContent =
+        `طلبات مكتملة ${completedOrdersCount}`;
 
-    document.getElementById('openingCash').innerHTML     =`<i class="fas fa-door-open"></i> افتتاحي ${cashSummery.opening_cash} ₪`;
-    document.getElementById('expectedCash').innerHTML    =`<i class="fas fa-coins"></i> الرصيد ${cashSummery.expected_cash} ₪`;
-    document.getElementById('cashOut').innerHTML         =`<i class="fas fa-minus-circle"></i> سحب ${cashSummery?.cash_out || 0} ₪`;
-    document.getElementById('cashIn').innerHTML          =`<i class="fas fa-plus-circle"></i> إضافة ${cashSummery?.cash_in || 0} ₪`;
+    document.getElementById('deletedCount').textContent =
+        `طلبات محذوفة ${deletedOrdersCount}`;
 
-    document.getElementById('trCashAdd').textContent = `إضافة ${cashSummery?.cash_in || 0} ₪`;
-    document.getElementById('trCashOut').textContent = `مصروفات ${cashSummery?.cash_out || 0} ₪`;
+    document.getElementById('totalSales').textContent =
+        `${cashSales + cardSales} ₪`;
+
+    document.getElementById('cashSales').innerHTML =
+        `<i class="fas fa-money-bill-wave"></i> ${cashSales} ₪ كاش`;
+
+    document.getElementById('cardSales').innerHTML =
+        `<i class="fas fa-credit-card"></i> ${cardSales} ₪ بطاقة`;
+
+    document.getElementById('averageDemand').textContent =
+        completedOrdersCount === 0
+            ? '0 ₪'
+            : `${((cashSales + cardSales) / completedOrdersCount).toFixed(2)} ₪`;
+
+    document.getElementById('averageDemandNote').innerHTML =
+        `<i class="fas fa-receipt"></i> متوسط قيمة الفاتورة`;
+
+    document.getElementById('openingCash').innerHTML =
+        `<i class="fas fa-door-open"></i> افتتاحي ${openingCash} ₪`;
+
+    document.getElementById('expectedCash').innerHTML =
+        `<i class="fas fa-coins"></i> الرصيد ${expectedCash} ₪`;
+
+    document.getElementById('cashOut').innerHTML =
+        `<i class="fas fa-minus-circle"></i> سحب ${cashOut} ₪`;
+
+    document.getElementById('cashIn').innerHTML =
+        `<i class="fas fa-plus-circle"></i> إضافة ${cashIn} ₪`;
+
+    document.getElementById('trCashAdd').textContent =
+        `إضافة ${cashIn} ₪`;
+
+    document.getElementById('trCashOut').textContent =
+        `مصروفات ${cashOut} ₪`;
 }
 function updateDashboardUI(){
     if(hasOpeningSession){
@@ -916,7 +950,7 @@ function openCloseCashModal(){
     document.getElementById('cardSalesModal').textContent    = `${cashSummery?.card_sales || 0} ₪`;
     document.getElementById('cashOutModal').textContent      = `- ${cashSummery?.cash_out || 0} ₪`;
     document.getElementById('cashInModal').textContent       = `+ ${cashSummery?.cash_in || 0} ₪`;
-    
+    document.getElementById('finalExpectedCashModal').textContent = `${cashSummery.expected_cash} ₪`
     clearCashDifferenceContaner();
 
     confirmCloseCashBtn.disabled = true;

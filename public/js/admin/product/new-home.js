@@ -516,49 +516,7 @@ function renderItemsTable(items) {
 
     const fragment = document.createDocumentFragment();
 
-    // for (const item of items) {
-    //     const row = document.createElement("tr");
-
-    //     const nameCell = document.createElement("td");
-    //     nameCell.className = "item-name-cell";
-    //     nameCell.textContent = item.name ?? "بدون اسم";
-
-
-
-    //     const actionsCell = document.createElement("td");
-    //     actionsCell.className = "item-actions-cell";
-
-    //     const editButton = document.createElement("button");
-    //     editButton.type = "button";
-    //     editButton.className =
-    //         "btn item-action-btn item-edit-btn";
-    //     editButton.dataset.action = "edit";
-    //     editButton.dataset.itemId = String(item.id);
-    //     editButton.title = "تعديل الصنف";
-    //     editButton.setAttribute("aria-label", "تعديل الصنف");
-
-    //     const editIcon = document.createElement("i");
-    //     editIcon.className = "fa-solid fa-pen-to-square";
-    //     editButton.appendChild(editIcon);
-
-    //     const deleteButton = document.createElement("button");
-    //     deleteButton.type = "button";
-    //     deleteButton.className =
-    //         "btn item-action-btn item-delete-btn";
-    //     deleteButton.dataset.action = "delete";
-    //     deleteButton.dataset.itemId = String(item.id);
-    //     deleteButton.title = "حذف الصنف";
-    //     deleteButton.setAttribute("aria-label", "حذف الصنف");
-
-    //     const deleteIcon = document.createElement("i");
-    //     deleteIcon.className = "fa-solid fa-trash-can";
-    //     deleteButton.appendChild(deleteIcon);
-
-    //     actionsCell.append(editButton, deleteButton);
-    //     row.append(nameCell, actionsCell);
-
-    //     fragment.appendChild(row);
-    // }
+    
 
     for (const item of items) {
         const row = document.createElement("tr");
@@ -1119,7 +1077,7 @@ function renderItemPrices(item) {
             return html + `
                     <li class="list">
                         <span class="badge bg-primary" dir="ltr">
-                            ${escapeHtml(unit.unit_name)} : ₪ ${escapeHtml(unit.price)}
+                            ${escapeHtml(unit.unit_name)} : ₪ ${escapeHtml(Number(unit.price).toString())}
                         </span>
                     </li>
                 `;
@@ -1134,7 +1092,7 @@ function renderItemPrices(item) {
         <li class="list">
             <span class="badge bg-primary" dir="ltr">
 
-                ${escapeHtml(units[0].unit_name)} : ₪ ${escapeHtml(units[0].price ?? '-')}
+                ${escapeHtml(units[0].unit_name)} : ₪ ${escapeHtml(Number(units[0].price).toString() ?? '-')}
             </span>
         </li>
         </ul>

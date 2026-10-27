@@ -318,7 +318,7 @@ function renderOrdersTable() {
 
                 <td data-label = 'التاريخ' class='nowrap-cell'>${formatDateOnly(utcToPalestine(order.created_at))}</td>
                 <td data-label = 'الوقت' class='nowrap-cell'>${formatTimeOnly(utcToPalestine(order.created_at))}</td>
-                <td data-label = 'المبلغ' class='nowrap-cell fw-bold'>${order.total_price} ₪</td>
+                <td data-label = 'المبلغ' class='nowrap-cell fw-bold'>${Number(order.total_price).toString()} ₪</td>
                 <td data-label = 'الحالة'><span class="status-badge ${statusClass}">${order.status}</span></td>
 
                 <td data-label = 'الإجراءات' class='content-action-btn'>
@@ -643,7 +643,7 @@ function viewOrder(orderId) {
                     —
                     ₪${discountValue}
                 </td>
-                <td class='fw-bold'>${item.quantity * item.price} ₪</td>
+                <td class='fw-bold'>${Number(Number(item.quantity) * Number(item.price)).toFixed(2)} ₪</td>
             </tr>
         `;
     });
@@ -654,7 +654,7 @@ function viewOrder(orderId) {
                 <strong>المجموع بدون الخصم</strong>
             </td>
             <td>
-                <strong>${order.total_price + order.discount} ₪</strong>
+                <strong>${Number(order.total_price) + Number(order.discount)} ₪</strong>
             </td>
         </tr>
 
@@ -664,10 +664,10 @@ function viewOrder(orderId) {
             </td>
             <td class="text-danger">
                 ${Number(order.total_discount_p) > 0
-                    ?`<strong>${order.total_discount_p}%</strong> —`
+                    ?`<strong>${Number(order.total_discount_p).toString()}%</strong> —`
                     :''
                 }
-                <strong>${order.discount} ₪</strong>
+                <strong>${Number(order.discount)} ₪</strong>
             </td>
         </tr>
 
@@ -676,7 +676,7 @@ function viewOrder(orderId) {
                 <strong>الإجمالي</strong>
             </td>
             <td>
-                <strong>${order.total_price} ₪</strong>
+                <strong>${Number(order.total_price).toString()} ₪</strong>
             </td>
         </tr>
     `;

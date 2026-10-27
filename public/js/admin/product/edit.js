@@ -624,7 +624,6 @@ document.getElementById("productForm").addEventListener(
 ========================= */
 
 async function submitProductData(finalData) {
-
     loader.style.display = "flex";
 
     try {
@@ -713,17 +712,23 @@ function setUnits(data) {
 
             unit_name: unit.unit_name,
 
-            conversion_factor: unit.conversion_factor,
+            conversion_factor: Number(unit.conversion_factor).toLocaleString('en-US', {
+                maximumFractionDigits: 2
+            }),
 
             barcode: unit.barcode || null,
 
             auto_generated_barcode: false,
 
-            selling_price: unit.price,
+            // selling_price: unit.price,
 
-            for_sale: unit.for_sale,
+            selling_price: Number(unit.price).toLocaleString('en-US', {
+                maximumFractionDigits: 2
+            }),
 
-            for_purchase: unit.for_purchase
+            for_sale: Number(unit.for_sale) === 1,
+
+            for_purchase: Number(unit.for_purchase) === 1
         };
 
         units.push(newUnit);

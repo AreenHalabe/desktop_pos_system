@@ -294,11 +294,11 @@ async function deleteTransaction(id) {
 
 
 function setCashSummery() {
-  document.getElementById('expectedCash').textContent = `${cashSummery?.expected_cash || 0} ₪`;
-  document.getElementById('openingCash').textContent = `${cashSummery?.opening_cash || 0} ₪`;
-  document.getElementById('cashSales').textContent = `${cashSummery?.cash_sales || 0} ₪`;
-  document.getElementById('cashIn').textContent = `+${cashSummery?.cash_in || 0} ₪`;
-  document.getElementById('cashOut').textContent = `-${cashSummery?.cash_out || 0} ₪`;
+  document.getElementById('expectedCash').textContent = `${Number(cashSummery?.expected_cash).toString() || 0} ₪`;
+  document.getElementById('openingCash').textContent = `${Number(cashSummery?.opening_cash).toString() || 0} ₪`;
+  document.getElementById('cashSales').textContent = `${Number(cashSummery?.cash_sales).toString() || 0} ₪`;
+  document.getElementById('cashIn').textContent = `+${Number(cashSummery?.cash_in).toString() || 0} ₪`;
+  document.getElementById('cashOut').textContent = `-${Number(cashSummery?.cash_out).toString() || 0} ₪`;
 }
 function setSpinnerLoader() {
   const spinner = '<div class="spinner-border spinner-border-sm text-primary" role="status"></div>';

@@ -1,5 +1,5 @@
 
-import { getAuthToken, setAuthToken, setAdminId } from "../../component/auth.js";
+import { setAuthToken, setAdminId } from "../../component/auth.js";
 import { setPortNumber } from "../../../env.js";
 const errorList = document.getElementById('error_list');
 const errorMessage = document.getElementById('errors');
@@ -27,10 +27,16 @@ form.addEventListener('submit', async (e) => {
         password: form.password.value
     };
 
-    const port = await window.electronAPI.getPort();
-    setPortNumber(port);
+    if(!urlEndPoint){
+        const port = await window.electronAPI.getPort();
+        setPortNumber(port);
 
-    urlEndPoint = `http://localhost:${port}`;
+        // urlEndPoint = `http://localhost:${port}`;
+    }
+
+    
+
+    urlEndPoint = `http://localhost:${3000}`;
 
     try {
         const res = await fetch(urlEndPoint + '/login', {
@@ -49,10 +55,8 @@ form.addEventListener('submit', async (e) => {
             setAuthToken('user-auth', data.token);
             setAdminId(data.id);
 
-            openRoleModal();
 
-            //window.location.href = './admin/category/home.html';
-            return;
+            window.location.href = './cashier/order/index.html';
         }
         else if (res.status === 403) {
             bootbox.alert({
@@ -80,28 +84,8 @@ form.addEventListener('submit', async (e) => {
 
 document.addEventListener('click', async function (e) {
 
-    if (e.target.closest('#adminLoginBtn')) {
-        const adminPassword = document.getElementById('adminPassword').value.trim();
-        await loginAsAdmin(adminPassword);
-        return;
-    };
-
-    if (e.target.closest('.role-btn')) {
-        const btn = e.target.closest('.role-btn');
-        if (!btn) return;
-
-        const role = btn.getAttribute('data-role');
-
-        if (role === "admin") {
-            bootboxLogin();
-        } else {
-            window.location.href = './cashier/order/index.html';
-        }
-
-        const modal = bootstrap.Modal.getInstance(loginModalEl);
-        modal.hide();
-
-        return;
+    if (e.target.closest('.admin-login-btn')) {
+        bootboxLogin();
     }
 
     if (e.target.closest('.toggle-password')) {
@@ -124,52 +108,6 @@ document.addEventListener('click', async function (e) {
 });
 
 
-async function loginAsAdmin(adminPassword) {
-    clearModalErrors();
-
-
-    try {
-        const res = await fetch(urlEndPoint + `/login-as-admin`, {
-            method: 'POST',
-            headers: {
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify(
-                {
-                    id: adminId,
-                    password: adminPassword
-                }
-            ),
-        });
-
-        const data = await res.json();
-
-        if (res.status === 200) {
-            setAuthToken("auth", data.token);
-            window.location.href = './admin/category/home.html';
-            return;
-        }
-        else if (res.status === 403) {
-            bootbox.alert({
-                title: "⚠️ تنبيه",
-                message: data.message,
-                centerVertical: true,
-                backdrop: true,
-                className: "fs-6"
-            });
-
-        }
-        else {
-            displayModalError(data.message);
-        }
-    } catch (err) {
-        displayModalError(err.message);
-    }
-
-}
-
-
-
 
 
 function disableLoginButton() {
@@ -188,10 +126,6 @@ function clearErrors() {
 }
 
 
-function openRoleModal() {
-    const modal = new bootstrap.Modal(loginModalEl);
-    modal.show();
-}
 
 function displayModalError(message) {
     const errorListModal = document.getElementById('error_list_modal');
@@ -209,55 +143,176 @@ function clearModalErrors() {
 
 
 function bootboxLogin() {
-    bootbox.dialog({
+
+    const dialog = bootbox.dialog({
         title: `
-      <div class="d-flex justify-content-between align-items-center">
-        <span class="fw-bold text-primary">
-          <i class="bi bi-box-arrow-in-right ms-2"></i>
-          تسجيل الدخول
-        </span>
-      </div>
-    `,
+            <div class="admin-modal-title">
+                <span>
+                    <i class="fas fa-user-shield"></i>
+                    تسجيل دخول الإدارة
+                </span>
+            </div>
+        `,
+
         message: `
-        <div class="text-center">
-            <div class="password-wrapper">
-                <i class="fas fa-eye toggle-password" data-target="adminPassword"></i>
-                <div class="input-group mb-4">
-                    <input type="password"  class="form-control" id="adminPassword" 
-                        placeholder="كلمة سر الآدمن" autocomplete="current-password" required>
- 
+            <form id="admin-login-form">
+
+                <div class="input-group mb-3">
+                    <input
+                        type="text"
+                        class="form-control"
+                        id="adminUsername"
+                        name="username"
+                        placeholder="اسم المستخدم"
+                        autocomplete="username"
+                        required
+                    >
+
                     <span class="input-group-text">
-                        <i class="fas fa-user-lock text-primary"></i>
+                        <i class="fas fa-user"></i>
                     </span>
                 </div>
-            </div>
 
-           
+                <div class="password-wrapper">
 
-            <button id="adminLoginBtn" class="btn btn-primary w-100">
-            تسجيل الدخول
-            </button>
+                    <i
+                        class="fas fa-eye toggle-password"
+                        data-target="adminPassword">
+                    </i>
 
-            <div id="error_list_modal" class="alert alert-danger p-2 mt-3 d-none">
-                <div id="errors_modal" class="mb-0 ps-3 text-danger"></div>
-            </div>
+                    <div class="input-group mb-3">
 
-        </div>
-    `,
+                        <input
+                            type="password"
+                            class="form-control"
+                            id="adminPassword"
+                            name="password"
+                            placeholder="كلمة سر الإدارة"
+                            autocomplete="current-password"
+                            required
+                        >
+
+                        <span class="input-group-text">
+                            <i class="fas fa-lock"></i>
+                        </span>
+
+                    </div>
+
+                </div>
+
+                <div
+                    id="error_list_modal"
+                    class="alert alert-danger p-2 mt-3 d-none"
+                >
+                    <div
+                        id="errors_modal"
+                        class="mb-0 ps-3 text-danger">
+                    </div>
+                </div>
+
+                <button
+                    type="submit"
+                    id="adminLoginBtn"
+                    class="admin-modal-login-btn w-100"
+                >
+                    <i class="fas fa-right-to-bracket"></i>
+                    تسجيل الدخول
+                </button>
+
+            </form>
+        `,
+
         centerVertical: true,
         closeButton: false,
+
         buttons: {
             cancel: {
                 label: 'إلغاء',
                 className: 'btn-secondary'
             }
-        },
+        }
     });
 
+    // الآن dialog موجود
+    dialog.on('shown.bs.modal', function () {
+
+        const adminLoginForm =
+            document.getElementById('admin-login-form');
+
+        adminLoginForm.addEventListener("submit", async (e) => {
+
+            // مهم جداً
+            e.preventDefault();
+            
+            const loginBtn = document.getElementById('adminLoginBtn');
+
+            disableLoginButton(loginBtn);
+
+            
+            const username =
+                document.getElementById("adminUsername").value.trim();
+
+            const password =
+                document.getElementById("adminPassword").value;
+
+            const formdata = {
+                name: username,
+                password: password
+            };
+
+            clearModalErrors();
+
+
+            if(!urlEndPoint){
+                const port = await window.electronAPI.getPort();
+                setPortNumber(port);
+
+                // urlEndPoint = `http://localhost:${port}`;
+            }
+
+            
+
+            urlEndPoint = `http://localhost:${3000}`;
+
+            try {
+
+                const res = await fetch(
+                    urlEndPoint + `/login-as-admin`,
+                    {
+                        method: 'POST',
+
+                        headers: {
+                            "Content-Type": "application/json"
+                        },
+
+                        body: JSON.stringify(formdata)
+                    }
+                );
+
+                const data = await res.json();
+
+                if (res.status === 200) {
+
+                    setAuthToken("auth", data.token);
+                    setAdminId(data.id);
+
+                    window.location.href =
+                        './admin/category/home.html';
+
+                    return;
+                }
+
+                displayModalError(data.message);
+
+            } catch (err) {
+
+                displayModalError(err.message);
+
+            }finally {
+                enableLoginButton(loginBtn);
+            }
+
+        });
+
+    });
 }
-
-//  <input type="password" id="adminPassword"  
-//                 class="form-control mb-3" dir='ltr'
-//                 placeholder="أدخل كلمة سر الأدمن" required></input>
-
-

@@ -4,7 +4,6 @@ import { displayContainer, displayError, observer, toUTC } from "../report/share
 import { urlServer, url } from "../../../api/urlEndPoint.js";
 
 
-
 const header = document.querySelector("site-header");
 const barChartCard = document.getElementById('barChartCard');
 const pieChartCard = document.getElementById('pieChartCard');
@@ -57,20 +56,16 @@ header.addEventListener("header:ready", () => {
 
 document.addEventListener('DOMContentLoaded', async function () {
   let { from, to } = getCurrentAndLastWeekTimestamp();
-
+  console.log(from, to);
   from = toUTC(from);
   to = toUTC(to);
-
+   console.log(from, to);
   await loadAnalysisData(from, to);
-
 });
-
-
 
 document.querySelectorAll(".reveal").forEach(el => {
   observer.observe(el);
 });
-
 
 document.addEventListener("click", async function (e) {
 
@@ -107,8 +102,8 @@ function showOverLayLoder() {
   `;
 
   document.getElementById('overlay_loader').style.display = 'flex';
-
 }
+
 function hiddeOverLayLoder() {
   document.getElementById('overlay_loader').style.display = 'none';
 
@@ -120,7 +115,6 @@ function hiddeOverLayLoder() {
   <span>تصدير البيانات</span> 
   `;
 }
-
 
 async function loadAnalysisData(startDate, endDate) {
   try {
@@ -144,10 +138,20 @@ async function loadAnalysisData(startDate, endDate) {
       showAuthExpired(data.message);
     }
     else if (res.status === 200) {
-      prevRevenue = data.statisticsData?.previous_revenue;
-      prevTotalOrders = data.statisticsData?.previous_total_orders;
-      orderByDay = data.orders_by_day;
-      salesByItems = data.top_sales_items;
+      prevRevenue = Number(data.statisticsData?.previous_revenue ?? 0);
+      prevTotalOrders = Number(data.statisticsData?.previous_total_orders ?? 0);
+
+      orderByDay = (data.orders_by_day ?? []).map(item => ({
+        ...item,
+        orders_count: Number(item.orders_count),
+        total_sales: Number(item.total_sales)
+      }));
+
+      salesByItems = (data.top_sales_items ?? []).map(item => ({
+        ...item,
+        quantity: Number(item.quantity),
+        total_qty: Number(item.total_qty)
+      }));
     }
     else {
       displayError(data.message);
@@ -165,11 +169,11 @@ function setHeaderSummery() {
   const { totalOrder, revenue, avgDemandOrder, topItem } = getCashSummery();
 
   document.getElementById('totalOrder').textContent = `${totalOrder}`;
-  document.getElementById('totalSales').textContent = `${revenue} ₪`;
-  document.getElementById('averageDemand').textContent = `${avgDemandOrder} ₪`;
+  document.getElementById('totalSales').textContent = `${Number(revenue).toFixed(2)} ₪`;
+  document.getElementById('averageDemand').textContent = `${Number(avgDemandOrder).toFixed(2)} ₪`;
 
   document.getElementById('topSellingItemName').textContent = `${topItem.name}`;
-  document.getElementById('topSellingItemValue').textContent = `(${topItem.totalQty}) طلب`;
+  document.getElementById('topSellingItemValue').textContent = `(${Number(topItem.totalQty)}) طلب`;
 
   const prevAvgDemandOrder = getPrevAvgOrderDemand();
 
@@ -177,17 +181,20 @@ function setHeaderSummery() {
   setRevenuePersantageChange(revenue, prevRevenue);
 
   setAvgDemandOrderPersantageChange(avgDemandOrder, prevAvgDemandOrder);
-
 }
 
 function getPrevAvgOrderDemand() {
-  const prevAvg = prevTotalOrders === 0
+  const prevAvg = Number(prevTotalOrders) === 0
     ? 0
-    : (prevRevenue / prevTotalOrders).toFixed(2);
+    : Number((Number(prevRevenue) / Number(prevTotalOrders)).toFixed(2));
+
   return prevAvg;
 }
 
 function getComparisonData(currentAvg, previousAvg) {
+  currentAvg = Number(currentAvg);
+  previousAvg = Number(previousAvg);
+
   if (!previousAvg || previousAvg === 0) {
     return {
       text: 'لا يوجد بيانات سابقة للمقارنة',
@@ -207,8 +214,9 @@ function getComparisonData(currentAvg, previousAvg) {
     };
   }
 
-  const change = ((currentAvg - previousAvg) / previousAvg) * 100;
-  const percent = Math.abs(change).toFixed(1);
+  const change = Number((((currentAvg - previousAvg) / previousAvg) * 100).toFixed(2));
+  const percent = Number(Math.abs(change).toFixed(2)).toFixed(2);
+
   let result = {
     percent,
     progress: Math.min(Math.abs(change), 100)
@@ -242,28 +250,36 @@ function getComparisonData(currentAvg, previousAvg) {
 
 function setOrderPersantageChange(totalOrders, prevTotalOrder) {
   const orderChange = getComparisonData(totalOrders, prevTotalOrder);
-  document.getElementById('orderChangeIcon').className = orderChange.icon + ' ' + orderChange.className.split(' ')[1];
-  document.getElementById('orderChangeValue').className = orderChange.className.split(' ')[1];
+
+  document.getElementById('orderChangeIcon').className =
+    orderChange.icon + ' ' + orderChange.className.split(' ')[1];
+
+  document.getElementById('orderChangeValue').className =
+    orderChange.className.split(' ')[1];
+
   document.getElementById('orderChangeValue').textContent = orderChange.text;
 }
+
 function setRevenuePersantageChange(totalRevenue, prevRevenue) {
   const revenueChange = getComparisonData(totalRevenue, prevRevenue);
-  document.getElementById('revenueChangeIcon').className = revenueChange.icon + ' ' + revenueChange.className.split(' ')[1];
-  document.getElementById('revenueChangeValue').className = revenueChange.className.split(' ')[1];
+
+  document.getElementById('revenueChangeIcon').className =
+    revenueChange.icon + ' ' + revenueChange.className.split(' ')[1];
+
+  document.getElementById('revenueChangeValue').className =
+    revenueChange.className.split(' ')[1];
+
   document.getElementById('revenueChangeValue').textContent = revenueChange.text;
 }
 
 function setAvgDemandOrderPersantageChange(currentAvg, prevAvg) {
   const data = getComparisonData(currentAvg, prevAvg);
   const className = data.className.split(' ');
+
   document.getElementById('avgText').className = className[1];
   document.getElementById('avgText').textContent = data.text;
   document.getElementById('iconAvg').className = data.icon;
 }
-
-
-
-
 
 function updateDashboardUI() {
   hiddeLoderChart(barChartCard);
@@ -283,22 +299,26 @@ function getCashSummery() {
   let totalOrder = 0;
   let revenue = 0;
   let avgDemandOrder = 0;
+
   let topItem = {
     name: 'لا يوجد بيانات',
     totalQty: 0
-  }
+  };
 
   if (orderByDay.length > 0) {
     for (const i of orderByDay) {
-      totalOrder += i.orders_count;
-      revenue += i.total_sales;
+      totalOrder += Number(i.orders_count);
+      revenue += Number(i.total_sales);
     }
+
     avgDemandOrder = totalOrder === 0
       ? 0
-      : (revenue / totalOrder).toFixed(2);
+      : Number((Number(revenue) / Number(totalOrder)).toFixed(2));
 
-    topItem.name = salesByItems[0].name;
-    topItem.totalQty = salesByItems[0].quantity;
+    if (salesByItems.length > 0) {
+      topItem.name = salesByItems[0].name;
+      topItem.totalQty = Number(salesByItems[0].quantity);
+    }
   }
 
   return {
@@ -306,25 +326,23 @@ function getCashSummery() {
     revenue,
     avgDemandOrder,
     topItem
-  }
-
+  };
 }
 
 function hiddeLoderChart(parentContainer) {
   const loader = parentContainer.querySelector('.loader-chart');
   loader.classList.add('d-none');
 }
+
 function displayMessageChart(parentContainer) {
   const message = parentContainer.querySelector('.message-chart');
   message.classList.remove('d-none');
 }
+
 function displayChartContainer(parentContainer) {
   const chart = parentContainer.querySelector('.chart-div');
   chart.classList.remove('d-none');
 }
-
-
-
 
 function getCurrentAndLastWeekTimestamp() {
   const now = new Date();
@@ -343,14 +361,20 @@ function getCurrentAndLastWeekTimestamp() {
   const parts = formatter.formatToParts(now);
   const get = (type) => parts.find(p => p.type === type).value;
 
-  const currentDate = `${get("year")}-${get("month")}-${get("day")} ${get("hour")}:${get("minute")}:${get("second")}`;
+  const currentDate =
+    `${get("year")}-${get("month")}-${get("day")} ${get("hour")}:${get("minute")}:${get("second")}`;
 
   // بداية اليوم قبل 7 أيام
-  const localDate = new Date(`${get("year")}-${get("month")}-${get("day")}T00:00:00`);
+  const localDate = new Date(
+    `${get("year")}-${get("month")}-${get("day")}T00:00:00`
+  );
+
   localDate.setDate(localDate.getDate() - 7);
 
   const lastParts = formatter.formatToParts(localDate);
-  const lastWeek = `${lastParts.find(p => p.type === "year").value}-${lastParts.find(p => p.type === "month").value}-${lastParts.find(p => p.type === "day").value}`;
+
+  const lastWeek =
+    `${lastParts.find(p => p.type === "year").value}-${lastParts.find(p => p.type === "month").value}-${lastParts.find(p => p.type === "day").value}`;
 
   return {
     from: lastWeek + " 00:00:00",
@@ -358,12 +382,10 @@ function getCurrentAndLastWeekTimestamp() {
   };
 }
 
-
-
 function drowingBarChartForOrderByDays() {
   const days = orderByDay.map(item => item.day_name);
-  const orders = orderByDay.map(item => item.orders_count);
-  const sales = orderByDay.map(item => item.total_sales);
+  const orders = orderByDay.map(item => Number(item.orders_count));
+  const sales = orderByDay.map(item => Number(Number(item.total_sales).toFixed(2)));
 
   const ctx = document.getElementById("barChart");
 
@@ -375,8 +397,7 @@ function drowingBarChartForOrderByDays() {
 
   displayChartContainer(barChartCard);
 
-
-
+  Chart.getChart(ctx)?.destroy();
 
   new Chart(ctx, {
     data: {
@@ -412,15 +433,19 @@ function drowingBarChartForOrderByDays() {
           displayColors: false,
           titleFont: { size: 14 },
           bodyFont: { size: 14 },
+
           callbacks: {
             label: function (context) {
-              return "عدد الطلبات: " + context.parsed.y;
+              return "عدد الطلبات: " + Number(context.parsed.y);
             },
+
             afterLabel: function (context) {
-              return "المبيعات: ₪ " + context.dataset.sales[context.dataIndex];
+              return "المبيعات: ₪ " +
+                Number(context.dataset.sales[context.dataIndex]).toFixed(2);
             }
           }
         },
+
         legend: {
           position: "top",
           labels: {
@@ -431,6 +456,7 @@ function drowingBarChartForOrderByDays() {
             boxHeight: 0
           }
         },
+
         datalabels: {
           color: 'black',
           anchor: 'end',
@@ -438,8 +464,10 @@ function drowingBarChartForOrderByDays() {
           offset: 4,
           textAlign: 'center',
           font: { size: 12, weight: 'bold' },
+
           formatter: function (value, context) {
-            return "₪ " + context.dataset.sales[context.dataIndex];
+            return "₪ " +
+              Number(context.dataset.sales[context.dataIndex]).toFixed(2);
           }
         }
       },
@@ -452,36 +480,41 @@ function drowingBarChartForOrderByDays() {
             font: { size: 17 },
             color: "black"
           },
+
           ticks: {
             font: {
               size: 18,
               weight: 'bold'
             },
+
             callback: function (value) {
               return '\u200E' + this.getLabelForValue(value);
             }
           },
+
           grid: { display: false }
         },
 
         yOrders: {
           type: "linear",
           position: "left",
+
           title: {
             display: true,
             text: "عدد الطلبات",
             font: { size: 17 },
             color: "black"
           },
+
           grid: { color: "rgba(0,0,0,0.08)" }
         }
-
       }
     },
 
     plugins: [ChartDataLabels]
   });
 }
+
 function drowingPieChartFroItemBySales() {
   const ctx = document.getElementById('pieChart');
   const labels = salesByItems.map(item => item.name);
@@ -491,10 +524,11 @@ function drowingPieChartFroItemBySales() {
     displayContainer(msgDiv);
     return;
   }
+
   displayChartContainer(pieChartCard);
 
-  const quantities = salesByItems.map(item => item.quantity);
-  const totalQuantity = salesByItems[0].total_qty;
+  const quantities = salesByItems.map(item => Number(item.quantity));
+  const totalQuantity = Number(salesByItems[0].total_qty);
 
   Chart.getChart(ctx)?.destroy();
 
@@ -503,8 +537,10 @@ function drowingPieChartFroItemBySales() {
 
     data: {
       labels: labels,
+
       datasets: [{
         data: quantities,
+
         backgroundColor: [
           "#0dcaf0",
           "#66BB6A",
@@ -520,11 +556,12 @@ function drowingPieChartFroItemBySales() {
       maintainAspectRatio: false,
 
       plugins: {
-
         legend: {
           position: "top",
+
           labels: {
             color: "#000000",
+
             font: {
               size: 15,
               weight: 'bold'
@@ -536,10 +573,12 @@ function drowingPieChartFroItemBySales() {
           rtl: true,
           bodyAlign: "right",
           displayColors: false,
+
           callbacks: {
             label: () => null,
+
             afterLabel: function (context) {
-              return "عدد الطلبات: " + context.raw;
+              return "عدد الطلبات: " + Number(context.raw);
             }
           }
         },
@@ -547,13 +586,18 @@ function drowingPieChartFroItemBySales() {
         datalabels: {
           color: "#fff",
           textAlign: "center",
+
           font: {
             weight: "bold",
             size: 14
           },
+
           formatter: function (value) {
-            const percentage = ((value / totalQuantity) * 100).toFixed(1);
-            return percentage + "%\n" + value + " طلب";
+            const percentage = Number(
+              ((Number(value) / Number(totalQuantity)) * 100).toFixed(2)
+            ).toFixed(2);
+
+            return percentage + "%\n" + Number(value) + " طلب";
           }
         }
       }
@@ -561,5 +605,4 @@ function drowingPieChartFroItemBySales() {
 
     plugins: [ChartDataLabels]
   });
-
 }
