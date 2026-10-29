@@ -57,9 +57,9 @@ header.addEventListener("header:ready", () => {
 document.addEventListener('DOMContentLoaded', async function () {
   let { from, to } = getCurrentAndLastWeekTimestamp();
   console.log(from, to);
-  from = toUTC(from);
-  to = toUTC(to);
-   console.log(from, to);
+  // from = toUTC(from);
+  // to = toUTC(to);
+  //  console.log(from, to);
   await loadAnalysisData(from, to);
 });
 

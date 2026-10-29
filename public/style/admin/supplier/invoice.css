@@ -110,6 +110,72 @@ body {
     margin-left: 0;
 }
 
+.invoice-bg{
+    background-color: #4e2a91;
+    
+}
+.invoice-color{
+    color: #4e2a91;
+}
+
+
+#confirmOrder {
+    background-color: #6f42c1;
+    border: 1px solid #6f42c1;
+    color: #fff;
+    border-radius: 10px;
+    padding: 9px 32px;
+    min-width: 200px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease-in-out;
+    box-shadow: 0 3px 6px rgba(111, 66, 193, 0.2);
+}
+
+#confirmOrder:hover {
+    background-color: #5a32a3;
+    border-color: #5a32a3;
+    transform: translateY(-2px);
+    box-shadow: 0 5px 12px rgba(111, 66, 193, 0.35);
+}
+
+#confirmOrder:active {
+    background-color: #4e2a91;
+    border-color: #4e2a91;
+    transform: translateY(0) scale(0.98);
+    box-shadow: 0 2px 4px rgba(111, 66, 193, 0.2);
+}
+
+#confirmOrder:focus-visible {
+    outline: 3px solid rgba(111, 66, 193, 0.3);
+    outline-offset: 3px;
+}
+
+#confirmOrder i {
+    margin-left: 5px;
+    transition: transform 0.2s ease-in-out;
+}
+
+#confirmOrder:hover i {
+    transform: scale(1.1);
+}
+
+
+.invoice-datetime-section {
+    padding: 15px;
+    border: 1px solid #dee2e6;
+    border-radius: 8px;
+    background-color: #f8f9fa;
+}
+
+
+.invoice-datetime-section input[type="datetime-local"]:disabled {
+    background-color: #e9ecef;
+    cursor: not-allowed;
+}
+
+
 @media (max-height: 800px) {
     .products-container {
         grid-template-rows: repeat(4, 1fr);

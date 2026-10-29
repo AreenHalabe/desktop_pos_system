@@ -53,7 +53,6 @@ let totalItemsSessions;
 let totalPagesSessions;
 let cashSessionBoxes = [];
 
-
 startDate.addEventListener('input', checkInputs);
 endDate.addEventListener('input', checkInputs);
 
@@ -132,15 +131,15 @@ modal.addEventListener('show.bs.modal', function (event) {
             ${formatHour(time, true)}
         `;
     }
-    document.getElementById('openingCash').textContent      = `${session.opening_cash} ₪`;
-    document.getElementById('cashSalesSession').textContent = `${session.cash_sales} ₪`;
-    document.getElementById('cardSalesSession').textContent = `${session.card_sales} ₪`;
-    document.getElementById('cashIn').textContent           = `+ ${session.cash_in} ₪`;
-    document.getElementById('cashOut').textContent          = `- ${session.cash_out} ₪`;
-    document.getElementById('actualCash').textContent       = `${session.actual_cash} ₪`;
-    document.getElementById('expectedCash').textContent     = `${session.expected_cash} ₪`;
-    document.getElementById('differance').textContent       = `${session.difference} ₪`;
-    const diff = session.difference;
+    document.getElementById('openingCash').textContent      = `${Number(session.opening_cash)} ₪`;
+    document.getElementById('cashSalesSession').textContent = `${Number(session.cash_sales)} ₪`;
+    document.getElementById('cardSalesSession').textContent = `${Number(session.card_sales)} ₪`;
+    document.getElementById('cashIn').textContent           = `+ ${Number(session.cash_in)} ₪`;
+    document.getElementById('cashOut').textContent          = `- ${Number(session.cash_out)} ₪`;
+    document.getElementById('actualCash').textContent       = `${Number(session.actual_cash)} ₪`;
+    document.getElementById('expectedCash').textContent     = `${Number(session.expected_cash)} ₪`;
+    document.getElementById('differance').textContent       = `${Number(session.difference)} ₪`;
+    const diff = Number(session.difference);
 
     if (diff === 0) {
         differanceStatus.classList.remove('alert-danger', 'alert-warning');
@@ -168,7 +167,7 @@ document.addEventListener("click", async function (e) {
             setDateTimeRange(formatDateTimeForFilter(startDate.value), formatDateTimeForFilter(endDate.value));
             hiddeLoader();
         }
-        
+
     }
     else if(e.target.closest('.prevBtn')) {
         const parent = e.target.closest('.pagination-button');
@@ -181,7 +180,7 @@ document.addEventListener("click", async function (e) {
         nextPage(type);
     }
     else if(e.target.closest('.print-btn')){
-        
+
         bootstrap.Modal.getInstance(modal).hide();
         showPrintLoader();
 
@@ -194,7 +193,7 @@ document.addEventListener("click", async function (e) {
             hidePrintLoader();
         }
 
-       
+
     }
 });
 
@@ -216,7 +215,7 @@ document.querySelector('.dropdown-menu').addEventListener('click', (e) => {
             handelTotalPage(allTransactions.length);
             renderTransactionsTable(allTransactions);
         }
-        
+
     }
 });
 
@@ -267,7 +266,7 @@ async function loadSesions() {
     }catch(e){
         displayError(e.message);
     }
-    
+
 }
 async function loadTransactions(sessionsIds) {
     if(sessionsIds.length === 0){
@@ -314,13 +313,13 @@ function setSessionData(sessions){
     if(sessions.length === 0) return;
     for(let session of sessions){
         sessionsIds.push(Number(session.session_id));
-        completedOrdersCount += session.completed_orders_count;
-        deletedOrdersCount   += session.canceled_orders_count;
-        revenueCash          += session.cash_sales;
-        revenueCard          += session.card_sales;
-        cashAdditions        += session.cash_in;
-        cashExpenses         += session.cash_out;
-        totalItemsCost       += session.items_cost;
+        completedOrdersCount += Number(session.completed_orders_count);
+        deletedOrdersCount   += Number(session.canceled_orders_count);
+        revenueCash          += Number(session.cash_sales);
+        revenueCard          += Number(session.card_sales);
+        cashAdditions        += Number(session.cash_in);
+        cashExpenses         += Number(session.cash_out);
+        totalItemsCost       += Number(session.items_cost);
     }
 }
 function resetSessionData(){
@@ -374,7 +373,7 @@ function setHeaderSummery(){
 
     expenses.textContent     = `- ${cashExpenses} ₪`;
     totalExpenses.textContent= `- ${cashExpenses} ₪`;
-    
+
 
     displayContainer(headerSummeryCard);
 }
@@ -385,7 +384,7 @@ function setSummeryRevenue(){
     document.getElementById('additionCashSummery').textContent = `+ ${cashAdditions} ₪`;
     document.getElementById('costOfGoodsSummery').textContent = `${totalItemsCost} ₪`;
     document.getElementById('netProfit').textContent = `${Number((revenueCard + revenueCash + cashAdditions) - (totalItemsCost + cashExpenses)).toFixed(2)} ₪`;
-    
+
     displayContainer(summeryRevenue);
 }
 
@@ -421,8 +420,8 @@ function setCashSessionBoxes(){
     let counter = (currentPageSessions * 9) - (9);
     container.innerHTML = sessions.map((session , index)=> {
         const isOpen = session.closed_at === null;
-        const diffStatus = session.difference === 0 ? 'status-add' : (session.difference < 0 ? 'status-withdraw' : 'status-warning');
-        
+        const diffStatus = Number(session.difference) === 0 ? 'status-add' : (Number(session.difference) < 0 ? 'status-withdraw' : 'status-warning');
+
         return `
         <tr>
 
@@ -452,63 +451,63 @@ function setCashSessionBoxes(){
             </td>
 
             <td class="text-primary" style="font-weight: 600;">
-                ${session.opening_cash} ₪
+                ${Number(session.opening_cash)} ₪
             </td>
 
             <td class="text-success" style="font-weight: 600;">
-               ${session.cash_sales} ₪
+               ${Number(session.cash_sales)} ₪
             </td>
 
             <td class="text-info" style="font-weight: 600;">
-                ${session.card_sales} ₪
+                ${Number(session.card_sales)} ₪
             </td>
 
             <td class="text-success" style="font-weight: 600;">
-                + ${session.cash_in} ₪
+                + ${Number(session.cash_in)} ₪
             </td>
 
             <td class="text-danger" style="font-weight: 600;"> 
-                - ${session.cash_out} ₪
+                - ${Number(session.cash_out)} ₪
             </td>
 
             <td class="text-dark" style="font-weight: 600;">
-                ${session.expected_cash} ₪
+                ${Number(session.expected_cash)} ₪
             </td>
 
             <td class="text-warning" style="font-weight: 600;">
-                ${session.actual_cash} ₪
+                ${Number(session.actual_cash)} ₪
             </td>
-        
-            
+
+
 
             <td>
                 <span class="badge ${diffStatus}" style="font-size: 14px;">
-                ${session.difference} ₪
+                ${Number(session.difference)} ₪
                 </span>
             </td>
-            
+
             <td>
-                <button class="btn btn-sm btn-primary"
+                <button class="btn btn-sm btn-secoundery bg-light view-btn"
                     data-bs-toggle="modal"
                     data-bs-target="#cashBoxModal"
-                    data-box-id="${session.session_id}"
+                    data-box-id="${Number(session.session_id)}"
                 >
-                    <i class="fas fa-print"></i>
+                    <i class="fas fa-eye"></i>
                 </button>
             </td>
 
 
-            
+
         </tr>
         `;
     }).join('');
 
-    //   document.getElementById('cashIn').textContent           = `+ ${session.cash_in} ₪`;
-    // document.getElementById('cashOut').textContent          = `- ${session.cash_out} ₪`;
-    // document.getElementById('actualCash').textContent       = `${session.actual_cash} ₪`;
-    // document.getElementById('expectedCash').textContent     = `${session.expected_cash} ₪`;
-    // document.getElementById('differance').textContent       = `${session.difference} ₪`;
-    // const diff = session.difference;
+    //   document.getElementById('cashIn').textContent           = `+ ${Number(session.cash_in)} ₪`;
+    // document.getElementById('cashOut').textContent          = `- ${Number(session.cash_out)} ₪`;
+    // document.getElementById('actualCash').textContent       = `${Number(session.actual_cash)} ₪`;
+    // document.getElementById('expectedCash').textContent     = `${Number(session.expected_cash)} ₪`;
+    // document.getElementById('differance').textContent       = `${Number(session.difference)} ₪`;
+    // const diff = Number(session.difference);
 
     // if (diff === 0) {
     //     differanceStatus.classList.remove('alert-danger', 'alert-warning');
@@ -562,7 +561,7 @@ function renderTransactionsTable(transactions){
         <tr>
 
             <td>${(++counter).toString().padStart(3, '0')}</td>
-        
+
             <td class="nowrap-cell">${formatDateOnly(utcToPalestine(t.created_at))}</td>
             <td class="nowrap-cell">${formatTimeOnly(utcToPalestine(t.created_at))}</td>
 
@@ -574,10 +573,10 @@ function renderTransactionsTable(transactions){
 
 
             <td class="fw-bold ${isAdd ? 'text-success' : 'text-danger'} nowrap-cell">
-            ${isAdd ? '+' : '-'} ${t.amount.toLocaleString()} ₪
+            ${isAdd ? '+' : '-'} ${Number(t.amount).toLocaleString()} ₪
             </td>
 
-            
+
             <td>${t.note}</td>
         </tr>
         `;
@@ -647,7 +646,7 @@ function prevPage(type) {
         }
 
     }
-    
+
 }
 function nextPage(type) {
     if(type === 'sessions'){

@@ -234,6 +234,28 @@
     color: #1565C0 !important;
 }
 
+
+
+.view-btn {
+    cursor: pointer;
+    background-color: #b3e5fc !important;
+    color: #0277bd !important;
+    border: 1px solid #81d4fa !important;
+    border-radius: 6px;
+    transition: all 0.2s ease;
+}
+
+.view-btn:hover {
+    background-color: #0dcaf0 !important;
+    color: #084298 !important;
+    border-color: #0aa2c0 !important;
+}
+
+.view-btn:active {
+    background-color: #0aa2c0 !important;
+    color: #ffffff !important;
+}
+
 @media (max-width: 768px) {
     .calc-flow {
         flex-direction: column !important;

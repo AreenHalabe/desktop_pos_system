@@ -401,7 +401,7 @@ function renderProducts(productList) {
 
 
                 <div class="product-price">
-                    ${product.cost_price.toFixed(2)} ₪
+                    ${Number(product.cost_price).toFixed(2)} ₪
                 </div>
 
 
@@ -996,10 +996,12 @@ async function loadInvoice() {
             // fillInvoiceData(data.invoice);
         }
         else {
+            console.log('error in loadInvoice');
             bootboxError(data.message);
         }
 
     } catch (e) {
+        console.log('error in loadInvoice catch');
         bootboxError(e.message);
     }
     
@@ -1139,7 +1141,7 @@ function addItemInvoiceInTable(invItems) {
         const product =
             products.find(
                 product =>
-                    product.id === item.item_id
+                    Number(product.id) === Number(item.item_id)
             )
         ;
 
@@ -1148,29 +1150,20 @@ function addItemInvoiceInTable(invItems) {
 
         invoiceItems.push({
 
-            id: item.item_id,
+            id: Number(item.item_id),
 
             name: item.name,
 
-            cost_price: item.cost_price,
+            cost_price: Number(item.cost_price),
 
             unit_id: unitId,
 
             unit_name :item.unit,
 
 
-            qty: item.quantity
+            qty: Number(item.quantity)
 
         });
-
-
-
-
-
-
-
-
-
     });
 
     

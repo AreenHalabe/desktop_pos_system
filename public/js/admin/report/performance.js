@@ -161,14 +161,14 @@ function setHeaderSummery(data) {
     const completedOrder = document.getElementById('completedOrder');
     const deletedOrder = document.getElementById('deletedOrder');
 
-    totalOrder.textContent = data.statisticsData.completed_orders + data.statisticsData.cancelled_orders;
-    completedOrder.innerHTML = `<i class="fas fa-check-circle"></i> ${data.statisticsData.completed_orders} مكتملة`;
-    deletedOrder.innerHTML = `<i class="fas fa-times-circle"></i> ${data.statisticsData.cancelled_orders} ملغية`;
+    totalOrder.textContent = Number(data.statisticsData.completed_orders) + Number(data.statisticsData.cancelled_orders);
+    completedOrder.innerHTML = `<i class="fas fa-check-circle"></i> ${Number(data.statisticsData.completed_orders)} مكتملة`;
+    deletedOrder.innerHTML = `<i class="fas fa-times-circle"></i> ${Number(data.statisticsData.cancelled_orders)} ملغية`;
 
 
-    document.getElementById('totalSales').textContent = `${data.statisticsData.cash_revenue + data.statisticsData.card_revenue} ₪`;
-    document.getElementById('cashSales').innerHTML = `<i class="fas fa-money-bill-wave"></i> ${data.statisticsData.cash_revenue} ₪ كاش`;
-    document.getElementById('cardSales').innerHTML = `<i class="fas fa-credit-card"></i> ${data.statisticsData.card_revenue} ₪ بطاقة`;
+    document.getElementById('totalSales').textContent = `${Number(data.statisticsData.cash_revenue) + Number(data.statisticsData.card_revenue)} ₪`;
+    document.getElementById('cashSales').innerHTML = `<i class="fas fa-money-bill-wave"></i> ${Number(data.statisticsData.cash_revenue)} ₪ كاش`;
+    document.getElementById('cardSales').innerHTML = `<i class="fas fa-credit-card"></i> ${Number(data.statisticsData.card_revenue)} ₪ بطاقة`;
 
     displayContainer(headerSummeryCard);
 }
@@ -183,14 +183,14 @@ function setAnalysesAndInsights(data) {
 
     delivaryOrders.innerHTML = (details?.delivery_orders == null)
         ? `<span class="text-muted">لا توجد بيانات</span>`
-        : `<span class="text-muted">${details.delivery_orders} طلب</span>
-       <span class="text-muted">(${details.delivery_percentage ?? 0}%)</span>`;
+        : `<span class="text-muted">${Number(details.delivery_orders)} طلب</span>
+       <span class="text-muted">(${Number(details.delivery_percentage ?? 0)}%)</span>`;
 
 
     tableOrders.innerHTML = (details?.table_orders == null)
         ? `<span class="text-muted">لا توجد بيانات</span>`
-        : `<span class="text-muted">${details.table_orders} طلب</span>
-       <span class="text-muted">(${details.table_percentage ?? 0}%)</span>`;
+        : `<span class="text-muted">${Number(details.table_orders)} طلب</span>
+       <span class="text-muted">(${Number(details.table_percentage ?? 0)}%)</span>`;
 
 
     const topItem = data.topSalesItems?.length
@@ -223,20 +223,20 @@ function setPeakHourAndBestDay() {
     const peakHourDev = document.getElementById('peakHour');
     const bestDayDev = document.getElementById('bestDay');
     peakHourDev.textContent = peakHour
-        ? `الساعة ${formatHour(peakHour.hour)} (${peakHour.orders_count} طلب)`
+        ? `الساعة ${formatHour(peakHour.hour)} (${Number(peakHour.orders_count)} طلب)`
         : "لا توجد بيانات";
 
     bestDayDev.textContent = bestDay
-        ? `${bestDay.day_name} (${bestDay.total_sales} ₪)`
+        ? `${bestDay.day_name} (${Number(bestDay.total_sales)} ₪)`
         : "لا توجد بيانات";
 }
 function getPeakHourAndBestDay() {
     const bestDay = orderByDay.length ?
-        orderByDay.reduce((prev, current) => current.total_sales > prev.total_sales ? current : prev)
+        orderByDay.reduce((prev, current) => Number(current.total_sales) > Number(prev.total_sales) ? current : prev)
         : null;
 
     const peakHour = orderByHour.length ?
-        orderByHour.reduce((prev, current) => current.orders_count > prev.orders_count ? current : prev)
+        orderByHour.reduce((prev, current) => Number(current.orders_count) > Number(prev.orders_count) ? current : prev)
         : null;
 
     return { peakHour, bestDay };
@@ -249,14 +249,14 @@ function computeAvgDemand(data) {
         return { currentAvg: 0, previousAvg: 0 };
     }
 
-    const totalOrders = data.completed_orders + data.cancelled_orders;
+    const totalOrders = Number(data.completed_orders) + Number(data.cancelled_orders);
 
     const currentAvg = totalOrders > 0
-        ? ((data.card_revenue + data.cash_revenue) / totalOrders).toFixed(1)
+        ? ((Number(data.card_revenue) + Number(data.cash_revenue)) / totalOrders).toFixed(1)
         : 0;
 
-    const previousAvg = data.previous_total_orders > 0
-        ? ((data.previous_revenue) / data.previous_total_orders).toFixed(1)
+    const previousAvg = Number(data.previous_total_orders) > 0
+        ? (Number(data.previous_revenue) / Number(data.previous_total_orders)).toFixed(1)
         : 0;
 
     return { currentAvg, previousAvg };
@@ -296,7 +296,7 @@ function getComparisonData(currentAvg, previousAvg) {
         };
     }
 
-    const change = ((currentAvg - previousAvg) / previousAvg) * 100;
+    const change = ((Number(currentAvg) - Number(previousAvg)) / Number(previousAvg)) * 100;
     const percent = Math.abs(change).toFixed(1);
     let result = {
         percent,
@@ -336,16 +336,16 @@ function setPersentageChange(data) {
 }
 
 function setOrderPersantageChange(data) {
-    const totalOrders = data.completed_orders + data.cancelled_orders;
-    const orderChange = getComparisonData(totalOrders, data.previous_total_orders);
+    const totalOrders = Number(data.completed_orders) + Number(data.cancelled_orders);
+    const orderChange = getComparisonData(totalOrders, Number(data.previous_total_orders));
     document.getElementById('orderChangeIcon').className = orderChange.icon + ' ' + orderChange.className.split(' ')[1];
     document.getElementById('orderChangeValue').className = orderChange.className.split(' ')[1];
     document.getElementById('orderChangeValue').textContent = orderChange.text;
 }
 
 function setRevenuePersantageChange(data) {
-    const totalRevenue = data.card_revenue + data.cash_revenue;
-    const revenueChange = getComparisonData(totalRevenue, data.previous_revenue);
+    const totalRevenue = Number(data.card_revenue) + Number(data.cash_revenue);
+    const revenueChange = getComparisonData(totalRevenue, Number(data.previous_revenue));
     document.getElementById('revenueChangeIcon').className = revenueChange.icon + ' ' + revenueChange.className.split(' ')[1];
     document.getElementById('revenueChangeValue').className = revenueChange.className.split(' ')[1];
     document.getElementById('revenueChangeValue').textContent = revenueChange.text;
@@ -365,7 +365,7 @@ function setDateTimeRange(startRange, endRange) {
 function drawingBarChartForOrdersByHour() {
     hiddeBarChartMessage(lineChartCard);
     const hours = orderByHour.map(item => formatHourTo12(item.hour));
-    const orders = orderByHour.map(item => item.orders_count);
+    const orders = orderByHour.map(item => Number(item.orders_count));
 
     if (orders.length === 0 && hours.length === 0) {
         displayBarChartMessage(lineChartCard);
@@ -478,8 +478,8 @@ function drawingBarChartForOrdersByHour() {
 function drowingBarChartForOrderByDays() {
 
     const days = orderByDay.map(item => item.day_name);
-    const orders = orderByDay.map(item => item.orders_count);
-    const sales = orderByDay.map(item => item.total_sales);
+    const orders = orderByDay.map(item => Number(item.orders_count));
+    const sales = orderByDay.map(item => Number(item.total_sales));
 
     if (orders.length === 0 && days.length === 0 && sales.length === 0) {
         displayBarChartMessage(bestDayLineChartCard);
@@ -619,8 +619,8 @@ function drowingPieChartFroItemBySales(container, salesByItems) {
 
     const labels = salesByItems.map(item => item.name);
 
-    const quantities = salesByItems.map(item => item.quantity);
-    const totalQuantity = salesByItems[0].total_qty;
+    const quantities = salesByItems.map(item => Number(item.quantity));
+    const totalQuantity = Number(salesByItems[0].total_qty);
 
     Chart.getChart(ctx)?.destroy();
 
@@ -678,7 +678,7 @@ function drowingPieChartFroItemBySales(container, salesByItems) {
                         size: 14
                     },
                     formatter: function (value) {
-                        const percentage = ((value / totalQuantity) * 100).toFixed(1);
+                        const percentage = ((Number(value) / totalQuantity) * 100).toFixed(1);
                         return percentage + "%\n" + value + " طلب";
                     }
                 }

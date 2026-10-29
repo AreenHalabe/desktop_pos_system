@@ -90,6 +90,7 @@ createAccountForm.addEventListener("submit", async (e) => {
     const data = {
         name: formData.get("name"),
         phone: formData.get('phone') || null,
+        note: formData.get('note')|| null
     }
     await createSupplierAccount(data);
 });
@@ -102,6 +103,7 @@ editAccountForm.addEventListener("submit", async (e) => {
     const data = {
         name: formData.get("name"),
         phone: formData.get('phone') || null,
+        note : formData.get('note') || null
     }
 
     await editSupplierAccount(supplierId, data);
@@ -149,10 +151,11 @@ editAccountModal.addEventListener('show.bs.modal', async function (event) {
     supplierId = Number(button.getAttribute('data-id'));
     const supplierName = button.getAttribute('data-name');
     const supplierPhone = button.getAttribute('data-phone');
+    const supplierNote  = button.getAttribute('data-note');
 
     document.getElementById('editSupplierName').value = supplierName;
     document.getElementById('editSupplierPhone').value = supplierPhone || '';
-
+    document.getElementById('editSupplierNote').value = supplierNote || '';
     
 
 });
@@ -204,7 +207,6 @@ function renderSuppliersTable() {
     }
 
     const colors = [
-        'primary',
         'success',
         'danger',
         'warning',
@@ -259,6 +261,8 @@ function renderSuppliersTable() {
                     }
                 </td>
 
+                <td>  ${supplier.note || '—'}  </td>
+
                 <td class="text-center">
                     <div class="btn-group">
 
@@ -279,6 +283,7 @@ function renderSuppliersTable() {
                             data-id   ="${supplier.id}"
                             data-name = '${supplier.name}'
                             data-phone = '${supplier?.phone || ''}'
+                            data-note  = '${supplier.note || ''}'
                             title="تعديل"
                         >
                             <i class="fas fa-pen-to-square"></i>

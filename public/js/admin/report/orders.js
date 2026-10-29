@@ -78,11 +78,15 @@ document.addEventListener("click", async function (e) {
 
   if (e.target.closest('.search-btn')) {
     const validation = validateDateRange(startDate, endDate);
+
+    const start = `${startDate.value} 00:00:00`;
+    const end = `${endDate.value} 23:59:59`;
+
     if (validation.valid) {
       hiddeAllContainer();
       displayLoader();
       hiddeError();
-      await loadOrdersDetails();
+      await loadOrdersDetails(start, end);
       hiddeLoader();
     }
   }
@@ -131,7 +135,7 @@ modal.addEventListener('show.bs.modal', function (event) {
     const discountPercent = Number(item.discount_item) || 0;
 
     const discountValue = roundDiscount(
-      Number(item.quantity * item.price) * discountPercent / 100
+      (Number(item.quantity) * Number(item.price)) * discountPercent / 100
     );
 
     itemsHtml += `
@@ -145,7 +149,7 @@ modal.addEventListener('show.bs.modal', function (event) {
             —
             ₪${discountValue}
         </td>
-        <td class='fw-bold'>${item.quantity * item.price} ₪</td>
+        <td class='fw-bold'>${Number(item.quantity) * Number(item.price)} ₪</td>
       </tr>
       `;
   });
@@ -156,7 +160,7 @@ modal.addEventListener('show.bs.modal', function (event) {
             <strong>المجموع</strong>
         </td>
         <td>
-            <strong>${order.total_price + order.discount} ₪</strong>
+            <strong>${Number(order.total_price) + Number(order.discount)} ₪</strong>
         </td>
     </tr>
 
@@ -164,12 +168,13 @@ modal.addEventListener('show.bs.modal', function (event) {
         <td colspan="5" class="text-end pe-3 text-danger">
             <strong>قيمة الخصم</strong>
         </td>
+       
         <td class="text-danger">
-          ${Number(order.total_discount_percentage) > 0
-              ?`<strong>${order.total_discount_percentage}%</strong> —`
-              :''
-          }
-          <strong>${order.discount} ₪</strong>
+            ${Number(order.total_discount_percentage) > 0
+                ?`<strong>${Number(order.total_discount_percentage).toString()}%</strong> —`
+                :''
+            }
+            <strong>${Number(order.discount)} ₪</strong>
         </td>
     </tr>
 
@@ -178,7 +183,7 @@ modal.addEventListener('show.bs.modal', function (event) {
             <strong>الإجمالي</strong>
         </td>
         <td>
-            <strong>${order.total_price} ₪</strong>
+           <strong>${Number(order.total_price).toString()} ₪</strong>
         </td>
     </tr>
   `;
@@ -227,7 +232,7 @@ document.querySelector('.dropdown-menu').addEventListener('click', async (e) => 
 });
 
 
-async function loadOrdersDetails() {
+async function loadOrdersDetails(start, end) {
   try {
     const res = await fetch(urlServer + `/reports/orders/details`, {
       method: 'POST',
@@ -236,8 +241,8 @@ async function loadOrdersDetails() {
         "Authorization": `${getAuthToken('auth')}`
       },
       body: JSON.stringify({
-        from: toUTC(formatDateTimeForServer(startDate.value)),
-        to: toUTC(formatDateTimeForServer(endDate.value)),
+        from: toUTC(start),
+        to: toUTC(end),
       }),
     });
     const data = await res.json();
@@ -265,6 +270,8 @@ async function loadOrdersDetails() {
 }
 
 async function loadMoreOrders(totalOrder, status, page) {
+  const start = `${startDate.value} 00:00:00`;
+  const end = `${endDate.value} 23:59:59`;
   try {
     const res = await fetch(urlServer + `/reports/orders/list`, {
       method: 'POST',
@@ -273,8 +280,8 @@ async function loadMoreOrders(totalOrder, status, page) {
         "Authorization": `${getAuthToken('auth')}`
       },
       body: JSON.stringify({
-        from: toUTC(formatDateTimeForServer(startDate.value)),
-        to: toUTC(formatDateTimeForServer(endDate.value)),
+        from: toUTC(start),
+        to: toUTC(end),
         page: page,
         status: status,
         totalOrder: totalOrder
@@ -295,7 +302,7 @@ async function loadMoreOrders(totalOrder, status, page) {
       displayError(data.message);
     }
   } catch (e) {
-    displayError(err.message);
+    displayError(e.message);
   }
 
 }
@@ -311,16 +318,16 @@ function setHeaderSummery(data) {
   const netProfit = document.getElementById('netProfit');
 
   
-  totalOrder.textContent = completedOrdersCount + cancelledOrdersCount;
+  totalOrder.textContent = Number(completedOrdersCount) + Number(cancelledOrdersCount);
   completedOrder.innerHTML = `<i class="fas fa-check-circle"></i> ${completedOrdersCount} مكتملة`;
   deletedOrder.innerHTML = `<i class="fas fa-times-circle"></i> ${cancelledOrdersCount} ملغية`;
 
-  totalSales.textContent = `${data.orderDetails.card_revenue + data.orderDetails.cash_revenue} ₪`;
-  cashSales.innerHTML = `<i class="fas fa-money-bill-wave"></i> ${data?.orderDetails.cash_revenue || 0} ₪ كاش `;
-  cardSales.innerHTML = `<i class="fas fa-credit-card"></i> ${data?.orderDetails.card_revenue || 0} ₪ بطاقة `;
+  totalSales.textContent = `${Number(data.orderDetails.card_revenue) + Number(data.orderDetails.cash_revenue)} ₪`;
+  cashSales.innerHTML = `<i class="fas fa-money-bill-wave"></i> ${Number(data?.orderDetails.cash_revenue) || 0} ₪ كاش `;
+  cardSales.innerHTML = `<i class="fas fa-credit-card"></i> ${Number(data?.orderDetails.card_revenue) || 0} ₪ بطاقة `;
 
 
-  netProfit.textContent = `${data.orderDetails.total_net_profit} ₪`
+  netProfit.textContent = `${Number(data.orderDetails.total_net_profit).toFixed(2)} ₪`
 
 
 
@@ -405,7 +412,7 @@ function renderOrdersTable() {
         <td><span class='status-badge ${paymentClass}'>  ${order.payment_method}</span></td>
         <td class='nowrap-cell'>${formatDateOnly(utcToPalestine(order.created_at))}</td>
         <td class='nowrap-cell'>${formatTimeOnly(utcToPalestine(order.created_at))}</td>
-        <td class='nowrap-cell fw-bold'>${order.total_price} ₪</td>
+        <td class='nowrap-cell fw-bold'>${Number(order.total_price).toString()} ₪</td>
         <td><span class="badge ${badgeClass}">${order.status}</span></td>
         <td>
           <button class="btn btn-sm btn-light"

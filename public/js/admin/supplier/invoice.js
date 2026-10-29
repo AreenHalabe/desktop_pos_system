@@ -881,7 +881,7 @@ function renderProducts(productList) {
 
 
                 <div class="product-price">
-                    ${product.cost_price.toFixed(2)} ₪
+                    ${Number(product.cost_price).toFixed(2)} ₪
                 </div>
 
 
@@ -1261,6 +1261,11 @@ function confirmOrder() {
         return;
     }
 
+
+    if(!invoiceDateTime.value && !useCurrentDateTime.checked ){
+        bootboxError("يرجى إدخال وقت الفاتورة أو تفعيل خيار التاريخ و الوقت الحالي");
+        return;
+    }
     let totalPrice = 0;
     let hasErrorInInput = false;
     invoiceItems.forEach(item => {
@@ -1497,6 +1502,10 @@ function setSupplierData(suppliers) {
 
 }
 async function createInvoice(invoiceData) {
+
+    invoiceData.invoice_date_time = invoiceDateTime.value;
+    invoiceData.use_current_date_time = useCurrentDateTime.checked;
+
     const loader = document.getElementById('overlay_loader');
     loader.style.display= 'flex';
     try {
@@ -1699,3 +1708,26 @@ function reSetInputs(){
     discountInput.value = 0;
     renderInvoice();
 }
+
+
+const invoiceDateTime = document.getElementById('invoiceDateTime');
+const useCurrentDateTime = document.getElementById('useCurrentDateTime');
+const currentDateTimeMessage = document.getElementById('currentDateTimeMessage');
+
+useCurrentDateTime.addEventListener('change', function () {
+
+    if (this.checked) {
+
+        invoiceDateTime.disabled = true;
+        invoiceDateTime.value = '';
+
+        currentDateTimeMessage.classList.remove('d-none');
+
+    } else {
+
+        invoiceDateTime.disabled = false;
+
+        currentDateTimeMessage.classList.add('d-none');
+    }
+
+});

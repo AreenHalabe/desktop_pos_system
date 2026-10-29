@@ -47,7 +47,7 @@
       color: white;
       border: none;
       font-weight: 600;
-      padding: 20px 15px;
+      padding: 10px 7px;
       font-size: 0.95rem;
       border-bottom: 2px solid #0b5ed7;
   }
@@ -133,24 +133,23 @@
   }
 
   .add-btn {
-      background-color: #0d6efd;
-      border-color: #0d6efd;
-      color: #fff;
-      border-radius: 8px;
-      padding: 12px 24px;
-      font-size: 1rem;
-      font-weight: 600;
-      transition: all 0.15s ease-in-out;
-      box-shadow: 0 0.125rem 0.25rem rgba(13, 110, 253, 0.25);
-  }
+    background-color: transparent;
+    border: 1px solid #0d6efd;
+    color: #0d6efd;
+    border-radius: 8px;
+    padding: 6px 14px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    transition: all 0.15s ease-in-out;
+}
 
-  .add-btn:hover {
-      background-color: #0b5ed7;
-      border-color: #0a58ca;
-      color: #fff;
-      transform: translateY(-1px);
-      box-shadow: 0 0.25rem 0.5rem rgba(13, 110, 253, 0.35);
-  }
+.add-btn:hover {
+    background-color: #0d6efd;
+    border-color: #0d6efd;
+    color: #fff;
+    transform: translateY(-1px);
+    box-shadow: 0 0.125rem 0.25rem rgba(13, 110, 253, 0.25);
+}
 
   .status-active {
       color: #198754;
@@ -221,6 +220,34 @@
         font-weight: bold;
         margin-top: 20px;
   }
+
+
+.invoice-btn {
+    background-color: #6f42c1;
+    border: 1px solid #6f42c1;
+    color: #fff;
+    border-radius: 8px;
+    padding: 8px 16px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    transition: all 0.2s ease-in-out;
+    box-shadow: 0 2px 5px rgba(111, 66, 193, 0.2);
+}
+
+.invoice-btn:hover {
+    background-color: #5a32a3;
+    border-color: #5a32a3;
+    color: #fff;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(111, 66, 193, 0.3);
+}
+
+.invoice-btn:active {
+    background-color: #4e2a91;
+    border-color: #4e2a91;
+    transform: translateY(0);
+}
+
 
   @media (max-width: 768px) {
       .btn-group {

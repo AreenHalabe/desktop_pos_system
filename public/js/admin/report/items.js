@@ -133,17 +133,17 @@ function setHeaderSummry(data) {
     const leastSellingItemName = document.getElementById('leastSellingItemName');
     const leastSellingItemValue = document.getElementById('leastSellingItemValue');
 
-    totalRevenue.textContent = `${data[0].total_revenue} ₪`;
+    totalRevenue.textContent = `${Number(data[0].total_revenue)} ₪`;
 
     topSellingItemName.textContent = data?.[0]?.name ?? "لا يوجد بيانات";
     topSellingItemValue.textContent = data?.[0]?.quantity
-        ? `${data[0].quantity} طلب`
+        ? `${Number(data[0].quantity)} طلب`
         : "";
 
     leastSellingItemName.textContent = data?.[data?.length - 1]?.name ?? "لا يوجد بيانات";
 
     leastSellingItemValue.textContent = data?.[data?.length - 1]?.quantity !== undefined
-        ? `${data[data.length - 1].quantity} طلب`
+        ? `${Number(data[data.length - 1].quantity)} طلب`
         : "";
 
     displayContainer(headerSummeryCard);
@@ -166,17 +166,17 @@ function setAnalysesAndInsights(items) {
     const highRevLowDemandItem = getHighRevenueLowDemand(items, avgQty, avgRevenue);
     const highDemandLowRevItem = getHighDemandLowRevenue(items, avgQty, avgRevenue);
 
-    topItemDemand.textContent = `${items[0].name} (${items[0].quantity} طلب)`;
-    leastItemDemand.textContent = `${items[length - 1].name} (${items[length - 1].quantity} طلب)`;
+    topItemDemand.textContent = `${items[0].name} (${Number(items[0].quantity)} طلب)`;
+    leastItemDemand.textContent = `${items[length - 1].name} (${Number(items[length - 1].quantity)} طلب)`;
 
     highRevLowDem.innerHTML = highRevLowDemandItem
         ? `
         <span class="text-muted">
         ${highRevLowDemandItem.name}
-        
+
             -
-            
-        (${highRevLowDemandItem.quantity} طلب • ${highRevLowDemandItem.total_sales} ₪)
+
+        (${Number(highRevLowDemandItem.quantity)} طلب • ${Number(highRevLowDemandItem.total_sales)} ₪)
         </span>
     `
         : `<span class="text-muted">لا توجد منتجات بإيراد مرتفع وطلب منخفض، مما يدل على أداء متوازن للمنتجات.</span>`;
@@ -189,8 +189,8 @@ function setAnalysesAndInsights(items) {
 
             -
 
-          (${highDemandLowRevItem.quantity} طلب • ${highDemandLowRevItem.total_sales} ₪)
-        
+          (${Number(highDemandLowRevItem.quantity)} طلب • ${Number(highDemandLowRevItem.total_sales)} ₪)
+
         </span>
     `
         : `<span class="text-muted">لا توجد منتجات بطلب مرتفع وإيراد منخفض، مما يشير إلى تسعير مناسب.</span>`;
@@ -202,23 +202,23 @@ function setAnalysesAndInsights(items) {
 
 function getAvgQty(items) {
     if (items.length === 0) return 0;
-    const avgQty = items.reduce((sum, i) => sum + i.quantity, 0) / items.length;
+    const avgQty = items.reduce((sum, i) => sum + Number(i.quantity), 0) / items.length;
     return avgQty;
 }
 function getAvgRevenue(items) {
     if (items.length === 0) return 0;
-    const avgRevenue = items[0].total_revenue / items.length;
+    const avgRevenue = Number(items[0].total_revenue) / items.length;
     return avgRevenue;
 }
 function getHighRevenueLowDemand(items, avgQty, avgRevenue) {
     const highRevenueLowDemand = items.find(i =>
-        i.total_sales > avgRevenue && i.quantity < avgQty
+        Number(i.total_sales) > avgRevenue && Number(i.quantity) < avgQty
     );
     return highRevenueLowDemand;
 }
 function getHighDemandLowRevenue(items, avgQty, avgRevenue) {
     const highDemandLowRevenue = items.find(i =>
-        i.quantity > avgQty && i.total_sales < avgRevenue
+        Number(i.quantity) > avgQty && Number(i.total_sales) < avgRevenue
     );
     return highDemandLowRevenue;
 }
@@ -281,7 +281,7 @@ function renderItemsTable(items) {
 
     tableBody.innerHTML = '';
 
-    
+
 
     let counter = (currentPage * 15) - (15);
     tableBody.innerHTML = pageItems.map(i => {
@@ -294,7 +294,7 @@ function renderItemsTable(items) {
         const netSales = totalSales - discountValue;
         const netProfit = Number(netSales) - (Number(i.average_cost_price) * Number(i.quantity));
 
-        
+
         return `
             <tr>
                 <td class="text-center col-number">
@@ -306,7 +306,7 @@ function renderItemsTable(items) {
                 </td>
 
                 <td class="text-center col-quantity fw-bold">
-                     ${formatNumber(i.quantity)} — ${i.base_unit_name ?? ''}
+                     ${formatNumber(Number(i.quantity))} — ${i.base_unit_name ?? ''}
                 </td>
 
                 <td class="text-center col-before fw-bold">
@@ -314,7 +314,7 @@ function renderItemsTable(items) {
                 </td>
 
                 <td class="text-center col-discount-rate">
-                    %${formatNumber(i.average_discount_percentage)}
+                    %${formatNumber(Number(i.average_discount_percentage))}
                 </td>
 
                 <td class="text-center col-discount-value">
@@ -323,7 +323,7 @@ function renderItemsTable(items) {
 
 
                 <td class="text-center col-cost">
-                    ${formatNumber(i.average_cost_price)} ₪ — ${i.base_unit_name ?? ''}
+                    ${formatNumber(Number(i.average_cost_price))} ₪ — ${i.base_unit_name ?? ''}
                 </td>
 
                 <td class="text-center col-after fw-bold">
@@ -331,13 +331,13 @@ function renderItemsTable(items) {
                 </td>
 
                 <td class="text-center col-percentage fw-bold">
-                    %${formatNumber(i.sales_percentage)}
+                    %${formatNumber(Number(i.sales_percentage))}
                 </td>
             </tr>
         `;
     }).join('');
 
-    
+
     updatePagination();
     displayPaginationBtn();
     displayContainer(tableCard);
@@ -396,15 +396,15 @@ function drowingPieChartFroItemBySales(container, salesByItems, isTopItems = tru
 
     if (isTopItems) {
         labels = salesByItems.slice(0, 5).map(item => item.name);
-        quantitiesItems = salesByItems.slice(0, 5).map(item => item.quantity);
+        quantitiesItems = salesByItems.slice(0, 5).map(item => Number(item.quantity));
     }
     else {
         labels = salesByItems.slice(-5).map(item => item.name);
-        quantitiesItems = salesByItems.slice(-5).map(item => item.quantity);
+        quantitiesItems = salesByItems.slice(-5).map(item => Number(item.quantity));
     }
 
 
-    const quantities = salesByItems.map(item => item.quantity);
+    const quantities = salesByItems.map(item => Number(item.quantity));
     const totalQuantity = quantities.reduce((sum, q) => sum + q, 0);
 
     Chart.getChart(ctx)?.destroy();

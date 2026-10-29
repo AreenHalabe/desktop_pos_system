@@ -487,7 +487,7 @@ async function loadChecksRecentlyAdded(needToRenderTable = true) {
         });
 
         let data = await res.json();
-
+        console.log(data);
         if (res.status === 200) {
 
 

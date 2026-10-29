@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Halabi_Services.ps</title>
+    <title>Halabi_Technology.ps</title>
 
     <!-- Bootstrap 5.3.2 RTL -->
     <link href="../../../wroot/assets/bootstrap/css/bootstrap.rtl.min.css" rel="stylesheet">
@@ -22,18 +22,14 @@
 <body>
 
     <site-header></site-header>
-    <div class="container mt-5">
+    <div class="container-fluid mt-5">
         <div class="row justify-content-center">
             <div class="col-12 col-lg-11">
                 <div class="admin-container">
                     <!-- Header -->
                     <div class="admin-header border-bottom">
-                        <h3><i class="fas fa-users me-3"></i>حسابات الموردين</h3>
+                        <h3><i class="fas fa-users me-3 text-primary"></i>حسابات الموردين</h3>
                         <p>إدارة حسابات الموردين</p>
-                        <a href="./invoice.html" class="btn btn-primary">
-                            <i class="fas fa-file-invoice me-2"></i>
-                            إنشاء فاتورة
-                        </a>
                     </div>
 
                     <!-- Controls -->
@@ -47,6 +43,10 @@
                                     </span>
                                 </h6>
                             </div>
+                            <a href="./invoice.html" class="btn invoice-btn">
+                                <i class="fas fa-file-invoice me-2"></i>
+                                إنشاء فاتورة
+                            </a>
 
                             <button class="btn add-btn ms-auto" data-bs-toggle="modal" data-bs-target="#createAccountModal
                             ">
@@ -65,6 +65,7 @@
                                         <th class="text-center">رقم الجوال</th>
                                         <th class="text-center">الرصيد</th>
                                         <th>الحالة</th>
+                                        <th>ملاحظة</th>
                                         <th class="text-center">العمليات</th>
                                     </tr>
                                 </thead>
@@ -103,7 +104,7 @@
                         <!-- اسم المورد -->
                         <div class="mb-3">
                             <label for="supplierName" class="form-label fw-semibold text-primary">
-                                اسم المورد
+                                اسم المورد*
                             </label>
 
                             <input type="text" class="form-control border-primary" id="supplierName" name="name"
@@ -113,11 +114,23 @@
                         <!-- رقم الجوال -->
                         <div class="mb-3">
                             <label for="supplierPhone" class="form-label fw-semibold text-primary">
-                                رقم الجوال
+                                رقم الجوال*
                             </label>
 
                             <input type="tel" class="form-control border-primary" id="supplierPhone" name="phone"
                                 placeholder="أدخل رقم الجوال" inputmode="numeric">
+                        </div>
+
+
+                        <div class="mb-3">
+                            <label for="supplierNote" class="form-label fw-semibold text-primary">
+                                ملاحظة
+                                _
+                                <small class="text-muted">إختياري</small>
+                            </label>
+
+                            <input type="text" class="form-control border-primary" id="supplierNote" name="note"
+                                placeholder="إختياري... أدخل ملاحظة">
                         </div>
 
                         <!-- رسالة الخطأ -->
@@ -180,6 +193,17 @@
 
                             <input type="tel" class="form-control border-primary" id="editSupplierPhone" name="phone"
                                 placeholder="أدخل رقم الجوال" inputmode="numeric">
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="supplierNote" class="form-label fw-semibold text-primary">
+                                ملاحظة
+                                _
+                                <small class="text-muted">إختياري</small>
+                            </label>
+
+                            <input type="text" class="form-control border-primary" id="editSupplierNote" name="note"
+                                placeholder="إختياري... أدخل ملاحظة">
                         </div>
 
                         <!-- رسالة الخطأ -->
