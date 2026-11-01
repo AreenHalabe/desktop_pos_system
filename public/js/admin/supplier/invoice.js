@@ -105,7 +105,7 @@ let categoriesData;
 
 // ];
 
-let products ;
+let products;
 
 // let products = [
 
@@ -617,6 +617,7 @@ document.addEventListener("click", function (e) {
         return;
     }
 
+
 });
 
 
@@ -693,7 +694,7 @@ document.addEventListener("change", function (e) {
         item.unit_name = unit.name;
 
         item.cost_price = roundAmount(Number(Number(product.cost_price) * Number(unit.conversion_factor)).toFixed(2));
-        
+
         renderInvoice();
 
 
@@ -942,7 +943,7 @@ function addProduct(productId) {
                 ? product.units[0].id
                 : null,
 
-            unit_name :product.units.length === 1
+            unit_name: product.units.length === 1
                 ? product.units[0].name
                 : '',
 
@@ -1031,7 +1032,7 @@ function updateCostPrice(productId, value) {
         Number(value);
 
 
-    
+
 
 
     item.cost_price = price;
@@ -1082,7 +1083,7 @@ function renderInvoice() {
     invoiceItems.forEach((item, index) => {
 
         const total =
-           Number(item.cost_price * item.qty).toFixed(2);
+            Number(item.cost_price * item.qty).toFixed(2);
 
         const row =
             document.createElement("tr");
@@ -1109,13 +1110,13 @@ function renderInvoice() {
                             data-product-id="${item.id}"
                         >
                             ${item.unit_id === null
-                                ? `
+                ? `
                                         <option value="" selected disabled>
                                             اختر الوحدة
                                         </option>
                                     `
-                                : ""
-                            }
+                : ""
+            }
 
                             ${products.find(product => product.id === item.id).units.map(unit => `
                                     <option
@@ -1125,7 +1126,7 @@ function renderInvoice() {
                                         ${unit.name}
                                     </option>
                                 `)
-                            .join("")}
+                .join("")}
                         </select>
                     </td>
 
@@ -1245,9 +1246,9 @@ function updateTotals() {
 // CONFIRM ORDER
 // ==========================================
 
-function confirmOrder() {
+function confirmOrder(isDraft = false) {
 
-    const supplierId =document.getElementById("supplierSelect").value;
+    const supplierId = document.getElementById("supplierSelect").value;
 
 
     if (!supplierId) {
@@ -1262,7 +1263,7 @@ function confirmOrder() {
     }
 
 
-    if(!invoiceDateTime.value && !useCurrentDateTime.checked ){
+    if (!invoiceDateTime.value && !useCurrentDateTime.checked) {
         bootboxError("يرجى إدخال وقت الفاتورة أو تفعيل خيار التاريخ و الوقت الحالي");
         return;
     }
@@ -1292,7 +1293,7 @@ function confirmOrder() {
         totalPrice += Number(item.cost_price * item.qty);
     });
 
-    if(hasErrorInInput){
+    if (hasErrorInInput) {
         return;
     }
 
@@ -1323,6 +1324,11 @@ function confirmOrder() {
         items: invoiceItems
 
     };
+
+    if (isDraft) {
+        showSaveSupplierOrderDraftDialog(orderData);
+        return;
+    }
 
     showConfirmSupplierOrderDialog(orderData);
 }
@@ -1380,9 +1386,9 @@ document.getElementById("clearFilters").addEventListener("click", () => {
 });
 
 
-document.getElementById("confirmOrder").addEventListener("click", confirmOrder);
+document.getElementById("confirmOrder").addEventListener("click", () => confirmOrder(false));
 
-
+document.getElementById("saveDraft").addEventListener("click", () => confirmOrder(true));
 // ==========================================
 // INIT
 // ==========================================
@@ -1477,11 +1483,11 @@ async function loadSuppliers() {
 
 function setSupplierData(suppliers) {
 
-    const selectSuppliers =  document.getElementById("supplierSelect");
+    const selectSuppliers = document.getElementById("supplierSelect");
 
     document.getElementById('loadingSupplier')?.remove();
 
-    if(suppliers.length === 0){
+    if (suppliers.length === 0) {
         const option = document.createElement("option");
         option.value = '';
         option.textContent = 'لا يوجد حسابات مُضافة للموردين';
@@ -1501,13 +1507,14 @@ function setSupplierData(suppliers) {
     });
 
 }
-async function createInvoice(invoiceData) {
+async function createInvoice(invoiceData, isDraft = 0) {
 
     invoiceData.invoice_date_time = invoiceDateTime.value;
     invoiceData.use_current_date_time = useCurrentDateTime.checked;
+    invoiceData.is_draft = isDraft;
 
     const loader = document.getElementById('overlay_loader');
-    loader.style.display= 'flex';
+    loader.style.display = 'flex';
     try {
         const res = await fetch(url + `/invoice/create`, {
             method: 'POST',
@@ -1520,8 +1527,8 @@ async function createInvoice(invoiceData) {
         const data = await res.json();
 
         if (res.status === 200) {
-           bootboxSuccess(data.message);
-           reSetInputs();
+            bootboxSuccess(data.message);
+            reSetInputs();
         }
 
 
@@ -1536,10 +1543,11 @@ async function createInvoice(invoiceData) {
 
     } catch (err) {
         bootboxError("حدث خطأ في الاتصال : " + err.message);
-    }finally{
-        loader.style.display= 'none';
+    } finally {
+        loader.style.display = 'none';
     }
 }
+
 function roundAmount(amount) {
     if (amount === 0) return 0;
 
@@ -1701,7 +1709,7 @@ function showConfirmSupplierOrderDialog(finalOrder) {
 
 }
 
-function reSetInputs(){
+function reSetInputs() {
     const select = document.getElementById("supplierSelect");
     select.value = "";
     invoiceItems = [];
@@ -1731,3 +1739,74 @@ useCurrentDateTime.addEventListener('change', function () {
     }
 
 });
+
+
+function showSaveSupplierOrderDraftDialog(finalOrder) {
+
+    bootbox.dialog({
+
+        title: '<i class="fas fa-file-pen me-2"></i> حفظ الفاتورة كمسودة',
+
+        message: `
+            <div class="container-fluid">
+
+                <div class="text-center mb-3">
+                    <i class="fas fa-file-circle-check text-secondary"
+                       style="font-size: 55px;"></i>
+                </div>
+
+                <div class="alert alert-info text-center mb-3">
+                    <i class="fas fa-info-circle me-1"></i>
+                    سيتم حفظ الفاتورة كمسودة، ويمكنك الرجوع إليها
+                    لاحقاً حتى يتم تأكيدها.
+                </div>
+
+                <div class="alert alert-warning mb-0">
+
+                    <div class="fw-bold mb-2">
+                        <i class="fas fa-exclamation-triangle me-1"></i>
+                        تنبيه بخصوص المخزون
+                    </div>
+
+                    <div>
+                        لن يتم تحديث أو زيادة المخزون للمنتجات الموجودة
+                        في هذه الفاتورة عند حفظها كمسودة.
+                    </div>
+
+                    <div class="mt-2">
+                        سيتم تحديث المخزون فقط بعد تأكيد الفاتورة.
+                    </div>
+
+                </div>
+
+            </div>
+        `,
+
+        buttons: {
+
+            cancel: {
+                label: "إلغاء",
+                className: "btn-outline-secondary"
+            },
+
+            confirm: {
+                label: '<i class="fas fa-save me-1"></i> حفظ كمسودة',
+                className: "btn-secondary fw-bold",
+
+                callback: async function () {
+
+                    const dialog = this;
+
+                    await createInvoice(finalOrder, 1);
+
+                    dialog.modal('hide');
+
+                    return false;
+                }
+            }
+
+        }
+
+    });
+
+}

@@ -357,11 +357,21 @@ function renderDebtsTable(debts) {
 
         let status = "مسددة";
         let badgeClass = "bg-success";
-        let canEdit = false;
-        if(Number(debt.remaining) === Number(debt.total_price)) {
+        let isDraft = false;
+
+        let showDelete = false;
+
+        if(Number(debt.is_draft) == 1){
+            isDraft    = true;
+            showDelete = true;
+            status = "بإنتظار التأكيد (مسودة)";
+            badgeClass = "bg-secondary";
+        }
+
+        else if(Number(debt.remaining) === Number(debt.total_price)) {
             status = "غير مدفوع";
             badgeClass = "bg-danger";
-            canEdit = true;
+            showDelete = true;
         } else if(Number(debt.remaining) < Number(debt.total_price) && Number(debt.remaining) !== 0) {
             status = "جزئي";
             badgeClass = "bg-warning";
@@ -401,7 +411,7 @@ function renderDebtsTable(debts) {
                         </button>
 
                         ${
-                            canEdit 
+                            isDraft 
                                     ? `<button 
                                         type="button" 
                                         class="edit-inv-btn"
@@ -410,31 +420,36 @@ function renderDebtsTable(debts) {
                                         >
                                             <i class="fas fa-pen-to-square"></i>
                                         </button>
-                                        
-                                        
-                                        <form
-                                            class="delete-account-form"
-                                            data-confirm-message='
-                                            هل أنت متأكد من حذف فاتورة رقم  <strong>${index+1}</strong>؟
-                                            <div class="danger-box">
-                                                سيتم حذفها نهائيا من النظام !
-                                            </div>'
-                                        >
-                                            <button 
-                                                type="submit" 
-                                                class="delete-btn"
-                                                data-id="${debt.id}"
-                                                title="حذف"
-                                            >
-                                                <i class="fas fa-trash"></i>
-                                            </button>
-                                        </form>
-                                    
-    
                                     `
                             : ''
                         }
-                        
+
+                        ${
+                            showDelete
+                            ?   `
+                                     <form
+                                        class="delete-account-form"
+                                        data-confirm-message='
+                                        هل أنت متأكد من حذف فاتورة رقم  <strong>${index+1}</strong>؟
+                                        <div class="danger-box">
+                                            سيتم حذفها نهائيا من النظام !
+                                        </div>'
+                                    >
+                                        <button 
+                                            type="submit" 
+                                            class="delete-btn"
+                                            data-id="${debt.id}"
+                                            title="حذف"
+                                        >
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </form>
+                                `
+                            : ''
+                            
+                        }
+
+                       
 
                         
                     </div>

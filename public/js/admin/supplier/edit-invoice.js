@@ -1,6 +1,7 @@
 import { url } from "../../../api/urlEndPoint.js";
 import { showAuthExpired, bootboxSuccess, bootboxError } from "../../../component/bootbox.js";
 import { setActiveNavLink } from "../../../component/bootbox.js";
+import {utcToPalestine} from "../report/shared-functionality.js"
 
 import { getAuthToken, removeAuthToken } from "../../../component/auth.js";
 
@@ -765,9 +766,9 @@ function updateTotals() {
 // CONFIRM ORDER
 // ==========================================
 
-function confirmOrder() {
+function confirmOrder(isDraft = false) {
 
-    const supplierId =document.getElementById("supplierSelect").value;
+    const supplierId = document.getElementById("supplierSelect").value;
 
 
     if (!supplierId) {
@@ -781,6 +782,11 @@ function confirmOrder() {
         return;
     }
 
+
+    if (!invoiceDateTime.value && !useCurrentDateTime.checked) {
+        bootboxError("يرجى إدخال وقت الفاتورة أو تفعيل خيار التاريخ و الوقت الحالي");
+        return;
+    }
     let totalPrice = 0;
     let hasErrorInInput = false;
     invoiceItems.forEach(item => {
@@ -807,7 +813,7 @@ function confirmOrder() {
         totalPrice += Number(item.cost_price * item.qty);
     });
 
-    if(hasErrorInInput){
+    if (hasErrorInInput) {
         return;
     }
 
@@ -827,8 +833,6 @@ function confirmOrder() {
     }
 
 
-
-
     const orderData = {
 
         supplier_id: Number(supplierId),
@@ -841,7 +845,10 @@ function confirmOrder() {
 
     };
 
-    // await createInvoice(orderData);
+    if (isDraft) {
+        showSaveSupplierOrderDraftDialog(orderData);
+        return;
+    }
 
     showConfirmSupplierOrderDialog(orderData);
 }
@@ -899,7 +906,10 @@ document.getElementById("clearFilters").addEventListener("click", () => {
 });
 
 
-document.getElementById("confirmOrder").addEventListener("click", confirmOrder);
+
+document.getElementById("confirmOrder").addEventListener("click", () => confirmOrder(false));
+
+document.getElementById("saveDraft").addEventListener("click", () => confirmOrder(true));
 
 
 // ==========================================
@@ -951,8 +961,6 @@ async function loadItemsTree() {
 
         if (res.status === 200) {
             products = data;
-
-            console.log(products);
         }
 
 
@@ -989,14 +997,11 @@ async function loadInvoice() {
             return;
         }
         else if (res.status === 200) {
-            console.log(data.invoice);
+            invoiceDateTime.value = utcToPalestine(data.invoice.created_at);
+
             addItemInvoiceInTable(data.invoice.items);
-            // currentInvoice = data.invoice;
-        
-            // fillInvoiceData(data.invoice);
         }
         else {
-            console.log('error in loadInvoice');
             bootboxError(data.message);
         }
 
@@ -1085,41 +1090,46 @@ function setSupplierData(suppliers) {
 
 
 }
-async function createInvoice(invoiceData) {
+async function createInvoice(invoiceData, isDraft = 0) {
 
-    console.log(invoiceData);
-    // const loader = document.getElementById('overlay_loader');
-    // loader.style.display= 'flex';
-    // try {
-    //     const res = await fetch(url + `/invoice/create`, {
-    //         method: 'POST',
-    //         headers: {
-    //             "Content-Type": "application/json",
-    //             "Authorization": `${getAuthToken('auth')}`
-    //         },
-    //         body: JSON.stringify(invoiceData),
-    //     });
-    //     const data = await res.json();
+    invoiceData.invoice_date_time = invoiceDateTime.value;
+    invoiceData.use_current_date_time = useCurrentDateTime.checked;
+    invoiceData.is_draft = isDraft;
 
-    //     if (res.status === 200) {
-    //        bootboxSuccess(data.message);
-    //     }
+    const loader = document.getElementById('overlay_loader');
+    loader.style.display= 'flex';
+    try {
+        const res = await fetch(url + `/invoice/update?invoice_id=${getInvoiceId()}`, {
+            method: 'PUT',
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": `${getAuthToken('auth')}`
+            },
+            body: JSON.stringify(invoiceData),
+        });
+        const data = await res.json();
+
+        if (res.status === 200) {
+           bootboxSuccess(data.message, null, false, function () {
+                window.location.href = `./account.html?supplier_id=${invoiceData.supplier_id}`;
+            });
+        }
 
 
-    //     else if (res.status === 401) {
-    //         showAuthExpired(data.message);
-    //     }
+        else if (res.status === 401) {
+            showAuthExpired(data.message);
+        }
 
 
-    //     else {
-    //         bootboxError(data.message);
-    //     }
+        else {
+            bootboxError(data.message);
+        }
 
-    // } catch (err) {
-    //     bootboxError("حدث خطأ في الاتصال : " + err.message);
-    // }finally{
-    //     loader.style.display= 'none';
-    // }
+    } catch (err) {
+        bootboxError("حدث خطأ في الاتصال : " + err.message);
+    }finally{
+        loader.style.display= 'none';
+    }
 }
 
 
@@ -1168,7 +1178,6 @@ function addItemInvoiceInTable(invItems) {
 
     
 
-    console.log(invoiceItems);
      renderInvoice();
 
 }
@@ -1336,3 +1345,96 @@ function showConfirmSupplierOrderDialog(finalOrder) {
     });
 
 }
+
+function showSaveSupplierOrderDraftDialog(finalOrder) {
+
+    bootbox.dialog({
+
+        title: '<i class="fas fa-file-pen me-2"></i> حفظ الفاتورة كمسودة',
+
+        message: `
+            <div class="container-fluid">
+
+                <div class="text-center mb-3">
+                    <i class="fas fa-file-circle-check text-secondary"
+                       style="font-size: 55px;"></i>
+                </div>
+
+                <div class="alert alert-info text-center mb-3">
+                    <i class="fas fa-info-circle me-1"></i>
+                    سيتم حفظ الفاتورة كمسودة، ويمكنك الرجوع إليها
+                    لاحقاً حتى يتم تأكيدها.
+                </div>
+
+                <div class="alert alert-warning mb-0">
+
+                    <div class="fw-bold mb-2">
+                        <i class="fas fa-exclamation-triangle me-1"></i>
+                        تنبيه بخصوص المخزون
+                    </div>
+
+                    <div>
+                        لن يتم تحديث أو زيادة المخزون للمنتجات الموجودة
+                        في هذه الفاتورة عند حفظها كمسودة.
+                    </div>
+
+                    <div class="mt-2">
+                        سيتم تحديث المخزون فقط بعد تأكيد الفاتورة.
+                    </div>
+
+                </div>
+
+            </div>
+        `,
+
+        buttons: {
+
+            cancel: {
+                label: "إلغاء",
+                className: "btn-outline-secondary"
+            },
+
+            confirm: {
+                label: '<i class="fas fa-save me-1"></i> حفظ كمسودة',
+                className: "btn-secondary fw-bold",
+
+                callback: async function () {
+
+                    const dialog = this;
+
+                    await createInvoice(finalOrder, 1);
+
+                    dialog.modal('hide');
+
+                    return false;
+                }
+            }
+
+        }
+
+    });
+
+}
+
+
+const invoiceDateTime = document.getElementById('invoiceDateTime');
+const useCurrentDateTime = document.getElementById('useCurrentDateTime');
+const currentDateTimeMessage = document.getElementById('currentDateTimeMessage');
+
+useCurrentDateTime.addEventListener('change', function () {
+
+    if (this.checked) {
+
+        invoiceDateTime.disabled = true;
+        invoiceDateTime.value = '';
+
+        currentDateTimeMessage.classList.remove('d-none');
+
+    } else {
+
+        invoiceDateTime.disabled = false;
+
+        currentDateTimeMessage.classList.add('d-none');
+    }
+
+});

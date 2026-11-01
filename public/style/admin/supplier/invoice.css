@@ -176,6 +176,34 @@ body {
 }
 
 
+#saveDraft {
+    background-color: #64748b;
+    border: 1px solid #64748b;
+    color: #fff;
+    border-radius: 10px;
+    padding: 9px 25px;
+    min-width: 180px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease-in-out;
+    box-shadow: 0 3px 6px rgba(100, 116, 139, 0.2);
+}
+
+#saveDraft:hover {
+    background-color: #475569;
+    border-color: #475569;
+    transform: translateY(-2px);
+    box-shadow: 0 5px 12px rgba(100, 116, 139, 0.35);
+}
+
+#saveDraft:active {
+    background-color: #334155;
+    border-color: #334155;
+    transform: translateY(0) scale(0.98);
+    box-shadow: 0 2px 4px rgba(100, 116, 139, 0.2);
+}
+
 @media (max-height: 800px) {
     .products-container {
         grid-template-rows: repeat(4, 1fr);
