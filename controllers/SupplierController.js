@@ -433,6 +433,7 @@ function mapInvoicesDate(invoicesData) {
                 remaining: row.remaining,
                 created_at: row.created_at,
                 discount: row.discount,
+                is_draft: row.is_draft,
                 items: []
             });
         }

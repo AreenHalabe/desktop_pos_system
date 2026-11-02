@@ -72,16 +72,125 @@ export const createInvoiceFromSupplier = async (req, res) => {
             throw new SystemError("قيمه الخصم اكبر من السعر الأساسي", 400);
         }
 
+        let date ;
+        if (invData.use_current_date_time) {
+            date = new Date();
+        } else {
+            date = invData.invoice_date_time
+            ? invData.invoice_date_time.replace('T', ' ') + ':00'
+            : null;
+        }
+
         await transaction.begin();
         transactionStarted = true;
-        const currentTimeStamp = new Date();
 
-        const invoiceId = await createPayInvoice(parsedData, currentTimeStamp, transaction);
+        
+
+        const invoiceId = await createPayInvoice(parsedData, date, transaction);
         await addInvoiceItems(invoiceId, parsedData.items, transaction);
+
+        if (parsedData.is_draft === 1) {
+            await transaction.commit();
+
+            return res.status(200).json({
+                success: true,
+                invoice_number: invoiceId,
+                message: "تم حفظ الفاتورة كمسودة",
+            });
+        }
 
         
         const addNewStockBatchs = await prepareStockBatches(parsedData.items, invoiceId);
-        await addNewStockBatches(addNewStockBatchs, currentTimeStamp, transaction);
+        await addNewStockBatches(addNewStockBatchs, date, transaction);
+
+
+        const totalPrice = parsedData.total_price - parsedData.discount;
+        await updateBalanceForSupplier(parsedData.supplier_id, totalPrice, true, transaction);
+
+        await transaction.commit();
+
+        return res.status(200).json({
+            success: true,
+            message: "تم إنشاء الفاتورة",
+        });
+
+
+
+    } catch (e) {
+        if (transactionStarted) {
+            try {
+                await transaction.rollback();
+            } catch (err) {
+                console.error(err);
+            }
+        }
+        const validationErrors = e?.errors || e?.issues;
+
+        if (Array.isArray(validationErrors) && validationErrors.length > 0) {
+            return res.status(400).json({
+                success: false,
+                message: validationErrors[0].message
+            });
+        }
+        return res.status(e.status || 500).json({
+            success: false,
+            message: e.message || "حدث خطأ غير معروف",
+        });
+    }
+}
+
+
+export const updateInvoice = async (req, res) => {
+    const currentInvId = Number(req.query.invoice_id);
+    const transaction = new sql.Transaction(pool);
+    let transactionStarted = false;
+    try {
+
+        const token = req.headers.authorization;
+        if (!token) {
+            throw new SystemError("إنتهت صلاحية الجلسة , الرجاء تسجيل الدخول مرة أخرى", 401);
+        }
+        await checkToken(token);
+
+        const invData = req.body;
+        const parsedData = invoiceSchema.parse(invData);
+
+        if (parsedData.discount > parsedData.total_price) {
+            throw new SystemError("قيمه الخصم اكبر من السعر الأساسي", 400);
+        }
+
+        let date ;
+        if (invData.use_current_date_time) {
+            date = new Date();
+        } else {
+            date = invData.invoice_date_time
+            ? invData.invoice_date_time.replace('T', ' ') + ':00'
+            : null;
+        }
+
+        await transaction.begin();
+        transactionStarted = true;
+
+        
+
+        await deleteCurrentInvoice(currentInvId, transaction);
+
+        const invoiceId = await createPayInvoice(parsedData, date, transaction);
+        await addInvoiceItems(invoiceId, parsedData.items, transaction);
+
+        if (parsedData.is_draft === 1) {
+            await transaction.commit();
+
+            return res.status(200).json({
+                success: true,
+                invoice_number: invoiceId,
+                message: "تم حفظ الفاتورة كمسودة",
+            });
+        }
+
+        
+        const addNewStockBatchs = await prepareStockBatches(parsedData.items, invoiceId);
+        await addNewStockBatches(addNewStockBatchs, date, transaction);
 
 
         const totalPrice = parsedData.total_price - parsedData.discount;
@@ -140,7 +249,6 @@ export const payIncoice = async (req, res) => {
         if (parsedData.amount > supplier.balance) {
             throw new SystemError("خطأ : قيمة الدُفعة أكبر من مستحقات المُورد", 400);
         }
-
 
         await transaction.begin();
         transactionStarted = true;
@@ -211,8 +319,10 @@ export const deleteInvoice = async (req, res) => {
                     DELETE FROM supplier_invoices WHERE id = @id
                 `)
             ;
-
-            await updateBalanceForSupplier(invoice.supplier_id, invoice.total_price, false, transaction);
+            
+            if(Number(invoice.is_draft) === 0) {
+                await updateBalanceForSupplier(invoice.supplier_id, invoice.total_price, false, transaction);
+            }
         
             await transaction.commit();
         }
@@ -304,10 +414,11 @@ async function createPayInvoice(parsedData, currentTimeStamp, transaction) {
         .input("remaining", sql.Decimal(18, 2), totalPrice)
         .input("created_at", sql.DateTime, currentTimeStamp)
         .input("discount", sql.Decimal(15, 2), parsedData.discount)
+        .input("is_draft", sql.Bit, parsedData.is_draft)
         .query(`
-            INSERT INTO supplier_invoices (supplier_id, total_price, remaining, created_at, discount)
+            INSERT INTO supplier_invoices (supplier_id, total_price, remaining, created_at, discount, is_draft)
             OUTPUT INSERTED.id
-            VALUES (@supplier_id, @total_price, @remaining, @created_at, @discount);
+            VALUES (@supplier_id, @total_price, @remaining, @created_at, @discount, @is_draft);
         `);
     const invoiceId = result.recordset[0].id;
 
@@ -522,6 +633,7 @@ async function payment(supplierId, amount, transaction) {
 
             WHERE supplier_id = @supplierId
               AND remaining > 0
+              AND is_draft = 0
         ),
 
         PaymentData AS
@@ -697,7 +809,7 @@ async function restorePayment(supplierId, amount, transaction) {
                     WHERE supplier_id = @supplier_id
                       AND total_price > 0
                       AND remaining < total_price
-
+                      AND is_draft = 0
                 ) AS InvoiceData
 
             ) AS RestoreData
@@ -783,6 +895,14 @@ const invoiceSchema = z.object({
     discount: z.preprocess(
         val => Number(val),
         z.number().nonnegative("القيمة الخصم يجب أن تكون صفر أو رقمًا موجبًا")
+    ),
+
+    is_draft: z.preprocess(
+        val => Number(val),
+        z.union([
+            z.literal(0),
+            z.literal(1)
+        ], "يجب أن تكون قيمة المسودة 0 أو 1")
     ),
 
     items: z.array(

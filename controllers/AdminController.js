@@ -1,7 +1,5 @@
-import { StatusCode } from "../HTTPSStatusCode/StatusCode.js";
 import { pool , sql } from "../DataBaseConnections/dbconnection.js";
 import { SystemError } from "../shared/functionality.js";
-import { z } from "zod";
 import { SignJWT } from "jose";
 import bcrypt from "bcrypt";
 
@@ -56,12 +54,12 @@ export const loginAsAdmin = async (req, res) => {
 
 export const loginAdmin = async (req , res) =>{
     try {
-        const {id , password} = req.body;
+        const {name , password} = req.body;
 
         const adminResult = await pool
             .request()
-            .input("id", sql.Int, Number(id))
-            .query("SELECT * FROM admin WHERE id = @id");
+            .input("name", sql.NVarChar, name)
+            .query("SELECT * FROM admin WHERE name = @name");
 
         
         const admin = adminResult.recordset[0];
