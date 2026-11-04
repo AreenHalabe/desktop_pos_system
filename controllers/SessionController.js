@@ -60,20 +60,21 @@ export const openNewSession = async (req , res) =>{
         }
 
 
-        const { opening_cash } = req.body;
+        const data = req.body;
 
-        const openingCash  = RealNumberSchema.parse({ value:opening_cash }).value;
+        const parsedData = newSessionSchema.parse(data);
 
         const currentTimeStamp = new Date();
         const result = await pool
             .request()
             .input("open_at", sql.DateTime2, currentTimeStamp)
-            .input("opening_cash", sql.Decimal(10, 2), openingCash)
+            .input("opening_cash", sql.Decimal(10, 2), parsedData.opening_cash)
             .input("admin_id", sql.Int, adminId)
+            .input("employee_name", sql.VarChar(50), parsedData.employee_name)
             .query(`
-                INSERT INTO cash_sessions (admin_id, open_at, opening_cash)
+                INSERT INTO cash_sessions (admin_id, open_at, opening_cash, employee_name)
                 OUTPUT INSERTED.id
-                VALUES (@admin_id, @open_at, @opening_cash)
+                VALUES (@admin_id, @open_at, @opening_cash, @employee_name)
             `)
         ;
         
@@ -241,4 +242,30 @@ async function getSession(sessionId) {
 const RealNumberSchema = z.object({
   value : z.coerce.number()
   .positive("السعر يجب أن يكون رقمًا موجبًا")
+});
+
+
+const newSessionSchema = z.object({
+
+    opening_cash: z.preprocess(
+        val => {
+            if (val === "" || val === null || val === undefined) {
+                return undefined;
+            }
+            return Number(val);
+        },
+        z.number({
+            required_error: "الكاش الافتتاحي مطلوب",
+            invalid_type_error: "الكاش الافتتاحي يجب أن يكون رقمًا"
+        })
+        .min(0, "الكاش الافتتاحي لا يمكن أن يكون بالسالب")
+    ),
+
+    employee_name: z.string({
+        required_error: "اسم الكاشير مطلوب",
+        invalid_type_error: "اسم الكاشير يجب أن يكون نصًا"
+    })
+    .trim()
+    .min(1, "اسم الكاشير مطلوب"),
+
 });

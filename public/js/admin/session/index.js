@@ -151,8 +151,8 @@ document.addEventListener("click", async function (e) {
     }
 
     else if(e.target.closest('.new-session-btn')){
-        bootboxOpenCash((cash) => { 
-            openNewSession(cash)
+        bootboxOpenCash((data) => {
+            openNewSession(data);
         });
     }
 
@@ -680,25 +680,7 @@ function setHeaderFilter(orderType, iconClass){
 
 
 
-function formatHourTo12(hourString) {
-    let start = parseInt(hourString, 10);
-    let end = (start + 1) % 24;
 
-    let start12 = start % 12 || 12;
-    let end12 = end % 12 || 12;
-    let period = end >= 12 ? "PM" : "AM";
-
-    return `${start12}-${end12} ${period}`;
-}
-
-
-function formateOrdersAndSalesByHour(){
-    const hours  = ordersAndSalesByHour.map(item => formatHourTo12(item.hour));
-    const orders = ordersAndSalesByHour.map(item => item.orders_count);
-    const sales  = ordersAndSalesByHour.map(item => item.sales);
-
-    return {hours, orders, sales};
-}
 
 
 function setcashSummery() {
@@ -772,7 +754,10 @@ function updateDashboardUI(){
 function setCloseCashBtnState(){
      document.getElementById('sessionHeader').innerHTML = `
         <div class="d-flex align-items-center">
-            <span class="badge bg-success">الصندوق مفتوح</span>
+            <span class="text-muted">
+                <i class="bi bi-person-fill me-1"></i>
+                الكاشير: <strong>${session.employee_name}</strong>
+            </span>
         </div>
         
         <button class="btn btn-danger d-flex align-items-center justify-content-center gap-2 close-cash-btn" id="closeCashBtn">
@@ -794,6 +779,7 @@ function setOpenCashBtnState(){
 }
 
 
+
 function bootboxOpenCash(onConfirm = null) {
 
   const dialog = bootbox.dialog({
@@ -805,14 +791,28 @@ function bootboxOpenCash(onConfirm = null) {
     `,
     message: `
       <div class="text-center">
-        <p class="mb-2 text-muted">أدخل الكاش الحالي</p>
-        <input 
-          type="number"
-          class="form-control opening-cash-input"
-          placeholder="0"
-          min="0"
-          step="0.01"
-        >
+        <div class="mb-3">
+          <label class="form-label fw-bold">اسم الكاشير</label>
+          <input 
+            type="text"
+            class="form-control cashier-name-input"
+            placeholder="أدخل اسم الكاشير"
+          >
+        </div>
+
+        <div>
+            <label class="form-label fw-bold">الكاش الحالي</label>
+            <div class="input-group">
+                <input 
+                type="number"
+                class="form-control opening-cash-input"
+                placeholder="0"
+                min="0"
+                step="0.01"
+                >
+                <span class="input-group-text fw-bold">₪</span>
+            </div>
+        </div>
       </div>
     `,
     centerVertical: true,
@@ -830,8 +830,14 @@ function bootboxOpenCash(onConfirm = null) {
           const cash = parseFloat(
             dialog.find(".opening-cash-input").val()
           );
+
+          const cashier_name = dialog.find(".cashier-name-input").val().trim();
+
           if (typeof onConfirm === "function") {
-            onConfirm(cash);
+            onConfirm({
+              cash,
+              cashier_name
+            });
           }
         }
       }
@@ -841,31 +847,34 @@ function bootboxOpenCash(onConfirm = null) {
   dialog.init(function () {
 
     const input = dialog.find(".opening-cash-input");
+    const cashierInput = dialog.find(".cashier-name-input");
     const confirmBtn = dialog.find(".btn-success");
 
     // الزر معطل بالبداية
     confirmBtn.prop("disabled", true);
 
-    input.on("input", function () {
+    function validateInputs() {
 
-      const value = this.value.trim();
+      const cash = input.val().trim();
+      const cashier_name = cashierInput.val().trim();
 
-      if (value === "" || Number(value) < 0) {
-        confirmBtn.prop("disabled", true);
-      } else {
-        confirmBtn.prop("disabled", false);
-      }
+      confirmBtn.prop(
+        "disabled",
+        cash === "" ||
+        Number(cash) < 0 ||
+        cashier_name === ""
+      );
+    }
 
-    });
+    input.on("input", validateInputs);
+    cashierInput.on("input", validateInputs);
 
-    input.focus();
+    cashierInput.focus();
   });
 }
 
 
-
-
-async function openNewSession(openingCash){
+async function openNewSession(sessionData) {
     try{
         const res = await fetch(urlServer + '/open/cash-session' , {
              method: 'POST',
@@ -874,7 +883,8 @@ async function openNewSession(openingCash){
                 "Authorization": `${getAuthToken('auth')}`
             },
             body: JSON.stringify({
-                opening_cash : openingCash
+                opening_cash : sessionData.cash,
+                employee_name : sessionData.cashier_name
             }),
         });
         const data = await res.json();
@@ -884,7 +894,7 @@ async function openNewSession(openingCash){
         else if(res.status === 200){
 
             bootboxSuccess(
-                `تم فتح صندوق اليوم بقيمة ${openingCash} ₪`,
+                `تم فتح صندوق جديد بقيمة ${sessionData.cash} ₪`,
                 null,
                 false,
                  () => {
@@ -951,6 +961,7 @@ function openCloseCashModal(){
     document.getElementById('cashOutModal').textContent      = `- ${cashSummery?.cash_out || 0} ₪`;
     document.getElementById('cashInModal').textContent       = `+ ${cashSummery?.cash_in || 0} ₪`;
     document.getElementById('finalExpectedCashModal').textContent = `${cashSummery.expected_cash} ₪`
+    document.getElementById('cashierNameModal').textContent       = `${session.employee_name}`;
     clearCashDifferenceContaner();
 
     confirmCloseCashBtn.disabled = true;

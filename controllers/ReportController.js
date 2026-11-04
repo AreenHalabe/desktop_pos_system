@@ -482,6 +482,7 @@ async function getSessionsDetails(from, to, adminId) {
             cs.difference,
             cs.open_at,
             cs.closed_at,
+            cs.employee_name,
 
             ISNULL(o.cash_sales, 0) AS cash_sales,
             ISNULL(o.card_sales, 0) AS card_sales,

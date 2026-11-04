@@ -486,14 +486,8 @@ function setCashSessionBoxes(){
                 </span>
             </td>
 
-            <td>
-                <button class="btn btn-sm btn-secoundery bg-light view-btn"
-                    data-bs-toggle="modal"
-                    data-bs-target="#cashBoxModal"
-                    data-box-id="${Number(session.session_id)}"
-                >
-                    <i class="fas fa-eye"></i>
-                </button>
+            <td class="fw-bold">
+                ${session.employee_name}
             </td>
 
 
@@ -501,27 +495,6 @@ function setCashSessionBoxes(){
         </tr>
         `;
     }).join('');
-
-    //   document.getElementById('cashIn').textContent           = `+ ${Number(session.cash_in)} ₪`;
-    // document.getElementById('cashOut').textContent          = `- ${Number(session.cash_out)} ₪`;
-    // document.getElementById('actualCash').textContent       = `${Number(session.actual_cash)} ₪`;
-    // document.getElementById('expectedCash').textContent     = `${Number(session.expected_cash)} ₪`;
-    // document.getElementById('differance').textContent       = `${Number(session.difference)} ₪`;
-    // const diff = Number(session.difference);
-
-    // if (diff === 0) {
-    //     differanceStatus.classList.remove('alert-danger', 'alert-warning');
-    //     differanceStatus.classList.add('alert-success'); // أزرق
-    // } else if (diff < 0) {
-    //     differanceStatus.classList.remove('alert-primary', 'alert-warning');
-    //     differanceStatus.classList.add('alert-danger'); // أحمر
-    // } else { // diff > 0
-    //     differanceStatus.classList.remove('alert-primary', 'alert-danger');
-    //     differanceStatus.classList.add('alert-warning'); // أصفر
-    // }
-
-
-
 
     displayContainer(cashSessionsCard);
     updatePagination(sessionPaginationBtnContainer, true);
