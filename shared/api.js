@@ -33,7 +33,7 @@ export async function getOrderAndItemsBySession(sessionId, pool, sql){
             LEFT JOIN order_items io
             ON o.id = io.order_id
 
-            LEFT JOIN Items i 
+            LEFT JOIN items i 
             ON io.item_id = i.id
 
             WHERE o.session_id = @session_id
