@@ -295,6 +295,32 @@ app.whenReady().then(async () => {
 
 
 
+    let cachedCategoriesData = [];
+    let cachedItemsData = [];
+
+    ipcMain.handle('get-pos-tree-cache', () => {
+      return {
+        categoriesData: cachedCategoriesData,
+        itemsData: cachedItemsData
+      };
+    });
+
+    ipcMain.handle('set-pos-tree-cache', (event, data) => {
+      cachedCategoriesData = data.categoriesData;
+      cachedItemsData = data.itemsData;
+
+      return true;
+    });
+
+    ipcMain.handle('clear-pos-tree-cache', () => {
+      cachedCategoriesData = [];
+      cachedItemsData = [];
+
+      return true;
+    });
+
+
+
     app.on("window-all-closed", () => {
       if (process.platform !== "darwin") {
         app.quit();

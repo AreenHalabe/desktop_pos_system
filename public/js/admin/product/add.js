@@ -1501,6 +1501,7 @@ async function submitProductData(finalData) {
         });
         let data = await res.json();
         if (res.status === 200) {
+            await window.electronAPI.clearPosTreeCache();
             bootboxSuccess(data.message);
             resetAllInputs();
         }

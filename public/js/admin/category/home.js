@@ -244,7 +244,7 @@ async function addMainCategory() {
     if (res.status === 200) {
       mainCategoryForm.reset();
       isUpdateCategoryData = true;
-
+      await window.electronAPI.clearPosTreeCache();
       bootboxSuccess(data.message);
       return;
     }
@@ -294,6 +294,7 @@ async function updateMainCategory(id) {
       bootstrap.Modal.getInstance(mainCategoryModal).hide();
       await buildListMainCategories();
       await updateMainCategoryCache();
+      await window.electronAPI.clearPosTreeCache();
       return;
     }
 
@@ -333,6 +334,7 @@ async function deleteMainCategory({ id }) {
     if (res.status === 200) {
       await buildListMainCategories();
       await updateMainCategoryCache();
+      await window.electronAPI.clearPosTreeCache();
       return;
     }
     bootboxError(data.message);
@@ -405,6 +407,7 @@ async function addCategory() {
       categoryForm.reset();
       isUpdateCategoryData = true;
       bootboxSuccess(data.message);
+      await window.electronAPI.clearPosTreeCache();
       return;
     }
 
@@ -453,6 +456,8 @@ async function updateCategory(id) {
       clearErrors(categoryModal);
       bootstrap.Modal.getInstance(categoryModal).hide();
       await buildListMainCategories();
+
+      await window.electronAPI.clearPosTreeCache();
       return;
     }
 
@@ -490,6 +495,7 @@ async function deleteCategory({ id }) {
     }
     if (res.status === 200) {
       await buildListMainCategories();
+      await window.electronAPI.clearPosTreeCache();
       return;
     }
     bootboxError(data.message);

@@ -641,6 +641,7 @@ async function submitProductData(finalData) {
         const data = await res.json();
 
         if (res.status === 200) {
+            await window.electronAPI.clearPosTreeCache();
             bootboxSuccess(data.message, null, false, redirectToHomePage);
 
         } else if (res.status === 401) {

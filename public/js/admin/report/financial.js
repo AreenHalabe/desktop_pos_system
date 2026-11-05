@@ -1,5 +1,5 @@
 import { showAuthExpired, setActiveNavLink, bootboxError, showPrintLoader, hidePrintLoader} from "../../../component/bootbox.js";
-import{ displayLoader, hiddeLoader, hiddeError, displayError, validateDateRange, observer, displayContainer, hiddeContainer, formatHour, formatDateTimeForServer, formatTimeOnly, formatDateOnly, toUTC, utcToPalestine } from "./shared-functionality.js";
+import{ displayLoader, hiddeLoader, hiddeError, displayError, validateDateRange, observer, displayContainer, hiddeContainer, formatHour, formatDateTimeForServer, formatTimeOnly, formatDateOnly, utcToPalestine } from "./shared-functionality.js";
 
 
 import { url, urlServer } from "../../../api/urlEndPoint.js";
@@ -240,8 +240,8 @@ async function loadSesions() {
                 "Authorization": `${getAuthToken('auth')}`
             },
             body: JSON.stringify({
-                from :  toUTC(formatDateTimeForServer(startDate.value)),
-                to   : toUTC(formatDateTimeForServer(endDate.value))
+                from :  formatDateTimeForServer(startDate.value),
+                to   :  formatDateTimeForServer(endDate.value)
             }),
             credentials: 'include',
         });

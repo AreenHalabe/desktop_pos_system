@@ -1,5 +1,5 @@
 import { showAuthExpired, setActiveNavLink } from "../../../component/bootbox.js";
-import { displayLoader, hiddeLoader, hiddeError, displayError, validateDateRange, observer, formatDateTimeForServer, displayContainer, hiddeContainer, formatHour, toUTC } from "./shared-functionality.js";
+import { displayLoader, hiddeLoader, hiddeError, displayError, validateDateRange, observer, formatDateTimeForServer, displayContainer, hiddeContainer, formatHour } from "./shared-functionality.js";
 import { url, urlServer } from "../../../api/urlEndPoint.js";
 import { getAuthToken, removeAuthToken } from "../../../component/auth.js";
 
@@ -75,9 +75,6 @@ document.addEventListener("DOMContentLoaded", async function () {
     let { from, to } = getCurrentAndLastWeekTimestamp();
     setHeaderCurrentDate(from.split(' ')[0], to.split(' ')[0]);
 
-    from = toUTC(from);
-    to = toUTC(to);
-
     await loadPerformanceAnalysis(from, to);
     displayContainer(headerDateRange);
     displayContainer(filterSection);
@@ -94,7 +91,7 @@ document.addEventListener("click", async function (e) {
             hiddeAllContainer();
             displayLoader();
             hiddeError();
-            await loadPerformanceAnalysis(toUTC(formatDateTimeForServer(startDate.value)), toUTC(formatDateTimeForServer(endDate.value)));
+            await loadPerformanceAnalysis(formatDateTimeForServer(startDate.value), formatDateTimeForServer(endDate.value));
             hiddeLoader();
             hiddeContainer(headerDateRange);
             setDateTimeRange(formatDateTimeForFilter(startDate.value), formatDateTimeForFilter(endDate.value));

@@ -2,7 +2,7 @@ import { setActiveNavLink, showAuthExpired, showError, hiddeError, bootboxSucces
 import { url, urlServer } from "../../../api/urlEndPoint.js";
 import { getAuthToken, removeAuthToken } from "../../../component/auth.js";
 import { printInvoiceFromCashier } from "../../../component/invoices.js";
-import { bootboxLoginAsAdmin, closeSideBar } from "../Switch-user-functionality.js";
+import { closeSideBar } from "../Switch-user-functionality.js";
 import { loadItemsAndCategoriesTree } from "../../../api/items.js";
 
 const header = document.querySelector("site-header");
@@ -63,11 +63,6 @@ let itemsData = [];
 document.addEventListener("DOMContentLoaded", async function () {
     const hasOpeningSession = await checkSession();
     if (hasOpeningSession) {
-        // await Promise.all([
-        //     loadCategoriesTree(),
-        //     loadItemsTree()
-        // ]);
-
         ({ categoriesData, itemsData } = await loadItemsAndCategoriesTree());
         clearLoader();
         initializeCashier(categoriesData, itemsData);
@@ -1654,6 +1649,7 @@ async function createOrder(invData) {
             return false;
         }
         else if (res.status === 200) {
+            
             return {
                 inv_num: data.invoiceNum,
                 success: data.success

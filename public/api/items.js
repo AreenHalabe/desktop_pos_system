@@ -3,34 +3,40 @@
  import { bootboxError } from "../component/bootbox.js";
 
 
- let categoriesData = [];
- let itemsData = [];
-
+let categoriesData = [];
+let itemsData = [];
 
 export async function loadItemsAndCategoriesTree() {
 
-    if(categoriesData.length > 0 && itemsData.length > 0) {
-        console.log("not loading");
+    // قراءة البيانات من الذاكرة المشتركة
+    const cachedData = await window.electronAPI.getPosTreeCache();
+
+    if (cachedData.categoriesData.length > 0 && cachedData.itemsData.length > 0) {
+        console.log("Loading categories and items from cache...");
+        categoriesData = cachedData.categoriesData;
+        itemsData = cachedData.itemsData;
         return {
             categoriesData,
             itemsData
-        }
+        };
     }
+    console.log("Loading categories and items from API...");
+    await Promise.all([
+        loadCategoriesTree(),
+        loadItemsTree()
+    ]);
 
-    else {
-        console.log("Loading categories and items tree...");
-        await Promise.all([
-            loadCategoriesTree(),
-            loadItemsTree()
-        ]);
-
-        return {
+    if (categoriesData.length > 0 && itemsData.length > 0) {
+        await window.electronAPI.setPosTreeCache({
             categoriesData,
             itemsData
-        }
+        });
     }
-    
 
+    return {
+        categoriesData,
+        itemsData
+    };
 }
 
 

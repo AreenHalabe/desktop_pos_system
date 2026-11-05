@@ -1,5 +1,5 @@
 import { showAuthExpired, setActiveNavLink } from "../../../component/bootbox.js";
-import { displayLoader, hiddeLoader, hiddeError, displayError, validateDateRange, observer, displayContainer, hiddeContainer, formatHour, formatDateTimeForServer, formatTimeOnly, formatDateOnly, toUTC, utcToPalestine } from "./shared-functionality.js";
+import { displayLoader, hiddeLoader, hiddeError, displayError, validateDateRange, observer, displayContainer, hiddeContainer, formatTimeOnly, formatDateOnly, utcToPalestine } from "./shared-functionality.js";
 
 
 import { urlServer } from "../../../api/urlEndPoint.js";
@@ -241,8 +241,8 @@ async function loadOrdersDetails(start, end) {
         "Authorization": `${getAuthToken('auth')}`
       },
       body: JSON.stringify({
-        from: toUTC(start),
-        to: toUTC(end),
+        from: start,
+        to:   end,
       }),
     });
     const data = await res.json();
@@ -280,8 +280,8 @@ async function loadMoreOrders(totalOrder, status, page) {
         "Authorization": `${getAuthToken('auth')}`
       },
       body: JSON.stringify({
-        from: toUTC(start),
-        to: toUTC(end),
+        from: start,
+        to: end,
         page: page,
         status: status,
         totalOrder: totalOrder

@@ -1,6 +1,6 @@
 import { setActiveNavLink, showAuthExpired, bootboxSuccess, bootboxError } from "../../../component/bootbox.js";
 import { getAuthToken, removeAuthToken } from "../../../component/auth.js";
-import { displayContainer, displayError, observer, toUTC } from "../report/shared-functionality.js";
+import { displayContainer, displayError, observer } from "../report/shared-functionality.js";
 import { urlServer, url } from "../../../api/urlEndPoint.js";
 
 
@@ -56,10 +56,7 @@ header.addEventListener("header:ready", () => {
 
 document.addEventListener('DOMContentLoaded', async function () {
   let { from, to } = getCurrentAndLastWeekTimestamp();
-  console.log(from, to);
-  // from = toUTC(from);
-  // to = toUTC(to);
-  //  console.log(from, to);
+  
   await loadAnalysisData(from, to);
 });
 

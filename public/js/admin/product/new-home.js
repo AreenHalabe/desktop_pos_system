@@ -853,6 +853,10 @@ async function deleteItem(itemId) {
         );
     }
 
+    if(res.status === 200) {
+        await window.electronAPI.clearPosTreeCache();
+    }
+
     return data;
 }
 
