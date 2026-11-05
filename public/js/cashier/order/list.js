@@ -157,6 +157,7 @@ document.addEventListener("click", async function (e) {
         order.time = formatTimeOnly(utcToPalestine(order.created_at));
         order.date = formatDateOnly(utcToPalestine(order.created_at));
 
+
         try {
             await handelOrderDatabeforPrinting(order);
         } catch (e) {

@@ -1,10 +1,13 @@
 
 import { setAuthToken, setAdminId } from "../../component/auth.js";
 import { setPortNumber } from "../../../env.js";
+import { urlServer } from "../../api/urlEndPoint.js";
+
 const errorList = document.getElementById('error_list');
 const errorMessage = document.getElementById('errors');
 const form = document.getElementById('login-form');
 const loginBtn = document.getElementById('login-btn');
+
 
 
 
@@ -39,7 +42,7 @@ form.addEventListener('submit', async (e) => {
     urlEndPoint = `http://localhost:${3000}`;
 
     try {
-        const res = await fetch(urlEndPoint + '/login', {
+        const res = await fetch(urlServer + '/login', {
             method: 'POST',
             headers: {
                 "Content-Type": "application/json"
@@ -277,7 +280,7 @@ function bootboxLogin() {
             try {
 
                 const res = await fetch(
-                    urlEndPoint + `/login-as-admin`,
+                    urlServer + `/login-as-admin`,
                     {
                         method: 'POST',
 

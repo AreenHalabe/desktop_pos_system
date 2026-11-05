@@ -275,6 +275,26 @@ app.whenReady().then(async () => {
       }
     });
 
+    ipcMain.handle('preview-invoice', async (event, invoiceContent) => {
+      const previewWindow = new BrowserWindow({
+          width: 800,
+          height: 900,
+          autoHideMenuBar: true,
+          webPreferences: {
+              contextIsolation: true,
+              nodeIntegration: false
+          }
+      });
+
+      await previewWindow.loadURL(
+          'data:text/html;charset=utf-8,' + encodeURIComponent(invoiceContent)
+      );
+
+      previewWindow.show();
+    });
+
+
+
     app.on("window-all-closed", () => {
       if (process.platform !== "darwin") {
         app.quit();

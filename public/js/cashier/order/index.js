@@ -3,11 +3,12 @@ import { url, urlServer } from "../../../api/urlEndPoint.js";
 import { getAuthToken, removeAuthToken } from "../../../component/auth.js";
 import { printInvoiceFromCashier } from "../../../component/invoices.js";
 import { bootboxLoginAsAdmin, closeSideBar } from "../Switch-user-functionality.js";
-
+import { loadItemsAndCategoriesTree } from "../../../api/items.js";
 
 const header = document.querySelector("site-header");
 
 const overlayLoader = document.getElementById('overlay_loader');
+const successModelOrder = document.getElementById('successModal');
 
 let sessionId;
 
@@ -56,13 +57,18 @@ header.addEventListener("header:ready", () => {
 });
 
 
+let categoriesData = [];
+let itemsData = [];
+
 document.addEventListener("DOMContentLoaded", async function () {
     const hasOpeningSession = await checkSession();
     if (hasOpeningSession) {
-        await Promise.all([
-            loadCategoriesTree(),
-            loadItemsTree()
-        ]);
+        // await Promise.all([
+        //     loadCategoriesTree(),
+        //     loadItemsTree()
+        // ]);
+
+        ({ categoriesData, itemsData } = await loadItemsAndCategoriesTree());
         clearLoader();
         initializeCashier(categoriesData, itemsData);
     }
@@ -91,375 +97,374 @@ function clearLoader() {
 
 
 
-// let categoriesData = [];
-// let itemsData = [];
 
 
-let categoriesData = [
-    {
-        id: 1,
-        name: "مواد غذائية",
-        categories: [
-            { id: 101, name: "ألبان وأجبان" },
-            { id: 102, name: "معلبات" },
-            { id: 103, name: "زيوت ومواد تموينية" }
-        ]
-    },
-    {
-        id: 2,
-        name: "مشروبات",
-        categories: [
-            { id: 201, name: "مياه معدنية" },
-            { id: 202, name: "عصائر" },
-            { id: 203, name: "مشروبات غازية" }
-        ]
-    },
-    {
-        id: 3,
-        name: "تسالي",
-        categories: [
-            { id: 301, name: "شيبس" },
-            { id: 302, name: "شوكولاتة" },
-            { id: 303, name: "بسكويت" }
-        ]
-    },
-    {
-        id: 4,
-        name: "منظفات",
-        categories: [
-            { id: 401, name: "مساحيق غسيل" },
-            { id: 402, name: "منظفات منزلية" }
-        ]
-    }
-];
+
+// let categoriesData = [
+//     {
+//         id: 1,
+//         name: "مواد غذائية",
+//         categories: [
+//             { id: 101, name: "ألبان وأجبان" },
+//             { id: 102, name: "معلبات" },
+//             { id: 103, name: "زيوت ومواد تموينية" }
+//         ]
+//     },
+//     {
+//         id: 2,
+//         name: "مشروبات",
+//         categories: [
+//             { id: 201, name: "مياه معدنية" },
+//             { id: 202, name: "عصائر" },
+//             { id: 203, name: "مشروبات غازية" }
+//         ]
+//     },
+//     {
+//         id: 3,
+//         name: "تسالي",
+//         categories: [
+//             { id: 301, name: "شيبس" },
+//             { id: 302, name: "شوكولاتة" },
+//             { id: 303, name: "بسكويت" }
+//         ]
+//     },
+//     {
+//         id: 4,
+//         name: "منظفات",
+//         categories: [
+//             { id: 401, name: "مساحيق غسيل" },
+//             { id: 402, name: "منظفات منزلية" }
+//         ]
+//     }
+// ];
 
 
-let itemsData = [
-    // =========================
-    // ألبان وأجبان
-    // =========================
-    {
-        id: 1,
-        name: "حليب كامل الدسم",
-        category_id: 101,
-        units: [
-            {
-                id: 1,
-                name: "حبة",
-                barcode: null,
-                price: 6,
-                conversion_factor: 1
-            },
-            {
-                id: 2,
-                name: "باكيت",
-                barcode: "100001",
-                price: 18,
-                conversion_factor: 3
-            },
-            {
-                id: 3,
-                name: "كرتونة",
-                barcode: "100002",
-                price: 72,
-                conversion_factor: 12
-            }
-        ]
-    },
-    {
-        id: 2,
-        name: "لبن زبادي",
-        category_id: 101,
-        units: [
-            {
-                id: 4,
-                name: "علبة",
-                barcode: "100003",
-                price: 3,
-                conversion_factor: 1
-            },
-            {
-                id: 5,
-                name: "كرتونة",
-                barcode: "100004",
-                price: 36,
-                conversion_factor: 12
-            }
-        ]
-    },
-    {
-        id: 3,
-        name: "جبنة بيضاء",
-        category_id: 101,
-        units: [
-            {
-                id: 6,
-                name: "قطعة",
-                barcode: null,
-                price: 12,
-                conversion_factor: 1
-            }
-        ]
-    },
+// let itemsData = [
+//     // =========================
+//     // ألبان وأجبان
+//     // =========================
+//     {
+//         id: 1,
+//         name: "حليب كامل الدسم",
+//         category_id: 101,
+//         units: [
+//             {
+//                 id: 1,
+//                 name: "حبة",
+//                 barcode: null,
+//                 price: 6,
+//                 conversion_factor: 1
+//             },
+//             {
+//                 id: 2,
+//                 name: "باكيت",
+//                 barcode: "100001",
+//                 price: 18,
+//                 conversion_factor: 3
+//             },
+//             {
+//                 id: 3,
+//                 name: "كرتونة",
+//                 barcode: "100002",
+//                 price: 72,
+//                 conversion_factor: 12
+//             }
+//         ]
+//     },
+//     {
+//         id: 2,
+//         name: "لبن زبادي",
+//         category_id: 101,
+//         units: [
+//             {
+//                 id: 4,
+//                 name: "علبة",
+//                 barcode: "100003",
+//                 price: 3,
+//                 conversion_factor: 1
+//             },
+//             {
+//                 id: 5,
+//                 name: "كرتونة",
+//                 barcode: "100004",
+//                 price: 36,
+//                 conversion_factor: 12
+//             }
+//         ]
+//     },
+//     {
+//         id: 3,
+//         name: "جبنة بيضاء",
+//         category_id: 101,
+//         units: [
+//             {
+//                 id: 6,
+//                 name: "قطعة",
+//                 barcode: null,
+//                 price: 12,
+//                 conversion_factor: 1
+//             }
+//         ]
+//     },
 
-    // =========================
-    // معلبات
-    // =========================
-    {
-        id: 4,
-        name: "فول معلب",
-        category_id: 102,
-        units: [
-            {
-                id: 7,
-                name: "علبة",
-                barcode: "200001",
-                price: 4,
-                conversion_factor: 1
-            },
-            {
-                id: 8,
-                name: "كرتونة",
-                barcode: "200002",
-                price: 48,
-                conversion_factor: 12
-            }
-        ]
-    },
-    {
-        id: 5,
-        name: "ذرة معلبة",
-        category_id: 102,
-        units: [
-            {
-                id: 9,
-                name: "علبة",
-                barcode: "200003",
-                price: 5,
-                conversion_factor: 1
-            }
-        ]
-    },
+//     // =========================
+//     // معلبات
+//     // =========================
+//     {
+//         id: 4,
+//         name: "فول معلب",
+//         category_id: 102,
+//         units: [
+//             {
+//                 id: 7,
+//                 name: "علبة",
+//                 barcode: "200001",
+//                 price: 4,
+//                 conversion_factor: 1
+//             },
+//             {
+//                 id: 8,
+//                 name: "كرتونة",
+//                 barcode: "200002",
+//                 price: 48,
+//                 conversion_factor: 12
+//             }
+//         ]
+//     },
+//     {
+//         id: 5,
+//         name: "ذرة معلبة",
+//         category_id: 102,
+//         units: [
+//             {
+//                 id: 9,
+//                 name: "علبة",
+//                 barcode: "200003",
+//                 price: 5,
+//                 conversion_factor: 1
+//             }
+//         ]
+//     },
 
-    // =========================
-    // زيوت ومواد تموينية
-    // =========================
-    {
-        id: 6,
-        name: "زيت دوار الشمس",
-        category_id: 103,
-        units: [
-            {
-                id: 10,
-                name: "عبوة",
-                barcode: "300001",
-                price: 15,
-                conversion_factor: 1
-            },
-            {
-                id: 11,
-                name: "كرتونة",
-                barcode: "300002",
-                price: 90,
-                conversion_factor: 6
-            }
-        ]
-    },
-    {
-        id: 7,
-        name: "أرز",
-        category_id: 103,
-        units: [
-            {
-                id: 12,
-                name: "كيلو",
-                barcode: null,
-                price: 7,
-                conversion_factor: 1
-            },
-            {
-                id: 13,
-                name: "كيس 5 كيلو",
-                barcode: "300003",
-                price: 32,
-                conversion_factor: 5
-            }
-        ]
-    },
+//     // =========================
+//     // زيوت ومواد تموينية
+//     // =========================
+//     {
+//         id: 6,
+//         name: "زيت دوار الشمس",
+//         category_id: 103,
+//         units: [
+//             {
+//                 id: 10,
+//                 name: "عبوة",
+//                 barcode: "300001",
+//                 price: 15,
+//                 conversion_factor: 1
+//             },
+//             {
+//                 id: 11,
+//                 name: "كرتونة",
+//                 barcode: "300002",
+//                 price: 90,
+//                 conversion_factor: 6
+//             }
+//         ]
+//     },
+//     {
+//         id: 7,
+//         name: "أرز",
+//         category_id: 103,
+//         units: [
+//             {
+//                 id: 12,
+//                 name: "كيلو",
+//                 barcode: null,
+//                 price: 7,
+//                 conversion_factor: 1
+//             },
+//             {
+//                 id: 13,
+//                 name: "كيس 5 كيلو",
+//                 barcode: "300003",
+//                 price: 32,
+//                 conversion_factor: 5
+//             }
+//         ]
+//     },
 
-    // =========================
-    // مياه وعصائر ومشروبات
-    // =========================
-    {
-        id: 8,
-        name: "مياه معدنية",
-        category_id: 201,
-        units: [
-            {
-                id: 14,
-                name: "حبة",
-                barcode: "400001",
-                price: 2,
-                conversion_factor: 1
-            },
-            {
-                id: 15,
-                name: "ربطة",
-                barcode: "400002",
-                price: 12,
-                conversion_factor: 6
-            },
-            {
-                id: 16,
-                name: "كرتونة",
-                barcode: "400003",
-                price: 24,
-                conversion_factor: 12
-            }
-        ]
-    },
-    {
-        id: 9,
-        name: "عصير برتقال",
-        category_id: 202,
-        units: [
-            {
-                id: 17,
-                name: "علبة",
-                barcode: "400004",
-                price: 4,
-                conversion_factor: 1
-            },
-            {
-                id: 18,
-                name: "كرتونة",
-                barcode: "400005",
-                price: 48,
-                conversion_factor: 12
-            }
-        ]
-    },
-    {
-        id: 10,
-        name: "مشروب غازي",
-        category_id: 203,
-        units: [
-            {
-                id: 19,
-                name: "حبة",
-                barcode: "400006",
-                price: 5,
-                conversion_factor: 1
-            },
-            {
-                id: 20,
-                name: "باكيت",
-                barcode: "400007",
-                price: 30,
-                conversion_factor: 6
-            }
-        ]
-    },
+//     // =========================
+//     // مياه وعصائر ومشروبات
+//     // =========================
+//     {
+//         id: 8,
+//         name: "مياه معدنية",
+//         category_id: 201,
+//         units: [
+//             {
+//                 id: 14,
+//                 name: "حبة",
+//                 barcode: "400001",
+//                 price: 2,
+//                 conversion_factor: 1
+//             },
+//             {
+//                 id: 15,
+//                 name: "ربطة",
+//                 barcode: "400002",
+//                 price: 12,
+//                 conversion_factor: 6
+//             },
+//             {
+//                 id: 16,
+//                 name: "كرتونة",
+//                 barcode: "400003",
+//                 price: 24,
+//                 conversion_factor: 12
+//             }
+//         ]
+//     },
+//     {
+//         id: 9,
+//         name: "عصير برتقال",
+//         category_id: 202,
+//         units: [
+//             {
+//                 id: 17,
+//                 name: "علبة",
+//                 barcode: "400004",
+//                 price: 4,
+//                 conversion_factor: 1
+//             },
+//             {
+//                 id: 18,
+//                 name: "كرتونة",
+//                 barcode: "400005",
+//                 price: 48,
+//                 conversion_factor: 12
+//             }
+//         ]
+//     },
+//     {
+//         id: 10,
+//         name: "مشروب غازي",
+//         category_id: 203,
+//         units: [
+//             {
+//                 id: 19,
+//                 name: "حبة",
+//                 barcode: "400006",
+//                 price: 5,
+//                 conversion_factor: 1
+//             },
+//             {
+//                 id: 20,
+//                 name: "باكيت",
+//                 barcode: "400007",
+//                 price: 30,
+//                 conversion_factor: 6
+//             }
+//         ]
+//     },
 
-    // =========================
-    // شيبس وشوكولاتة وبسكويت
-    // =========================
-    {
-        id: 11,
-        name: "شيبس بطعم الجبنة",
-        category_id: 301,
-        units: [
-            {
-                id: 21,
-                name: "كيس",
-                barcode: "500001",
-                price: 2,
-                conversion_factor: 1
-            },
-            {
-                id: 22,
-                name: "كرتونة",
-                barcode: "500002",
-                price: 40,
-                conversion_factor: 20
-            }
-        ]
-    },
-    {
-        id: 12,
-        name: "شوكولاتة بالحليب",
-        category_id: 302,
-        units: [
-            {
-                id: 23,
-                name: "قطعة",
-                barcode: "500003",
-                price: 3,
-                conversion_factor: 1
-            },
-            {
-                id: 24,
-                name: "علبة",
-                barcode: "500004",
-                price: 30,
-                conversion_factor: 10
-            }
-        ]
-    },
-    {
-        id: 13,
-        name: "بسكويت سادة",
-        category_id: 303,
-        units: [
-            {
-                id: 25,
-                name: "باكيت",
-                barcode: null,
-                price: 4,
-                conversion_factor: 1
-            }
-        ]
-    },
+//     // =========================
+//     // شيبس وشوكولاتة وبسكويت
+//     // =========================
+//     {
+//         id: 11,
+//         name: "شيبس بطعم الجبنة",
+//         category_id: 301,
+//         units: [
+//             {
+//                 id: 21,
+//                 name: "كيس",
+//                 barcode: "500001",
+//                 price: 2,
+//                 conversion_factor: 1
+//             },
+//             {
+//                 id: 22,
+//                 name: "كرتونة",
+//                 barcode: "500002",
+//                 price: 40,
+//                 conversion_factor: 20
+//             }
+//         ]
+//     },
+//     {
+//         id: 12,
+//         name: "شوكولاتة بالحليب",
+//         category_id: 302,
+//         units: [
+//             {
+//                 id: 23,
+//                 name: "قطعة",
+//                 barcode: "500003",
+//                 price: 3,
+//                 conversion_factor: 1
+//             },
+//             {
+//                 id: 24,
+//                 name: "علبة",
+//                 barcode: "500004",
+//                 price: 30,
+//                 conversion_factor: 10
+//             }
+//         ]
+//     },
+//     {
+//         id: 13,
+//         name: "بسكويت سادة",
+//         category_id: 303,
+//         units: [
+//             {
+//                 id: 25,
+//                 name: "باكيت",
+//                 barcode: null,
+//                 price: 4,
+//                 conversion_factor: 1
+//             }
+//         ]
+//     },
 
-    // =========================
-    // منظفات
-    // =========================
-    {
-        id: 14,
-        name: "مسحوق غسيل",
-        category_id: 401,
-        units: [
-            {
-                id: 26,
-                name: "كيس",
-                barcode: "600001",
-                price: 20,
-                conversion_factor: 1
-            },
-            {
-                id: 27,
-                name: "كرتونة",
-                barcode: "600002",
-                price: 100,
-                conversion_factor: 5
-            }
-        ]
-    },
-    {
-        id: 15,
-        name: "سائل تنظيف الأرضيات",
-        category_id: 402,
-        units: [
-            {
-                id: 28,
-                name: "عبوة",
-                barcode: "600003",
-                price: 12,
-                conversion_factor: 1
-            }
-        ]
-    }
-];
+//     // =========================
+//     // منظفات
+//     // =========================
+//     {
+//         id: 14,
+//         name: "مسحوق غسيل",
+//         category_id: 401,
+//         units: [
+//             {
+//                 id: 26,
+//                 name: "كيس",
+//                 barcode: "600001",
+//                 price: 20,
+//                 conversion_factor: 1
+//             },
+//             {
+//                 id: 27,
+//                 name: "كرتونة",
+//                 barcode: "600002",
+//                 price: 100,
+//                 conversion_factor: 5
+//             }
+//         ]
+//     },
+//     {
+//         id: 15,
+//         name: "سائل تنظيف الأرضيات",
+//         category_id: 402,
+//         units: [
+//             {
+//                 id: 28,
+//                 name: "عبوة",
+//                 barcode: "600003",
+//                 price: 12,
+//                 conversion_factor: 1
+//             }
+//         ]
+//     }
+// ];
 
 // ==================================================
 // 1. المتغيرات والعناصر
@@ -470,6 +475,8 @@ let nextCartId = 1;
 
 let barcodeMap = new Map();
 let discountType = "partial";
+
+let currentInvoiceData = null;
 
 const currency = "₪";
 
@@ -1322,7 +1329,7 @@ function printInvoiceToConsole() {
 // ==================================================
 
 // التركيز على الباركود عند النقر خارج حقول الإدخال.
-document.addEventListener("click", function (e) {
+document.addEventListener("click", async function (e) {
     if (!e.target.closest("input, select, textarea")) {
         elements.barcodeInput?.focus();
     }
@@ -1399,6 +1406,28 @@ document.addEventListener("click", function (e) {
 
     if (newInvoiceButton) {
         reSetOrder();
+        return;
+    }
+
+    if (e.target.closest('.print-invoice-btn')) {
+        closeSuccessModal();
+        try {
+            await printInvoiceFromCashier(currentInvoiceData);
+        } catch (e) {
+            bootboxError(e.message);
+        } finally {
+            clearFinalOrderDetails();
+            reSetOrder();
+        }
+    }
+
+
+
+    else if (e.target.closest('.close-success-modal')) {
+        clearFinalOrderDetails();
+        closeSuccessModal();
+        reSetOrder();
+        return;
     }
 
 
@@ -1644,7 +1673,6 @@ async function createOrder(invData) {
     }
 }
 
-let currentInvoiceData = null;
 
 const confirmPayModalElement = document.getElementById("confirmPayModal");
 
@@ -1813,6 +1841,10 @@ confirmPayDialog.find("#confirmOrderButton").on("click", async function () {
    
     const result = await createOrder(currentInvoiceData);
 
+    
+
+    currentInvoiceData.inv_num = result?.inv_num ?? 0;
+
     if (result === false) {
         confirmButton.prop("disabled", false);
 
@@ -1827,7 +1859,7 @@ confirmPayDialog.find("#confirmOrderButton").on("click", async function () {
 
     confirmPayModal.hide();
 
-    bootboxSuccess('تم بنجاح');
+     showSuccessModal();
 
     
 });
@@ -1855,4 +1887,23 @@ function reSetOrder(){
         elements.barcodeInput.value = "";
         elements.barcodeInput.focus();
     }
+}
+
+function showSuccessModal() {
+    const modal = new bootstrap.Modal(successModelOrder);
+    modal.show();
+}
+
+function closeSuccessModal() {
+    bootstrap.Modal.getInstance(successModelOrder).hide();
+}
+
+function clearFinalOrderDetails() {
+    currentInvoiceData = {
+        items: [],
+        total_price: 0,
+        payment_method: '',
+        discount_amount: 0,
+        inv_num : 0,
+    };
 }
