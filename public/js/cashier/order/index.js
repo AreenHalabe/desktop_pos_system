@@ -1602,7 +1602,6 @@ async function checkSession() {
 
 
 async function createOrder(activeUrl , invData) {
-    console.log('Creating order with data:', invData);
     overlayLoader.style.display = 'flex';
     try {
         const res = await fetch(activeUrl + `/creat/order?session_id=${sessionId}`, {

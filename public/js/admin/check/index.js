@@ -266,22 +266,22 @@ document.addEventListener("click", async function (e) {
         return;
     }
 
-    if (e.target.closest(".print-invoice-btn")) {
+    // if (e.target.closest(".print-invoice-btn")) {
 
-        if (checks.length == 0) return;
+    //     if (checks.length == 0) return;
 
-        try {
-            overlayLoader.classList.remove('d-none');
-            // await printChecks(checks);
-        } catch (e) {
-            bootboxError(e.message);
-        } finally {
-            overlayLoader.classList.add('d-none');
-        }
+    //     try {
+    //         overlayLoader.classList.remove('d-none');
+    //         // await printChecks(checks);
+    //     } catch (e) {
+    //         bootboxError(e.message);
+    //     } finally {
+    //         overlayLoader.classList.add('d-none');
+    //     }
 
-        return;
+    //     return;
 
-    }
+    // }
 
 });
 
@@ -487,7 +487,6 @@ async function loadChecksRecentlyAdded(needToRenderTable = true) {
         });
 
         let data = await res.json();
-        console.log(data);
         if (res.status === 200) {
 
 
@@ -1211,32 +1210,13 @@ function openCheckStatusModal(check) {
                         الحساب
                     </label>
 
-                    <select 
-                        name="accountName" 
-                        class="form-select" 
+                    <input
+                        type="text"
+                        name="accountName"
+                        class="form-control"
+                        value="${check.account_name || ''}"
                         required
                     >
-                        <option 
-                            value="حسني"
-                            ${check.account_name === "حسني" ? "selected" : ""}
-                        >
-                            حسني
-                        </option>
-
-                        <option 
-                            value="وسيم"
-                            ${check.account_name === "وسيم" ? "selected" : ""}
-                        >
-                            وسيم
-                        </option>
-
-                        <option 
-                            value="أخرى"
-                            ${check.account_name === "أخرى" ? "selected" : ""}
-                        >
-                            أخرى
-                        </option>
-                    </select>
                 </div>
 
 

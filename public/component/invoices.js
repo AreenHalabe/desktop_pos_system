@@ -62,10 +62,13 @@ export async function printInvoice(order) {
 
             <hr>
 
-            <p class="inv-num" dir="rtl">
-                <strong>رقم الطلب :&nbsp;</strong> 
-                <span id="orderId"> ${order.inv_num} </span>
-            </p>
+            ${order.inv_num ? `
+                    <p class="inv-num" dir="rtl">
+                        <strong>رقم الطلب :&nbsp;</strong>
+                        <span id="orderId">${order.inv_num}</span>
+                    </p>
+                ` : ''
+            }
 
             <div class="date-time-container">
                 <div class="date-time">
@@ -162,7 +165,15 @@ export async function printCashSummery(session, isSessionClosed = true) {
 
                 <h2 class="center">ملخص الصندوق</h2>
                 <hr>
-            
+
+                 <!-- الموظف المسؤول -->
+                <div class="cash-employee">
+                    <p>
+                        <strong>الكاشير :</strong>
+                        <span>${session?.employee_name || "غير محدد"}</span>
+                    </p>
+                </div>
+                <hr>
 
                 <!-- معلومات الجلسة -->
                 <div class="open-close-info">
@@ -623,9 +634,24 @@ async function createHTMLCashSummary(cashHtml) {
                 flex-direction: column;
             }
         
+            
             hr{
                 margin-top: 13px;
                 margin-bottom: 13px;
+            }
+
+            .cash-employee {
+                text-align: center;
+                margin-bottom: 13px;
+            }
+
+            .cash-employee p {
+                margin: 0;
+            }
+
+            .cash-employee span {
+                font-size: 15px;
+                font-weight: bold;
             }
 
 

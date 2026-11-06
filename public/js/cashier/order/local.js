@@ -4,7 +4,10 @@ import { urlServer, localUrlServer } from "../../../api/urlEndPoint.js";
 import { removeAuthToken } from "../../../component/auth.js";
 
 import { closeSideBar } from "../Switch-user-functionality.js";
-import { formatDateOnly, formatTimeOnly, utcToPalestine } from "../../admin/report/shared-functionality.js";
+import { utcToPalestine } from "../../admin/report/shared-functionality.js";
+
+import { getAuthToken } from "../../../component/auth.js";
+import {hasInternetConnection} from "../../../api/items.js";
 
 const BATCH_SIZE = 20;
 
@@ -113,7 +116,28 @@ async function getSavedOrdersBatch() {
 // مزامنة الدفعة الحالية مع السيرفر
 async function syncOrdersBatch(orders) {
 
-    throw new Error('يجب ربط syncOrdersBatch بفنكشن المزامنة');
+    const hasConnection = await hasInternetConnection();
+
+    if (!hasConnection) {
+        throw new Error('لا يوجد اتصال بالإنترنت. يرجى التحقق من الاتصال والمحاولة مرة أخرى.');
+    }
+
+    const res = await fetch(urlServer + '/order/async-to-server', {
+        method: 'POST',
+        headers: {
+            "Content-Type": "application/json",
+            "Authorization": `${getAuthToken('user-auth')}`
+        },
+        body: JSON.stringify(orders)
+    });
+
+    const data = await res.json();
+
+
+    if (!res.ok || !data.success) {
+        throw new Error(data.message || 'فشل حذف الطلبات المحلية من السيرفر');
+    }
+
 }
 
 
@@ -214,7 +238,6 @@ async function loadOrders() {
 // =====================================
 
 function renderOrders() {
-    console.log('Rendering orders:', currentOrders);
 
     if (!currentOrders.length) {
         ordersTableBody.innerHTML = '';
@@ -320,11 +343,11 @@ function openOrderItemsModal(orderId) {
                 </td>
 
                 <td>
-                    ${escapeHtml(item.unit ?? '-')}
+                    ${escapeHtml(item.unit_name ?? '-')}
                 </td>
 
                 <td>
-                    ${formatNumber(item.price)}
+                    ${formatNumber(item.unit_price)}
                 </td>
 
                 <td>

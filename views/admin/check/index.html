@@ -205,16 +205,13 @@
                                 الحساب
                             </label>
 
-                            <select id="accountFilter" class="form-select">
-                                <option value="all">جميع الحسابات</option>
-
-                                <option value="حسني">حسني</option>
-                                <option value="وسيم">وسيم</option>
-                                <option value="أُخرى">أُخرى</option>
-
-                                <!-- Accounts will be loaded here -->
-
-                            </select>
+                            <input
+                                type="text"
+                                id="accountFilter"
+                                name="accountFilter"
+                                class="form-control"
+                                placeholder="ابحث باسم الحساب..."
+                            >
 
                         </div>
 
@@ -547,23 +544,14 @@
                                         اسم الحساب المُصدر للشيك *
                                     </label>
 
-                                    <select id="accountName" name="accountName" class="form-select" required>
-                                        <option value="" selected disabled>
-                                            إختر الحساب
-                                        </option>
-
-                                        <option value="حسني">
-                                            حسني
-                                        </option>
-
-                                        <option value="وسيم">
-                                            وسيم
-                                        </option>
-
-                                        <option value="أخرى">
-                                            أٌخرى
-                                        </option>
-                                    </select>
+                                    <input
+                                        type="text"
+                                        id="accountName"
+                                        name="accountName"
+                                        class="form-control"
+                                        placeholder="أدخل اسم الحساب المُصدر للشيك"
+                                        required
+                                    >
                                 </div>
 
 

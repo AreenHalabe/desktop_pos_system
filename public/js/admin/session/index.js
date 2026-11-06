@@ -244,6 +244,7 @@ async function loadSessionAnalytics() {
 
         else if(res.status === 200){
             if(data.has_open_session){
+                console.log(data);
                 hasOpeningSession = data.has_open_session;
                 cashSummery = data?.cash_summery ?? cashSummery;
                 session   = data?.session ?? session;
@@ -930,6 +931,8 @@ async function closeCashSession() {
         else if(res.status === 200){
             cashSummery.actual_cash = actualCash.value;
             cashSummery.open_at = session.open_at;
+
+            cashSummery.employee_name = session.employee_name;
             bootboxSuccess(
                 data.message,
                 async () => {

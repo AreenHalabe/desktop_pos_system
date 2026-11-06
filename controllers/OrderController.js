@@ -125,7 +125,7 @@ export const deleteSyncedOrder = async (req, res) => {
         return res.status(200).json({
             success: true,
             message: "تم حذف الطلبات بنجاح",
-            deletedCount: result.recordset.length,
+            deletedCount: result.rowsAffected[0],
         });
 
     } catch (e) {
@@ -209,24 +209,26 @@ async function getAllOrderAndItems() {
     const result = await pool
         .request()
         .query(`
-            SELECT TOP (20)
-                o.*, 
+            SELECT
+                o.*,
                 io.id AS order_item_id,
                 io.order_id,
                 io.item_id,
                 io.quantity,
                 io.price,
-                io.unit, 
+                io.unit,
                 io.discount_item,
                 io.conversion_factor,
                 io.item_name
-            FROM orders o
+            FROM (
+                SELECT TOP (20) *
+                FROM orders
+                ORDER BY id ASC
+            ) o
             LEFT JOIN order_items io
-            ON o.id = io.order_id
-
+                ON o.id = io.order_id
             ORDER BY o.id ASC;
-        `)
-        ;
+        `);
 
     return result.recordset;
 }
@@ -270,8 +272,8 @@ function buildTreeOfOrders(rows) {
                 order_id: row.order_id,
                 item_id: row.item_id,
                 quantity: row.quantity,
-                price: row.price,
-                unit: row.unit,
+                unit_price: row.price,
+                unit_name: row.unit,
                 discount_item: row.discount_item,
                 conversion_factor: row.conversion_factor,
                 item_name: row.item_name
