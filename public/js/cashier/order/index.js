@@ -1,9 +1,9 @@
-import { setActiveNavLink, showAuthExpired, showError, hiddeError, bootboxSuccess, bootboxError, showPrintLoader, hidePrintLoader } from "../../../component/bootbox.js";
-import { url, urlServer } from "../../../api/urlEndPoint.js";
+import { setActiveNavLink, showAuthExpired, bootboxError, showPrintLoader, hidePrintLoader } from "../../../component/bootbox.js";
+import { url, urlServer, localUrlServer } from "../../../api/urlEndPoint.js";
 import { getAuthToken, removeAuthToken } from "../../../component/auth.js";
 import { printInvoiceFromCashier } from "../../../component/invoices.js";
 import { closeSideBar } from "../Switch-user-functionality.js";
-import { loadItemsAndCategoriesTree } from "../../../api/items.js";
+import { loadItemsAndCategoriesTree, setSessionId, getSessionId, hasInternetConnection} from "../../../api/items.js";
 
 const header = document.querySelector("site-header");
 
@@ -61,15 +61,32 @@ let categoriesData = [];
 let itemsData = [];
 
 document.addEventListener("DOMContentLoaded", async function () {
-    const hasOpeningSession = await checkSession();
-    if (hasOpeningSession) {
+
+    const hasInternet = await hasInternetConnection();
+
+    if(hasInternet) {
+
+        const hasOpeningSession = await checkSession();
+        if (hasOpeningSession) {
+            ({ categoriesData, itemsData } = await loadItemsAndCategoriesTree());
+            clearLoader();
+            initializeCashier(categoriesData, itemsData);
+            
+        }
+        else {
+            handleSessionStatus();
+        }
+
+
+    }
+    else{
         ({ categoriesData, itemsData } = await loadItemsAndCategoriesTree());
         clearLoader();
         initializeCashier(categoriesData, itemsData);
+        sessionId = getSessionId();
     }
-    else {
-        handleSessionStatus();
-    }
+
+    
 });
 
 function handleSessionStatus() {
@@ -1561,6 +1578,7 @@ async function checkSession() {
         }
         else if (res.status === 200) {
             if (data.hasOpeningSession) {
+                setSessionId(data.session_id);
                 sessionId = data.session_id;
             }
             return data.hasOpeningSession
@@ -1570,72 +1588,24 @@ async function checkSession() {
             return false;
         }
     } catch (e) {
-        bootboxError(e);
+        const hasInternet = await hasInternetConnection();
+        if (!hasInternet) {
+            sessionId = getSessionId();
+            return true;
+        }else{
+            bootboxError(e.message);
+        }
+        
     }
 
 }
-async function loadCategoriesTree() {
-    try {
-        const res = await fetch(url + `/category/tree-for-supplier`, {
-            method: 'GET',
-            headers: {
-                "Content-Type": "application/json",
-                "Authorization": `${getAuthToken('user-auth')}`
-            },
-        });
-        const data = await res.json();
-
-        if (res.status === 200) {
-            categoriesData = data;
-            document.getElementById("loadingMainCategory")?.remove();
-            document.getElementById("loadingSubCategory")?.remove();
-        }
-        else if (res.status === 401) {
-            showAuthExpired(data.message);
-        }
-        else {
-            bootboxError(data.message);
-        }
-
-    } catch (err) {
-        bootboxError("حدث خطأ في الاتصال : " + err.message);
-    }
-}
-async function loadItemsTree() {
-    try {
-        const res = await fetch(url + `/items/tree-for-cashier`, {
-            method: 'GET',
-            headers: {
-                "Content-Type": "application/json",
-                "Authorization": `${getAuthToken('user-auth')}`
-            },
-        });
-        const data = await res.json();
-
-        if (res.status === 200) {
-            itemsData = data;
-        }
 
 
-        else if (res.status === 401) {
-            showAuthExpired(data.message);
-        }
-
-
-        else {
-            bootboxError(data.message);
-        }
-
-    } catch (err) {
-        bootboxError("حدث خطأ في الاتصال : " + err.message);
-    }
-}
-
-
-async function createOrder(invData) {
+async function createOrder(activeUrl , invData) {
+    console.log('Creating order with data:', invData);
     overlayLoader.style.display = 'flex';
     try {
-        const res = await fetch(urlServer + `/creat/order?session_id=${sessionId}`, {
+        const res = await fetch(activeUrl + `/creat/order?session_id=${sessionId}`, {
             method: 'POST',
             headers: {
                 "Content-Type": "application/json",
@@ -1649,9 +1619,9 @@ async function createOrder(invData) {
             return false;
         }
         else if (res.status === 200) {
-            
             return {
-                inv_num: data.invoiceNum,
+                message: data.message,
+                inv_num: data.invoiceNum || '000',
                 success: data.success
             };
         }
@@ -1834,8 +1804,9 @@ confirmPayDialog.find("#confirmOrderButton").on("click", async function () {
 
     currentInvoiceData.payment_method = paymentMethod;
 
-   
-    const result = await createOrder(currentInvoiceData);
+    const activeUrl = await checkRemoteServer();
+    
+    const result    = await createOrder(activeUrl, currentInvoiceData);
 
     
 
@@ -1855,7 +1826,7 @@ confirmPayDialog.find("#confirmOrderButton").on("click", async function () {
 
     confirmPayModal.hide();
 
-     showSuccessModal();
+     showSuccessModal(result.message);
 
     
 });
@@ -1885,9 +1856,10 @@ function reSetOrder(){
     }
 }
 
-function showSuccessModal() {
+function showSuccessModal(message) {
     const modal = new bootstrap.Modal(successModelOrder);
     modal.show();
+    document.getElementById('successMessage').textContent = message;
 }
 
 function closeSuccessModal() {
@@ -1902,4 +1874,20 @@ function clearFinalOrderDetails() {
         discount_amount: 0,
         inv_num : 0,
     };
+}
+
+
+async function checkRemoteServer() {
+    try {
+        const response = await fetch(`${url}/test/connection`, {
+            method: 'GET',
+            cache: 'no-store',
+            signal: AbortSignal.timeout(4000)
+        });
+
+        return response.ok ? url : localUrlServer;
+
+    } catch (error) {
+        return localUrlServer;
+    }
 }

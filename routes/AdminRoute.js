@@ -5,4 +5,4 @@ export const AdminRoute = express.Router();
 
 AdminRoute.post('/login' , loginAsCashier);
 
-AdminRoute.post('/login-as-admin' , loginAdmin);
+// AdminRoute.post('/login-as-admin' , loginAdmin);

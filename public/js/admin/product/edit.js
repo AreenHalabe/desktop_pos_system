@@ -4,6 +4,7 @@ import { url } from "../../../api/urlEndPoint.js";
 import { showAuthExpired, bootboxSuccess, bootboxError, setActiveNavLink } from "../../../component/bootbox.js";
 
 import { getAuthToken, removeAuthToken } from "../../../component/auth.js";
+import { clearItemsAndCategoriesCache } from "../../../api/items.js";
 
 const header = document.querySelector("site-header");
 
@@ -641,7 +642,7 @@ async function submitProductData(finalData) {
         const data = await res.json();
 
         if (res.status === 200) {
-            await window.electronAPI.clearPosTreeCache();
+            clearItemsAndCategoriesCache();
             bootboxSuccess(data.message, null, false, redirectToHomePage);
 
         } else if (res.status === 401) {

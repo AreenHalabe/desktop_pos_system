@@ -1,0 +1,308 @@
+
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>مزامنة الطلبات المحلية</title>
+
+    <link href="../../../wroot/assets/bootstrap/css/bootstrap.rtl.min.css" rel="stylesheet">
+    <link href="../../../wroot/assets/bootstrap/css/bootstrap-icons.css" rel="stylesheet">
+       <!-- FontAwesome -->
+    <link href="../../../wroot/assets/fontawesome/css/all.min.css" rel="stylesheet">
+
+    <link rel="stylesheet" href="../../../public/style/cashier/header.css" />
+    <link rel="stylesheet" href="../../../public/style/cashier/order/local.css" />
+</head>
+
+<body>
+
+    <div class="header-wrapper p-1">
+        <site-header></site-header>
+    </div>
+
+    <div class="container-fluid py-4 px-3 px-lg-4">
+
+        <!-- Page Header -->
+        <div class="page-header mb-4">
+
+            <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
+
+                <div>
+                    <h4 class="fw-bold mb-2">
+                        <i class="bi bi-cloud-arrow-up text-primary ms-1"></i>
+                        مزامنة الطلبات المحلية
+                    </h4>
+
+                    <p class="text-secondary mb-0">
+                        إدارة ومزامنة الطلبات المحفوظة على هذا الجهاز مع قاعدة البيانات الرئيسية.
+                    </p>
+                </div>
+
+                <div class="header-actions">
+                    <button class="btn btn-primary px-4" id="syncOrdersBtn">
+                        <i class="bi bi-arrow-repeat ms-1 sync-icon"></i>
+                        مزامنة الدفعة الحالية
+                    </button>
+                </div>
+
+            </div>
+
+        </div>
+
+        <!-- Information -->
+        <div class="info-card p-3 p-md-4 mb-4">
+
+            <div class="d-flex align-items-start gap-3">
+
+                <div class="text-primary fs-3">
+                    <i class="bi bi-info-circle"></i>
+                </div>
+
+                <div class="flex-grow-1">
+
+                    <h6 class="fw-bold mb-2">
+                        كيف تتم المزامنة؟
+                    </h6>
+
+                    <p class="text-secondary mb-2 small">
+                        تتم المزامنة على دفعات، كل دفعة تحتوي على 20 طلباً كحد أقصى.
+                        بعد نجاح مزامنة الدفعة الحالية، سيتم تحميل الدفعة التالية تلقائياً.
+                    </p>
+
+                    <div class="d-flex flex-wrap gap-2">
+                        <span class="badge text-bg-primary">
+                            20 طلباً لكل دفعة
+                        </span>
+
+                        <span class="badge text-bg-success">
+                            تحميل تلقائي للدفعة التالية
+                        </span>
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        <!-- Statistics -->
+        <div class="row g-3 mb-4">
+
+            <div class="col-12 col-sm-6 col-lg-4">
+                <div class="info-card p-3 h-100">
+                    <div class="text-secondary small mb-2">
+                        الطلبات في الدفعة الحالية
+                    </div>
+
+                    <div class="d-flex align-items-center justify-content-between">
+                        <h3 class="fw-bold mb-0" id="currentBatchCount">0</h3>
+                        <i class="bi bi-receipt text-primary fs-3"></i>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-12 col-sm-6 col-lg-4">
+                <div class="info-card p-3 h-100">
+                    <div class="text-secondary small mb-2">
+                        إجمالي الطلبات التي تمت مزامنتها
+                    </div>
+
+                    <div class="d-flex align-items-center justify-content-between">
+                        <h3 class="fw-bold text-success mb-0" id="syncedCount">0</h3>
+                        <i class="bi bi-check-circle text-success fs-3"></i>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-12 col-sm-6 col-lg-4">
+                <div class="info-card p-3 h-100">
+                    <div class="text-secondary small mb-2">
+                        حالة المزامنة
+                    </div>
+
+                    <div class="d-flex align-items-center justify-content-between">
+                        <h5 class="fw-bold mb-0" id="syncStatus">
+                            بانتظار المزامنة
+                        </h5>
+                        <i class="bi bi-cloud text-secondary fs-3"></i>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Progress -->
+        <div class="info-card p-3 mb-4 d-none" id="progressContainer">
+
+            <div class="d-flex justify-content-between mb-2">
+                <span class="small fw-semibold" id="progressText">
+                    جاري المزامنة...
+                </span>
+
+                <span class="small text-secondary" id="progressPercentage">
+                    0%
+                </span>
+            </div>
+
+            <div class="progress sync-progress">
+                <div class="progress-bar progress-bar-striped progress-bar-animated"
+                     id="syncProgressBar"
+                     role="progressbar"
+                     style="width: 0%">
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Orders Table -->
+        <div class="table-card">
+
+            <div class="p-3 p-md-4 border-bottom">
+
+                <div class="d-flex flex-column flex-sm-row justify-content-between align-items-sm-center gap-2">
+
+                    <div>
+                        <h5 class="fw-bold mb-1">
+                            الطلبات بانتظار المزامنة
+                        </h5>
+
+                        <span class="batch-label" id="batchDescription">
+                            عرض أول 20 طلباً
+                        </span>
+                    </div>
+
+                    <span class="badge text-bg-secondary" id="ordersCountBadge">
+                        0 طلب
+                    </span>
+
+                </div>
+
+            </div>
+
+            <div class="table-responsive">
+
+                <table class="table table-hover mb-0">
+
+                    <thead>
+                        <tr>
+                            <th>رقم الطلب</th>
+                            <th>تاريخ الطلب</th>
+                            <th>عدد الأصناف</th>
+                            <th>الإجمالي</th>
+                            <th>الخصم</th>
+                            <th>طريقة الدفع</th>
+                            <th>الحالة</th>
+                            <th class="text-center">التفاصيل</th>
+                        </tr>
+                    </thead>
+
+                    <tbody id="ordersTableBody">
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+            <!-- Empty State -->
+            <div class="empty-state d-none" id="emptyState">
+
+                <i class="bi bi-check-circle"></i>
+
+                <h5 class="fw-bold mt-3">
+                    لا توجد طلبات بانتظار المزامنة
+                </h5>
+
+                <p class="text-secondary mb-0">
+                    جميع الطلبات المحفوظة على الجهاز تمت مزامنتها بنجاح.
+                </p>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- Order Items Modal -->
+    <div class="modal fade" id="orderItemsModal" tabindex="-1" aria-hidden="true">
+
+        <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+
+            <div class="modal-content">
+
+                <div class="modal-header">
+
+                    <h5 class="modal-title fw-bold">
+                        <i class="bi bi-receipt text-primary ms-1"></i>
+                        تفاصيل الطلب
+                        <span id="modalOrderId" class="text-primary"></span>
+                    </h5>
+
+                    <button type="button"
+                            class="btn-close"
+                            data-bs-dismiss="modal"
+                            aria-label="Close">
+                    </button>
+
+                </div>
+
+                <div class="modal-body">
+
+                    <div class="table-responsive">
+
+                        <table class="table table-bordered table-hover">
+
+                            <thead>
+                                <tr>
+                                    <th>#</th>
+                                    <th>اسم الصنف</th>
+                                    <th>الكمية</th>
+                                    <th>الوحدة</th>
+                                    <th>السعر</th>
+                                    <th>الخصم</th>
+                                </tr>
+                            </thead>
+
+                            <tbody id="orderItemsTableBody">
+
+                            </tbody>
+
+                        </table>
+
+                    </div>
+
+                    <div class="alert alert-light border mb-0">
+                        <div class="d-flex justify-content-between">
+                            <span class="fw-semibold">إجمالي أصناف الطلب</span>
+                            <strong id="modalOrderTotal">0</strong>
+                        </div>
+                    </div>
+
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button"
+                            class="btn btn-secondary"
+                            data-bs-dismiss="modal">
+                        إغلاق
+                    </button>
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+     <script src="../../../wroot/assets/bootstrap/js/bootstrap.bundle.min.js"></script>
+
+    <script src="../../../wroot/assets/jquery/jquery-3.7.1.min.js"></script>
+    <script src="../../../wroot/assets/bootbox/bootbox.min.js"></script>
+
+    <script type="module" src="../../../public/js/cashier/order/local.js"></script>
+
+</body>
+</html>

@@ -3,16 +3,8 @@ import { poolConnect } from "./DataBaseConnections/dbconnection.js";
 import bodyParser from "body-parser";
 import cors from "cors";
 import { AdminRoute } from "./routes/AdminRoute.js";
-import { MainCategoryRoute } from "./routes/MainCategoryRoute.js";
-import { CategoryRoute } from "./routes/CategoryRoute.js";
-import { ItemRoute } from "./routes/ItemsRoute.js";
-import { SessionRoute } from "./routes/SessionRoute.js";
 import { OrderRoute } from "./routes/OrderRoute.js";
-import { TransactionRoute } from "./routes/TransactionRoute.js";
-import { ReportRoute } from "./routes/ReportRoute.js";
-import { SupplierRoute } from "./routes/SupplierRoute.js";
-import { InvoiceRoute } from "./routes/InvoicesRoute.js";
-import { CheckRoute } from "./routes/CheckRoute.js";
+
 
 const app = express();
 
@@ -22,16 +14,9 @@ app.use(express.json());
 app.use(cors());
 
 app.use(AdminRoute);
-app.use(MainCategoryRoute);
-app.use(CategoryRoute);
-app.use(ItemRoute);
-app.use(SessionRoute);
+
 app.use(OrderRoute);
-app.use(TransactionRoute);
-app.use(ReportRoute);
-app.use(SupplierRoute);
-app.use(InvoiceRoute);
-app.use(CheckRoute);
+
 
 let server_port;
 
@@ -98,4 +83,3 @@ export { initServer, server_port };
 
 
 
-// "package-win": "electron-packager . electron-tutorial-app --overwrite --asar=true --platform=win32 --arch=x64 --icon=assets/icons/win/icon.ico --prune=true --out=release-builds --version-string.CompanyName=CE --version-string.FileDescription=CE --version-string.ProductName=\"Student Maneger Sysytem\"",

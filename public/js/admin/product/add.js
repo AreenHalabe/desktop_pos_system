@@ -5,6 +5,7 @@ import { setActiveNavLink } from "../../../component/bootbox.js";
 
 import { getAuthToken, removeAuthToken } from "../../../component/auth.js";
 
+import { clearItemsAndCategoriesCache } from "../../../api/items.js";
 const header = document.querySelector("site-header");
 
 const autoBarcodeCheckbox = document.getElementById('auto_barcode');
@@ -1501,7 +1502,7 @@ async function submitProductData(finalData) {
         });
         let data = await res.json();
         if (res.status === 200) {
-            await window.electronAPI.clearPosTreeCache();
+            clearItemsAndCategoriesCache();
             bootboxSuccess(data.message);
             resetAllInputs();
         }

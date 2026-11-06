@@ -5,7 +5,7 @@ const config = {
     user: "BLACK",
     password: "20012001",
     server: "DESKTOP-63T0OB5//SQLEXPRESS",     
-    database: "super_market",    
+    database: "super_market_cash",    
     options: {
         trustServerCertificate: true
     }

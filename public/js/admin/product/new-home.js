@@ -4,6 +4,8 @@ import { url } from "../../../api/urlEndPoint.js";
 import { showAuthExpired, bootboxConfirm, bootboxSuccess, bootboxError, setActiveNavLink } from "../../../component/bootbox.js";
 import { removeAuthToken, getAuthToken } from "../../../component/auth.js";
 
+import { clearItemsAndCategoriesCache } from "../../../api/items.js";
+
 // ============================================
 // Header
 // ============================================
@@ -854,7 +856,7 @@ async function deleteItem(itemId) {
     }
 
     if(res.status === 200) {
-        await window.electronAPI.clearPosTreeCache();
+        clearItemsAndCategoriesCache();
     }
 
     return data;

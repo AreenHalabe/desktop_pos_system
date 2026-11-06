@@ -2,6 +2,7 @@
 import { setAuthToken, setAdminId } from "../../component/auth.js";
 import { setPortNumber } from "../../../env.js";
 import { urlServer } from "../../api/urlEndPoint.js";
+import { hasInternetConnection } from "../../api/items.js";
 
 const errorList = document.getElementById('error_list');
 const errorMessage = document.getElementById('errors');
@@ -30,57 +31,65 @@ form.addEventListener('submit', async (e) => {
         password: form.password.value
     };
 
-    if(!urlEndPoint){
+
+    if (!urlEndPoint) {
         const port = await window.electronAPI.getPort();
         setPortNumber(port);
-
-        // urlEndPoint = `http://localhost:${port}`;
+        urlEndPoint = `http://localhost:${port}`;
     }
 
-    
+    const hasInternet = await hasInternetConnection();
 
-    urlEndPoint = `http://localhost:${3000}`;
+    if (!hasInternet) {
+        await localLogin(formdata)
+    }
 
-    try {
-        const res = await fetch(urlServer + '/login', {
-            method: 'POST',
-            headers: {
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify(formdata),
-        });
-        const data = await res.json();
-
-
-        if (res.status === 200) {
-            adminId = data.id;
-            // setAuthToken('auth',data.token);
-            setAuthToken('user-auth', data.token);
-            setAdminId(data.id);
-
-
-            window.location.href = './cashier/order/index.html';
-        }
-        else if (res.status === 403) {
-            bootbox.alert({
-                title: "⚠️ تنبيه",
-                message: data.message,
-                centerVertical: true,
-                backdrop: true,
-                className: "fs-6"
+    else {
+        try {
+            const res = await fetch(urlServer + '/login', {
+                method: 'POST',
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify(formdata),
             });
+            const data = await res.json();
+
+
+            if (res.status === 200) {
+                adminId = data.id;
+                // setAuthToken('auth',data.token);
+                setAuthToken('user-auth', data.token);
+                setAdminId(data.id);
+
+
+                window.location.href = './cashier/order/index.html';
+            }
+            else if (res.status === 403) {
+                bootbox.alert({
+                    title: "⚠️ تنبيه",
+                    message: data.message,
+                    centerVertical: true,
+                    backdrop: true,
+                    className: "fs-6"
+                });
+            }
+            else {
+                enableLoginButton();
+                errorList.style.display = 'block';
+                errorMessage.innerHTML = data.message;
+            }
         }
-        else {
+        catch (error) {
             enableLoginButton();
             errorList.style.display = 'block';
-            errorMessage.innerHTML = data.message;
+            errorMessage.innerHTML = `فشل الاتصال بالخادم: ${error.message}`;
         }
     }
-    catch (error) {
-        enableLoginButton();
-        errorList.style.display = 'block';
-        errorMessage.innerHTML = `${error.message}`;
-    }
+
+
+
+
 
 });
 
@@ -246,12 +255,12 @@ function bootboxLogin() {
 
             // مهم جداً
             e.preventDefault();
-            
+
             const loginBtn = document.getElementById('adminLoginBtn');
 
             disableLoginButton(loginBtn);
 
-            
+
             const username =
                 document.getElementById("adminUsername").value.trim();
 
@@ -265,17 +274,6 @@ function bootboxLogin() {
 
             clearModalErrors();
 
-
-            if(!urlEndPoint){
-                const port = await window.electronAPI.getPort();
-                setPortNumber(port);
-
-                // urlEndPoint = `http://localhost:${port}`;
-            }
-
-            
-
-            urlEndPoint = `http://localhost:${3000}`;
 
             try {
 
@@ -309,13 +307,43 @@ function bootboxLogin() {
 
             } catch (err) {
 
-                displayModalError(err.message);
+                displayModalError(`فشل الاتصال بالخادم: ${err.message}`);
 
-            }finally {
+            } finally {
                 enableLoginButton(loginBtn);
             }
 
         });
 
     });
+}
+
+
+async function localLogin(formdata) {
+    try {
+        const res = await fetch(urlEndPoint + '/login', {
+            method: 'POST',
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(formdata),
+        });
+        const data = await res.json();
+
+
+        if (res.status === 200) {
+            window.location.href = './cashier/order/index.html';
+        }
+
+        else {
+            enableLoginButton();
+            errorList.style.display = 'block';
+            errorMessage.innerHTML = data.message;
+        }
+    }
+    catch (error) {
+        enableLoginButton();
+        errorList.style.display = 'block';
+        errorMessage.innerHTML = `فشل الاتصال بالخادم: ${error.message}`;
+    }
 }
