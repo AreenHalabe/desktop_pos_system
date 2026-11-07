@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+
+<head>
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Halabi_Technology.ps</title>
+
+    <!-- Bootstrap 5.3.2 RTL -->
+    <link href="../../../wroot/assets/bootstrap/css/bootstrap.rtl.min.css" rel="stylesheet">
+    <link href="../../../wroot/assets/bootstrap/css/bootstrap-icons.css" rel="stylesheet">
+
+    <!-- FontAwesome -->
+    <link href="../../../wroot/assets/fontawesome/css/all.min.css" rel="stylesheet">
+
+    <link rel="stylesheet" href="../../../public/style/admin/header.css" />
+
+    
+</head>
+
+<body style="background-color: #c8ced3;">
+    <site-header></site-header>
+    <div class="container-fluid py-4">
+
+        <div class="card border-0 shadow-sm">
+
+            <!-- Header -->
+            <div class="card-header d-flex align-items-center bg-white py-3">
+
+                <div class="d-flex align-items-center gap-3">
+
+                    <div class="text-danger fs-3">
+                        <i class="fa-solid fa-money-bill-transfer"></i>
+                    </div>
+
+                    <div>
+                        <h5 class="mb-1 fw-bold">
+                            تقرير المصروفات
+                        </h5>
+
+                        <small class="text-muted">
+                            عرض المصروفات المسجلة
+                        </small>
+                    </div>
+
+                </div>
+                
+                
+            </div>
+            
+
+            <!-- Body -->
+            <div class="card-body">
+
+                <!-- Loading -->
+                <div
+                    id="expensesLoading"
+                    class="text-center py-5 d-none"
+                >
+                    <div
+                        class="spinner-border text-primary"
+                        role="status"
+                    >
+                        <span class="visually-hidden">
+                            جاري التحميل...
+                        </span>
+                    </div>
+
+                    <div class="text-muted mt-2">
+                        جاري تحميل المصروفات...
+                    </div>
+                </div>
+
+                <!-- Empty -->
+                <div
+                    id="expensesEmpty"
+                    class="text-center text-muted py-5 d-none"
+                >
+                    <i class="fa-solid fa-receipt fs-1 mb-3"></i>
+
+                    <div class="fw-semibold">
+                        لا توجد مصروفات
+                    </div>
+                </div>
+
+                <!-- Table -->
+                <div
+                    id="expensesTableWrapper"
+                    class="table-responsive"
+                >
+
+                    <table
+                        class="table table-hover align-middle text-center mb-0"
+                    >
+
+                        <thead class="table-light">
+                            <tr>
+                                <th>التاريخ</th>
+                                <th>الوقت</th>
+                                <th>النوع</th>
+                                <th>القيمة</th>
+                                <th>السبب</th>
+                            </tr>
+                        </thead>
+
+                        <tbody id="expensesTableBody"></tbody>
+
+                    </table>
+
+                </div>
+
+            </div>
+
+            <!-- Pagination -->
+            <div
+                id="expensesPaginationWrapper"
+                class="card-footer bg-white border-top"
+            >
+
+                <nav
+                    aria-label="تنقل صفحات المصروفات"
+                >
+
+                    <ul
+                        id="expensesPagination"
+                        class="pagination justify-content-center mb-0 flex-wrap"
+                    >
+                    </ul>
+
+                </nav>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <div id="overlay_loader"
+        class="position-fixed top-0 start-0 w-100 h-100 d-flex justify-content-center align-items-center d-none"
+        style="background: rgba(0,0,0,0.55); backdrop-filter: blur(3px); z-index: 9999;">
+
+        <div class="text-center text-white">
+
+            <div class="spinner-border mb-3" role="status" style="width: 4rem; height: 4rem;">
+            </div>
+
+            <p class="fs-5 mb-0">
+                جاري معالجة الطلب، يرجى الانتظار...
+            </p>
+
+        </div>
+    </div>
+
+
+    <script src="../../../wroot/assets/bootstrap/js/bootstrap.bundle.min.js"></script>
+
+    <script src="../../../wroot/assets/jquery/jquery-3.7.1.min.js"></script>
+    <script src="../../../wroot/assets/bootbox/bootbox.min.js"></script>
+
+    <script type="module" src="../../../public/js/admin/report/expenses.js"></script>
+
+</body>
+
+</html>

@@ -163,7 +163,7 @@ document.addEventListener("click", async function (e) {
             hiddeError();
             resetSessionData();
             await loadSesions();
-            await loadTransactions(sessionsIds);
+           
             setDateTimeRange(formatDateTimeForFilter(startDate.value), formatDateTimeForFilter(endDate.value));
             hiddeLoader();
         }
@@ -268,44 +268,7 @@ async function loadSesions() {
     }
 
 }
-async function loadTransactions(sessionsIds) {
-    if(sessionsIds.length === 0){
-        filterTransactions([]);
-        setHeaderFilter(' ', ' ', true);
-        handelTotalPage(0);
-        renderTransactionsTable([]);
-        return;
-    }
-    try{
-        const res = await fetch(urlServer + `/reports/financial/transactions` ,{
-            method: 'POST',
-                headers: {
-                "Content-Type": "application/json",
-                "Authorization": `${getAuthToken('auth')}`
-            },
-            body: JSON.stringify({
-                session_ids : sessionsIds,
-            }),
-        });
 
-        const data = await res.json();
-
-        if(res.status === 401){
-            showAuthExpired(data.message);
-        }
-        else if(res.status === 200){
-            filterTransactions(data.transactions);
-            setHeaderFilter(' ', ' ', true);
-            handelTotalPage(data.transactions.length);
-            renderTransactionsTable(data.transactions);
-        }
-        else{
-            displayError(data.message);
-        }
-    }catch(err){
-        displayError(err.message);
-    }
-}
 
 
 
