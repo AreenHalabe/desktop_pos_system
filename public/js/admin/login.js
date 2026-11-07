@@ -1,7 +1,7 @@
 
 import { setAuthToken, setAdminId } from "../../component/auth.js";
 import { setPortNumber } from "../../../env.js";
-import { urlServer } from "../../api/urlEndPoint.js";
+
 
 const errorList = document.getElementById('error_list');
 const errorMessage = document.getElementById('errors');
@@ -11,7 +11,6 @@ const loginBtn = document.getElementById('login-btn');
 
 
 
-let adminId;
 let urlEndPoint;
 const loginModalEl = document.getElementById('loginModal');
 
@@ -33,16 +32,11 @@ form.addEventListener('submit', async (e) => {
     if(!urlEndPoint){
         const port = await window.electronAPI.getPort();
         setPortNumber(port);
-
-        // urlEndPoint = `http://localhost:${port}`;
+        urlEndPoint = `http://localhost:${port}`;
     }
 
-    
-
-    urlEndPoint = `http://localhost:${3000}`;
-
     try {
-        const res = await fetch(urlServer + '/login', {
+        const res = await fetch(urlEndPoint + '/login', {
             method: 'POST',
             headers: {
                 "Content-Type": "application/json"
@@ -53,7 +47,6 @@ form.addEventListener('submit', async (e) => {
 
 
         if (res.status === 200) {
-            adminId = data.id;
             // setAuthToken('auth',data.token);
             setAuthToken('user-auth', data.token);
             setAdminId(data.id);
@@ -270,17 +263,14 @@ function bootboxLogin() {
                 const port = await window.electronAPI.getPort();
                 setPortNumber(port);
 
-                // urlEndPoint = `http://localhost:${port}`;
+                urlEndPoint = `http://localhost:${port}`;
             }
 
-            
-
-            urlEndPoint = `http://localhost:${3000}`;
 
             try {
 
                 const res = await fetch(
-                    urlServer + `/login-as-admin`,
+                    urlEndPoint + `/login-as-admin`,
                     {
                         method: 'POST',
 

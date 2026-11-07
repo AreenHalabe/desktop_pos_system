@@ -162,7 +162,15 @@ export async function printCashSummery(session, isSessionClosed = true) {
 
                 <h2 class="center">ملخص الصندوق</h2>
                 <hr>
-            
+
+                 <!-- الموظف المسؤول -->
+                <div class="cash-employee">
+                    <p>
+                        <strong>الكاشير :</strong>
+                        <span>${session?.employee_name || "غير محدد"}</span>
+                    </p>
+                </div>
+                <hr>
 
                 <!-- معلومات الجلسة -->
                 <div class="open-close-info">
@@ -174,9 +182,9 @@ export async function printCashSummery(session, isSessionClosed = true) {
                     <p style="margin-top: 8px;">
                         <strong>وقت الإغلاق :</strong>
                         ${isSessionClosed
-            ? `<span style="margin-top: 5px;">${closeDate} | ${closeTime}</span>`
-            : `<span style="margin-top: 5px;">لم يتم إغلاقه</span>`
-        }
+                            ? `<span style="margin-top: 5px;">${closeDate} | ${closeTime}</span>`
+                            : `<span style="margin-top: 5px;">لم يتم إغلاقه</span>`
+                        }
                     </p>
                 </div>
 
@@ -629,6 +637,19 @@ async function createHTMLCashSummary(cashHtml) {
             }
 
 
+            .cash-employee {
+                text-align: center;
+                margin-bottom: 13px;
+            }
+
+            .cash-employee p {
+                margin: 0;
+            }
+
+            .cash-employee span {
+                font-size: 15px;
+                font-weight: bold;
+            }
 
         
 

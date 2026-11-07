@@ -16,22 +16,11 @@ export const checkCashSession = async (req , res) => {
 
         const session = await checkSession(adminId, pool, sql);
         const hasOpeningSession = !!session;
-        // let cashSummery;
-
-        // if (hasOpeningSession) {
-        //     cashSummery = await getCashSummery(session.id, pool, sql);
-
-        //     cashSummery.expected_cash =
-        //         session.opening_cash + cashSummery.cash_sales + cashSummery.cash_in - cashSummery.cash_out;
-
-        //     cashSummery.opening_cash = session.opening_cash;
-        // }
-
+      
         return res.status(200).json(
             {
                 hasOpeningSession,
                 session_id: session?.id || null
-                // cash_summery: cashSummery || null
             }
         );
 
@@ -70,7 +59,7 @@ export const openNewSession = async (req , res) =>{
             .input("open_at", sql.DateTime2, currentTimeStamp)
             .input("opening_cash", sql.Decimal(10, 2), parsedData.opening_cash)
             .input("admin_id", sql.Int, adminId)
-            .input("employee_name", sql.VarChar(50), parsedData.employee_name)
+            .input("employee_name", sql.NVarChar(50), parsedData.employee_name)
             .query(`
                 INSERT INTO cash_sessions (admin_id, open_at, opening_cash, employee_name)
                 OUTPUT INSERTED.id

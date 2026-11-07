@@ -5,6 +5,7 @@ contextBridge.exposeInMainWorld("electronAPI", {
     getPort: () => ipcRenderer.invoke("get-port"),
     backupDatabase: () => ipcRenderer.invoke("backup-database"),
     previewInvoice: (invoiceContent) =>  ipcRenderer.invoke('preview-invoice', invoiceContent),
+    mainWindowPath: () => ipcRenderer.invoke('get-main-window-path')
 });
 
 

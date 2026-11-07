@@ -487,7 +487,6 @@ async function loadChecksRecentlyAdded(needToRenderTable = true) {
         });
 
         let data = await res.json();
-        console.log(data);
         if (res.status === 200) {
 
 
@@ -1211,32 +1210,13 @@ function openCheckStatusModal(check) {
                         الحساب
                     </label>
 
-                    <select 
-                        name="accountName" 
-                        class="form-select" 
+                    <input
+                        type="text"
+                        name="accountName"
+                        class="form-control"
+                        value="${check.account_name || ''}"
                         required
                     >
-                        <option 
-                            value="حسني"
-                            ${check.account_name === "حسني" ? "selected" : ""}
-                        >
-                            حسني
-                        </option>
-
-                        <option 
-                            value="وسيم"
-                            ${check.account_name === "وسيم" ? "selected" : ""}
-                        >
-                            وسيم
-                        </option>
-
-                        <option 
-                            value="أخرى"
-                            ${check.account_name === "أخرى" ? "selected" : ""}
-                        >
-                            أخرى
-                        </option>
-                    </select>
                 </div>
 
 

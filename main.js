@@ -294,6 +294,11 @@ app.whenReady().then(async () => {
     });
 
 
+    ipcMain.handle('get-main-window-path', () => {
+      return path.join(__dirname, 'views', 'mainWindow.html');
+    });
+
+
 
     app.on("window-all-closed", () => {
       if (process.platform !== "darwin") {
