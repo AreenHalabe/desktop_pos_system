@@ -114,6 +114,8 @@ customBaseUnitName.addEventListener("change", () => {
     customBaseUnitName.required = false;
     customBaseUnitName.value = "";
     renderUnits();
+    updateContainsUnitOptions();
+    updatePurchaseUnitOptions();
 });
 
 
@@ -216,6 +218,8 @@ function updateContainsUnitOptions() {
     const baseUnitName =
         getBaseUnitName();
 
+    if(baseUnitName == 'other') return ;
+
 
     if (baseUnitName) {
 
@@ -284,6 +288,7 @@ function updatePurchaseUnitOptions() {
     const baseUnitName =
         getBaseUnitName();
 
+    if(baseUnitName == 'other') return ;
 
     if (baseUnitName) {
 
