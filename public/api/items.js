@@ -9,26 +9,17 @@
 
 export async function loadItemsAndCategoriesTree() {
 
-    if(categoriesData.length > 0 && itemsData.length > 0) {
-        console.log("not loading");
-        return {
-            categoriesData,
-            itemsData
-        }
-    }
+    
+    await Promise.all([
+        loadCategoriesTree(),
+        loadItemsTree()
+    ]);
 
-    else {
-        console.log("Loading categories and items tree...");
-        await Promise.all([
-            loadCategoriesTree(),
-            loadItemsTree()
-        ]);
-
-        return {
-            categoriesData,
-            itemsData
-        }
+    return {
+        categoriesData,
+        itemsData
     }
+    
     
 
 }

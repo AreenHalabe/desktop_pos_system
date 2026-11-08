@@ -6,24 +6,21 @@ import { setPortNumber } from "../../../env.js";
 const errorList = document.getElementById('error_list');
 const errorMessage = document.getElementById('errors');
 const form = document.getElementById('login-form');
-const loginBtn = document.getElementById('login-btn');
+const baseLoginBtn = document.getElementById('login-btn');
 
 
 
 
 let urlEndPoint;
-const loginModalEl = document.getElementById('loginModal');
 
-loginModalEl.addEventListener('hidden.bs.modal', function () {
-    enableLoginButton();
-});
+
 
 
 
 form.addEventListener('submit', async (e) => {
     e.preventDefault();
     clearErrors();
-    disableLoginButton();
+    disableLoginButton(baseLoginBtn);
     const formdata = {
         name: form.name.value,
         password: form.password.value
@@ -47,11 +44,8 @@ form.addEventListener('submit', async (e) => {
 
 
         if (res.status === 200) {
-            // setAuthToken('auth',data.token);
             setAuthToken('user-auth', data.token);
             setAdminId(data.id);
-
-
             window.location.href = './cashier/order/index.html';
         }
         else if (res.status === 403) {
@@ -64,15 +58,17 @@ form.addEventListener('submit', async (e) => {
             });
         }
         else {
-            enableLoginButton();
+            
             errorList.style.display = 'block';
             errorMessage.innerHTML = data.message;
         }
     }
     catch (error) {
-        enableLoginButton();
+        
         errorList.style.display = 'block';
         errorMessage.innerHTML = `${error.message}`;
+    }finally{
+        enableLoginButton(baseLoginBtn);
     }
 
 });
@@ -106,14 +102,20 @@ document.addEventListener('click', async function (e) {
 
 
 
-function disableLoginButton() {
+function disableLoginButton(loginBtn) {
     loginBtn.disabled = true;
-    loginBtn.innerHTML = 'جاري تسجيل الدخول...';
+    loginBtn.innerHTML = `
+        <i class="fas fa-spinner fa-spin"></i>
+        جاري تسجيل الدخول...
+    `;
 }
 
-function enableLoginButton() {
+function enableLoginButton(loginBtn) {
     loginBtn.disabled = false;
-    loginBtn.innerHTML = 'تسجيل الدخول';
+    loginBtn.innerHTML = `
+        <i class="fas fa-right-to-bracket"></i>
+        تسجيل الدخول
+    `;
 }
 
 function clearErrors() {
