@@ -79,6 +79,16 @@ document.addEventListener('DOMContentLoaded', async function () {
     await buildSelectCategory();
 });
 
+document.querySelector('form').addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') {
+        e.preventDefault();
+
+        if (e.target.id === 'customBaseUnitName') {
+            customBaseUnitName.dispatchEvent(new Event('change'));
+        }
+    }
+});
+
 baseUnitName.addEventListener("change", () => {
     const isCustom = baseUnitName.value === "other";
 
@@ -114,6 +124,8 @@ customBaseUnitName.addEventListener("change", () => {
     customBaseUnitContainer.classList.add("d-none");
     customBaseUnitName.required = false;
     customBaseUnitName.value = "";
+
+    renderUnits();
 });
 
 
@@ -711,6 +723,7 @@ function renderUnits() {
     const baseUnitName =
         getBaseUnitName();
 
+    if(baseUnitName == 'other') return ;
 
     if (!baseUnitName) {
 

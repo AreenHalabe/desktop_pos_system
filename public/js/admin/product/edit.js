@@ -83,6 +83,13 @@ document.addEventListener("DOMContentLoaded", async function () {
 
 });
 
+
+document.querySelector('form').addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') {
+        e.preventDefault();
+    }
+});
+
 async function buildSelectCategory() {
     const select = document.getElementById("productCategory");
 
@@ -946,3 +953,5 @@ function renderStockAndCost(units, stockBatch) {
 function redirectToHomePage(){
     window.location.href = './home.html'
 }
+
+
