@@ -107,13 +107,15 @@ customBaseUnitName.addEventListener("change", () => {
     } else {
         const option = new Option(unitName, unitName, true, true);
         baseUnitName.add(option);
-        renderUnits();
+        
     }
 
     // إخفاء حقل الإدخال بعد إضافة الوحدة
     customBaseUnitContainer.classList.add("d-none");
     customBaseUnitName.required = false;
     customBaseUnitName.value = "";
+
+    renderUnits();
 });
 
 
