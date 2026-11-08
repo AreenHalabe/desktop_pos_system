@@ -113,6 +113,7 @@ customBaseUnitName.addEventListener("change", () => {
     customBaseUnitContainer.classList.add("d-none");
     customBaseUnitName.required = false;
     customBaseUnitName.value = "";
+    renderUnits();
 });
 
 
@@ -709,6 +710,8 @@ function renderUnits() {
 
     const baseUnitName =
         getBaseUnitName();
+
+    if(baseUnitName == 'other') return;
 
 
     if (!baseUnitName) {
@@ -1476,6 +1479,15 @@ document.addEventListener("change", function (e) {
 }
 );
 
+document.querySelector('form').addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') {
+        e.preventDefault();
+
+        if (e.target.id === 'customBaseUnitName') {
+            customBaseUnitName.dispatchEvent(new Event('change'));
+        }
+    }
+});
 
 
 updateContainsUnitOptions();
@@ -1501,7 +1513,6 @@ async function submitProductData(finalData) {
         });
         let data = await res.json();
         if (res.status === 200) {
-            await window.electronAPI.clearPosTreeCache();
             bootboxSuccess(data.message);
             resetAllInputs();
         }

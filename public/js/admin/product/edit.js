@@ -713,9 +713,7 @@ function setUnits(data) {
 
             unit_name: unit.unit_name,
 
-            conversion_factor: Number(unit.conversion_factor).toLocaleString('en-US', {
-                maximumFractionDigits: 2
-            }),
+            conversion_factor: Number(unit.conversion_factor),
 
             barcode: unit.barcode || null,
 
@@ -945,3 +943,9 @@ function renderStockAndCost(units, stockBatch) {
 function redirectToHomePage(){
     window.location.href = './home.html'
 }
+
+document.querySelector('form').addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') {
+        e.preventDefault();
+    }
+});

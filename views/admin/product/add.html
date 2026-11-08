@@ -134,16 +134,37 @@
                                 </label>
 
                                 <select class="form-select" id="baseUnitName" name="base_unit" required>
-                                    <option value="" selected disabled> اختر الوِحدة </option>
+                                    <option value="" selected disabled>اختر الوحدة</option>
+
+                                    <!-- وحدات العد -->
                                     <option value="حبة">حبة</option>
                                     <option value="قطعة">قطعة</option>
                                     <option value="سيجارة">سيجارة</option>
                                     <option value="رغيف">رغيف</option>
+                                    <option value="كيس">كيس</option>
+                                    <option value="ربطة">ربطة</option>
+                                    
+
+                                    <!-- وحدات التعبئة -->
                                     <option value="علبة">علبة</option>
+                                    <option value="كرتونة">كرتونة</option>
+                                    <option value="صندوق">صندوق</option>
+                                    <option value="باكيت">باكيت</option>
+                                    <option value="عبوة">عبوة</option>
+                                    <option value="مرطبان">مرطبان</option>
+                                    <option value="تنكة">تنكة</option>
+
+                                    <!-- وحدات الوزن -->
                                     <option value="كيلو">كيلو</option>
+                                    <option value="نصف كيلو">نصف كيلو</option>
+                                    <option value="ربع كيلو">ربع كيلو</option>
+                                    <option value="وقية">وقية</option>
+                                    <option value="نصف وقية">نصف وقية</option>
                                     <option value="غرام">غرام</option>
-                                    <option value="لتر">لتر</option>
-                                    <option value="مل">مل</option>
+
+                                    
+                                    
+
                                     <option value="other">✚ وحدة أخرى...</option>
                                 </select>
                                 <div id="customBaseUnitContainer" class="mt-2 d-none">
@@ -595,7 +616,7 @@
                                 <div class="stock-input-wrapper">
 
                                     <input type="number" class="form-control stock-input" id="currentStock" min="0"
-                                        step="1" placeholder="0" required disabled>
+                                        step="0.5" placeholder="0" required disabled>
 
                                     <span class="stock-unit" id="stockUnit">
                                         الوحدة
