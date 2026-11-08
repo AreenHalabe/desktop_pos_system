@@ -721,9 +721,7 @@ function setUnits(data) {
 
             unit_name: unit.unit_name,
 
-            conversion_factor: Number(unit.conversion_factor).toLocaleString('en-US', {
-                maximumFractionDigits: 2
-            }),
+            conversion_factor: Number(unit.conversion_factor),
 
             barcode: unit.barcode || null,
 
