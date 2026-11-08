@@ -7,25 +7,21 @@ import { hasInternetConnection } from "../../api/items.js";
 const errorList = document.getElementById('error_list');
 const errorMessage = document.getElementById('errors');
 const form = document.getElementById('login-form');
-const loginBtn = document.getElementById('login-btn');
+const baseLoginBtn = document.getElementById('login-btn');
 
 
 
 
-let adminId;
 let urlEndPoint;
-const loginModalEl = document.getElementById('loginModal');
 
-loginModalEl.addEventListener('hidden.bs.modal', function () {
-    enableLoginButton();
-});
+
 
 
 
 form.addEventListener('submit', async (e) => {
     e.preventDefault();
     clearErrors();
-    disableLoginButton();
+    disableLoginButton(baseLoginBtn);
     const formdata = {
         name: form.name.value,
         password: form.password.value
@@ -41,7 +37,7 @@ form.addEventListener('submit', async (e) => {
     const hasInternet = await hasInternetConnection();
 
     if (!hasInternet) {
-        await localLogin(formdata)
+        await localLogin(formdata);
     }
 
     else {
@@ -57,8 +53,6 @@ form.addEventListener('submit', async (e) => {
 
 
             if (res.status === 200) {
-                adminId = data.id;
-                // setAuthToken('auth',data.token);
                 setAuthToken('user-auth', data.token);
                 setAdminId(data.id);
 
@@ -75,15 +69,16 @@ form.addEventListener('submit', async (e) => {
                 });
             }
             else {
-                enableLoginButton();
                 errorList.style.display = 'block';
                 errorMessage.innerHTML = data.message;
             }
         }
         catch (error) {
-            enableLoginButton();
+            
             errorList.style.display = 'block';
             errorMessage.innerHTML = `فشل الاتصال بالخادم: ${error.message}`;
+        }finally{
+            enableLoginButton(baseLoginBtn);
         }
     }
 
@@ -122,14 +117,20 @@ document.addEventListener('click', async function (e) {
 
 
 
-function disableLoginButton() {
+function disableLoginButton(loginBtn) {
     loginBtn.disabled = true;
-    loginBtn.innerHTML = 'جاري تسجيل الدخول...';
+    loginBtn.innerHTML = `
+        <i class="fas fa-spinner fa-spin"></i>
+        جاري تسجيل الدخول...
+    `;
 }
 
-function enableLoginButton() {
+function enableLoginButton(loginBtn) {
     loginBtn.disabled = false;
-    loginBtn.innerHTML = 'تسجيل الدخول';
+    loginBtn.innerHTML = `
+        <i class="fas fa-right-to-bracket"></i>
+        تسجيل الدخول
+    `;
 }
 
 function clearErrors() {
@@ -154,7 +155,7 @@ function clearModalErrors() {
 }
 
 
-function bootboxLogin() {
+function bootboxLogin() { 
 
     const dialog = bootbox.dialog({
         title: `
@@ -336,14 +337,14 @@ async function localLogin(formdata) {
         }
 
         else {
-            enableLoginButton();
             errorList.style.display = 'block';
             errorMessage.innerHTML = data.message;
         }
     }
     catch (error) {
-        enableLoginButton();
         errorList.style.display = 'block';
         errorMessage.innerHTML = `فشل الاتصال بالخادم: ${error.message}`;
+    }finally{
+        enableLoginButton(baseLoginBtn);
     }
 }
