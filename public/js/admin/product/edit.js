@@ -82,6 +82,12 @@ document.addEventListener("DOMContentLoaded", async function () {
 
 });
 
+document.querySelector('form').addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' && e.target.id !== 'customBaseUnitName') {
+        e.preventDefault();
+    }
+});
+
 async function buildSelectCategory() {
     const select = document.getElementById("productCategory");
 
@@ -679,7 +685,6 @@ async function loadItem() {
         }
 
         else if (res.status === 200) {
-
             setItemData(data.item);
 
             setUnits(data.item.units);
@@ -712,9 +717,7 @@ function setUnits(data) {
 
             unit_name: unit.unit_name,
 
-            conversion_factor: Number(unit.conversion_factor).toLocaleString('en-US', {
-                maximumFractionDigits: 2
-            }),
+            conversion_factor: Number(unit.conversion_factor),
 
             barcode: unit.barcode || null,
 

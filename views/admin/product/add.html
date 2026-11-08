@@ -29,7 +29,7 @@
 
             <!-- =========================
              بيانات المنتج
-        ========================== -->
+            ========================== -->
             <div class="card mb-4">
 
                 <div class="card-header">
@@ -95,7 +95,7 @@
 
             <!-- =========================
              الوحدة الأساسية
-        ========================== -->
+            ========================== -->
             <div class="card mb-4">
 
                 <div class="card-header">
@@ -134,26 +134,42 @@
                                 </label>
 
                                 <select class="form-select" id="baseUnitName" name="base_unit" required>
-                                    <option value="" selected disabled> اختر الوِحدة </option>
+                                    <option value="" selected disabled>اختر الوحدة</option>
+
+                                    <!-- وحدات العد -->
                                     <option value="حبة">حبة</option>
                                     <option value="قطعة">قطعة</option>
                                     <option value="سيجارة">سيجارة</option>
                                     <option value="رغيف">رغيف</option>
+                                    <option value="كيس">كيس</option>
+                                    <option value="ربطة">ربطة</option>
+                                    
+
+                                    <!-- وحدات التعبئة -->
                                     <option value="علبة">علبة</option>
+                                    <option value="كرتونة">كرتونة</option>
+                                    <option value="صندوق">صندوق</option>
+                                    <option value="باكيت">باكيت</option>
+                                    <option value="عبوة">عبوة</option>
+                                    <option value="مرطبان">مرطبان</option>
+                                    <option value="تنكة">تنكة</option>
+
+                                    <!-- وحدات الوزن -->
                                     <option value="كيلو">كيلو</option>
+                                    <option value="نصف كيلو">نصف كيلو</option>
+                                    <option value="ربع كيلو">ربع كيلو</option>
+                                    <option value="وقية">وقية</option>
+                                    <option value="نصف وقية">نصف وقية</option>
                                     <option value="غرام">غرام</option>
-                                    <option value="لتر">لتر</option>
-                                    <option value="مل">مل</option>
+
+                                    
+                                    
+
                                     <option value="other">✚ وحدة أخرى...</option>
                                 </select>
                                 <div id="customBaseUnitContainer" class="mt-2 d-none">
-                                    <input
-                                        type="text"
-                                        class="form-control"
-                                        id="customBaseUnitName"
-                                        placeholder="اكتب اسم الوحدة"
-                                        maxlength="50"
-                                    >
+                                    <input type="text" class="form-control" id="customBaseUnitName"
+                                        placeholder="اكتب اسم الوحدة" maxlength="50">
                                 </div>
 
                                 <div class="form-text d-flex flex-column gap-1">
@@ -246,7 +262,7 @@
 
             <!-- =========================
              وحدات المنتج
-        ========================== -->
+            ========================== -->
             <div class="card mb-4">
 
                 <div class="card-header">
@@ -700,7 +716,7 @@
 
             <!-- =========================
              الأزرار
-        ========================== -->
+            ========================== -->
             <div class="action-buttons">
 
                 <button type="button" class="btn btn-outline-secondary" id="resetBtn">

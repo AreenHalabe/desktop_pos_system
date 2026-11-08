@@ -107,6 +107,7 @@ customBaseUnitName.addEventListener("change", () => {
     } else {
         const option = new Option(unitName, unitName, true, true);
         baseUnitName.add(option);
+        renderUnits();
     }
 
     // إخفاء حقل الإدخال بعد إضافة الوحدة
@@ -709,6 +710,8 @@ function renderUnits() {
 
     const baseUnitName =
         getBaseUnitName();
+
+    if(baseUnitName == 'other') return;
 
 
     if (!baseUnitName) {
@@ -1476,6 +1479,15 @@ document.addEventListener("change", function (e) {
 }
 );
 
+document.querySelector('form').addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') {
+        e.preventDefault();
+
+        if (e.target.id === 'customBaseUnitName') {
+            customBaseUnitName.dispatchEvent(new Event('change'));
+        }
+    }
+});
 
 
 updateContainsUnitOptions();
