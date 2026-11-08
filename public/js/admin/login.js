@@ -6,25 +6,25 @@ import { urlServer } from "../../api/urlEndPoint.js";
 const errorList = document.getElementById('error_list');
 const errorMessage = document.getElementById('errors');
 const form = document.getElementById('login-form');
-const loginBtn = document.getElementById('login-btn');
+const baseLoginBtn = document.getElementById('login-btn');
 
 
 
 
 let adminId;
 let urlEndPoint;
-const loginModalEl = document.getElementById('loginModal');
+// const loginModalEl = document.getElementById('loginModal');
 
-loginModalEl.addEventListener('hidden.bs.modal', function () {
-    enableLoginButton();
-});
+// loginModalEl.addEventListener('hidden.bs.modal', function () {
+//     enableLoginButton();
+// });
 
 
 
 form.addEventListener('submit', async (e) => {
     e.preventDefault();
     clearErrors();
-    disableLoginButton();
+    disableLoginButton(baseLoginBtn);
     const formdata = {
         name: form.name.value,
         password: form.password.value
@@ -71,13 +71,13 @@ form.addEventListener('submit', async (e) => {
             });
         }
         else {
-            enableLoginButton();
+            enableLoginButton(baseLoginBtn);
             errorList.style.display = 'block';
             errorMessage.innerHTML = data.message;
         }
     }
     catch (error) {
-        enableLoginButton();
+        enableLoginButton(baseLoginBtn);
         errorList.style.display = 'block';
         errorMessage.innerHTML = `${error.message}`;
     }
@@ -113,18 +113,24 @@ document.addEventListener('click', async function (e) {
 
 
 
-function disableLoginButton() {
+function disableLoginButton(loginBtn) {
     loginBtn.disabled = true;
-    loginBtn.innerHTML = 'جاري تسجيل الدخول...';
+    loginBtn.innerHTML = `
+        <i class="fas fa-spinner fa-spin"></i>
+        جاري تسجيل الدخول...
+    `;
 }
 
-function enableLoginButton() {
+function enableLoginButton(loginBtn) {
     loginBtn.disabled = false;
-    loginBtn.innerHTML = 'تسجيل الدخول';
+    loginBtn.innerHTML = `
+        <i class="fas fa-right-to-bracket"></i>
+        تسجيل الدخول
+    `;
 }
 
 function clearErrors() {
-    errorMessage.innerHTML = '';
+    errorMessage.textContent = '';
     errorList.style.display = 'none';
 }
 

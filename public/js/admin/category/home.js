@@ -3,6 +3,7 @@ import { url } from "../../../api/urlEndPoint.js";
 import { fetchMainCategories } from "../../../api/category.js";
 import { removeAuthToken, getAuthToken } from "../../../component/auth.js";
 
+import { clearItemsAndCategoriesCache } from "../../../api/items.js";
 
 const header = document.querySelector("site-header");
 
@@ -240,11 +241,11 @@ async function addMainCategory() {
     });
 
     const data = await res.json();
-
+    
     if (res.status === 200) {
       mainCategoryForm.reset();
       isUpdateCategoryData = true;
-      await window.electronAPI.clearPosTreeCache();
+      clearItemsAndCategoriesCache();
       bootboxSuccess(data.message);
       return;
     }
@@ -294,7 +295,7 @@ async function updateMainCategory(id) {
       bootstrap.Modal.getInstance(mainCategoryModal).hide();
       await buildListMainCategories();
       await updateMainCategoryCache();
-      await window.electronAPI.clearPosTreeCache();
+      clearItemsAndCategoriesCache();
       return;
     }
 
@@ -334,7 +335,7 @@ async function deleteMainCategory({ id }) {
     if (res.status === 200) {
       await buildListMainCategories();
       await updateMainCategoryCache();
-      await window.electronAPI.clearPosTreeCache();
+      clearItemsAndCategoriesCache();
       return;
     }
     bootboxError(data.message);
@@ -407,7 +408,7 @@ async function addCategory() {
       categoryForm.reset();
       isUpdateCategoryData = true;
       bootboxSuccess(data.message);
-      await window.electronAPI.clearPosTreeCache();
+      clearItemsAndCategoriesCache();
       return;
     }
 
@@ -457,7 +458,7 @@ async function updateCategory(id) {
       bootstrap.Modal.getInstance(categoryModal).hide();
       await buildListMainCategories();
 
-      await window.electronAPI.clearPosTreeCache();
+      clearItemsAndCategoriesCache();
       return;
     }
 
@@ -495,7 +496,7 @@ async function deleteCategory({ id }) {
     }
     if (res.status === 200) {
       await buildListMainCategories();
-      await window.electronAPI.clearPosTreeCache();
+      clearItemsAndCategoriesCache();
       return;
     }
     bootboxError(data.message);

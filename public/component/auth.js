@@ -1,22 +1,22 @@
 
 export function getAuthToken(role) {
-  return localStorage.getItem(role);
+  return sessionStorage.getItem(role);
 }
 
 export function setAuthToken(role , token) {
-  localStorage.setItem(role, token);
+  sessionStorage.setItem(role, token);
 }
 
 
 export function removeAuthToken() {
-  localStorage.removeItem('auth');
-  localStorage.removeItem('user-auth');
-  localStorage.removeItem('id');
+  sessionStorage.removeItem('auth');
+  sessionStorage.removeItem('user-auth');
+  sessionStorage.removeItem('id');
 }
 
 export function setAdminId(id){
-  localStorage.setItem('id' , id);
+  sessionStorage.setItem('id' , id);
 }
 export function getAdminId(){
-  return localStorage.getItem('id');
+  return sessionStorage.getItem('id');
 }
