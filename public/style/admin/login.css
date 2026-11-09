@@ -256,6 +256,189 @@ h2 {
 
 }
 
+
+/* =========================
+   Admin Login
+========================= */
+
+.admin-login-wrapper {
+    margin-top: 22px;
+}
+
+.admin-divider {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 15px;
+    color: #999;
+    font-size: 13px;
+}
+
+.admin-divider::before,
+.admin-divider::after {
+    content: "";
+    flex: 1;
+    height: 1px;
+    background: #e5e5e5;
+}
+
+.admin-divider span {
+    white-space: nowrap;
+}
+
+
+/* Button */
+
+.admin-login-btn {
+    width: 100%;
+    border: 1px solid #dee2e6;
+    background: #f8f9fa;
+    border-radius: 12px;
+    padding: 11px 13px;
+
+    display: flex;
+    align-items: center;
+    gap: 12px;
+
+    cursor: pointer;
+    text-align: right;
+
+    transition: all 0.2s ease;
+}
+
+.admin-login-btn:hover {
+    background: #fff;
+    border-color: #6c757d;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.07);
+}
+
+
+/* Icon */
+
+.admin-icon {
+    width: 40px;
+    height: 40px;
+    min-width: 40px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 10px;
+
+    background: #343a40;
+    color: white;
+
+    font-size: 17px;
+}
+
+
+/* Text */
+
+.admin-text {
+    flex: 1;
+
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.admin-text strong {
+    color: #343a40;
+    font-size: 14px;
+}
+
+.admin-text small {
+    color: #8a8a8a;
+    font-size: 11px;
+}
+
+
+/* Arrow */
+
+.admin-arrow {
+    color: #999;
+    font-size: 13px;
+
+    transition: transform 0.2s ease;
+}
+
+.admin-login-btn:hover .admin-arrow {
+    transform: translateX(-3px);
+    color: #343a40;
+}
+
+
+
+/* =========================
+   Admin Bootbox
+========================= */
+
+.admin-modal-title {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+
+    color: #343a40;
+    font-weight: bold;
+    font-size: 18px;
+}
+
+.admin-modal-title i {
+    width: 36px;
+    height: 36px;
+
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    background: #343a40;
+    color: white;
+
+    border-radius: 9px;
+
+    font-size: 16px;
+}
+
+
+/* Inputs */
+
+.admin-modal-login-btn {
+    border: none;
+    border-radius: 10px;
+
+    padding: 11px;
+
+    background: #343a40;
+    color: white;
+
+    font-weight: 600;
+
+    transition: all 0.2s ease;
+}
+
+.admin-modal-login-btn:hover:not(:disabled) {
+    background: #212529;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+}
+.admin-modal-login-btn i {
+    margin-left: 6px;
+}
+
+
+/* Input focus */
+
+.bootbox .form-control:focus {
+    border-color: #6c757d;
+    box-shadow: 0 0 0 0.15rem rgba(52, 58, 64, 0.15);
+}
+
+.bootbox .input-group-text {
+    background: #f8f9fa;
+    color: #343a40;
+}
 @media (max-width:768px) {
 
     .login-card {
@@ -418,3 +601,4 @@ h2 {
         font-size: 12px;
     }
 }
+

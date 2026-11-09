@@ -15,9 +15,10 @@ export function showAuthExpired(message) {
         className: 'd-none'
       }
     },
-    callback: function (result) {
+    callback: async function (result) {
       if (result) {
-        window.location.href = '/admin/login';
+        const mainWindowPath = await window.electronAPI.mainWindowPath();
+        window.location.href = `file://${mainWindowPath}`;
       }
     }
   });
