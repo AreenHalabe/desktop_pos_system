@@ -1085,3 +1085,33 @@ body {
     color: #020202;
     font-weight: 800;
 }
+
+
+.amount-quantity-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+
+    width: 100%;
+    min-width: 115px;
+
+    padding: 8px 12px;
+
+    border: 1px solid #0284c7;
+    border-radius: 8px;
+
+    background: #e0f2fe;
+    color: #0369a1;
+
+    font-size: 13px;
+    font-weight: 600;
+
+    cursor: pointer;
+    transition: .2s;
+}
+
+.amount-quantity-btn:hover {
+    background: #0284c7;
+    color: white;
+}

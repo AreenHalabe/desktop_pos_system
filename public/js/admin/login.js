@@ -57,7 +57,7 @@ form.addEventListener('submit', async (e) => {
                 setAdminId(data.id);
 
 
-                window.location.href = './cashier/order/index.html';
+                window.location.href = './cashier/order/test-order.html';
             }
             else if (res.status === 403) {
                 bootbox.alert({

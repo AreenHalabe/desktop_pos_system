@@ -762,7 +762,6 @@ function renderUnits() {
                 .value
         );
 
-
     const baseForSale = document.getElementById("baseForSale").checked;
 
     const baseForPurchase = document.getElementById("baseForPurchase").checked;
@@ -806,9 +805,9 @@ function renderUnits() {
                 <td>
 
                     ${baseBarcode
-            ? escapeHtml(baseBarcode)
-            : autoBarcodeCheckbox.checked ? '<span class="text-muted">سيتم توليده تلقائياً</span>' : '<span class="text-muted">—</span>'
-        }
+                        ? escapeHtml(baseBarcode)
+                        : autoBarcodeCheckbox.checked ? '<span class="text-muted">سيتم توليده تلقائياً</span>' : '<span class="text-muted">—</span>'
+                    }
 
                 </td>
 
@@ -1328,7 +1327,7 @@ function formatPrice(value) {
 
     return `
             <strong>
-                ${Number(value).toFixed(2)}
+                ${Number(value)}
             </strong>
 
             <span class="text-muted">

@@ -2,7 +2,7 @@
 <html lang="ar" dir="rtl">
 
 <head>
-      <meta charset="UTF-8">
+    <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Halabi_Technology.ps</title>
 
@@ -21,7 +21,7 @@
     <div class="header-wrapper">
         <site-header></site-header>
     </div>
-    
+
     <main class="cashier-page">
 
         <div class="cashier-layout">
@@ -69,7 +69,7 @@
 
                             <tbody>
 
-                               
+
 
                             </tbody>
                         </table>
@@ -222,11 +222,11 @@
                         </div>
 
                         <div class="product-list">
-                            
-                           
+
+
                         </div>
 
-                        
+
 
                     </div>
                 </section>
@@ -271,7 +271,7 @@
                                 </tbody>
 
                                 <tfoot>
-                                    <tr class="table-light" style ="font-size:13px">
+                                    <tr class="table-light" style="font-size:13px">
                                         <td colspan="5" class="fw-bold">
                                             <i class="fa-solid fa-calculator me-1"></i>
                                             المجموع قبل الخصم
@@ -280,7 +280,7 @@
                                         </td>
                                     </tr>
 
-                                    <tr class="table-danger" style ="font-size:13px">
+                                    <tr class="table-danger" style="font-size:13px">
                                         <td colspan="5" class="fw-bold text-danger">
                                             <i class="fa-solid fa-tag me-1"></i>
                                             قيمة الخصم
@@ -289,7 +289,7 @@
                                         </td>
                                     </tr>
 
-                                    <tr class="table-success" style ="font-size:13px">
+                                    <tr class="table-success" style="font-size:13px">
                                         <td colspan="5" class="fw-bold fs-6">
                                             <i class="fa-solid fa-wallet me-1"></i>
                                             الإجمالي بعد الخصم
@@ -304,16 +304,16 @@
 
                         <hr>
 
+                 
+
+                            
+
                         <div class="mb-2 fw-bold">
                             <i class="fa-solid fa-credit-card me-1"></i>
                             اختر طريقة الدفع
                         </div>
-
-                        <select
-                            id="confirmPaymentMethod"
-                            class="form-select form-select"
-                            style="font-size: 1rem;"
-                        >
+                        <select id="confirmPaymentMethod" class="form-select form-select"
+                            style="font-size: 1rem;">
                             <option value="" selected disabled>
                                 -- اختر كاش أو بطاقة --
                             </option>
@@ -325,12 +325,44 @@
                             <option value="بطاقة">
                                 💳 بطاقة
                             </option>
+
+                            <option value="دفع بالدين">
+                                🧾 دفع بالدين
+                            </option>
                         </select>
+
 
                         <div class="form-text mt-2">
                             <i class="fa-solid fa-circle-info me-1"></i>
                             يجب تحديد طريقة الدفع لتأكيد الطلب.
                         </div>
+
+                        <div class="mt-3 mb-3 d-none" id="customerAccountContainer">
+
+                            <label for="confirmCustomerId" class="form-label fw-bold">
+                                <i class="fa-solid fa-user me-1"></i>
+                                حساب الزبون
+                            </label>
+
+                            <select id="confirmCustomerId" class="form-select form-select" style="font-size: 0.9rem;">
+                                <option value="" selected disabled>
+                                    -- اختر حساب الزبون --
+                                </option>
+
+                                <option value="1">
+                                    احمد
+                                </option>
+                                <option value="2">
+                                    محمد
+                                </option>
+                                <option value="3">
+                                    امجد
+                                </option>
+                            </select>
+
+                        </div>
+                            
+
 
                         <div class="cash-calculator mt-3 p-3 rounded-3 border">
                             <div class="d-flex align-items-center gap-2 mb-3">
@@ -348,14 +380,8 @@
                                         </label>
 
                                         <div class="input-group">
-                                            <input
-                                                type="number"
-                                                id="receivedAmount"
-                                                class="form-control"
-                                                min="0"
-                                                step="0.01"
-                                                placeholder="0.00"
-                                            >
+                                            <input type="number" id="receivedAmount" class="form-control" min="0"
+                                                step="0.01" placeholder="0.00">
                                             <span class="input-group-text">₪</span>
                                         </div>
                                     </div>
@@ -367,11 +393,7 @@
                                             الباقي للزبون
                                         </label>
 
-                                        <div
-                                            id="changeAmount"
-                                            class="change-amount"
-                                            aria-live="polite"
-                                        >
+                                        <div id="changeAmount" class="change-amount" aria-live="polite">
                                             0.00 ₪
                                         </div>
                                     </div>
@@ -383,20 +405,11 @@
                 </div>
 
                 <div class="modal-footer">
-                    <button
-                        type="button"
-                        class="btn btn-secondary"
-                        data-bs-dismiss="modal"
-                    >
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
                         <i class="fa-solid fa-xmark me-1"></i> إلغاء
                     </button>
 
-                    <button
-                        type="button"
-                        class="btn btn-success fw-bold"
-                        id="confirmOrderButton"
-                        disabled
-                    >
+                    <button type="button" class="btn btn-success fw-bold" id="confirmOrderButton" disabled>
                         <i class="fa-solid fa-check me-1"></i> تأكيد الطلب
                     </button>
                 </div>
@@ -446,6 +459,58 @@
             <div class="spinner-border" role="status" style="width: 4rem; height: 4rem;">
             </div>
             <p class="mt-3 fs-5">جاري معالجة الطلب، يرجى الانتظار...</p>
+        </div>
+    </div>
+
+
+
+
+    <div class="modal fade" id="amountQuantityModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        <i class="fa-solid fa-coins"></i>
+                        تحديد الكمية حسب المبلغ
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+
+                <div class="modal-body">
+
+                    <div class="mb-3">
+                        <label class="form-label">الصنف</label>
+                        <input type="text" id="amountItemName" class="form-control fs-6" readonly>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">
+                            المبلغ المطلوب (شيكل)
+                        </label>
+                        <input type="number" id="amountInput" class="form-control fs-6" min="1" step="1"
+                            placeholder="أدخل المبلغ">
+                    </div>
+
+                    <div class="amount-result">
+                        <div class="text-muted">الكمية المسحوبة</div>
+                        <h3 id="amountQuantityResult">0</h3>
+                        <span id="amountUnitName">غرام</span>
+                    </div>
+
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        إلغاء
+                    </button>
+
+                    <button type="button" class="btn btn-primary" id="confirmAmountQuantity">
+                        اعتماد الكمية
+                    </button>
+                </div>
+
+            </div>
         </div>
     </div>
 

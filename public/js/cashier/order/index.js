@@ -3,7 +3,7 @@ import { url, urlServer, localUrlServer } from "../../../api/urlEndPoint.js";
 import { getAuthToken, removeAuthToken } from "../../../component/auth.js";
 import { printInvoiceFromCashier } from "../../../component/invoices.js";
 import { closeSideBar } from "../Switch-user-functionality.js";
-import { loadItemsAndCategoriesTree, setSessionId, getSessionId, hasInternetConnection} from "../../../api/items.js";
+import { loadItemsAndCategoriesTree, setSessionId, getSessionId, hasInternetConnection } from "../../../api/items.js";
 
 const header = document.querySelector("site-header");
 
@@ -64,14 +64,14 @@ document.addEventListener("DOMContentLoaded", async function () {
 
     const hasInternet = await hasInternetConnection();
 
-    if(hasInternet) {
+    if (hasInternet) {
 
         const hasOpeningSession = await checkSession();
         if (hasOpeningSession) {
             ({ categoriesData, itemsData } = await loadItemsAndCategoriesTree());
             clearLoader();
             initializeCashier(categoriesData, itemsData);
-            
+
         }
         else {
             handleSessionStatus();
@@ -79,14 +79,14 @@ document.addEventListener("DOMContentLoaded", async function () {
 
 
     }
-    else{
+    else {
         ({ categoriesData, itemsData } = await loadItemsAndCategoriesTree());
         clearLoader();
         initializeCashier(categoriesData, itemsData);
         sessionId = getSessionId();
     }
 
-    
+
 });
 
 function handleSessionStatus() {
@@ -792,6 +792,10 @@ function addItemToCart(item, selectedUnit = null) {
 
     if (!validUnit) return;
 
+    const unitPrice = Number(validUnit.price);
+
+    const initialQuantity = needsAmountButton(unitPrice) ? 0 : 1;
+
     // إذا كان الصنف نفسه وبنفس الوحدة موجودًا، زد الكمية.
     const existingRow = cart.find(row =>
         String(row.item_id) === String(item.id) &&
@@ -799,7 +803,10 @@ function addItemToCart(item, selectedUnit = null) {
     );
 
     if (existingRow) {
-        existingRow.quantity += 1;
+        if (initialQuantity === 1) {
+            existingRow.quantity += 1;
+        }
+
     } else {
         cart.push({
             // معرّف داخلي لتمييز سطر السلة في الواجهة.
@@ -815,7 +822,7 @@ function addItemToCart(item, selectedUnit = null) {
                 validUnit.conversion_factor
             ),
 
-            quantity: 1,
+            quantity: initialQuantity,
             discount_item: 0
         });
     }
@@ -906,38 +913,59 @@ function renderCart(addNewItem = false) {
 
         quantityControl.className = "qty-control";
 
-        const decreaseButton = document.createElement("button");
 
-        decreaseButton.type = "button";
-        decreaseButton.className = "qty-btn decrease-qty";
-        decreaseButton.setAttribute(
-            "aria-label",
-            "تقليل الكمية"
-        );
-        decreaseButton.textContent = "−";
 
-        const quantityValue = document.createElement("span");
+        // زر تحديد المبلغ يظهر فقط للأسعار التي تحتوي
+        // على كسور غير النصف
+        if (needsAmountButton(row.unit_price)) {
 
-        quantityValue.className = "qty-value";
-        quantityValue.textContent = String(row.quantity);
+            const amountButton = document.createElement("button");
 
-        const increaseButton = document.createElement("button");
+            amountButton.type = "button";
+            amountButton.className = "amount-quantity-btn";
 
-        increaseButton.type = "button";
-        increaseButton.className = "qty-btn increase-qty";
-        increaseButton.setAttribute(
-            "aria-label",
-            "زيادة الكمية"
-        );
-        increaseButton.textContent = "+";
+            amountButton.dataset.cartId = String(row.cartId);
 
-        quantityControl.append(
-            decreaseButton,
-            quantityValue,
-            increaseButton
-        );
+            amountButton.innerHTML = `
+        <i class="fa-solid fa-coins"></i>
+        <span>تحديد المبلغ</span>
+    `;
+
+            amountButton.title = "تحديد الكمية حسب المبلغ";
+
+            quantityControl.append(amountButton);
+
+        } else {
+
+            const decreaseButton = document.createElement("button");
+
+            decreaseButton.type = "button";
+            decreaseButton.className = "qty-btn decrease-qty";
+            decreaseButton.setAttribute("aria-label", "تقليل الكمية");
+            decreaseButton.textContent = "−";
+
+            const quantityValue = document.createElement("span");
+
+            quantityValue.className = "qty-value";
+            quantityValue.textContent = String(row.quantity);
+
+            const increaseButton = document.createElement("button");
+
+            increaseButton.type = "button";
+            increaseButton.className = "qty-btn increase-qty";
+            increaseButton.setAttribute("aria-label", "زيادة الكمية");
+            increaseButton.textContent = "+";
+
+            quantityControl.append(
+                decreaseButton,
+                quantityValue,
+                increaseButton
+            );
+        }
+
 
         quantityCell.append(quantityControl);
+
         tr.append(quantityCell);
 
         // سعر الوحدة
@@ -1235,6 +1263,10 @@ function changeCartUnit(cartId, unitId) {
     row.unit_id = selectedUnit.id;
     row.unit_name = selectedUnit.name;
     row.unit_price = Number(selectedUnit.price);
+
+    const qty = needsAmountButton(Number(selectedUnit.price)) ? 0 : 1
+
+    row.quantity = qty;
     row.conversion_factor = Number(
         selectedUnit.conversion_factor
     );
@@ -1316,6 +1348,16 @@ function printInvoiceToConsole() {
         return;
     }
 
+    const invalidItem = cart.find(row => Number(row.quantity) <= 0);
+
+    if (invalidItem) {
+        bootboxError(
+            `لا يمكن الدفع، الرجاء تحديد المبلغ أو الكمية للصنف: ${invalidItem.item_name}`
+        );
+
+        return;
+    }
+
     const subtotal = calculateSubtotal();
     const totalDiscount = calculateTotalDiscount();
 
@@ -1331,7 +1373,7 @@ function printInvoiceToConsole() {
         total_price: Number(subtotal.toFixed(2)),
         discount_amount: Number(totalDiscount.toFixed(2)),
     };
-    
+
     showConfirmPayDialog(invoice);
 }
 
@@ -1349,7 +1391,7 @@ document.addEventListener("click", async function (e) {
     // إضافة صنف من كرت المنتجات.
     const productButton = e.target.closest(".product-item");
 
-    if (productButton &&elements.productList?.contains(productButton)) {
+    if (productButton && elements.productList?.contains(productButton)) {
         const itemId = productButton.dataset.itemId;
 
         const item = itemsData.find(
@@ -1443,7 +1485,7 @@ document.addEventListener("click", async function (e) {
     }
 
 
-    
+
 });
 
 
@@ -1555,10 +1597,36 @@ elements.totalDiscount?.addEventListener(
 // ==================================================
 
 document.addEventListener("keydown", function (e) {
-    if (e.key !== "F4") return;
+    if (e.key == "F4") {
+        e.preventDefault();
+        printInvoiceToConsole();
+    }
 
-    e.preventDefault();
-    printInvoiceToConsole();
+    else if (e.key === "=") {
+        e.preventDefault();
+
+        if (cart.length > 0) {
+            cart[cart.length - 1].quantity += 1;
+
+            renderCart();
+            updateTotals();
+        }
+    }
+    else if (e.key === "-") {
+        e.preventDefault();
+
+        if (cart.length > 0) {
+            const lastItem = cart[cart.length - 1];
+
+            if (lastItem.quantity > 0) {
+                lastItem.quantity -= 1;
+
+                renderCart();
+                updateTotals();
+            }
+        }
+    }
+
 });
 
 
@@ -1592,16 +1660,17 @@ async function checkSession() {
         if (!hasInternet) {
             sessionId = getSessionId();
             return true;
-        }else{
+        } else {
             bootboxError(e.message);
         }
-        
+
     }
 
 }
 
 
-async function createOrder(activeUrl , invData) {
+async function createOrder(activeUrl, invData) {
+    
     overlayLoader.style.display = 'flex';
     try {
         const res = await fetch(activeUrl + `/creat/order?session_id=${sessionId}`, {
@@ -1711,7 +1780,11 @@ function showConfirmPayDialog(invoiceData) {
     );
 
     // إعادة تعيين الحقول عند فتح فاتورة جديدة
-    confirmPayDialog.find("#confirmPaymentMethod").val("");
+   
+    confirmPaymentMethod.value = "";
+    customerAccountContainer.classList.add("d-none");
+    confirmCustomerId.value = "";
+
 
     confirmPayDialog.find("#receivedAmount").val("");
 
@@ -1746,8 +1819,42 @@ confirmPayModalElement.addEventListener("shown.bs.modal", function () {
 
 // تعطيل التأكيد حتى يختار طريقة الدفع
 confirmPayDialog.find("#confirmPaymentMethod").on("change", function () {
-    confirmPayDialog.find("#confirmOrderButton")
-        .prop("disabled", !this.value);
+
+    const paymentMethod = this.value;
+
+    const customerContainer = confirmPayDialog.find("#customerAccountContainer");
+    const customerSelect = confirmPayDialog.find("#confirmCustomerId");
+
+    if (paymentMethod === "دفع بالدين") {
+
+        customerContainer.removeClass("d-none");
+
+    } else {
+
+        customerContainer.addClass("d-none");
+        customerSelect.val("");
+    }
+
+    const customerRequired =
+        paymentMethod !== "دفع بالدين" ||
+        Boolean(customerSelect.val());
+
+    confirmPayDialog.find("#confirmOrderButton").prop(
+        "disabled",
+        !paymentMethod || !customerRequired
+    );
+});
+
+
+confirmPayDialog.find("#confirmCustomerId").on("change", function () {
+
+    const paymentMethod = confirmPayDialog.find("#confirmPaymentMethod").val();
+
+    confirmPayDialog.find("#confirmOrderButton").prop(
+        "disabled",
+        !paymentMethod ||
+        (paymentMethod === "دفع بالدين" && !this.value)
+    );
 });
 
 
@@ -1803,11 +1910,13 @@ confirmPayDialog.find("#confirmOrderButton").on("click", async function () {
 
     currentInvoiceData.payment_method = paymentMethod;
 
-    const activeUrl = await checkRemoteServer();
-    
-    const result    = await createOrder(activeUrl, currentInvoiceData);
+    currentInvoiceData.customer_id = confirmCustomerId.value;
 
-    
+    const activeUrl = await checkRemoteServer();
+
+    const result = await createOrder(activeUrl, currentInvoiceData);
+
+
 
     currentInvoiceData.inv_num = result?.inv_num ?? 0;
 
@@ -1821,17 +1930,17 @@ confirmPayDialog.find("#confirmOrderButton").on("click", async function () {
         return;
     }
 
-    
+
 
     confirmPayModal.hide();
 
-     showSuccessModal(result.message);
+    showSuccessModal(result.message);
 
-    
+
 });
 
 
-function reSetOrder(){
+function reSetOrder() {
     cart = [];
     nextCartId = 1;
 
@@ -1871,7 +1980,7 @@ function clearFinalOrderDetails() {
         total_price: 0,
         payment_method: '',
         discount_amount: 0,
-        inv_num : 0,
+        inv_num: 0,
     };
 }
 
@@ -1889,4 +1998,158 @@ async function checkRemoteServer() {
     } catch (error) {
         return localUrlServer;
     }
+}
+
+
+
+
+
+
+
+
+
+
+const amountModalElement = document.getElementById("amountQuantityModal");
+const amountModal = bootstrap.Modal.getOrCreateInstance(amountModalElement);
+
+const amountInput = document.getElementById("amountInput");
+const amountItemName = document.getElementById("amountItemName");
+const amountQuantityResult = document.getElementById("amountQuantityResult");
+const amountUnitName = document.getElementById("amountUnitName");
+const confirmAmountQuantity = document.getElementById("confirmAmountQuantity");
+
+let selectedAmountCartId = null;
+let calculatedAmountQuantity = 0;
+// فتح المودل
+elements.invoiceBody.addEventListener("click", function (e) {
+
+    const button = e.target.closest(".amount-quantity-btn");
+
+    if (!button) return;
+
+    const cartId = button.dataset.cartId;
+
+    const row = cart.find(
+        item => String(item.cartId) === String(cartId)
+    );
+
+    if (!row) return;
+
+    selectedAmountCartId = cartId;
+
+    amountItemName.value = row.item_name;
+
+    amountInput.value = "";
+
+    amountUnitName.textContent = row.unit_name;
+
+    amountQuantityResult.textContent = "0";
+
+    calculatedAmountQuantity = 0;
+
+    amountModal.show();
+
+    setTimeout(() => amountInput.focus(), 300);
+});
+// حساب الكمية عند إدخال المبلغ
+amountInput.addEventListener("input", function () {
+
+    const amount = Number(this.value);
+
+    const row = cart.find(
+        item => String(item.cartId) === String(selectedAmountCartId)
+    );
+
+    if (!row || !Number.isFinite(amount) || amount <= 0 ||
+        !Number.isFinite(Number(row.unit_price)) ||
+        Number(row.unit_price) <= 0) {
+
+        calculatedAmountQuantity = 0;
+        amountQuantityResult.textContent = "0";
+
+        return;
+    }
+
+    calculatedAmountQuantity = (amount / Number(row.unit_price)).toFixed(3);
+
+    amountQuantityResult.textContent =
+        calculatedAmountQuantity.replace(/\.?0+$/, "");
+});
+// اعتماد الكمية
+confirmAmountQuantity.addEventListener("click", function () {
+
+    const amount = Number(amountInput.value);
+
+    if (!Number.isFinite(amount) || amount <= 0) {
+        amountInput.focus();
+        return;
+    }
+
+    const row = cart.find(
+        item => String(item.cartId) === String(selectedAmountCartId)
+    );
+
+    if (!row || calculatedAmountQuantity <= 0) return;
+
+    row.quantity = calculatedAmountQuantity;
+
+    amountModal.hide();
+
+    renderCart();
+    updateTotals();
+});
+
+
+
+function needsAmountButton(price) {
+
+    const value = Number(price);
+
+    return Math.abs(value * 2 - Math.round(value * 2)) > 0.000001;
+}
+
+
+
+
+
+
+const confirmPaymentMethod = confirmPayDialog.find("#confirmPaymentMethod")[0];
+const customerAccountContainer = confirmPayDialog.find("#customerAccountContainer")[0];
+const confirmCustomerId = confirmPayDialog.find("#confirmCustomerId")[0];
+const confirmOrderButton = confirmPayDialog.find("#confirmOrderButton")[0];
+
+confirmPaymentMethod.addEventListener("change", function () {
+
+    if (this.value === "دفع بالدين") {
+
+        customerAccountContainer.classList.remove("d-none");
+        confirmCustomerId.required = true;
+
+    } else {
+
+        customerAccountContainer.classList.add("d-none");
+        confirmCustomerId.value = "";
+        confirmCustomerId.required = false;
+    }
+
+    updateConfirmButtonState();
+});
+
+confirmCustomerId.addEventListener("change", function () {
+    updateConfirmButtonState();
+});
+
+function updateConfirmButtonState() {
+
+    const paymentMethod = confirmPaymentMethod.value;
+    const customerId = confirmCustomerId.value;
+
+    const validPayment = paymentMethod !== "";
+
+    const validCustomer =
+        paymentMethod !== "دفع بالدين" ||
+        customerId !== "";
+
+    confirmOrderButton.disabled =
+        !validPayment || !validCustomer;
 }

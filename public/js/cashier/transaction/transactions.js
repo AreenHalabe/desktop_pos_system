@@ -8,12 +8,18 @@ import { formatDateOnly, formatTimeOnly, utcToPalestine } from "../../admin/repo
 
 const header = document.querySelector("site-header");
 
-const amount = document.getElementById('transactionAmount');
+const transactionAmount = document.getElementById('transactionAmount');
 const type = document.getElementById('transactionType');
-const note = document.getElementById('transactionNote');
-const createBtn = document.getElementById('creatTransactionBtn');
+const transactionNote = document.getElementById('transactionNote');
+const creatTransactionBtn = document.getElementById('creatTransactionBtn');
 const openModalBtn = document.getElementById('openTransactionModal');
 
+
+const transactionType = document.getElementById('transactionType');
+const customersAccountsSelect = document.getElementById('customersAccountsSelect');
+const debtWarning = document.getElementById('debtWarning');
+const customerDebtInfo = document.getElementById('customerDebtInfo');
+const customerDebtValue = document.getElementById('customerDebtValue');
 
 
 
@@ -43,6 +49,9 @@ let currentTransaction = {
   type: ''
 }
 
+
+let customers = [];
+let selectedCustomerDebt = 0;
 
 class SiteHeader extends HTMLElement {
   async connectedCallback() {
@@ -87,9 +96,9 @@ header.addEventListener("header:ready", () => {
 });
 
 
-amount.addEventListener("input", checkInputs);
-type.addEventListener("change", checkInputs);
-note.addEventListener("input", checkInputs);
+transactionAmount.addEventListener("input", checkInputs);
+transactionType.addEventListener("change", checkInputs);
+transactionNote.addEventListener("input", checkInputs);
 
 
 
@@ -118,12 +127,12 @@ document.addEventListener("click", async function (e) {
     data.time = formatTimeOnly(utcToPalestine(data.created_at));
     data.date = formatDateOnly(utcToPalestine(data.created_at));
 
-    try{
+    try {
       await printTransaction(data);
 
-    }catch(e){
+    } catch (e) {
       bootboxError(e.message);
-    }finally{
+    } finally {
       hidePrintLoader();
     }
 
@@ -144,24 +153,95 @@ document.addEventListener("click", async function (e) {
 
 
 document.getElementById('transactionModal').addEventListener('hidden.bs.modal', function () {
-  amount.value = '';
-  note.value = '';
-  type.value = '';
-  createBtn.disabled = true;
+  const accountDev = document.getElementById('customersAccountsDev');
+  transactionAmount.value = '';
+  transactionNote.value = '';
+  transactionType.value = '';
+  transactionType.value = '';
+  accountDev.classList.add('d-none');
+  creatTransactionBtn.disabled = true;
 });
 
 document.addEventListener('DOMContentLoaded', async function () {
   await loadTransaction();
 });
 
+transactionType.addEventListener('change', () => {
+  const selected = transactionType.value;
+  const accountDev = document.getElementById('customersAccountsDev');
+
+  if (selected === 'تسديد دين') {
+    accountDev.classList.remove('d-none');
+  }
+  else {
+    customersAccountsSelect.value = '';
+    accountDev.classList.add('d-none');
+    customerDebtInfo.classList.add('d-none');
+    selectedCustomerDebt = 0;
+  }
+
+  checkInputs();
+
+});
+
+customersAccountsSelect.addEventListener('change', function () {
+
+  const customer = customers.find(c => c.id == this.value);
+
+  if (customer) {
+    selectedCustomerDebt = Number(customer.total_debt);
+
+    customerDebtValue.textContent = selectedCustomerDebt;
+    customerDebtInfo.classList.remove('d-none');
+
+  } else {
+    selectedCustomerDebt = 0;
+    customerDebtInfo.classList.add('d-none');
+  }
+
+  checkInputs();
+});
+
 
 
 
 function checkInputs() {
-  if (amount.value.trim() !== "" && amount.value.trim() !== "0" && type.value !== "" && note.value.trim() !== "") {
-    createBtn.disabled = false;
+
+  const amount = Number(transactionAmount.value);
+
+  const basicValid =
+    transactionAmount.value.trim() !== "" &&
+    transactionType.value !== "" &&
+    transactionNote.value.trim() !== "";
+
+  // إذا تسديد دين
+  if (transactionType.value === "تسديد دين") {
+
+    const customerSelected = customersAccountsSelect.value !== "";
+
+    // عرض الدين (اختياري UI بسيط)
+    if (customerSelected) {
+      debtWarning.classList.add('d-none');
+    }
+
+    // تحقق من الدين
+    if (amount > selectedCustomerDebt ) {
+      debtWarning.textContent = `المبلغ المدخل أكبر من رصيد الزبون الذي يساوي... (${selectedCustomerDebt} ₪)`;
+      debtWarning.classList.remove('d-none');
+      creatTransactionBtn.disabled = true;
+      return;
+    }
+
+    if (basicValid && customerSelected) {
+      debtWarning.classList.add('d-none');
+      creatTransactionBtn.disabled = false;
+    } else {
+      creatTransactionBtn.disabled = true;
+    }
+
   } else {
-    createBtn.disabled = true;
+    debtWarning.classList.add('d-none');
+    creatTransactionBtn.disabled = !basicValid;
   }
 }
 
@@ -189,6 +269,7 @@ async function loadTransaction() {
         sessionId = data.session_id;
         cashSummery = data.cash_summery;
         transactionsData = data.transactions;
+        await loadCustomersAccount();
         handelTotalPage(transactionsData.length);
         renderTransactionsTable(data.transactions);
       }
@@ -209,8 +290,59 @@ async function loadTransaction() {
   }
 }
 
+function buildCustomersSelect(customers) {
+  if (customers.length === 0) {
+    customersAccountsSelect.innerHTML = `
+      <option value="" selected disabled>لا يوجد حسابات عليها ديون</option>
+    `;
+    return;
+  }
+
+  customersAccountsSelect.innerHTML = `
+    <option value="" selected disabled>إختر حساب</option>
+  `;
+
+  customers.forEach(customer => {
+    customersAccountsSelect.innerHTML += `
+      <option value="${customer.id}">${customer.name}</option>
+    `;
+  });
+}
+
+async function loadCustomersAccount() {
+  try {
+    const res = await fetch(urlServer + '/customers/debts', {
+      method: 'GET',
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `${getAuthToken('user-auth')}`
+      },
+    });
+
+    const data = await res.json();
+
+
+    if (res.status === 401) {
+      showAuthExpired(data.message);
+      return;
+    }
+
+    else if (res.status === 200) {
+      customers = data.customers;
+      buildCustomersSelect(customers);
+    }
+
+    else {
+      bootboxError(data.message);
+    }
+
+  } catch (err) {
+    bootboxError(err.message);
+  }
+}
 
 async function createTransaction() {
+  
   if (!sessionId) return bootboxError("لا يوجد صندوق مفتوح حاليا");
   displaySpinnerLoader();
   let transType;
@@ -229,9 +361,12 @@ async function createTransaction() {
         "Authorization": `${getAuthToken('user-auth')}`
       },
       body: JSON.stringify({
-        amount: amount.value,
-        note: note.value,
+        amount: transactionAmount.value,
+        note: transactionNote.value,
         type: transType,
+        customer_id: transactionType.value === "تسديد دين"
+          ? customersAccountsSelect.value
+          : 0
       }),
     });
 
@@ -470,9 +605,9 @@ function updatePagination() {
   document.getElementById('nextBtn').disabled = currentPage === totalPages;
 }
 function updateCurrentTransactionData() {
-  currentTransaction.amount = amount.value;
-  currentTransaction.note = note.value;
-  currentTransaction.type = type.value;
+  currentTransaction.amount = transactionAmount.value;
+  currentTransaction.note = transactionNote.value;
+  currentTransaction.type = transactionType.value;
 }
 
 

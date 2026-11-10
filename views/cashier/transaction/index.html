@@ -172,7 +172,21 @@
                                     <option value="" selected disabled>اختر النوع...</option>
                                     <option value="إضافة">إضافة</option>
                                     <option value="سحب">سحب</option>
+                                    <option value="تسديد دين"> تسديد دَين</option>
                                 </select>
+                            </div>
+
+                            <div class="mb-3 d-none" id="customersAccountsDev">
+                                <label class="form-label fw-bold">الزبون <span class="text-danger">*</span></label>
+                                <select class="form-select" id="customersAccountsSelect">
+                                    <option value="" selected disabled> إختر حساب</option>
+                                </select>
+
+                                <div class="mb-3 d-none" id="customerDebtInfo">
+                                    <div class="alert alert-info py-2 mb-0">
+                                        الدين المستحق: <strong id="customerDebtValue">0</strong> ₪
+                                    </div>
+                                </div>
                             </div>
 
 
@@ -188,6 +202,9 @@
                         </form>
                     </div>
 
+                    <div class="alert alert-danger py-2 d-none" id="debtWarning" role="alert">
+                        المبلغ أكبر من الدين المستحق
+                    </div>
 
 
                     <div class="modal-footer">

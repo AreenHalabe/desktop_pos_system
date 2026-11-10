@@ -52,6 +52,11 @@
       border-bottom: 2px solid #0b5ed7;
   }
 
+    .customer-table thead th {
+        background-color: #198754 !important;
+        border-bottom: 2px solid #146c43 !important;
+    }
+
   .table tbody td {
       padding: 20px 15px;
       vertical-align: middle;
@@ -149,6 +154,18 @@
     color: #fff;
     transform: translateY(-1px);
     box-shadow: 0 0.125rem 0.25rem rgba(13, 110, 253, 0.25);
+}
+
+
+.add-customer-btn {
+    border: 1px solid #198754 !important;
+    color: #198754 !important;
+}
+
+.add-customer-btn:hover {
+    background-color: #198754 !important;
+    border-color: #198754 !important;
+    color: #fff !important;
 }
 
   .status-active {

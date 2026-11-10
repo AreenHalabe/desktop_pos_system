@@ -277,6 +277,7 @@ function addUnit() {
 function renderUnits() {
     const tbody = document.getElementById("unitsTableBody");
 
+
     let html = "";
 
     html += `
@@ -314,7 +315,7 @@ function renderUnits() {
                         class="form-control selling-price"
                         data-unit-id="${units[0].id}"
                         value="${units[0].selling_price}"
-                        min="0.5"
+                        min="0"
                         step="any"
                     >
                     <span class="input-group-text">
@@ -352,7 +353,7 @@ function renderUnits() {
                             class="form-control conversion-factor"
                             data-unit-id="${unit.id}"
                             value="${unit.conversion_factor}"
-                            min="0.1"
+                            min="0"
                             step="any"
                         >
                         <span class="input-group-text">
@@ -385,7 +386,7 @@ function renderUnits() {
                                         class="form-control selling-price"
                                         data-unit-id="${unit.id}"
                                         value="${unit.selling_price}"
-                                        min="0.5"
+                                        min="0"
                                         step="any"
                                     >
                                     <span class="input-group-text">
@@ -730,7 +731,7 @@ function setUnits(data) {
             // selling_price: unit.price,
 
             selling_price: Number(unit.price).toLocaleString('en-US', {
-                maximumFractionDigits: 2
+                maximumFractionDigits: 4
             }),
 
             for_sale: Number(unit.for_sale) === 1,
