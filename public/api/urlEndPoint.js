@@ -7,5 +7,3 @@ export const localUrlServer = `http://localhost:${getPortNumber()}`;
 export const url        = `https://suppermarket.halabitech.com`;
 export const urlServer  = `https://suppermarket.halabitech.com`;
 
-// export const url        = `http://localhost:3000`;
-// export const urlServer  = `http://localhost:3000`;

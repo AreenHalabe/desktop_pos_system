@@ -55,9 +55,8 @@ export async function printInvoice(order) {
     const invoiceHTML = `
         <div id="invoice" class="invoice">
             <div style="width: 100%; text-align: center;">
-                <h4 class="center">Coffee Corner</h4>
-                <p class="center">0587003023</p>
-                <small class="center">رام الله - إم الشرايط - حي تميم الداري</small>
+                <h5 class="center">سوبر ماركت العائلات</h5>
+                <small class="center">شارع العطار</small>
             </div>
 
             <hr>
@@ -293,7 +292,7 @@ export async function printTransaction(transaction) {
             </div>
             <hr>
 
-            <h5 class="center">Coffee Corner</h5>
+            <h5 class="center">سوبر ماركت العائلات</h5>
             
         </div>
     
@@ -816,9 +815,8 @@ async function createHTMLTransaction(transactionHTML) {
 
 
 async function print(invoiceContent) {
-    // await window.electronAPI.printInvoice(invoiceContent);
-
-    await window.electronAPI.previewInvoice(invoiceContent);
+    await window.electronAPI.printInvoice(invoiceContent);
+    //await window.electronAPI.previewInvoice(invoiceContent);
 }
 
 

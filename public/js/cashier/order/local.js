@@ -1,4 +1,4 @@
-import { bootboxError, setActiveNavLink } from "../../../component/bootbox.js";
+import { bootboxError, setActiveNavLink, showAuthExpired } from "../../../component/bootbox.js";
 import { urlServer, localUrlServer } from "../../../api/urlEndPoint.js";
 
 import { removeAuthToken } from "../../../component/auth.js";
@@ -133,6 +133,9 @@ async function syncOrdersBatch(orders) {
 
     const data = await res.json();
 
+    if(res.status == 401){
+        showAuthExpired(data.message);
+    }
 
     if (!res.ok || !data.success) {
         throw new Error(data.message || 'فشل حذف الطلبات المحلية من السيرفر');

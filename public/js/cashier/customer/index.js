@@ -2,7 +2,7 @@ import { setActiveNavLink, showAuthExpired, bootboxSuccess, bootboxError, bootbo
 import { url, urlServer } from "../../../api/urlEndPoint.js";
 import { getAuthToken, removeAuthToken } from "../../../component/auth.js";
 
-
+import { clearCustomersCash } from "../../../api/items.js";
 
 
 
@@ -324,6 +324,7 @@ async function createSupplierAccount(supplierData) {
         }
         else if (res.status === 200) {
             await loadSuppliers();
+            clearCustomersCash();
             hiddeMolde(createAccountModal);
         }
         else {
@@ -358,6 +359,7 @@ async function editSupplierAccount(id, supplierData) {
         else if (res.status === 200) {
             bootboxSuccess(data.message);
             await loadSuppliers();
+            clearCustomersCash();
             hiddeMolde(editAccountModal);
         }
         else {
@@ -402,6 +404,7 @@ async function deleteAccount({ id }) {
             success = true;
             bootboxSuccess(data.message);
             await loadSuppliers();
+            clearCustomersCash();
             return;
         }
 

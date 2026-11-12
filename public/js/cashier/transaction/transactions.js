@@ -557,11 +557,6 @@ function renderTransactionsTable(transactions, hasOpeningSession = true) {
             <i class="fas fa-print"></i>
           </button>
 
-
-          <button class="btn btn-sm delete-btn" title="حذف" data-transaction=' {"id":"${t.id}", "amount":${t.amount}, "type":"${t.type}", "note":"${t.note}"} '>
-            <i class="fas fa-trash"></i>
-          </button>
-
           
         </td>
 
@@ -571,6 +566,9 @@ function renderTransactionsTable(transactions, hasOpeningSession = true) {
 
   updatePagination();
 
+  // <button class="btn btn-sm delete-btn" title="حذف" data-transaction=' {"id":"${t.id}", "amount":${t.amount}, "type":"${t.type}", "note":"${t.note}"} '>
+          //   <i class="fas fa-trash"></i>
+          // </button>
 
 }
 function prevPage() {

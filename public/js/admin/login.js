@@ -333,7 +333,7 @@ async function localLogin(formdata) {
 
 
         if (res.status === 200) {
-            window.location.href = './cashier/order/index.html';
+            window.location.href = './cashier/order/test-order.html';
         }
 
         else {

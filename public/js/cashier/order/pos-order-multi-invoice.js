@@ -1,4 +1,4 @@
-import { setActiveNavLink, showAuthExpired, bootboxError, showPrintLoader, hidePrintLoader } from "../../../component/bootbox.js";
+import { setActiveNavLink, showAuthExpired, bootboxError } from "../../../component/bootbox.js";
 
 import { url, urlServer, localUrlServer } from "../../../api/urlEndPoint.js";
 
@@ -131,7 +131,6 @@ document.addEventListener("DOMContentLoaded", async function () {
         if (hasOpeningSession) {
 
             ({ categoriesData, itemsData } = await loadItemsAndCategoriesTree());
-
             await loadCustomerInfo();
 
             clearLoader();
@@ -195,7 +194,7 @@ function clearLoader() {
 
 
 async function loadCustomerInfo() {
-    const customers = await loadCustomers();
+    const customers = await loadCustomers();    
 
     const confirmCustomerId = document.getElementById('confirmCustomerId');
 
@@ -427,7 +426,6 @@ const elements = {
 
 
 
-    newInvoiceButton: document.querySelector("#clearInvoiceButton"),
     addInvoiceButton: document.querySelector("#addInvoiceButton")
 
 };
@@ -978,7 +976,6 @@ function addItemToCart(item, selectedUnit = null) {
     );
 
 
-
     if (existingRow) {
 
         if (initialQuantity === 1) {
@@ -1229,12 +1226,9 @@ function renderCart(addNewItem = false) {
 
 
             amountButton.innerHTML = `
-
-        <i class="fa-solid fa-coins"></i>
-
-        <span>تحديد المبلغ</span>
-
-    `;
+                <i class="fa-solid fa-coins"></i>
+                <span>تحديد المبلغ</span>
+            `;
 
 
 
@@ -1860,12 +1854,9 @@ function changeCartUnit(cartId, unitId) {
 
     );
 
-
-
     if (!row) return;
 
-
-
+    
     const item = itemsData.find(
 
         currentItem =>
@@ -1875,6 +1866,8 @@ function changeCartUnit(cartId, unitId) {
             String(row.item_id)
 
     );
+
+
 
 
 
@@ -2283,11 +2276,7 @@ document.addEventListener("click", async function (e) {
 
 
 
-    // تفريغ الفاتورة الحالية (السلوك القديم).
-    if (e.target.closest("#clearInvoiceButton")) {
-        reSetOrder();
-        return;
-    }
+    
 
     // إنشاء فاتورة مستقلة جديدة.
     if (e.target.closest("#addInvoiceButton")) {
@@ -2579,9 +2568,18 @@ elements.totalDiscount?.addEventListener(
 
 document.addEventListener("keydown", function (e) {
 
-    if (e.key == "F4") {
+    if (e.key === "Shift") {
 
         e.preventDefault();
+
+        if (confirmPayModalElement.classList.contains("show")) {
+
+            confirmPayDialog.find("#confirmPaymentMethod")
+                .val("كاش")
+                .trigger("change");
+
+            return;
+        }
 
         printInvoiceToConsole();
 
@@ -2621,7 +2619,7 @@ document.addEventListener("keydown", function (e) {
 
 
 
-            if (lastItem.quantity > 0) {
+            if (lastItem.quantity > 1) {
 
                 lastItem.quantity -= 1;
 
@@ -2637,7 +2635,26 @@ document.addEventListener("keydown", function (e) {
 
     }
 
+    
 
+    else if (e.key === 'End') {
+        e.preventDefault();
+        if (confirmPayModalElement.classList.contains('show')) {
+           confirmPayDialog.find("#confirmPaymentMethod")
+            .val("دفع بالدين")
+            .trigger("change");
+        } 
+
+    }
+
+    else if (e.key === 'PageDown') {
+        e.preventDefault();
+        if (confirmPayModalElement.classList.contains('show')) {
+           confirmPayDialog.find("#confirmPaymentMethod")
+            .val("بطاقة")
+            .trigger("change");
+        } 
+    }
 
 });
 
@@ -2724,11 +2741,8 @@ async function checkSession() {
 
 
 async function createOrder(activeUrl, invData) {
-
-
-
+    
     overlayLoader.style.display = 'flex';
-
     try {
 
         const res = await fetch(activeUrl + `/creat/order?session_id=${sessionId}`, {
@@ -2778,8 +2792,6 @@ async function createOrder(activeUrl, invData) {
             return false;
 
         }
-
-
 
     } catch (err) {
 
@@ -3173,7 +3185,6 @@ confirmPayDialog.find("#receivedAmount").on("input", function () {
 // تأكيد الطلب وحفظه
 
 confirmPayDialog.find("#confirmOrderButton").on("click", async function () {
-
     const confirmButton = $(this);
 
 
@@ -3341,7 +3352,7 @@ async function checkRemoteServer() {
 
             cache: 'no-store',
 
-            signal: AbortSignal.timeout(4000)
+            signal: AbortSignal.timeout(5000)
 
         });
 
@@ -3358,23 +3369,6 @@ async function checkRemoteServer() {
     }
 
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -3499,13 +3493,13 @@ amountInput.addEventListener("input", function () {
 
     }
 
-
+    
 
     calculatedAmountQuantity = (amount / Number(row.unit_price)).toFixed(3);
 
 
 
-    amountQuantityResult.textContent = calculatedAmountQuantity;
+    amountQuantityResult.textContent =  calculatedAmountQuantity.replace(/\.?0+$/, "");
 
 });
 
@@ -3555,12 +3549,6 @@ confirmAmountQuantity.addEventListener("click", function () {
 
 });
 
-
-
-
-
-
-
 function needsAmountButton(price) {
 
 
@@ -3572,15 +3560,6 @@ function needsAmountButton(price) {
     return Math.abs(value * 2 - Math.round(value * 2)) > 0.000001;
 
 }
-
-
-
-
-
-
-
-
-
 
 
 

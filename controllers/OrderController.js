@@ -20,7 +20,7 @@ export const createOrder = async (req, res) => {
         await transaction.begin();
         transactionStarted = true;
 
-        const orderId = await insertOrder(sessionId, parsedData.total_price, orderData.discount_amount, parsedData.total_discount_percentage, parsedData.payment_method, 'مكتمل', transaction);
+        const orderId = await insertOrder(sessionId, parsedData.total_price, orderData.discount_amount, parsedData.total_discount_percentage, parsedData.payment_method, 'مكتمل', orderData.customer_id, transaction);
         await insertItems(orderId, parsedData.items, transaction);
 
         await transaction.commit();
@@ -150,9 +150,11 @@ export const deleteSyncedOrder = async (req, res) => {
 
 
 
-async function insertOrder(sessionId, mainPrice, discount, totalDiscountPercentage, paymentMethod, status, transaction) {
+async function insertOrder(sessionId, mainPrice, discount, totalDiscountPercentage, paymentMethod, status, customerId, transaction) {
 
     const totalPrice = mainPrice - discount;
+
+    customerId = customerId === "" ? null : customerId;
 
     const currentTimeStamp = new Date();
     const result = await transaction
@@ -164,10 +166,11 @@ async function insertOrder(sessionId, mainPrice, discount, totalDiscountPercenta
         .input('payment_method', sql.NVarChar, paymentMethod)
         .input('status', sql.NVarChar, status)
         .input("created_at", sql.DateTime2, currentTimeStamp)
+        .input('customer_id', sql.Int, customerId)
         .query(`
-            INSERT INTO orders (session_id, total_price, discount, total_discount_percentage, payment_method, status, created_at)
+            INSERT INTO orders (session_id, total_price, discount, total_discount_percentage, payment_method, status, created_at, customer_id)
             OUTPUT INSERTED.id
-            VALUES (@session_id, @total_price, @discount, @total_discount_percentage, @payment_method, @status, @created_at)
+            VALUES (@session_id, @total_price, @discount, @total_discount_percentage, @payment_method, @status, @created_at, @customer_id)
         `)
         ;
 
@@ -186,7 +189,7 @@ async function insertItems(orderId, items, transaction) {
         `);
         request.input(`order_id${index}`, sql.Int, orderId);
         request.input(`item_id${index}`, sql.Int, item.item_id);
-        request.input(`quantity${index}`, sql.Int, item.quantity);
+        request.input(`quantity${index}`, sql.Decimal(15, 2), item.quantity);
         request.input(`price${index}`, sql.Decimal(15, 2), item.unit_price);
         request.input(`unit${index}`, sql.NVarChar, item.unit_name);
         request.input(`discount_item${index}`, sql.Decimal(7, 2), item.discount_item);
@@ -259,6 +262,7 @@ function buildTreeOfOrders(rows) {
                 status: row.status,
                 created_at: row.created_at,
                 total_discount_p: row.total_discount_percentage,
+                customer_id : row.customer_id,
                 items: []
             };
 
@@ -332,7 +336,6 @@ const invoiceItemSchema = z.object({
     quantity: z.preprocess(
         val => Number(val),
         z.number()
-            .int("الكمية يجب أن تكون عددًا صحيحًا")
             .positive("الكمية يجب أن تكون أكبر من صفر")
     ),
 
@@ -366,7 +369,7 @@ const invoiceSchema = z.object({
         z.number()
             .nonnegative("قيمة الخصم لا يمكن أن تكون سالبة")
     ),
-    payment_method: z.enum(["كاش", "بطاقة"], {
+    payment_method: z.enum(["كاش", "بطاقة", "دفع بالدين"], {
         errorMap: () => ({ message: "يجب اختيار طريقة الدفع" })
     }),
 });

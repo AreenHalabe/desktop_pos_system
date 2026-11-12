@@ -16,60 +16,6 @@
     <link rel="stylesheet" href="../../../public/style/cashier/order/index.css" />
 
 
-    <style>
-        .invoice-panel .panel-heading { gap: 10px; flex-wrap: wrap; }
-        .invoice-tabs {
-            display: flex;
-            align-items: center;
-            gap: 7px;
-            padding: 10px 12px;
-            overflow-x: auto;
-            border-bottom: 1px solid #e9ecef;
-            background: #f8f9fa;
-            min-height: 54px;
-        }
-        .invoice-tab {
-            display: inline-flex;
-            align-items: center;
-            flex: 0 0 auto;
-            border: 1px solid #dee2e6;
-            border-radius: 8px;
-            overflow: hidden;
-            background: #fff;
-        }
-        .invoice-tab.active {
-            border-color: #0d6efd;
-            background: #eaf2ff;
-            box-shadow: 0 0 0 1px rgba(13,110,253,.08);
-        }
-        .invoice-tab-select, .invoice-tab-close {
-            border: 0;
-            background: transparent;
-            min-height: 36px;
-        }
-        .invoice-tab-select { padding: 6px 10px; color: #343a40; font-size: 13px; font-weight: 600; }
-        .invoice-tab.active .invoice-tab-select { color: #0d6efd; }
-        .invoice-tab-count {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            min-width: 19px;
-            height: 19px;
-            margin-right: 6px;
-            padding: 0 5px;
-            border-radius: 20px;
-            background: #e9ecef;
-            color: #495057;
-            font-size: 11px;
-        }
-        .invoice-tab-close { padding: 5px 8px; color: #dc3545; border-right: 1px solid #eee; }
-        .invoice-tab-close:hover { background: #fff0f1; }
-        @media (max-width: 576px) {
-            .invoice-actions { width: 100%; }
-            .invoice-actions button { flex: 1 1 auto; }
-        }
-    </style>
-
 </head>
 
 <body>
@@ -100,12 +46,12 @@
                         </div>
 
                         <div class="d-flex align-items-center gap-2 flex-wrap invoice-actions">
-                            <button id="addInvoiceButton" class="btn btn-sm btn-primary" type="button">
+                            <!-- <button id="addInvoiceButton" class="btn btn-sm btn-primary" type="button">
                                 <i class="fa-solid fa-plus ms-1"></i>
                                 إضافة فاتورة
-                            </button>
-                            <button id="clearInvoiceButton" class="btn btn-sm btn-outline-secondary" type="button">
-                                <i class="fa-solid fa-eraser ms-1"></i>
+                            </button> -->
+                            <button id="addInvoiceButton" class="btn btn-sm btn-outline-secondary" type="button">
+                                <i class="fa-solid fa-plus ms-1"></i>
                                 فاتورة جديدة
                             </button>
                         </div>
@@ -201,7 +147,7 @@
                         <div class="col-6 col-md-2">
                             <button class="btn btn-primary-custom pay-btn w-100" type="button">
                                 <i class="fa-solid fa-credit-card ms-1"></i>
-                                الدفع F4
+                                الدفع
                             </button>
                         </div>
 

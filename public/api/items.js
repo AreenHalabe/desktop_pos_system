@@ -182,7 +182,7 @@ export async function hasInternetConnection() {
         const response = await fetch(`${url}/test/connection`, {
             method: 'GET',
             cache: 'no-store',
-            signal: AbortSignal.timeout(4000)
+            signal: AbortSignal.timeout(5000)
         });
 
         return response.ok ? true : false;

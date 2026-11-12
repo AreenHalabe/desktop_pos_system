@@ -244,7 +244,6 @@ async function loadSessionAnalytics() {
 
         else if(res.status === 200){
             if(data.has_open_session){
-                console.log(data);
                 hasOpeningSession = data.has_open_session;
                 cashSummery = data?.cash_summery ?? cashSummery;
                 session   = data?.session ?? session;

@@ -728,7 +728,7 @@ function setUnits(data) {
 
             auto_generated_barcode: false,
 
-            // selling_price: unit.price,
+            // selling_price: Number(unit.price),
 
             selling_price: Number(unit.price).toLocaleString('en-US', {
                 maximumFractionDigits: 4
@@ -741,6 +741,7 @@ function setUnits(data) {
 
         units.push(newUnit);
     });
+
     renderUnits();
 }
 
