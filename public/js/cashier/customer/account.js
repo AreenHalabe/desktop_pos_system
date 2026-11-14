@@ -20,10 +20,8 @@ import {
 
 
 const header = document.querySelector("site-header");
-const overlayLoader = document.getElementById('overlay_loader');
 
 const modalElement = document.getElementById('orderDetailsModal');
-const orderDetailsModal = bootstrap.Modal.getOrCreateInstance(modalElement);
 
 let currentPaymentPage = 1;
 let totalPaymentPages = 1;
@@ -98,6 +96,16 @@ header.addEventListener("header:ready", () => {
 document.addEventListener("DOMContentLoaded", async function () {
     
     await loadCustomerDetails(1);
+
+});
+
+
+document.addEventListener("click", async function (e) {
+
+    if (e.target.closest('.payment-page-btn')) {
+        const supplierId = getCustomerId();
+        window.location.href = `./payment.html?supplier_id=${supplierId}`;
+    }
 
 });
 
@@ -405,7 +413,7 @@ modalElement.addEventListener('show.bs.modal', function (event) {
 
         const quantity = Number(item.quantity);
 
-        const price = Number(item.price);
+        const price = Number(item.price).toFixed(3);
 
         const total = quantity * price;
 
@@ -421,7 +429,7 @@ modalElement.addEventListener('show.bs.modal', function (event) {
 
                 <td>${quantity}</td>
 
-                <td>${price.toFixed(2)} ₪</td>
+                <td>${price} ₪</td>
 
                 <td>${total.toFixed(2)} ₪</td>
 
@@ -442,6 +450,18 @@ modalElement.addEventListener('show.bs.modal', function (event) {
             <td>
                 <strong>${itemsTotal.toFixed(2)} ₪</strong>
             </td>
+        </tr>
+
+        <tr class="table-danger">
+
+            <td colspan="4" class="text-end pe-3">
+                <strong>الخصم</strong>
+            </td>
+
+            <td>
+                <strong>${Number(order.discount).toFixed(2)} ₪</strong>
+            </td>
+
         </tr>
 
         <tr class="table-success">
@@ -558,19 +578,3 @@ document.getElementById("paymentPagination").addEventListener("click", async fun
 
 });
 
-
-// ======================================
-// Loader
-// ======================================
-
-function showLader(loader) {
-
-    loader.classList.remove('d-none');
-
-}
-
-function hiddeLoader(loader) {
-
-    loader.classList.add('d-none');
-
-}
