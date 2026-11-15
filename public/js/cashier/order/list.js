@@ -28,7 +28,7 @@ let currentPage;
 let itemsPerPage = 10;
 let totalItems;
 let totalPages;
-let sessionId;
+
 
 let updatedOrder;
 
@@ -76,14 +76,8 @@ header.addEventListener("header:ready", () => {
 });
 
 document.addEventListener('DOMContentLoaded', async function () {
+    await getAllCompletedDeletedDailyOrders();
 
-    const hasOpenSession = await checkSession();
-    if (hasOpenSession) {
-        await getAllCompletedDeletedDailyOrders();
-    }
-    else {
-        renderOrdersTable();
-    }
 });
 
 document.addEventListener("click", async function (e) {
@@ -394,43 +388,13 @@ function nextPage() {
 }
 
 
-async function checkSession() {
-    try {
-        const res = await fetch(urlServer + '/check/cash-session', {
-            method: 'GET',
-            headers: {
-                "Content-Type": "application/json",
-                "Authorization": `${getAuthToken('user-auth')}`
-            },
-            credentials: 'include',
-        });
-        const data = await res.json();
-        if (res.status === 401) {
-            showAuthExpired(data.message);
-            return false;
-        }
-        else if (res.status === 200) {
-            if (data.hasOpeningSession) {
-                sessionId = data.session_id;
-            }
-            return data.hasOpeningSession
-        }
-        else {
-            showError(errorBox, data.message);
-            return false;
-        }
-    } catch (e) {
-        showError(errorBox, e);
-    }
-
-}
 
 async function getAllCompletedDeletedDailyOrders(isMakeDeleteOrder = false, isMakeRestorOrders = false) {
     const totalOrderCompleted = document.getElementById('total-orders');
     const totalDeletedOrder = document.getElementById('deleted-orders');
     hiddeError(errorBox);
     try {
-        const res = await fetch(urlServer + `/daily/completed/deleted/orders?session_id=${sessionId}`, {
+        const res = await fetch(urlServer + `/daily/completed/deleted/orders`, {
             method: 'GET',
             headers: {
                 "Content-Type": "application/json",
