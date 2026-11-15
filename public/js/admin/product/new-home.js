@@ -1,10 +1,11 @@
 
 import { fetchCategories } from "../../../api/category.js";
 import { url } from "../../../api/urlEndPoint.js";
-import { showAuthExpired, bootboxError, setActiveNavLink } from "../../../component/bootbox.js";
+import { showAuthExpired, bootboxConfirm, bootboxSuccess, bootboxError, setActiveNavLink } from "../../../component/bootbox.js";
 import { removeAuthToken, getAuthToken } from "../../../component/auth.js";
 
 import { clearItemsAndCategoriesCache } from "../../../api/items.js";
+
 // ============================================
 // Header
 // ============================================
@@ -75,6 +76,10 @@ const elements = {
     categoryFilter: document.getElementById("categoryFilter"),
     barcodeSearch: document.getElementById("barcodeSearch"),
     searchBarcodeBtn: document.getElementById("searchBarcodeBtn"),
+
+    itemNameSearch: document.getElementById("itemNameSearch"),
+    searchItemNameBtn: document.getElementById("searchItemNameBtn"),
+    nameSuggestions: document.getElementById("nameSuggestions"),
     clearSearchBtn: document.getElementById("clearSearchBtn"),
     resetFiltersBtn: document.getElementById("resetFiltersBtn"),
 
@@ -103,6 +108,7 @@ const state = {
 
     categoryId: "",
     barcode: "",
+    selectedNameItemId: null,
 
     items: [],
     totalItems: 0,
@@ -112,7 +118,9 @@ const state = {
     isDeleting: false,
 
     pendingDeleteItem: null,
-    requestController: null
+    requestController: null,
+    suggestionsController: null,
+    suggestionsTimer: null
 };
 
 
@@ -339,17 +347,19 @@ async function loadItems() {
     state.isLoading = true;
 
     hideAlert();
+    hideNameSuggestions();
     renderLoading();
 
     try {
         let endpoint;
         const barcodeMode = Boolean(state.barcode);
+        const nameMode = Boolean(state.selectedNameItemId);
 
         if (barcodeMode) {
-            const query = buildQueryString({
-                barcode: state.barcode
-            });
-
+            const query = buildQueryString({ barcode: state.barcode });
+            endpoint = `${url}/items?${query}`;
+        } else if (nameMode) {
+            const query = buildQueryString({ item_id: state.selectedNameItemId });
             endpoint = `${url}/items?${query}`;
         } else {
             const query = buildQueryString({
@@ -357,7 +367,6 @@ async function loadItems() {
                 limit: state.limit,
                 category_id: state.categoryId
             });
-
             endpoint = `${url}/items?${query}`;
         }
 
@@ -371,23 +380,14 @@ async function loadItems() {
 
         const data = await res.json();
 
-
         if (!res.ok) {
-            if (res.status === 401) {
-                showAuthExpired(data.message);
-            }
-
-            throw new Error(
-                data.message || "حدث خطأ أثناء جلب الأصناف"
-            );
+            if (res.status === 401) showAuthExpired(data.message);
+            throw new Error(data.message || "حدث خطأ أثناء جلب الأصناف");
         }
 
-        // تجاهل الاستجابة القديمة إذا بدأ طلب أحدث.
-        if (state.requestController !== controller) {
-            return;
-        }
+        if (state.requestController !== controller) return;
 
-        if (barcodeMode) {
+        if (barcodeMode || nameMode) {
             renderBarcodeResult(data);
         } else {
             renderItemsResponse(data);
@@ -396,11 +396,7 @@ async function loadItems() {
         updateFilterInfo();
 
     } catch (error) {
-        if (error.name === "AbortError") {
-            return;
-        }
-
-        
+        if (error.name === "AbortError") return;
 
         state.items = [];
         state.totalItems = 0;
@@ -408,14 +404,8 @@ async function loadItems() {
 
         updateItemsCount(0);
         renderPagination();
-
         renderTableError("تعذّر تحميل الأصناف. حاول مرة أخرى.");
-
-        if (error.message) {
-            showAlert(error.message);
-        } else {
-            showAlert("حدث خطأ أثناء تحميل الأصناف.");
-        }
+        showAlert(error.message || "حدث خطأ أثناء تحميل الأصناف.");
 
     } finally {
         if (state.requestController === controller) {
@@ -423,10 +413,7 @@ async function loadItems() {
             state.requestController = null;
         }
     }
-}
-
-
-// ============================================
+}// ============================================
 // Handle Items Response
 // ============================================
 
@@ -481,12 +468,12 @@ function renderBarcodeResult(data) {
         state.totalItems = 0;
         state.totalPages = 0;
 
-        renderEmpty("لم يتم العثور على صنف بهذا الباركود");
+        renderEmpty("لم يتم العثور على الصنف المطلوب");
         updateItemsCount(0);
         renderPagination();
 
         showAlert(
-            "لا يوجد صنف مطابق للباركود المدخل.",
+            "لم يتم العثور على الصنف المطلوب.",
             "warning"
         );
 
@@ -638,10 +625,12 @@ function createPageButton({
 function renderPagination() {
     elements.paginationList.replaceChildren();
 
-    if (state.barcode || state.totalPages <= 1) {
+    if (state.barcode || state.selectedNameItemId || state.totalPages <= 1) {
         elements.paginationInfo.textContent = state.barcode
             ? "نتيجة البحث بالباركود"
-            : `الصفحة ${state.page}`;
+            : state.selectedNameItemId
+                ? "نتيجة البحث باسم الصنف"
+                : `الصفحة ${state.page}`;
 
         return;
     }
@@ -754,6 +743,10 @@ function updateFilterInfo() {
         parts.push(`الباركود: ${state.barcode}`);
     }
 
+    if (state.selectedNameItemId) {
+        parts.push(`الصنف: ${elements.itemNameSearch.value.trim()}`);
+    }
+
     if (state.categoryId) {
         const selectedOption =
             elements.categoryFilter.selectedOptions[0];
@@ -785,21 +778,161 @@ function updateFilterInfo() {
 
 function searchByBarcode() {
     state.barcode = elements.barcodeSearch.value.trim();
+    state.selectedNameItemId = null;
+    elements.itemNameSearch.value = "";
     state.page = 1;
 
+    hideNameSuggestions();
+    void loadItems();
+}
+
+function searchByItemName() {
+    if (!state.selectedNameItemId) {
+        showAlert("اختر صنفاً من القائمة المنسدلة أولاً.", "warning");
+        elements.itemNameSearch.focus();
+        return;
+    }
+
+    state.barcode = "";
+    elements.barcodeSearch.value = "";
+    state.page = 1;
+
+    hideNameSuggestions();
     void loadItems();
 }
 
 function resetFilters() {
     state.categoryId = "";
     state.barcode = "";
+    state.selectedNameItemId = null;
     state.page = 1;
 
     elements.categoryFilter.value = "";
     elements.barcodeSearch.value = "";
+    elements.itemNameSearch.value = "";
 
+    hideNameSuggestions();
     hideAlert();
     void loadItems();
+}
+
+
+// ============================================
+// Search by Item Name - Autocomplete
+// ============================================
+
+function hideNameSuggestions() {
+    clearTimeout(state.suggestionsTimer);
+    state.suggestionsController?.abort();
+    state.suggestionsController = null;
+
+    if (!elements.nameSuggestions) return;
+    elements.nameSuggestions.classList.add("d-none");
+    elements.nameSuggestions.replaceChildren();
+}
+
+function renderNameSuggestions(items) {
+    elements.nameSuggestions.replaceChildren();
+
+    if (!items.length) {
+        const empty = document.createElement("div");
+        empty.className = "name-suggestion-empty";
+        empty.textContent = "لا توجد أصناف مطابقة";
+        elements.nameSuggestions.appendChild(empty);
+        elements.nameSuggestions.classList.remove("d-none");
+        return;
+    }
+
+    const fragment = document.createDocumentFragment();
+
+    for (const item of items) {
+        const button = document.createElement("button");
+        button.type = "button";
+        button.className = "name-suggestion-item";
+        button.dataset.itemId = String(item.id);
+        button.dataset.itemName = item.name ?? "";
+
+        const name = document.createElement("span");
+        name.textContent = item.name ?? "بدون اسم";
+
+        const id = document.createElement("small");
+        id.textContent = `#${item.id}`;
+
+        button.append(name, id);
+        fragment.appendChild(button);
+    }
+
+    elements.nameSuggestions.appendChild(fragment);
+    elements.nameSuggestions.classList.remove("d-none");
+}
+
+async function loadNameSuggestions() {
+    const name = elements.itemNameSearch.value.trim();
+    state.selectedNameItemId = null;
+    state.suggestionsController?.abort();
+
+    if (name.length < 2) {
+        hideNameSuggestions();
+        return;
+    }
+
+    const controller = new AbortController();
+    state.suggestionsController = controller;
+
+    try {
+        const query = buildQueryString({
+            name,
+            suggestions: 1,
+            category_id: state.categoryId
+        });
+
+        const res = await fetch(`${url}/items?${query}`, {
+            method: "GET",
+            headers: {
+                "Authorization": `${getAuthToken("auth")}`
+            },
+            signal: controller.signal
+        });
+
+        const data = await res.json();
+
+        if (!res.ok) {
+            if (res.status === 401) showAuthExpired(data.message);
+            throw new Error(data.message || "تعذّر البحث عن الأصناف");
+        }
+
+        if (state.suggestionsController !== controller) return;
+
+        renderNameSuggestions(
+            Array.isArray(data.suggestions) ? data.suggestions : []
+        );
+
+    } catch (error) {
+        if (error.name === "AbortError") return;
+        hideNameSuggestions();
+        showAlert(error.message || "حدث خطأ أثناء البحث عن الصنف.");
+    } finally {
+        if (state.suggestionsController === controller) {
+            state.suggestionsController = null;
+        }
+    }
+}
+
+function handleItemNameInput() {
+    state.selectedNameItemId = null;
+    clearTimeout(state.suggestionsTimer);
+    state.suggestionsController?.abort();
+
+    state.suggestionsTimer = setTimeout(() => {
+        void loadNameSuggestions();
+    }, 300);
+}
+
+function selectNameSuggestion(button) {
+    state.selectedNameItemId = Number(button.dataset.itemId);
+    elements.itemNameSearch.value = button.dataset.itemName;
+    hideNameSuggestions();
+    hideAlert();
 }
 
 
@@ -951,6 +1084,30 @@ elements.searchBarcodeBtn.addEventListener(
     searchByBarcode
 );
 
+// البحث باسم الصنف
+elements.searchItemNameBtn.addEventListener("click", searchByItemName);
+elements.itemNameSearch.addEventListener("input", handleItemNameInput);
+
+elements.itemNameSearch.addEventListener("keydown", event => {
+    if (event.key === "Enter") {
+        event.preventDefault();
+        searchByItemName();
+    }
+
+    if (event.key === "Escape") hideNameSuggestions();
+});
+
+elements.nameSuggestions.addEventListener("click", event => {
+    const button = event.target.closest(".name-suggestion-item");
+    if (button) selectNameSuggestion(button);
+});
+
+document.addEventListener("click", event => {
+    if (!event.target.closest(".name-search-wrapper")) {
+        hideNameSuggestions();
+    }
+});
+
 // البحث عند الضغط على Enter
 elements.barcodeSearch.addEventListener("keydown", event => {
     if (event.key === "Enter") {
@@ -963,19 +1120,25 @@ elements.barcodeSearch.addEventListener("keydown", event => {
 elements.categoryFilter.addEventListener("change", () => {
     state.categoryId = elements.categoryFilter.value;
     state.barcode = "";
+    state.selectedNameItemId = null;
     state.page = 1;
 
     elements.barcodeSearch.value = "";
+    elements.itemNameSearch.value = "";
 
+    hideNameSuggestions();
     void loadItems();
 });
 
 // مسح البحث
 elements.clearSearchBtn.addEventListener("click", () => {
     state.barcode = "";
+    state.selectedNameItemId = null;
     elements.barcodeSearch.value = "";
+    elements.itemNameSearch.value = "";
     state.page = 1;
 
+    hideNameSuggestions();
     void loadItems();
     elements.barcodeSearch.focus();
 });
@@ -1119,28 +1282,32 @@ function renderItemStock(item) {
         0
     );
 
+    const cleanNumber = value => Number(value.toFixed(4));
+
     if (units.length === 0) {
         return `
             <span class="badge bg-primary fs-6">
-                ${totalStock}
+                ${cleanNumber(totalStock)}
             </span>
         `;
     }
 
     // الأكبر أولاً حسب معامل التحويل
-    const sortedUnits = [...units].sort(
-        (a, b) => Number(b.conversion_factor) - Number(a.conversion_factor)
-    );
+    const sortedUnits = [...units]
+        .filter(unit => {
+            const factor = Number(unit.conversion_factor);
+            return Number.isFinite(factor) && factor > 0;
+        })
+        .sort(
+            (a, b) =>
+                Number(b.conversion_factor) - Number(a.conversion_factor)
+        );
 
-    let remainingStock = totalStock;
+    let remainingStock = cleanNumber(totalStock);
     const stockParts = [];
 
     for (const unit of sortedUnits) {
         const factor = Number(unit.conversion_factor);
-
-        if (!Number.isFinite(factor) || factor <= 0) {
-            continue;
-        }
 
         const quantity = Math.floor(remainingStock / factor);
 
@@ -1150,18 +1317,36 @@ function renderItemStock(item) {
                 quantity
             });
 
-            remainingStock %= factor;
+            remainingStock = cleanNumber(
+                remainingStock - quantity * factor
+            );
         }
     }
 
-    // عرض المتبقي بأصغر وحدة إذا لم يُستهلك بالكامل
+    // عرض المتبقي بأصغر وحدة مرة واحدة فقط
     if (remainingStock > 0) {
-        const smallestUnit = sortedUnits[sortedUnits.length - 1];
-
-        stockParts.push({
-            name: smallestUnit.unit_name,
-            quantity: remainingStock
+        const smallestUnit = sortedUnits.reduce((smallest, unit) => {
+            return Number(unit.conversion_factor) <
+                Number(smallest.conversion_factor)
+                ? unit
+                : smallest;
         });
+
+        // إذا كانت الوحدة الأساسية قد عُرضت بالفعل، نضيف المتبقي إليها
+        const existingPart = stockParts.find(
+            part => part.name === smallestUnit.unit_name
+        );
+
+        if (existingPart) {
+            existingPart.quantity = cleanNumber(
+                existingPart.quantity + remainingStock
+            );
+        } else {
+            stockParts.push({
+                name: smallestUnit.unit_name,
+                quantity: remainingStock
+            });
+        }
     }
 
     if (stockParts.length === 0) {
@@ -1178,7 +1363,7 @@ function renderItemStock(item) {
             ${stockParts.map(part => `
                 <li class="list">
                     <span class="badge ${totalStock === 0 ? 'bg-danger' : 'bg-success'}" dir="rtl">
-                        ${escapeHtml(part.quantity)} : ${escapeHtml(part.name)} 
+                        ${escapeHtml(part.quantity)} : ${escapeHtml(part.name)}
                     </span>
                 </li>
             `).join('')}

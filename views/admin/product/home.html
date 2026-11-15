@@ -25,213 +25,112 @@
 
   <site-header></site-header>
 
-    <main class="items-page container-fluid">
+  <main class="items-page container-fluid">
 
-      <!-- عنوان الصفحة والأزرار -->
-      <section class="items-toolbar">
+    <!-- عنوان الصفحة والأزرار -->
+    <section class="items-toolbar">
 
-        <div class="items-page-heading">
-          <div class="items-heading-icon">
-            <i class="fa-solid fa-boxes-stacked"></i>
-          </div>
+      <div class="items-page-heading">
+        <div class="items-heading-icon">
+          <i class="fa-solid fa-boxes-stacked"></i>
+        </div>
 
-          <div>
-            <h1>إدارة الأصناف</h1>
-            <p>عرض الأصناف والبحث عنها وإدارتها</p>
+        <div>
+          <h1>إدارة الأصناف</h1>
+          <p>عرض الأصناف والبحث عنها وإدارتها</p>
+        </div>
+      </div>
+
+      <button type="button" class="btn btn-primary add-item-btn" id="addItemBtn">
+        <i class="fa-solid fa-plus"></i>
+        <span>إضافة صنف جديد</span>
+      </button>
+
+    </section>
+
+    <!-- الفلاتر والبحث -->
+    <section class="items-filter-card">
+
+      <div class="filter-section-heading">
+        <i class="fa-solid fa-sliders"></i>
+        <span>البحث والفلترة</span>
+      </div>
+
+
+
+
+
+      <div class="row g-3 align-items-end">
+
+        <!-- الفئة -->
+        <div class="col-12 col-md-4 col-lg-3">
+          <label for="categoryFilter" class="form-label">
+            الفئة
+          </label>
+
+          <div class="input-with-icon">
+            <i class="fa-solid fa-layer-group"></i>
+
+            <select class="form-select" id="categoryFilter">
+              <option value="">كل الفئات</option>
+            </select>
           </div>
         </div>
 
-        <button type="button" class="btn btn-primary add-item-btn" id="addItemBtn">
-          <i class="fa-solid fa-plus"></i>
-          <span>إضافة صنف جديد</span>
-        </button>
+        <!-- البحث بالباركود -->
+        <div class="col-12 col-md-4 col-lg-5">
+          <label for="barcodeSearch" class="form-label">
+            البحث حسب الباركود
+          </label>
 
-      </section>
+          <div class="barcode-search-group">
 
-      <!-- الفلاتر والبحث -->
-      <section class="items-filter-card">
+            <div class="input-with-icon barcode-input-wrapper">
+              <i class="fa-solid fa-barcode"></i>
 
-        <div class="filter-section-heading">
-          <i class="fa-solid fa-sliders"></i>
-          <span>البحث والفلترة</span>
-        </div>
-
-        <div class="row g-3 align-items-end">
-
-          <!-- فلترة حسب الفئة -->
-          <div class="col-12 col-md-5 col-lg-4">
-
-            <label for="categoryFilter" class="form-label">
-              الفئة
-            </label>
-
-            <div class="input-with-icon">
-              <i class="fa-solid fa-layer-group"></i>
-
-              <select class="form-select" id="categoryFilter">
-                <option value="">كل الفئات</option>
-              </select>
+              <input type="search" class="form-control" id="barcodeSearch" placeholder="امسح الباركود..."
+                autocomplete="off">
             </div>
 
+            <button type="button" class="btn btn-primary search-btn" id="searchBarcodeBtn">
+              <i class="fa-solid fa-magnifying-glass"></i>
+              <span>بحث</span>
+            </button>
+
+            <button type="button" class="btn btn-light clear-search-btn" id="clearSearchBtn" title="مسح البحث">
+              <i class="fa-solid fa-xmark"></i>
+            </button>
+
           </div>
+        </div>
 
-          <!-- البحث حسب الباركود -->
-          <div class="col-12 col-md-7 col-lg-8">
+        <!-- البحث باسم الصنف -->
+        <div class="col-12 col-md-4 col-lg-4">
 
-            <label for="barcodeSearch" class="form-label">
-              البحث حسب الباركود
-            </label>
+          <label for="itemNameSearch" class="form-label">
+            البحث حسب اسم الصنف
+          </label>
+
+          <div class="name-search-wrapper">
 
             <div class="barcode-search-group">
 
               <div class="input-with-icon barcode-input-wrapper">
-                <i class="fa-solid fa-barcode"></i>
+                <i class="fa-solid fa-box"></i>
 
-                <input type="search" class="form-control" id="barcodeSearch" placeholder="امسح الباركود أو أدخله هنا..."
-                  autocomplete="off" inputmode="text">
+                <input type="search" class="form-control" id="itemNameSearch" placeholder="اكتب اسم الصنف..."
+                  autocomplete="off">
               </div>
 
-              <button type="button" class="btn btn-primary search-btn" id="searchBarcodeBtn">
+              <button type="button" class="btn btn-primary search-btn" id="searchItemNameBtn">
                 <i class="fa-solid fa-magnifying-glass"></i>
                 <span>بحث</span>
               </button>
 
-              <button type="button" class="btn btn-light clear-search-btn" id="clearSearchBtn" title="مسح البحث"
-                aria-label="مسح البحث">
-                <i class="fa-solid fa-xmark"></i>
-              </button>
-
             </div>
 
-          </div>
-
-        </div>
-
-        <div class="filter-bottom-row">
-          <div class="active-filter-info" id="activeFilterInfo">
-            <i class="fa-solid fa-circle-info"></i>
-            <span>يتم عرض جميع الأصناف</span>
-          </div>
-
-          <button type="button" class="btn btn-link reset-filters-btn" id="resetFiltersBtn">
-            <i class="fa-solid fa-rotate-right"></i>
-            إعادة ضبط الفلاتر
-          </button>
-        </div>
-
-      </section>
-
-      <!-- جدول الأصناف -->
-      <section class="items-table-card">
-
-        <div class="table-card-header">
-
-          <div>
-            <h2>قائمة الأصناف</h2>
-            <p>إدارة الأصناف المسجلة في النظام</p>
-          </div>
-
-          <div class="items-count" id="itemsCount">
-            <i class="fa-solid fa-box"></i>
-            <span>0 صنف</span>
-          </div>
-
-        </div>
-
-        <!-- رسائل الحالة -->
-        <div class="items-alert alert d-none" id="itemsAlert" role="alert" aria-live="polite"></div>
-
-        <!-- الجدول -->
-        <div class="table-responsive items-table-wrapper">
-
-          <table class="table table-bordered  align-middle mb-0 table-striped">
-            <colgroup>
-              <col style="width: 14%">
-              <col style="width: 38%">
-              <col style="width: 38%">
-              <col style="width: 10%">
-          </colgroup>
-
-            <thead class="table-dark">
-              <tr>
-                <th>اسم الصنف</th>
-                <th class="text-center">المخزون</th>
-                <th class="text-center">سعر البيع</th>
-                <th class="text-center">العمليات</th>
-              </tr>
-            </thead>
-
-            <tbody id="itemsTableBody">
-
-              <!-- حالة التحميل الأولية -->
-              <tr>
-                <td colspan="4">
-                  <div class="table-state">
-                    <span class="spinner-border spinner-border-sm"></span>
-                    <span>جاري تحميل الأصناف...</span>
-                  </div>
-                </td>
-              </tr>
-
-            </tbody>
-
-          </table>
-
-        </div>
-
-        <!-- ترقيم الصفحات -->
-        <div class="table-pagination">
-
-          <div class="pagination-info" id="paginationInfo">
-            الصفحة 1
-          </div>
-
-          <nav aria-label="ترقيم صفحات الأصناف">
-            <ul class="pagination mb-0" id="paginationList">
-            </ul>
-          </nav>
-
-        </div>
-
-      </section>
-
-    </main>
-
-
-    <div class="modal fade" id="deleteItemModal" tabindex="-1" aria-labelledby="deleteItemModalLabel"
-      aria-hidden="true">
-      <div class="modal-dialog modal-dialog-centered">
-
-        <div class="modal-content delete-modal-content">
-
-          <div class="modal-body text-center p-4">
-
-            <div class="delete-modal-icon">
-              <i class="fa-solid fa-trash-can"></i>
-            </div>
-
-            <h5 id="deleteItemModalLabel">حذف الصنف</h5>
-
-            <p class="delete-confirm-text">
-              هل أنت متأكد من حذف الصنف
-              <strong id="deleteItemName"></strong>؟
-            </p>
-
-            <p class="delete-warning-text">
-              لا يمكن التراجع عن هذه العملية.
-            </p>
-
-            <div class="delete-modal-actions">
-
-              <button type="button" class="btn btn-light" data-bs-dismiss="modal" id="cancelDeleteBtn">
-                إلغاء
-              </button>
-
-              <button type="button" class="btn btn-danger" id="confirmDeleteBtn">
-                <i class="fa-solid fa-trash-can"></i>
-                تأكيد الحذف
-              </button>
-
+            <!-- القائمة المنسدلة -->
+            <div id="nameSuggestions" class="name-suggestions d-none">
             </div>
 
           </div>
@@ -239,7 +138,139 @@
         </div>
 
       </div>
+
+      <div class="filter-bottom-row">
+        <div class="active-filter-info" id="activeFilterInfo">
+          <i class="fa-solid fa-circle-info"></i>
+          <span>يتم عرض جميع الأصناف</span>
+        </div>
+
+        <button type="button" class="btn btn-link reset-filters-btn" id="resetFiltersBtn">
+          <i class="fa-solid fa-rotate-right"></i>
+          إعادة ضبط الفلاتر
+        </button>
+      </div>
+
+    </section>
+
+    <!-- جدول الأصناف -->
+    <section class="items-table-card">
+
+      <div class="table-card-header">
+
+        <div>
+          <h2>قائمة الأصناف</h2>
+          <p>إدارة الأصناف المسجلة في النظام</p>
+        </div>
+
+        <div class="items-count" id="itemsCount">
+          <i class="fa-solid fa-box"></i>
+          <span>0 صنف</span>
+        </div>
+
+      </div>
+
+      <!-- رسائل الحالة -->
+      <div class="items-alert alert d-none" id="itemsAlert" role="alert" aria-live="polite"></div>
+
+      <!-- الجدول -->
+      <div class="table-responsive items-table-wrapper">
+
+        <table class="table table-bordered  align-middle mb-0 table-striped">
+          <colgroup>
+            <col style="width: 14%">
+            <col style="width: 38%">
+            <col style="width: 38%">
+            <col style="width: 10%">
+          </colgroup>
+
+          <thead class="table-dark">
+            <tr>
+              <th>اسم الصنف</th>
+              <th class="text-center">المخزون</th>
+              <th class="text-center">سعر البيع</th>
+              <th class="text-center">العمليات</th>
+            </tr>
+          </thead>
+
+          <tbody id="itemsTableBody">
+
+            <!-- حالة التحميل الأولية -->
+            <tr>
+              <td colspan="4">
+                <div class="table-state">
+                  <span class="spinner-border spinner-border-sm"></span>
+                  <span>جاري تحميل الأصناف...</span>
+                </div>
+              </td>
+            </tr>
+
+          </tbody>
+
+        </table>
+
+      </div>
+
+      <!-- ترقيم الصفحات -->
+      <div class="table-pagination">
+
+        <div class="pagination-info" id="paginationInfo">
+          الصفحة 1
+        </div>
+
+        <nav aria-label="ترقيم صفحات الأصناف">
+          <ul class="pagination mb-0" id="paginationList">
+          </ul>
+        </nav>
+
+      </div>
+
+    </section>
+
+  </main>
+
+
+  <div class="modal fade" id="deleteItemModal" tabindex="-1" aria-labelledby="deleteItemModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+
+      <div class="modal-content delete-modal-content">
+
+        <div class="modal-body text-center p-4">
+
+          <div class="delete-modal-icon">
+            <i class="fa-solid fa-trash-can"></i>
+          </div>
+
+          <h5 id="deleteItemModalLabel">حذف الصنف</h5>
+
+          <p class="delete-confirm-text">
+            هل أنت متأكد من حذف الصنف
+            <strong id="deleteItemName"></strong>؟
+          </p>
+
+          <p class="delete-warning-text">
+            لا يمكن التراجع عن هذه العملية.
+          </p>
+
+          <div class="delete-modal-actions">
+
+            <button type="button" class="btn btn-light" data-bs-dismiss="modal" id="cancelDeleteBtn">
+              إلغاء
+            </button>
+
+            <button type="button" class="btn btn-danger" id="confirmDeleteBtn">
+              <i class="fa-solid fa-trash-can"></i>
+              تأكيد الحذف
+            </button>
+
+          </div>
+
+        </div>
+
+      </div>
+
     </div>
+  </div>
 
 
 
@@ -247,15 +278,15 @@
 
 
 
-    <script src="../../../wroot/assets/bootstrap/js/bootstrap.bundle.min.js"></script>
+  <script src="../../../wroot/assets/bootstrap/js/bootstrap.bundle.min.js"></script>
 
-    <script src="../../../wroot/assets/jquery/jquery-3.7.1.min.js"></script>
-    <script src="../../../wroot/assets/bootbox/bootbox.min.js"></script>
-
-
+  <script src="../../../wroot/assets/jquery/jquery-3.7.1.min.js"></script>
+  <script src="../../../wroot/assets/bootbox/bootbox.min.js"></script>
 
 
-    <script type="module" src="../../../public/js/admin/product/new-home.js"></script>
-  </body>
+
+
+  <script type="module" src="../../../public/js/admin/product/new-home.js"></script>
+</body>
 
 </html>

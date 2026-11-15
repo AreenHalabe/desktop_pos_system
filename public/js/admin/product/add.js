@@ -79,6 +79,16 @@ document.addEventListener('DOMContentLoaded', async function () {
     await buildSelectCategory();
 });
 
+document.querySelector('form').addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') {
+        e.preventDefault();
+
+        if (e.target.id === 'customBaseUnitName') {
+            customBaseUnitName.dispatchEvent(new Event('change'));
+        }
+    }
+});
+
 baseUnitName.addEventListener("change", () => {
     const isCustom = baseUnitName.value === "other";
 
@@ -114,9 +124,8 @@ customBaseUnitName.addEventListener("change", () => {
     customBaseUnitContainer.classList.add("d-none");
     customBaseUnitName.required = false;
     customBaseUnitName.value = "";
+
     renderUnits();
-    updateContainsUnitOptions();
-    updatePurchaseUnitOptions();
 });
 
 
@@ -219,8 +228,6 @@ function updateContainsUnitOptions() {
     const baseUnitName =
         getBaseUnitName();
 
-    if(baseUnitName == 'other') return ;
-
 
     if (baseUnitName) {
 
@@ -289,7 +296,6 @@ function updatePurchaseUnitOptions() {
     const baseUnitName =
         getBaseUnitName();
 
-    if(baseUnitName == 'other') return ;
 
     if (baseUnitName) {
 
@@ -717,8 +723,7 @@ function renderUnits() {
     const baseUnitName =
         getBaseUnitName();
 
-    if(baseUnitName == 'other') return;
-
+    if(baseUnitName == 'other') return ;
 
     if (!baseUnitName) {
 
@@ -756,7 +761,6 @@ function renderUnits() {
                 .getElementById("baseSellingPrice")
                 .value
         );
-
 
     const baseForSale = document.getElementById("baseForSale").checked;
 
@@ -801,9 +805,9 @@ function renderUnits() {
                 <td>
 
                     ${baseBarcode
-            ? escapeHtml(baseBarcode)
-            : autoBarcodeCheckbox.checked ? '<span class="text-muted">سيتم توليده تلقائياً</span>' : '<span class="text-muted">—</span>'
-        }
+                        ? escapeHtml(baseBarcode)
+                        : autoBarcodeCheckbox.checked ? '<span class="text-muted">سيتم توليده تلقائياً</span>' : '<span class="text-muted">—</span>'
+                    }
 
                 </td>
 
@@ -1323,7 +1327,7 @@ function formatPrice(value) {
 
     return `
             <strong>
-                ${Number(value).toFixed(2)}
+                ${Number(value)}
             </strong>
 
             <span class="text-muted">
@@ -1485,15 +1489,6 @@ document.addEventListener("change", function (e) {
 }
 );
 
-document.querySelector('form').addEventListener('keydown', (e) => {
-    if (e.key === 'Enter') {
-        e.preventDefault();
-
-        if (e.target.id === 'customBaseUnitName') {
-            customBaseUnitName.dispatchEvent(new Event('change'));
-        }
-    }
-});
 
 
 updateContainsUnitOptions();

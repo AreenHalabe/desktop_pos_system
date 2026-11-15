@@ -149,7 +149,7 @@ modal.addEventListener('show.bs.modal', function (event) {
             —
             ₪${discountValue}
         </td>
-        <td class='fw-bold'>${Number(item.quantity) * Number(item.price)} ₪</td>
+        <td class='fw-bold'>${Number(Number(item.quantity) * Number(item.price)).toFixed(2)} ₪</td>
       </tr>
       `;
   });
