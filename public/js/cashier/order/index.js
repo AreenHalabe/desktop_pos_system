@@ -121,40 +121,6 @@ let itemsData = [];
 
 document.addEventListener("DOMContentLoaded", async function () {
 
-    // const hasInternet = await hasInternetConnection();
-    // if (hasInternet) {
-
-    //     const hasOpeningSession = await checkSession();
-
-    //     if (hasOpeningSession) {
-
-    //         ({ categoriesData, itemsData } = await loadItemsAndCategoriesTree());
-    //         await loadCustomerInfo();
-
-    //         clearLoader();
-
-    //         initializeCashier(categoriesData, itemsData);
-    //     }
-
-    //     else {
-    //         handleSessionStatus();
-    //     }
-    // }
-
-    // else {
-
-    //     ({ categoriesData, itemsData } = await loadItemsAndCategoriesTree());
-
-    //     await loadCustomerInfo();
-
-    //     clearLoader();
-
-    //     initializeCashier(categoriesData, itemsData);
-
-    //     sessionId = getSessionId();
-
-    // }
-
     const hasOpeningSession = await checkSession();
     if (hasOpeningSession) {
         ({ categoriesData, itemsData } = await loadItemsAndCategoriesTree());
