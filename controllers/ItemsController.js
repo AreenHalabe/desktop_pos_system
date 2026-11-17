@@ -627,7 +627,7 @@ async function addItemUnits(itemId, units, transaction) {
 
       request.input(
         `conversion_factor_${index}`,
-        sql.Decimal(18, 6),
+        sql.Decimal(18, 2),
         unit.conversion_factor
       );
 
@@ -639,7 +639,7 @@ async function addItemUnits(itemId, units, transaction) {
 
       request.input(
         `price_${index}`,
-        sql.Decimal(18, 2),
+        sql.Decimal(18, 3),
         unit.price
       );
 
@@ -1279,7 +1279,7 @@ async function saveItemUnits(itemId, addUnits, updateUnits, transaction) {
       request.input(`${prefix}_unit_name`, sql.NVarChar(255), unit.unit_name);
       request.input(`${prefix}_conversion_factor`, sql.Decimal(18, 6), unit.conversion_factor);
       request.input(`${prefix}_barcode`, sql.VarChar(50), unit.barcode ?? null);
-      request.input(`${prefix}_price`, sql.Decimal(18, 2), unit.selling_price);
+      request.input(`${prefix}_price`, sql.Decimal(18, 3), unit.selling_price);
       request.input(`${prefix}_for_sale`, sql.Bit, unit.for_sale);
       request.input(`${prefix}_for_purchase`, sql.Bit, unit.for_purchase);
 

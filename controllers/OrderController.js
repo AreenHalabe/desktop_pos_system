@@ -363,8 +363,8 @@ async function insertItems(orderId, items, transaction) {
         `);
         request.input(`order_id${index}`, sql.Int, orderId);
         request.input(`item_id${index}`, sql.Int, item.item_id);
-        request.input(`quantity${index}`, sql.Int, item.quantity);
-        request.input(`price${index}`, sql.Decimal(15, 2), item.unit_price);
+        request.input(`quantity${index}`, sql.Decimal(15, 2), item.quantity);
+        request.input(`price${index}`, sql.Decimal(15, 3), item.unit_price);
         request.input(`cost_price${index}`, sql.Decimal(15, 3), item.cost_price);
         request.input(`unit${index}`, sql.NVarChar, item.unit_name);
         request.input(`discount_item${index}`, sql.Decimal(7, 2), item.discount_item);
