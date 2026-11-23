@@ -829,6 +829,7 @@ document.addEventListener("input", (event) => {
 });
 
 
+
 function renderStockAndCost(units, stockBatch) {
     const container = document.getElementById("stock-cost-container");
     document.getElementById('baseUnitName').textContent = units[0].unit_name;
@@ -852,10 +853,12 @@ function renderStockAndCost(units, stockBatch) {
     for (const unit of sortedUnits) {
         const conversionFactor = Number(unit.conversion_factor);
 
-        const quantity = Math.floor(
-            (remainingQty + 1e-9) / conversionFactor
+        // const quantity = Math.floor(
+        //     (remainingQty + 1e-9) / conversionFactor
+        // );
+        const quantity = Math.trunc(
+            remainingQty / conversionFactor
         );
-
         remainingQty -= quantity * conversionFactor;
 
         stockUnits.push({
@@ -941,7 +944,7 @@ function renderStockAndCost(units, stockBatch) {
                 ? `
                     <div class="alert alert-warning mt-3 mb-0">
                         الكمية المتبقية غير الموزعة:
-                        ${remainingQty}
+                        ${remainingQty.toFixed(3)}
                         ${units[0]?.unit_name || "وحدة أساسية"}
                     </div>
                 `

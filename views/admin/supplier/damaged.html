@@ -1,0 +1,275 @@
+
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>أصناف تالفة</title>
+
+    <link href="../../../wroot/assets/bootstrap/css/bootstrap.rtl.min.css" rel="stylesheet">
+    
+    <link href="../../../wroot/assets/bootstrap/css/bootstrap-icons.css" rel="stylesheet">
+    <link href="../../../wroot/assets/fontawesome/css/all.min.css" rel="stylesheet">
+
+     
+    <link rel="stylesheet" href="../../../public/style/admin/supplier/demaged.css" />
+    <link rel="stylesheet" href="../../../public/style/admin/header.css" />
+</head>
+
+<body>
+    <site-header></site-header>
+    <div class="container-fluid page-container">
+
+        <!-- Header -->
+        <div class="page-header">
+            <div>
+                <h3>
+                    <i class="fas fa-box-open me-2"></i>
+                    أصناف تالفة
+                </h3>
+                <p>إدارة الأصناف التالفة والمرتجعة للموردين</p>
+            </div>
+        </div>
+
+        <!-- Search -->
+        <div class="main-card">
+
+            <h5 class="section-title">
+                <i class="fas fa-search me-2"></i>
+                البحث عن صنف
+            </h5>
+
+            <div class="row g-3">
+
+                <!-- Barcode -->
+                <div class="col-md-6">
+
+                    <label class="form-label">البحث بالباركود</label>
+
+                    <div class="input-group search-group">
+                        <input
+                            type="text"
+                            class="form-control"
+                            id="barcodeInput"
+                            placeholder="امسح أو أدخل الباركود..."
+                            autocomplete="off"
+                        >
+
+                        <button class="btn search-btn" id="barcodeSearchBtn">
+                            <i class="fas fa-search"></i>
+                        </button>
+                    </div>
+
+                </div>
+
+                <!-- Name -->
+                <div class="col-md-6 position-relative">
+
+                    <label class="form-label">البحث باسم الصنف</label>
+
+                    <div class="input-group search-group">
+
+                        <input
+                            type="text"
+                            class="form-control"
+                            id="itemNameInput"
+                            placeholder="اكتب اسم الصنف..."
+                            autocomplete="off"
+                        >
+
+                        <button class="btn search-btn" id="nameSearchBtn">
+                            <i class="fas fa-search"></i>
+                        </button>
+
+                    </div>
+
+                    <!-- Dropdown -->
+                    <div id="itemSearchDropdown" class="search-dropdown hidden"></div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        <!-- Operation Type -->
+        <div class="main-card">
+
+            <h5 class="section-title">
+                <i class="fas fa-sliders me-2"></i>
+                نوع العملية
+            </h5>
+
+            <div class="operation-options">
+
+                <label class="operation-option active" id="damagedOption">
+
+                    <input
+                        type="radio"
+                        name="operationType"
+                        value="damaged"
+                        checked
+                    >
+
+                    <i class="fas fa-trash-alt"></i>
+
+                    <span>تالف</span>
+
+                </label>
+
+                <label class="operation-option" id="supplierOption">
+
+                    <input
+                        type="radio"
+                        name="operationType"
+                        value="supplier_return"
+                    >
+
+                    <i class="fas fa-truck-loading"></i>
+
+                    <span>ترجيع لمورد</span>
+
+                </label>
+
+            </div>
+
+            <!-- Supplier Return Fields -->
+            <div id="supplierReturnFields" class="supplier-fields hidden">
+
+                <div class="row g-3">
+
+                    <div class="col-md-6">
+
+                        <label class="form-label">
+                            مبلغ الترجيع للمورد
+                        </label>
+
+                        <input
+                            type="number"
+                            id="returnAmount"
+                            class="form-control"
+                            min="0"
+                            step="0.01"
+                            value="0"
+                            placeholder="أدخل مبلغ الترجيع"
+                        >
+
+                    </div>
+
+                    <div class="col-md-6">
+
+                        <label class="form-label">
+                            المورد
+                        </label>
+
+                        <select id="supplierSelect" class="form-select">
+
+                            <option value="">اختر المورد</option>
+
+                        </select>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        <!-- Cart -->
+        <div class="main-card cart-card">
+
+            <div class="cart-header">
+
+                <h5 class="section-title mb-0">
+                    <i class="fas fa-shopping-cart me-2"></i>
+                    سلة الأصناف
+                </h5>
+
+                <span class="cart-count" id="cartCount">0 صنف</span>
+
+            </div>
+
+            <div class="table-responsive">
+
+                <table class="table cart-table">
+
+                    <thead>
+
+                        <tr>
+                            <th>#</th>
+                            <th>اسم الصنف</th>
+                            <th>الوحدة</th>
+                            <th>الكمية</th>
+                            <th>حذف</th>
+                        </tr>
+
+                    </thead>
+
+                    <tbody id="cartBody">
+
+                        <tr>
+                            <td colspan="5" class="empty-cart">
+                                <i class="fas fa-shopping-basket"></i>
+                                <p>السلة فارغة</p>
+                            </td>
+                        </tr>
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+            <div class="cart-footer">
+
+                <button class="btn clear-btn" id="clearCartBtn">
+                    <i class="fas fa-trash me-1"></i>
+                    تفريغ السلة
+                </button>
+
+                <button class="btn submit-btn" id="submitOperationBtn">
+                    <i class="fas fa-check me-1"></i>
+                    تنفيذ العملية
+                </button>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <div id="overlay_loader"
+        class="position-fixed top-0 start-0 w-100 h-100 d-flex justify-content-center align-items-center d-none"
+        style="background: rgba(0,0,0,0.55); backdrop-filter: blur(3px); z-index: 9999;">
+
+        <div class="text-center text-white">
+
+            <div class="spinner-border mb-3" role="status" style="width: 4rem; height: 4rem;">
+            </div>
+
+            <p class="fs-5 mb-0">
+                جاري معالجة الطلب، يرجى الانتظار...
+            </p>
+
+        </div>
+    </div>
+
+
+    <!-- Bootstrap JS -->
+    <script src="../../../wroot/assets/bootstrap/js/bootstrap.bundle.min.js"></script>
+
+    <script src="../../../wroot/assets/jquery/jquery-3.7.1.min.js"></script>
+    <script src="../../../wroot/assets/bootbox/bootbox.min.js"></script>
+
+
+    
+
+    <script type="module" src="../../../public/js/admin/supplier/damaged.js"></script>
+
+
+</body>
+</html>

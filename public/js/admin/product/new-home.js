@@ -1309,9 +1309,10 @@ function renderItemStock(item) {
     for (const unit of sortedUnits) {
         const factor = Number(unit.conversion_factor);
 
-        const quantity = Math.floor(remainingStock / factor);
+        // const quantity = Math.floor(remainingStock / factor);
+        const quantity = Math.trunc(remainingStock / factor);
 
-        if (quantity > 0) {
+        if (quantity !== 0) {
             stockParts.push({
                 name: unit.unit_name,
                 quantity
@@ -1324,7 +1325,7 @@ function renderItemStock(item) {
     }
 
     // عرض المتبقي بأصغر وحدة مرة واحدة فقط
-    if (remainingStock > 0) {
+    if (remainingStock !== 0) {
         const smallestUnit = sortedUnits.reduce((smallest, unit) => {
             return Number(unit.conversion_factor) <
                 Number(smallest.conversion_factor)
@@ -1362,7 +1363,7 @@ function renderItemStock(item) {
         <ul class="list-unstyled m-0 ul_box">
             ${stockParts.map(part => `
                 <li class="list">
-                    <span class="badge ${totalStock === 0 ? 'bg-danger' : 'bg-success'}" dir="rtl">
+                    <span class="badge ${totalStock <= 0 ? 'bg-danger' : 'bg-success'}" dir="rtl">
                         ${escapeHtml(part.quantity)} : ${escapeHtml(part.name)}
                     </span>
                 </li>
